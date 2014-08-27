@@ -20,7 +20,6 @@
 	--=====================================================================================================================================--
 
 	Path_Effector_newfx_lua = nil
-	Path_Effector_newfx_lua = "C:\\Users\\VICTOR PAYARES\\Desktop\\HTDM\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 	--Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 
 	--=====================================================================================================================================--
