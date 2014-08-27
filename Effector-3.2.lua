@@ -1,4 +1,4 @@
------------------------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------------------
 	--[[ Copyright (c) 2014, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		  All rights reserved / 24 August 2014 Colombia. ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.2.9.1
@@ -36,12 +36,12 @@
 		fx, var = { }, { }; l = linefx[ii]; L = linefx[ii].styleref; line.dur = l.duration -----
 		----------------------------------------------------------------------------------------
 		l_layer, l_style, l_actor, l_spacing	= l.layer, l.style, l.actor, l.spacing ---------
-		l_ml, l_mr, l_mt, l_mb					= l.margin_l, l.margin_r, l.margin_t, l.margin_b
-		l_align, l_dur, l_x, l_y, l_i			= l.align,  line.dur, l.center, l.middle, line.i
-		l_start, l_end, l_mid, l_n				= l.start_time,  l.end_time,  l.mid_time, line.n
-		l_left, l_center, l_right, l_width		= l.left, l.center, l.right, l.width -----------
-		l_top, l_middle, l_bottom, l_height		= l.top, l.middle, l.bottom, l.height ----------
-		l_angle, l_outline, l_shadow, l_mv		= l.angle, l.outline, l.shadow, l.margin_v -----
+		l_ml, l_mr, l_mt, l_mb			= l.margin_l, l.margin_r, l.margin_t, l.margin_b
+		l_align, l_dur, l_x, l_y, l_i		= l.align,  line.dur, l.center, l.middle, line.i
+		l_start, l_end, l_mid, l_n		= l.start_time,  l.end_time,  l.mid_time, line.n
+		l_left, l_center, l_right, l_width	= l.left, l.center, l.right, l.width -----------
+		l_top, l_middle, l_bottom, l_height	= l.top, l.middle, l.bottom, l.height ----------
+		l_angle, l_outline, l_shadow, l_mv	= l.angle, l.outline, l.shadow, l.margin_v -----
 		l_scale_x, l_scale_y, l_fsize, l_fname	= l.scale_x, l.scale_y, l.fontsize, l.fontname--
 		l_color1, l_color2, l_color3, l_color4	= l.color1, l.color2, l.color3, l.color4 -------
 		l_alpha1, l_alpha2, l_alpha3, l_alpha4	= l.alpha1, l.alpha2, l.alpha3, l.alpha4 -------
@@ -50,10 +50,10 @@
 		char, left, width, line.char = {}, l.left, 0, linefx[ii].char; char.i = 1 --------------
 		if fx__.noblank == true then char.n = unicode.len(txt_chars:gsub(" ", "")) else char.n = unicode.len(txt_chars) end
 		--------------------------------------------------------------------------------------------------------------------------------------------
-		text.color1  = color.ass(sett.color_1c)	text.color1c  = text.color1		text.alpha1  = ass_alpha(sett.alpha_1a)	text.alpha1a  =  text.alpha1
-		text.color2  = color.ass(sett.color_2c)	text.color2c  = text.color2		text.alpha2  = ass_alpha(sett.alpha_2a)	text.alpha2a  =  text.alpha2
-		text.color3  = color.ass(sett.color_3c)	text.color3c  = text.color3		text.alpha3  = ass_alpha(sett.alpha_3a)	text.alpha3a  =  text.alpha3
-		text.color4  = color.ass(sett.color_4c)	text.color4c  = text.color4		text.alpha4  = ass_alpha(sett.alpha_4a)	text.alpha4a  =  text.alpha4
+		text.color1  = color.ass(sett.color_1c)	text.color1c  = text.color1	text.alpha1  = ass_alpha(sett.alpha_1a)	text.alpha1a  =  text.alpha1
+		text.color2  = color.ass(sett.color_2c)	text.color2c  = text.color2	text.alpha2  = ass_alpha(sett.alpha_2a)	text.alpha2a  =  text.alpha2
+		text.color3  = color.ass(sett.color_3c)	text.color3c  = text.color3	text.alpha3  = ass_alpha(sett.alpha_3a)	text.alpha3a  =  text.alpha3
+		text.color4  = color.ass(sett.color_4c)	text.color4c  = text.color4	text.alpha4  = ass_alpha(sett.alpha_4a)	text.alpha4a  =  text.alpha4
 		shape.color1 = color.ass(fx__.color1)	shape.color1c = shape.color1	shape.alpha1 = ass_alpha(fx__.alpha1)	shape.alpha1a = shape.alpha1
 		shape.color3 = color.ass(fx__.color3)	shape.color3c = shape.color3	shape.alpha3 = ass_alpha(fx__.alpha3)	shape.alpha3a = shape.alpha3
 		shape.color4 = color.ass(fx__.color4)	shape.color4c = shape.color4	shape.alpha4 = ass_alpha(fx__.alpha4)	shape.alpha4a = shape.alpha4
@@ -62,8 +62,8 @@
 		if text.color3 == l.color3 then txt_c3 = "" else txt_c3 = "\\3c"..text.color3 end; if text.alpha3 == l.alpha3 then txt_a3 = "" else txt_a3 = "\\3a"..text.alpha3 end
 		if text.color4 == l.color4 then txt_c4 = "" else txt_c4 = "\\4c"..text.color4 end; if text.alpha4 == l.alpha4 then txt_a4 = "" else txt_a4 = "\\4a"..text.alpha4 end
 		--------------------------------------------------------------------------------------------------------------------------------------------
-		text.color	 = format("\\1c%s\\3c%s\\4c%s", text.color1, text.color3, text.color4)
-		text.alpha	 = format("\\1a%s\\3a%s\\4a%s", text.alpha1, text.alpha3, text.alpha4)
+		text.colo    = format("\\1c%s\\3c%s\\4c%s", text.color1, text.color3, text.color4)
+		text.alpha   = format("\\1a%s\\3a%s\\4a%s", text.alpha1, text.alpha3, text.alpha4)
 		text.style   = txt_c1..txt_c3..txt_c4..txt_a1..txt_a3..txt_a4
 		text.alpha0  = "\\alpha&HFF&"
 		shape.color  = format("\\1c%s\\3c%s\\4c%s", shape.color1, shape.color3, shape.color4)
