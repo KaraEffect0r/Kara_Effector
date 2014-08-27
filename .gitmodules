@@ -1,3 +1,3 @@
 [submodule "Yutils"]
-	path = Yutils
+	path = deps/Yutils
 	url = https://github.com/Youka/Yutils.git
