@@ -4887,15 +4887,12 @@ end
 -- Librería de Funciones "text" usando Yutils.lua by Youka --------------------------------------
 function text.to_shape( Text, Scale, Tags )
 	local text_2shape = Text or val_text
-	local text_scale = Scale or 1
-	local shape_scale
-	if text_scale == 8 then
-		shape_scale = 4
-	elseif text_scale == 4 then
-		shape_scale = 2
-	else
-		shape_scale = 1
-		text_scale = 1
+	local text_scale, shape_scale = 1, 1
+	if Scale and Scale >= 2 then
+		local scale_mode = math.log(Scale, 2) + 1
+		if scale_mode == math.floor(scale_mode) then
+			text_scale, shape_scale = Scale, scale_mode
+		end
 	end
 	local text_font = Yutils.decode.create_font(l.fontname, l.bold, l.italic, l.underline, l.strikeout, l.fontsize, text_scale*l.scale_x/100, text_scale*l.scale_y/100, l.spacing)
 	if Tags then return format("{\\an7\\pos(%s,%s)\\p%s}%s", fx.pos_l, fx.pos_t, shape_scale, text_font.text_to_shape( text_2shape ):gsub("%-?%d+%.%d+", function(x) x = format("%d", x) return x end)) end
