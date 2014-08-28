@@ -1,0 +1,16 @@
+# Auto detect text files and perform LF normalization
+*				text=auto
+
+# Git files
+.gitattributes	text
+.gitignore		text
+.gitmodules		text
+
+# Source code
+*.lua		diff=lua
+
+# Subtitles
+*.ass		diff=astextplain
+
+# Documentations
+*.md		diff=astextplain
