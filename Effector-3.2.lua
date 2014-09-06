@@ -1,5 +1,5 @@
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	--[[ Copyright (c) 2014, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		  All rights reserved / 24 August 2014 Colombia. ]]--
+	--[[ Copyright (c) 2014, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki	   All rights reserved / 06 September 2014 Colombia. ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.2.9.1
 	--> http://www.karaeffector.blogspot.com	   --> http://www.facebook.com/karaeffector
@@ -20,7 +20,7 @@
 	--=====================================================================================================================================--
 
 	Path_Effector_newfx_lua = nil
-	--Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
+	Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 
 	--=====================================================================================================================================--
 	function do_fx( subs, meta, line, sett )
@@ -78,7 +78,8 @@
 		function maxloop(new_maxloop) fx.maxloop_fx	= new_maxloop maxj = fx.maxloop_fx return "" end
 		function replay(num_replay)   fx.replay_fx	= num_replay  maxJ = fx.replay_fx  return "" end
 		function relayer(new_layer)   fx.layer		= new_layer						   return "" end
-		function export_text(mode)    local newfile = aegisub.dialog.save("Kara Effector[fx]: Export File", "", "", "Text files (.txt)|.txt", false)
+		function export_text(mode)
+			local newfile = aegisub.dialog.save("Kara Effector[fx]: Export File", "", "", "Text files (.txt)|.txt", false)
 			if newfile then local file = io.open(newfile, "w")
 				if	   mode == "export times ms"	  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].start_time..","..linefx[idx_line[i] + count_line_dialogue - ini_line].end_time.."\n") end
 				elseif mode == "export times"		  then for i = 1, line.n do file:write(ms_to_HMS(linefx[idx_line[i] + count_line_dialogue - ini_line].start_time)..","..ms_to_HMS(linefx[idx_line[i] + count_line_dialogue - ini_line].end_time).."\n") end
@@ -108,7 +109,7 @@
 				library_title = fx__.folderfx; sett.linecomment = false
 				local l = table.copy(line)
 				if line.i == 1 then
-					newFX = fx__.namefx:gsub(" ", "_"); if newFX == "" then newFX = library_mode.."_"..tostring(os.time()):sub(-6, -1) end
+					newFX = fx__.namefx:gsub(" ", "_"); if newFX == "" then newFX = library_mode.."_"..tostring(os.time( )):sub(-6, -1) end
 					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then fx_GUI = "PfxM_Box" elseif fx__.folderfx == "shape[fx]" then fx_GUI = "Shape_Box" elseif fx__.folderfx == "translation[fx]" then if fx_box[29].value == "Char" then fx_box[29].value = "Translation Char" elseif fx_box[29].value == "Syl" or fx_box[29].value == "Furi" then fx_box[29].value = "Translation Word" or fx_box[29].value == "Word" or fx_box[29].value == "Convert to Hiragana" or fx_box[29].value == "Convert to Katakana" or fx_box[29].value == "Convert to Romaji" elseif fx_box[29].value == "Line" then fx_box[29].value = "Translation Line" end fx_GUI = "Trans_Box" end
 					New_fx_config = format("%s = table.duplicate(%s); table.inbox(%s, \"%s: %s\",\"%s\",%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s); table.insert(%s, %s); table.insert(%s, \"%s\")", newFX, fx_GUI, newFX, library_title, newFX:gsub("_", " "), fx_box[29].value, ((fx_box[30].value == true) and "true" or "false"), ((fx_box[31].value == true) and "true" or "false"), fx_box[32].value, fx_box[33].value, fx_box[34].value, fx_box[35].value, fx_box[36].value, fx_box[37].value, Ps(fx_box[38].text), Ps(fx_box[39].text), Ps(fx_box[40].text), Ps(fx_box[41].text), Ps(fx_box[42].text), Ps(fx_box[43].text), Ps(fx_box[44].text), Ps(fx_box[45].text), Ps(fx_box[46].text), Ps(fx_box[47].text), Ps(fx_box[48].text), Ps(fx_box[49].text), Ps(fx_box[50].text), Ps(fx_box[51].text), Ps(fx_box[52].text), Ps(fx_box[53].text), Ps(fx_box[54].text), Ps(fx_box[55].text), Ps(fx_box[56].text), Ps(fx_box[57].text), fx_box[66].value, ((fx_box[67].value == true) and "true" or "false"), library_fx, newFX, library_mode, newFX:gsub("_", " "))
 					if Path_Effector_newfx_lua == nil then
@@ -216,10 +217,10 @@
 									effector.default_val( )
 									-----------------------------------------------
 									if pcall(loadstring("return function(fx__, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
-										variable_ = loadstring(format("return function(fx__, line, x, y) %s return \"\" end", tag.HTML_to_ass(fx__.variable)))()
+										variable_ = loadstring(format("return function(fx__, line, x, y) %s return \"\" end", tag.HTML_to_ass(fx__.variable)))( )
 										var_KEfx_ = variable_(fx__, line, x, y)
 									end
-									variable_ = loadstring("return function(fx__, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")()
+									variable_ = loadstring("return function(fx__, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
 									if line.i == 1 and syl.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, line, x, y)) else var.once = recall.v_once end
 									if syl.i  == 1 and J == 1 then				  var.line = variable_(fx__, line, x, y) end
 									if wordsyl.i == 1 and J == 1 then			  var.word = variable_(fx__, line, x, y) end
@@ -227,7 +228,7 @@
 									var.syl  = variable_(fx__, line, x, y)		  var.furi, var.char = var.syl, var.syl
 									var.loop = variable_(fx__, line, x, y)
 									-----------------------------------------------
-									maxloop1  = loadstring("return function(fx__, line, x, y) return {".. fx__.loops .."} end")()	maxloop_fx = maxloop1(fx__, line, x, y)
+									maxloop1  = loadstring("return function(fx__, line, x, y) return {".. fx__.loops .."} end")( )	maxloop_fx = maxloop1(fx__, line, x, y)
 									loop_h    = ceil((maxloop_fx[1] or 1)*(val_width + 2*L.outline)/(val_height + 2*L.outline))		maxloop_fx = maxloop1(fx__, line, x, y)
 									fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1	fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
 									-----------------------------------------------
@@ -304,7 +305,7 @@
 										fx.pos_b = fx.pos_y + l.height/2
 										x, y = fx.pos_x, fx.pos_y
 										--variables de tamaño--
-										size1 = loadstring("return function(fx__, meta, line, s) return {".. fx__.size .."} end")() size = size1(fx__, meta, line, s)
+										size1 = loadstring("return function(fx__, meta, line, s) return {".. fx__.size .."} end")( ) size = size1(fx__, meta, line, s)
 										if #size > 0 then
 											if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
 											fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
@@ -343,6 +344,18 @@
 										if #returnfx > 0 or returnfx[1] ~= nil then
 											if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
 											if fx__.t_type ~= "Template Line [Word]" and fx__.t_type ~= "Template Line [Syl]" and fx__.t_type ~= "Template Line [Char]" then if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end else returnfx[1] = tag.to_temp(fx__.addtag); fx.add_tags = "" T_line = true end
+											--[[
+											if fx__.language ~= "Automation Auto-4" then
+												addtag1 = loadstring("return function(fx__, meta, line, furi, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")()
+												addtag = addtag1(fx__, meta, line, furi, x, y, module)
+												t_vals = addtag[1] or "\\an5"
+												t_vals = tag.val( t_vals )
+												addtag = addtag1(fx__, meta, line, furi, x, y, module)
+												fx.add_tags = tag.do_tag(table.op(addtag, "concat"))
+											else
+												fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag))
+											end
+											--]]
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then if T_line == false then Ltags_style = tags_style else Ltags_style = "" end
 													l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, Ltags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
