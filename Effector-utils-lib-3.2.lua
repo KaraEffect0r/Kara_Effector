@@ -3,7 +3,7 @@
 	Effector_Lib_testers  = "NatsuoDC, Nagato Akatsuki & Vict8r"
 	Effector_Lib_approved = "KaraLaura & Nagato Akatsuki"
 	Effector_Lib_version  = "3.1.9"
-	Effector_Lib_modified = "24 August 2014"
+	Effector_Lib_modified = "06 september 2014"
 	------------------------------------------------------------------------------------------------------------------------
 	Yutils = include("Yutils.lua")
 	------------------------------------------------------------------------------------------------------------------------
