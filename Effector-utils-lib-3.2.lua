@@ -5769,15 +5769,7 @@
 	function text.to_shape( Text, Scale, Tags )
 		local text_2shape = Text or val_text
 		local text_scale = Scale or 1
-		local shape_scale
-		if text_scale == 8 then
-			shape_scale = 4
-		elseif text_scale == 4 then
-			shape_scale = 2
-		else
-			shape_scale = 1
-			text_scale = 1
-		end
+		local shape_scale = math.round( math.log(text_scale, 2)	+ 1 )
 		local text_font = Yutils.decode.create_font(l.fontname, l.bold, l.italic, l.underline, l.strikeout, l.fontsize, text_scale*l.scale_x/100, text_scale*l.scale_y/100, l.spacing)
 		if Tags then return format("{\\an7\\pos(%s,%s)\\p%s}%s", fx.pos_l, fx.pos_t, shape_scale, text_font.text_to_shape( text_2shape ):gsub("%-?%d+%.%d+", function(x) x = format("%d", x) return x end)) end
 		return shape.ASSDraw3(text_font.text_to_shape( text_2shape ))
