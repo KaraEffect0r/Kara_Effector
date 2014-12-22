@@ -19,12 +19,11 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
 	-----------------------------------------------------------------------------------------------------------------
-	Version: 22th August 2014, 11:00 (GMT+1)
+	Version: 14th November 2014, 15:45 (GMT+1)
 	
 	Yutils
 		table
-			append(dst_t, src_t) -> table
-			copy(t) -> table
+			copy(t[, depth]) -> table
 			tostring(t) -> string
 		utf8
 			charrange(s, i) -> number
@@ -45,9 +44,10 @@
 				transform(x, y, z[, w]) -> number, number, number, number
 			degree(x1, y1, z1, x2, y2, z2) -> number
 			distance(x, y[, z]) -> number
+			line_intersect(x0, y0, x1, y1, x2, y2, x3, y3, strict) -> number, number|nil|inf
 			ortho(x1, y1, z1, x2, y2, z2) -> number, number, number
 			randomsteps(min, max, step) -> number
-			round(x) -> number
+			round(x[, dec]) -> number
 			stretch(x, y, z, length) -> number, number, number
 			trim(x, min, max) -> number
 		algorithm
@@ -61,7 +61,7 @@
 			glue(src_shape, dst_shape[, transform_callback]) -> string
 			move(shape, x, y) -> string
 			split(shape, max_len) -> string
-			to_outline(shape, width_xy[, width_y]) -> string
+			to_outline(shape, width_xy[, width_y][, mode]) -> string
 			to_pixels(shape) -> table
 			transform(shape, matrix) -> string
 		ass
@@ -85,6 +85,24 @@
 				data_raw() -> string
 				data_packed() -> table
 				data_text() -> string
+			create_wav_reader(filename) -> table
+				file_size() -> number
+				channels_number() -> number
+				sample_rate() -> number
+				byte_rate() -> number
+				block_align() -> number
+				bits_per_sample() -> number
+				samples_per_channel() -> number
+				min_max_amplitude() -> number, number
+				sample_from_ms(ms) -> number
+				ms_from_sample(sample) -> number
+				position([pos]) -> number
+				samples_interlaced(n) -> table
+				samples(n) -> table
+			create_frequency_analyzer(samples, sample_rate) -> table
+				frequencies() -> table
+				frequency_weight(freq) -> number
+				frequency_range_weight(freq_min, freq_max) -> number
 			create_font(family, bold, italic, underline, strikeout, size[, xscale][, yscale][, hspace]) -> table
 				metrics() -> table
 				text_extents(text) -> table
@@ -93,12 +111,13 @@
 ]]
 
 -- Configuration
-local FP_PRECISION = 1000	-- Floating point precision by divisor (for shape points)
+local FP_PRECISION = 3	-- Floating point precision by numbers behind point (for shape points)
 local CURVE_TOLERANCE = 1	-- Angle in degree to define a curve as flat
 local MAX_CIRCUMFERENCE = 1.5	-- Circumference step size to create round edges out of lines
+local MITER_LIMIT = 200	-- Maximal length of a miter join
 local SUPERSAMPLING = 8	-- Anti-aliasing precision for shape to pixels conversion
 local FONT_PRECISION = 64	-- Font scale for better precision output from native font system
-local LIBASS_FONTHACK = false	-- Scale font data to fontsize? (no effect on windows)
+local LIBASS_FONTHACK = true	-- Scale font data to fontsize? (no effect on windows)
 local LIBPNG_PATH = "libpng"	-- libpng dynamic library location or shortcut (for system library loading function)
 
 -- Load FFI interface
@@ -471,13 +490,20 @@ png_bytep* png_get_rows(png_const_structp, png_const_infop);
 end)
 
 -- Helper functions
-local function roundf(x)
-	return math.floor(x * FP_PRECISION) / FP_PRECISION
-end
+local unpack = table.unpack or unpack
 local function rotate2d(x, y, angle)
 	local ra = math.rad(angle)
 	return math.cos(ra)*x - math.sin(ra)*y,
 		math.sin(ra)*x + math.cos(ra)*y
+end
+local function bton(s)
+	-- Get numeric presentation (=byte) of string characters
+	local bytes, n = {s:byte(1,-1)}, 0
+	-- Combine bytes to unsigned integer number
+	for i = 0, #s-1 do
+		n = n + bytes[1+i] * 256^i
+	end
+	return n
 end
 local function utf8_to_utf16(s)
 	-- Get resulting utf16 characters number (+ null-termination)
@@ -505,26 +531,11 @@ local Yutils
 Yutils = {
 	-- Table sublibrary
 	table = {
-		-- Appends table to table
-		append = function(dst_t, src_t)
-			-- Check arguments
-			if type(dst_t) ~= "table" or type(src_t) ~= "table" then
-				error("2 tables expected", 2)
-			end
-			-- Insert source table array elements to the end of destination table
-			local dst_t_n = #dst_t
-			for i, v in ipairs(src_t) do
-				dst_t_n = dst_t_n + 1
-				dst_t[dst_t_n] = v
-			end
-			-- Return (modified) destination table
-			return dst_t
-		end,
 		-- Copies table deep
-		copy = function(t)
+		copy = function(t, depth)
 			-- Check argument
-			if type(t) ~= "table" then
-				error("table expected", 2)
+			if type(t) ~= "table" or depth ~= nil and not(type(depth) == "number" and depth >= 1) then
+				error("table and optional depth expected", 2)
 			end
 			-- Copy & return
 			local function copy_recursive(old_t)
@@ -534,7 +545,14 @@ Yutils = {
 				end
 				return new_t
 			end
-			return copy_recursive(t)
+			local function copy_recursive_n(old_t, depth)
+				local new_t = {}
+				for key, value in pairs(old_t) do
+					new_t[key] = type(value) == "table" and depth >= 2 and copy_recursive_n(value, depth-1) or value
+				end
+				return new_t
+			end
+			return depth and copy_recursive_n(t, depth) or copy_recursive(t)
 		end,
 		-- Converts table to string
 		tostring = function(t)
@@ -554,7 +572,7 @@ Yutils = {
 						value = string.format("%q", value)
 					end
 					result_n = result_n + 1
-					result[result_n] = string.format("%s[%s] = %s", space, tostring(key), tostring(value))
+					result[result_n] = string.format("%s[%s] = %s", space, key, value)
 					if type(value) == "table" then
 						convert_recursive(value, space .. "\t")
 					end
@@ -568,7 +586,7 @@ Yutils = {
 	-- UTF8 sublibrary
 	utf8 = {
 --[[
-		UTF16 -> UTF8
+		UTF32 -> UTF8
 		--------------
 		U-00000000 - U-0000007F:		0xxxxxxx
 		U-00000080 - U-000007FF:		110xxxxx 10xxxxxx
@@ -602,13 +620,13 @@ Yutils = {
 			-- Return utf8 characters iterator
 			local char_i, s_pos, s_len = 0, 1, #s
 			return function()
-				if s_pos > s_len then
-					return
-				else
-					char_i = char_i + 1
+				if s_pos <= s_len then
 					local cur_pos = s_pos
 					s_pos = s_pos + Yutils.utf8.charrange(s, s_pos)
-					return char_i, s:sub(cur_pos, s_pos-1)
+					if s_pos-1 <= s_len then
+						char_i = char_i + 1
+						return char_i, s:sub(cur_pos, s_pos-1)
+					end
 				end
 			end
 		end,
@@ -671,53 +689,61 @@ Yutils = {
 					angle_sum = angle_sum + 90
 				until angle_sum >= angle
 				-- Return curve points as tuple
-				if unpack then
-					return unpack(curves)
-				else
-					return table.unpack(curves)
-				end
+				return unpack(curves)
 			end
 		end,
 		-- Get point on n-degree bezier curve
 		bezier = function(pct, pts)
 			-- Check arguments
-			if type(pct) ~= "number" or type(pts) ~= "table" or pct < 0 or pct > 1 then
+			if type(pct) ~= "number" or pct < 0 or pct > 1 or type(pts) ~= "table" then
 				error("percent number and points table expected", 2)
+			end
+			local pts_n = #pts
+			if pts_n < 2 then
+				error("at least 2 points expected", 2)
 			end
 			for _, value in ipairs(pts) do
 				if type(value[1]) ~= "number" or type(value[2]) ~= "number" or (value[3] ~= nil and type(value[3]) ~= "number") then
 					error("points have to be tables with 2 or 3 numbers", 2)
 				end
 			end
-			--Factorial
-			local function fac(n)
-				local k = 1
-				if n > 1 then
+			-- Pick a fitting fast calculation
+			local pct_inv = 1 - pct
+			if pts_n == 2 then	-- Linear curve
+				return pct_inv * pts[1][1] + pct * pts[2][1],
+						pct_inv * pts[1][2] + pct * pts[2][2],
+						pts[1][3] and pts[2][3] and pct_inv * pts[1][3] + pct * pts[2][3] or 0
+			elseif pts_n == 3 then	-- Quadratic curve
+				return pct_inv * pct_inv * pts[1][1] + 2 * pct_inv * pct * pts[2][1] + pct * pct * pts[3][1],
+						pct_inv * pct_inv * pts[1][2] + 2 * pct_inv * pct * pts[2][2] + pct * pct * pts[3][2],
+						pts[1][3] and pts[2][3] and pct_inv * pct_inv * pts[1][3] + 2 * pct_inv * pct * pts[2][3] + pct * pct * pts[3][3] or 0
+			elseif pts_n == 4 then	-- Cubic curve
+				return pct_inv * pct_inv * pct_inv * pts[1][1] + 3 * pct_inv * pct_inv * pct * pts[2][1] + 3 * pct_inv * pct * pct * pts[3][1] + pct * pct * pct * pts[4][1],
+						pct_inv * pct_inv * pct_inv * pts[1][2] + 3 * pct_inv * pct_inv * pct * pts[2][2] + 3 * pct_inv * pct * pct * pts[3][2] + pct * pct * pct * pts[4][2],
+						pts[1][3] and pts[2][3] and pts[3][3] and pts[4][3] and pct_inv * pct_inv * pct_inv * pts[1][3] + 3 * pct_inv * pct_inv * pct * pts[2][3] + 3 * pct_inv * pct * pct * pts[3][3] + pct * pct * pct * pts[4][3] or 0
+			else	-- pts_n > 4
+				-- Factorial
+				local function fac(n)
+					local k = 1
 					for i=2, n do
 						k = k * i
 					end
+					return k
 				end
-				return k
+				-- Calculate coordinate
+				local ret_x, ret_y, ret_z = 0, 0, 0
+				local n, bern, pt = pts_n - 1
+				for i=0, n do
+					pt = pts[1+i]
+					-- Bernstein polynom
+					bern = fac(n) / (fac(i) * fac(n - i)) *	--Binomial coefficient
+							pct^i * pct_inv^(n - i)
+					ret_x = ret_x + pt[1] * bern
+					ret_y = ret_y + pt[2] * bern
+					ret_z = ret_z + (pt[3] or 0) * bern
+				end
+				return ret_x, ret_y, ret_z
 			end
-			--Binomial coefficient
-			local function bin(i, n)
-				return fac(n) / (fac(i) * fac(n-i))
-			end
-			--Bernstein polynom
-			local function bernstein(pct, i, n)
-				return bin(i, n) * pct^i * (1 - pct)^(n - i)
-			end
-			--Calculate coordinate
-			local ret_x, ret_y, ret_z = 0, 0, 0
-			local n, bern, pt = #pts - 1
-			for i=0, n do
-				bern = bernstein(pct, i, n)
-				pt = pts[i+1]
-				ret_x = ret_x + pt[1] * bern
-				ret_y = ret_y + pt[2] * bern
-				ret_z = ret_z + (pt[3] or 0) * bern
-			end
-			return ret_x, ret_y, ret_z
 		end,
 		-- Creates 3d matrix
 		create_matrix = function()
@@ -746,6 +772,8 @@ Yutils = {
 					end
 					-- Replace old matrix
 					matrix = Yutils.table.copy(new_matrix)
+					-- Return this object
+					return obj
 				end,
 				-- Set matrix to identity
 				identity = function()
@@ -927,11 +955,40 @@ Yutils = {
 		-- Length of vector
 		distance = function(x, y, z)
 			-- Check arguments
-			if type(x) ~= "number" or type(y) ~= "number" or (z ~= nil and type(z) ~= "number") then
+			if type(x) ~= "number" or type(y) ~= "number" or z ~= nil and type(z) ~= "number" then
 				error("one vector (2 or 3 numbers) expected", 2)
 			end
 			-- Calculate length
 			return z and math.sqrt(x*x + y*y + z*z) or math.sqrt(x*x + y*y)
+		end,
+		line_intersect = function(x0, y0, x1, y1, x2, y2, x3, y3, strict)
+			-- Check arguments
+			if type(x0) ~= "number" or type(y0) ~= "number" or type(x1) ~= "number" or type(y1) ~= "number" or
+				type(x2) ~= "number" or type(y2) ~= "number" or type(x3) ~= "number" or type(y3) ~= "number" or
+				strict ~= nil and type(strict) ~= "boolean" then
+				error("two lines and optional strictness flag expected", 2)
+			end
+			-- Get line vectors & check valid lengths
+			local x10, y10, x32, y32 = x0 - x1, y0 - y1, x2 - x3, y2 - y3
+			if x10 == 0 and y10 == 0 or x32 == 0 and y32 == 0 then
+				error("lines mustn't have zero length", 2)
+			end
+			-- Calculate determinant and check for parallel lines
+			local det = x10 * y32 - y10 * x32
+			if det ~= 0 then
+				-- Calculate line intersection (endless line lengths)
+				local pre, post = (x0 * y1 - y0 * x1), (x2 * y3 - y2 * x3)
+				local ix, iy = (pre * x32 - x10 * post) / det, (pre * y32 - y10 * post) / det
+				-- Check for line intersection with given line lengths
+				if strict then
+					local s, t = x10 ~= 0 and (ix - x1) / x10 or (iy - y1) / y10, x32 ~= 0 and (ix - x3) / x32 or (iy - y3) / y32
+					if s < 0 or s > 1 or t < 0 or t > 1 then
+						return 1/0	-- inf
+					end
+				end
+				-- Return intersection point
+				return ix, iy
+			end
 		end,
 		-- Get orthogonal vector of 2 given vectors
 		ortho = function(x1, y1, z1, x2, y2, z2)
@@ -955,13 +1012,18 @@ Yutils = {
 			return math.min(min + math.random(0, math.ceil((max - min) / step)) * step, max)
 		end,
 		-- Rounds number
-		round = function(x)
+		round = function(x, dec)
 			-- Check argument
-			if type(x) ~= "number" then
-				error("number expected", 2)
+			if type(x) ~= "number" or dec ~= nil and type(dec) ~= "number" then
+				error("number and optional number expected", 2)
 			end
-			-- Return number rounded to nearest integer
-			return math.floor(x + 0.5)
+			-- Return number rounded to wished decimal size
+			if dec and dec >= 1 then
+				dec = 10^math.floor(dec)
+				return math.floor(x * dec + 0.5) / dec
+			else
+				return math.floor(x + 0.5)
+			end
 		end,
 		-- Scales vector to given length
 		stretch = function(x, y, z, length)
@@ -1002,14 +1064,10 @@ Yutils = {
 			-- Return iterator
 			return function()
 				i = i + 1
-				if i > n then
-					return
-				else
+				if i <= n then
 					local ret_starts = starts + (i-1) * dur
 					local ret_ends = ret_starts + dur
-					if dur < 0 and ret_ends < ends then
-						ret_ends = ends
-					elseif dur > 0 and ret_ends > ends then
+					if dur < 0 and ret_ends < ends or dur > 0 and ret_ends > ends then
 						ret_ends = ends
 					end
 					return ret_starts, ret_ends, i, n
@@ -1066,10 +1124,11 @@ Yutils = {
 			local x0, y0, x1, y1
 			-- Calculate minimal and maximal coordinates
 			Yutils.shape.filter(shape, function(x, y)
-				x0 = x0 and math.min(x0, x) or x
-				y0 = y0 and math.min(y0, y) or y
-				x1 = x1 and math.max(x1, x) or x
-				y1 = y1 and math.max(y1, y) or y
+				if x0 then
+					x0, y0, x1, y1 = math.min(x0, x), math.min(y0, y), math.max(x1, x), math.max(y1, y)
+				else
+					x0, y0, x1, y1 = x, y, x, y
+				end
 			end)
 			return x0, y0, x1, y1
 		end,
@@ -1090,12 +1149,12 @@ Yutils = {
 			for i=2, data_n do
 				for j=1, elements.n do
 					if compare_func(data[i], elements[j].value) then
-						goto element_found
+						goto trace_element_found
 					end
 				end
 				elements.n = elements.n + 1
 				elements[elements.n] = {value = type(data[i]) == "table" and Yutils.table.copy(data[i]) or data[i]}
-				::element_found::
+				::trace_element_found::
 			end
 			-- Detection helper functions
 			local function index_to_x(i)
@@ -1301,8 +1360,8 @@ Yutils = {
 							x, token_num = filter(x, token_num, typ)
 							-- Point to replace?
 							if type(x) == "number" and type(token_num) == "number" then
-								new_point = typ and string.format("%s %s %s", typ, roundf(x), roundf(token_num)) or
-												string.format("%s %s", roundf(x), roundf(token_num))
+								new_point = typ and string.format("%s %s %s", typ, Yutils.math.round(x, FP_PRECISION), Yutils.math.round(token_num, FP_PRECISION)) or
+												string.format("%s %s", Yutils.math.round(x, FP_PRECISION), Yutils.math.round(token_num, FP_PRECISION))
 								shape = string.format("%s%s%s", shape:sub(1, point_start-1), new_point, shape:sub(token_end+1))
 								token_end = point_start + #new_point - 1
 							end
@@ -1318,11 +1377,13 @@ Yutils = {
 			return shape
 		end,
 		-- Converts shape curves to lines
-		flatten = function(shape)
+		flatten = function(shape, curve_tolerance)
 			-- Check argument
 			if type(shape) ~= "string" then
 				error("shape expected", 2)
 			end
+			-- new argument for CURVE_TOLERANCE
+			local curve_tolerance = curve_tolerance or CURVE_TOLERANCE
 			-- 4th degree curve subdivider
 			local function curve4_subdivide(x0, y0, x1, y1, x2, y2, x3, y3, pct)
 				-- Calculate points on curve vectors
@@ -1361,7 +1422,7 @@ Yutils = {
 				local pts, pts_n = {x0, y0}, 2
 				-- Conversion in recursive processing
 				local function convert_recursive(x0, y0, x1, y1, x2, y2, x3, y3)
-					if curve4_is_flat(x0, y0, x1, y1, x2, y2, x3, y3, CURVE_TOLERANCE) then
+					if curve4_is_flat(x0, y0, x1, y1, x2, y2, x3, y3, curve_tolerance) then
 						pts[pts_n+1] = x3
 						pts[pts_n+2] = y3
 						pts_n = pts_n + 2
@@ -1395,7 +1456,7 @@ Yutils = {
 							-- Convert curve to lines
 							local line_points = curve4_to_lines(x0, y0, x1, y1, x2, y2, x3, y3)
 							for i=1, #line_points do
-								line_points[i] = roundf(line_points[i])
+								line_points[i] = Yutils.math.round(line_points[i], FP_PRECISION)
 							end
 							line_curve = table.concat(line_points, " ")
 							shape = string.format("%s%s%s", shape:sub(1, curve_start-1), line_curve, shape:sub(curve_end+1))
@@ -1512,12 +1573,12 @@ Yutils = {
 					for cur_distance = distance_rest > 0 and distance_rest or max_len, distance, max_len do
 						pct = cur_distance / distance
 						lines_n = lines_n + 1
-						lines[lines_n] = string.format("%s %s", roundf(x0 + rel_x * pct), roundf(y0 + rel_y * pct))
+						lines[lines_n] = string.format("%s %s", Yutils.math.round(x0 + rel_x * pct, FP_PRECISION), Yutils.math.round(y0 + rel_y * pct, FP_PRECISION))
 					end
 					return table.concat(lines, " ")
 				-- No line split
 				else
-					return string.format("%s %s", roundf(x1), roundf(y1))
+					return string.format("%s %s", Yutils.math.round(x1, FP_PRECISION), Yutils.math.round(y1, FP_PRECISION))
 				end
 			end
 			-- Build new shape with shorter lines
@@ -1544,7 +1605,7 @@ Yutils = {
 				end
 				-- Add current point or splitted line to new shape
 				new_shape_n = new_shape_n + 1
-				new_shape[new_shape_n] = line_mode and last_point and line_split(last_point[1], last_point[2], x, y) or string.format("%s %s", roundf(x), roundf(y))
+				new_shape[new_shape_n] = line_mode and last_point and line_split(last_point[1], last_point[2], x, y) or string.format("%s %s", Yutils.math.round(x, FP_PRECISION), Yutils.math.round(y, FP_PRECISION))
 				-- Update last point & move
 				last_point = {x, y}
 				if typ == "m" then
@@ -1563,12 +1624,14 @@ Yutils = {
 			return table.concat(new_shape, " ")
 		end,
 		-- Converts shape to stroke version
-		to_outline = function(shape, width_xy, width_y)
+		to_outline = function(shape, width_xy, width_y, mode)
 			-- Check arguments
-			if type(shape) ~= "string" or type(width_xy) ~= "number" or width_xy < 0 or not (width_y == nil or type(width_y) == "number" and width_y >= 0) then
-				error("shape and line width (general or horizontal and vertical) expected", 2)
-			elseif width_y and not (width_xy > 0 or width_y > 0) or width_xy == 0 then
+			if type(shape) ~= "string" or type(width_xy) ~= "number" or width_y ~= nil and type(width_y) ~= "number" or mode ~= nil and type(mode) ~= "string" then
+				error("shape, line width (general or horizontal and vertical) and optional mode expected", 2)
+			elseif width_y and (width_xy < 0 or width_y < 0 or not (width_xy > 0 or width_y > 0)) or width_xy <= 0 then
 				error("one width must be >0", 2)
+			elseif mode and mode ~= "round" and mode ~= "bevel" and mode ~= "miter" then
+				error("valid mode expected", 2)
 			end
 			-- Line width values
 			local width, xscale, yscale
@@ -1662,28 +1725,85 @@ Yutils = {
 							end
 						end
 						-- Calculate orthogonal vectors to both neighbour points
-						local o_vec1_x, o_vec1_y = Yutils.math.ortho(point[1]-pre_point[1], point[2]-pre_point[2], 0, 0, 0, 1)
+						local vec1_x, vec1_y, vec2_x, vec2_y = point[1]-pre_point[1], point[2]-pre_point[2], point[1]-post_point[1], point[2]-post_point[2]
+						local o_vec1_x, o_vec1_y = Yutils.math.ortho(vec1_x, vec1_y, 0, 0, 0, 1)
 						o_vec1_x, o_vec1_y = Yutils.math.stretch(o_vec1_x, o_vec1_y, 0, width)
-						local o_vec2_x, o_vec2_y = Yutils.math.ortho(post_point[1]-point[1], post_point[2]-point[2], 0, 0, 0, 1)
+						local o_vec2_x, o_vec2_y = Yutils.math.ortho(vec2_x, vec2_y, 0, 0, 0, -1)
 						o_vec2_x, o_vec2_y = Yutils.math.stretch(o_vec2_x, o_vec2_y, 0, width)
-						-- Calculate degree & circumference between orthogonal vectors
-						local degree = Yutils.math.degree(o_vec1_x, o_vec1_y, 0, o_vec2_x, o_vec2_y, 0)
-						local circ = math.abs(math.rad(degree)) * width
-						-- Add first edge point
-						outline_n = outline_n + 1
-						outline[outline_n] = string.format("%s%s %s",
-																	outline_n == 1 and "m " or outline_n == 2 and "l " or "",
-																	roundf(point[1] + o_vec1_x * xscale), roundf(point[2] + o_vec1_y * yscale))
-						-- Round edge needed?
-						if circ > MAX_CIRCUMFERENCE then
-							local circ_rest = circ % MAX_CIRCUMFERENCE
-							for cur_circ = circ_rest > 0 and circ_rest or MAX_CIRCUMFERENCE, circ, MAX_CIRCUMFERENCE do
-								local curve_vec_x, curve_vec_y = rotate2d(o_vec1_x, o_vec1_y, cur_circ / circ * degree)
-								outline_n = outline_n + 1
-								outline[outline_n] = string.format("%s%s %s",
-																			outline_n == 1 and "m " or outline_n == 2 and "l " or "",
-																			roundf(point[1] + curve_vec_x * xscale), roundf(point[2] + curve_vec_y * yscale))
+						-- Check for gap or edge join
+						local is_x, is_y = Yutils.math.line_intersect(point[1] + o_vec1_x - vec1_x, point[2] + o_vec1_y - vec1_y,
+																					point[1] + o_vec1_x, point[2] + o_vec1_y,
+																					point[1] + o_vec2_x - vec2_x, point[2] + o_vec2_y - vec2_y,
+																					point[1] + o_vec2_x, point[2] + o_vec2_y,
+																					true)
+						if is_y then
+							-- Add gap point
+							outline_n = outline_n + 1
+							outline[outline_n] = string.format("%s%s %s",
+																		outline_n == 1 and "m " or outline_n == 2 and "l " or "",
+																		Yutils.math.round(point[1] + (is_x - point[1]) * xscale, FP_PRECISION), Yutils.math.round(point[2] + (is_y - point[2]) * yscale, FP_PRECISION))
+						else
+							-- Add first edge point
+							outline_n = outline_n + 1
+							outline[outline_n] = string.format("%s%s %s",
+																		outline_n == 1 and "m " or outline_n == 2 and "l " or "",
+																		Yutils.math.round(point[1] + o_vec1_x * xscale, FP_PRECISION), Yutils.math.round(point[2] + o_vec1_y * yscale, FP_PRECISION))
+							-- Create join by mode
+							if mode == "bevel" then
+								-- Nothing to add!
+							elseif mode == "miter" then
+								-- Add mid edge point(s)
+								is_x, is_y = Yutils.math.line_intersect(point[1] + o_vec1_x - vec1_x, point[2] + o_vec1_y - vec1_y,
+																					point[1] + o_vec1_x, point[2] + o_vec1_y,
+																					point[1] + o_vec2_x - vec2_x, point[2] + o_vec2_y - vec2_y,
+																					point[1] + o_vec2_x, point[2] + o_vec2_y)
+								if is_y then	-- Vectors intersect
+									local is_vec_x, is_vec_y = is_x - point[1], is_y - point[2]
+									local is_vec_len = Yutils.math.distance(is_vec_x, is_vec_y)
+									if is_vec_len > MITER_LIMIT then
+										local fix_scale = MITER_LIMIT / is_vec_len
+										outline_n = outline_n + 1
+										outline[outline_n] = string.format("%s%s %s %s %s",
+																					outline_n == 2 and "l " or "",
+																					Yutils.math.round(point[1] + (o_vec1_x + (is_vec_x - o_vec1_x) * fix_scale) * xscale, FP_PRECISION), Yutils.math.round(point[2] + (o_vec1_y + (is_vec_y - o_vec1_y) * fix_scale) * yscale, FP_PRECISION),
+																					Yutils.math.round(point[1] + (o_vec2_x + (is_vec_x - o_vec2_x) * fix_scale) * xscale, FP_PRECISION), Yutils.math.round(point[2] + (o_vec2_y + (is_vec_y - o_vec2_y) * fix_scale) * yscale, FP_PRECISION))
+									else
+										outline_n = outline_n + 1
+										outline[outline_n] = string.format("%s%s %s",
+																					outline_n == 2 and "l " or "",
+																					Yutils.math.round(point[1] + is_vec_x * xscale, FP_PRECISION), Yutils.math.round(point[2] + is_vec_y * yscale, FP_PRECISION))
+									end
+								else	-- Parallel vectors
+									vec1_x, vec1_y = Yutils.math.stretch(vec1_x, vec1_y, 0, MITER_LIMIT)
+									vec2_x, vec2_y = Yutils.math.stretch(vec2_x, vec2_y, 0, MITER_LIMIT)
+									outline_n = outline_n + 1
+									outline[outline_n] = string.format("%s%s %s %s %s",
+																				outline_n == 2 and "l " or "",
+																				Yutils.math.round(point[1] + (o_vec1_x + vec1_x) * xscale, FP_PRECISION), Yutils.math.round(point[2] + (o_vec1_y + vec1_y) * yscale, FP_PRECISION),
+																				Yutils.math.round(point[1] + (o_vec2_x + vec2_x) * xscale, FP_PRECISION), Yutils.math.round(point[2] + (o_vec2_y + vec2_y) * yscale, FP_PRECISION))
+								end
+							else	-- not mode or mode == "round"
+								-- Calculate degree & circumference between orthogonal vectors
+								local degree = Yutils.math.degree(o_vec1_x, o_vec1_y, 0, o_vec2_x, o_vec2_y, 0)
+								local circ = math.abs(math.rad(degree)) * width
+								-- Join needed?
+								if circ > MAX_CIRCUMFERENCE then
+									-- Add curve edge points
+									local circ_rest = circ % MAX_CIRCUMFERENCE
+									for cur_circ = circ_rest > 0 and circ_rest or MAX_CIRCUMFERENCE, circ - MAX_CIRCUMFERENCE, MAX_CIRCUMFERENCE do
+										local curve_vec_x, curve_vec_y = rotate2d(o_vec1_x, o_vec1_y, cur_circ / circ * degree)
+										outline_n = outline_n + 1
+										outline[outline_n] = string.format("%s%s %s",
+																					outline_n == 2 and "l " or "",
+																					Yutils.math.round(point[1] + curve_vec_x * xscale, FP_PRECISION), Yutils.math.round(point[2] + curve_vec_y * yscale, FP_PRECISION))
+									end
+								end
 							end
+							-- Add end edge point
+							outline_n = outline_n + 1
+							outline[outline_n] = string.format("%s%s %s",
+																		outline_n == 2 and "l " or "",
+																		Yutils.math.round(point[1] + o_vec2_x * xscale, FP_PRECISION), Yutils.math.round(point[2] + o_vec2_y * yscale, FP_PRECISION))
 						end
 					end
 					-- Insert inner or outer outline to stroke shape
@@ -2038,6 +2158,7 @@ Yutils = {
 						end
 						-- Create dialogs copy & style storage
 						local dialogs, dialog_styles, dialog, style_dialogs = Yutils.table.copy(dialogs), {}
+						local space_width
 						-- Process single dialogs
 						for i=1, dialogs.n do
 							dialog = dialogs[i]
@@ -2061,7 +2182,7 @@ Yutils = {
 								if meta.play_res_x > 0 and meta.play_res_y > 0 then
 									-- Horizontal position
 									if (dialog.styleref.alignment-1) % 3 == 0 then
-										dialog.left = math.max(dialog.margin_l, dialog.styleref.margin_l)
+										dialog.left = dialog.margin_l ~= 0 and dialog.margin_l or dialog.styleref.margin_l
 										dialog.center = dialog.left + dialog.width / 2
 										dialog.right = dialog.left + dialog.width
 										dialog.x = dialog.left
@@ -2071,14 +2192,14 @@ Yutils = {
 										dialog.right = dialog.left + dialog.width
 										dialog.x = dialog.center
 									else
-										dialog.left = meta.play_res_x - math.max(dialog.margin_r, dialog.styleref.margin_r) - dialog.width
+										dialog.left = meta.play_res_x - (dialog.margin_r ~= 0 and dialog.margin_r or dialog.styleref.margin_r) - dialog.width
 										dialog.center = dialog.left + dialog.width / 2
 										dialog.right = dialog.left + dialog.width
 										dialog.x = dialog.right
 									end
 									-- Vertical position
 									if dialog.styleref.alignment > 6 then
-										dialog.top = math.max(dialog.margin_v, dialog.styleref.margin_v)
+										dialog.top = dialog.margin_v ~= 0 and dialog.margin_v or dialog.styleref.margin_v
 										dialog.middle = dialog.top + dialog.height / 2
 										dialog.bottom = dialog.top + dialog.height
 										dialog.y = dialog.top
@@ -2088,22 +2209,312 @@ Yutils = {
 										dialog.bottom = dialog.top + dialog.height
 										dialog.y = dialog.middle
 									else
-										dialog.top = meta.play_res_y - math.max(dialog.margin_v, dialog.styleref.margin_v) - dialog.height
+										dialog.top = meta.play_res_y - (dialog.margin_v ~= 0 and dialog.margin_v or dialog.styleref.margin_v) - dialog.height
 										dialog.middle = dialog.top + dialog.height / 2
 										dialog.bottom = dialog.top + dialog.height
 										dialog.y = dialog.bottom
 									end
 								end
+								space_width = text_sizes(" ", dialog.styleref)
 							end
-							-- Get subtexts
-							--[[
-								<<TODO>>
-								all:
-									width, height, ascent, descent, intlead, extlead
-									x, y, left, center, right, top, middle, bottom
-								line:
-									syls, word, chars
-							]]
+							-- Add dialog text chunks
+							dialog.text_chunked = {n = 0}
+							do
+								-- Has tags+text chunks?
+								local chunk_start, chunk_end = dialog.text:find("{.-}")
+								if not chunk_start then
+									dialog.text_chunked = {n = 1, {tags = "", text = dialog.text}}
+								else
+									-- First chunk without tags
+									if chunk_start ~= 1 then
+										dialog.text_chunked.n = dialog.text_chunked.n + 1
+										dialog.text_chunked[dialog.text_chunked.n] = {tags = "", text = dialog.text:sub(1, chunk_start-1)}
+									end
+									-- Chunks with tags
+									local chunk2_start, chunk2_end
+									repeat
+										chunk2_start, chunk2_end = dialog.text:find("{.-}", chunk_end+1)
+										dialog.text_chunked.n = dialog.text_chunked.n + 1
+										dialog.text_chunked[dialog.text_chunked.n] = {tags = dialog.text:sub(chunk_start+1, chunk_end-1), text = dialog.text:sub(chunk_end+1, chunk2_start and chunk2_start-1 or -1)}
+										chunk_start, chunk_end = chunk2_start, chunk2_end
+									until not chunk_start
+								end
+							end
+							-- Add dialog sylables
+							dialog.syls = {n = 0}
+							do
+								local last_time, text_chunk, pretags, kdur, posttags, syl = 0
+								-- Get sylables from text chunks
+								for i=1, dialog.text_chunked.n do
+									text_chunk = dialog.text_chunked[i]
+									pretags, kdur, posttags = text_chunk.tags:match("(.-)\\[kK][of]?(%d+)(.*)")
+									if posttags then	-- All tag groups have to contain karaoke times or everything is invalid (=no sylables there)
+										syl = {
+											i = dialog.syls.n + 1,
+											start_time = last_time,
+											mid_time = last_time + kdur * 10 / 2,
+											end_time = last_time + kdur * 10,
+											duration = kdur * 10,
+											tags = pretags .. posttags
+										}
+										syl.prespace, syl.text, syl.postspace = text_chunk.text:match("(%s*)(%S*)(%s*)")
+										syl.prespace, syl.postspace = syl.prespace:len(), syl.postspace:len()
+										if text_sizes and dialog.styleref then
+											syl.width, syl.height, syl.ascent, syl.descent, syl.internal_leading, syl.external_leading = text_sizes(syl.text, dialog.styleref)
+										end
+										last_time = syl.end_time
+										dialog.syls.n = dialog.syls.n + 1
+										dialog.syls[dialog.syls.n] = syl
+									else
+										dialog.syls = {n = 0}
+										break
+									end
+								end
+								-- Calculate sylable positions with all sylables data already available
+								if dialog.syls.n > 0 and dialog.syls[1].width and meta.play_res_x > 0 and meta.play_res_y > 0 then
+									if dialog.styleref.alignment > 6 or dialog.styleref.alignment < 4 then
+										local cur_x = dialog.left
+										for i=1, dialog.syls.n do
+											syl = dialog.syls[i]
+											-- Horizontal position
+											cur_x = cur_x + syl.prespace * space_width
+											syl.left = cur_x
+											syl.center = syl.left + syl.width / 2
+											syl.right = syl.left + syl.width
+											syl.x = (dialog.styleref.alignment-1) % 3 == 0 and syl.left or
+													(dialog.styleref.alignment-2) % 3 == 0 and syl.center or
+													syl.right
+											cur_x = cur_x + syl.width + syl.postspace * space_width
+											-- Vertical position
+											syl.top = dialog.top
+											syl.middle = dialog.middle
+											syl.bottom = dialog.bottom
+											syl.y = dialog.y
+										end
+									else
+										local max_width, sum_height = 0, 0
+										for i=1, dialog.syls.n do
+											syl = dialog.syls[i]
+											max_width = math.max(max_width, syl.width)
+											sum_height = sum_height + syl.height
+										end
+										local cur_y, x_fix = meta.play_res_y / 2 - sum_height / 2
+										for i=1, dialog.syls.n do
+											syl = dialog.syls[i]
+											-- Horizontal position
+											x_fix = (max_width - syl.width) / 2
+											if dialog.styleref.alignment == 4 then
+												syl.left = dialog.left + x_fix
+												syl.center = syl.left + syl.width / 2
+												syl.right = syl.left + syl.width
+												syl.x = syl.left
+											elseif dialog.styleref.alignment == 5 then
+												syl.left = meta.play_res_x / 2 - syl.width / 2
+												syl.center = syl.left + syl.width / 2
+												syl.right = syl.left + syl.width
+												syl.x = syl.center
+											else -- dialog.styleref.alignment == 6
+												syl.left = dialog.right - syl.width - x_fix
+												syl.center = syl.left + syl.width / 2
+												syl.right = syl.left + syl.width
+												syl.x = syl.right
+											end
+											-- Vertical position
+											syl.top = cur_y
+											syl.middle = syl.top + syl.height / 2
+											syl.bottom = syl.top + syl.height
+											syl.y = syl.middle
+											cur_y = cur_y + syl.height
+										end
+									end
+								end
+							end
+							-- Add dialog words
+							dialog.words = {n = 0}
+							do
+								local word
+								for prespace, word_text, postspace in dialog.text_stripped:gmatch("(%s*)(%S+)(%s*)") do
+									word = {
+										i = dialog.words.n + 1,
+										start_time = dialog.start_time,
+										mid_time = dialog.mid_time,
+										end_time = dialog.end_time,
+										duration = dialog.duration,
+										text = word_text,
+										prespace = prespace:len(),
+										postspace = postspace:len()
+									}
+									if text_sizes and dialog.styleref then
+										word.width, word.height, word.ascent, word.descent, word.internal_leading, word.external_leading = text_sizes(word.text, dialog.styleref)
+									end
+									-- Add current word to dialog words
+									dialog.words.n = dialog.words.n + 1
+									dialog.words[dialog.words.n] = word
+								end
+								-- Calculate word positions with all words data already available
+								if dialog.words.n > 0 and dialog.words[1].width and meta.play_res_x > 0 and meta.play_res_y > 0 then
+									if dialog.styleref.alignment > 6 or dialog.styleref.alignment < 4 then
+										local cur_x = dialog.left
+										for i=1, dialog.words.n do
+											word = dialog.words[i]
+											-- Horizontal position
+											cur_x = cur_x + word.prespace * space_width
+											word.left = cur_x
+											word.center = word.left + word.width / 2
+											word.right = word.left + word.width
+											word.x = (dialog.styleref.alignment-1) % 3 == 0 and word.left or
+													(dialog.styleref.alignment-2) % 3 == 0 and word.center or
+													word.right
+											cur_x = cur_x + word.width + word.postspace * space_width
+											-- Vertical position
+											word.top = dialog.top
+											word.middle = dialog.middle
+											word.bottom = dialog.bottom
+											word.y = dialog.y
+										end
+									else
+										local max_width, sum_height = 0, 0
+										for i=1, dialog.words.n do
+											word = dialog.words[i]
+											max_width = math.max(max_width, word.width)
+											sum_height = sum_height + word.height
+										end
+										local cur_y, x_fix = meta.play_res_y / 2 - sum_height / 2
+										for i=1, dialog.words.n do
+											word = dialog.words[i]
+											-- Horizontal position
+											x_fix = (max_width - word.width) / 2
+											if dialog.styleref.alignment == 4 then
+												word.left = dialog.left + x_fix
+												word.center = word.left + word.width / 2
+												word.right = word.left + word.width
+												word.x = word.left
+											elseif dialog.styleref.alignment == 5 then
+												word.left = meta.play_res_x / 2 - word.width / 2
+												word.center = word.left + word.width / 2
+												word.right = word.left + word.width
+												word.x = word.center
+											else -- dialog.styleref.alignment == 6
+												word.left = dialog.right - word.width - x_fix
+												word.center = word.left + word.width / 2
+												word.right = word.left + word.width
+												word.x = word.right
+											end
+											-- Vertical position
+											word.top = cur_y
+											word.middle = word.top + word.height / 2
+											word.bottom = word.top + word.height
+											word.y = word.middle
+											cur_y = cur_y + word.height
+										end
+									end
+								end
+							end
+							-- Add dialog characters
+							dialog.chars = {n = 0}
+							do
+								local char, char_index, syl, word
+								for _, char_text in Yutils.utf8.chars(dialog.text_stripped) do
+									char = {
+										i = dialog.chars.n + 1,
+										start_time = dialog.start_time,
+										mid_time = dialog.mid_time,
+										end_time = dialog.end_time,
+										duration = dialog.duration,
+										text = char_text
+									}
+									char_index = 0
+									for i=1, dialog.syls.n do
+										syl = dialog.syls[i]
+										for _ in Yutils.utf8.chars(string.format("%s%s%s", string.rep(" ", syl.prespace), syl.text, string.rep(" ", syl.postspace))) do
+											char_index = char_index + 1
+											if char_index == char.i then
+												char.syl_i = syl.i
+												char.start_time = syl.start_time
+												char.mid_time = syl.mid_time
+												char.end_time = syl.end_time
+												char.duration = syl.duration
+												goto syl_reference_found
+											end
+										end
+									end
+									::syl_reference_found::
+									char_index = 0
+									for i=1, dialog.words.n do
+										word = dialog.words[i]
+										for _ in Yutils.utf8.chars(string.format("%s%s%s", string.rep(" ", word.prespace), word.text, string.rep(" ", word.postspace))) do
+											char_index = char_index + 1
+											if char_index == char.i then
+												char.word_i = word.i
+												goto word_reference_found
+											end
+										end
+									end
+									::word_reference_found::
+									if text_sizes and dialog.styleref then
+										char.width, char.height, char.ascent, char.descent, char.internal_leading, char.external_leading = text_sizes(char.text, dialog.styleref)
+									end
+									dialog.chars.n = dialog.chars.n + 1
+									dialog.chars[dialog.chars.n] = char
+								end
+								-- Calculate character positions with all characters data already available
+								if dialog.chars.n > 0 and dialog.chars[1].width and meta.play_res_x > 0 and meta.play_res_y > 0 then
+									if dialog.styleref.alignment > 6 or dialog.styleref.alignment < 4 then
+										local cur_x = dialog.left
+										for i=1, dialog.chars.n do
+											char = dialog.chars[i]
+											-- Horizontal position
+											char.left = cur_x
+											char.center = char.left + char.width / 2
+											char.right = char.left + char.width
+											char.x = (dialog.styleref.alignment-1) % 3 == 0 and char.left or
+													(dialog.styleref.alignment-2) % 3 == 0 and char.center or
+													char.right
+											cur_x = cur_x + char.width
+											-- Vertical position
+											char.top = dialog.top
+											char.middle = dialog.middle
+											char.bottom = dialog.bottom
+											char.y = dialog.y
+										end
+									else
+										local max_width, sum_height = 0, 0
+										for i=1, dialog.chars.n do
+											char = dialog.chars[i]
+											max_width = math.max(max_width, char.width)
+											sum_height = sum_height + char.height
+										end
+										local cur_y, x_fix = meta.play_res_y / 2 - sum_height / 2
+										for i=1, dialog.chars.n do
+											char = dialog.chars[i]
+											-- Horizontal position
+											x_fix = (max_width - char.width) / 2
+											if dialog.styleref.alignment == 4 then
+												char.left = dialog.left + x_fix
+												char.center = char.left + char.width / 2
+												char.right = char.left + char.width
+												char.x = char.left
+											elseif dialog.styleref.alignment == 5 then
+												char.left = meta.play_res_x / 2 - char.width / 2
+												char.center = char.left + char.width / 2
+												char.right = char.left + char.width
+												char.x = char.center
+											else -- dialog.styleref.alignment == 6
+												char.left = dialog.right - char.width - x_fix
+												char.center = char.left + char.width / 2
+												char.right = char.left + char.width
+												char.x = char.right
+											end
+											-- Vertical position
+											char.top = cur_y
+											char.middle = char.top + char.height / 2
+											char.bottom = char.top + char.height
+											char.y = char.middle
+											cur_y = cur_y + char.height
+										end
+									end
+								end
+							end
 						end
 						-- Add durations between dialogs
 						for _, dialogs in pairs(dialog_styles) do
@@ -2142,83 +2553,54 @@ Yutils = {
 			end
 			-- Image decoders
 			local function bmp_decode(filename)
-				-- Convert little-endian bytes string to Lua number
-				local function bton(s)
-					local bytes, n = {s:byte(1,#s)}, 0
-					for i = 0, #bytes-1 do
-						n = n + bytes[1+i] * 2^(i*8)
-					end
-					return n
-				end
-				-- Open file handle & read bitmap type from header
+				-- Open file handle
 				local file = io.open(filename, "rb")
-				if file and file:read(2) == "BM" then
-					-- Read bitmap header
-					local file_size = file:read(4)
-					if not file_size then
-						return "file size not found"
+				if file then
+					-- Read file header
+					local header = file:read(14)
+					if not header or #header ~= 14 then
+						return "couldn't read file header"
 					end
-					file_size = bton(file_size)
-					file:seek("cur", 4)	-- skip application reserved bytes
-					local data_offset = file:read(4)
-					if not data_offset then
-						return "data offset not found"
+					-- Check BMP signature
+					if header:sub(1,2) == "BM" then
+						-- Read relevant file header fields
+						local file_size, data_offset = bton(header:sub(3,6)), bton(header:sub(11,14))
+						-- Read DIB header
+						header = file:read(24)
+						if not header or #header ~= 24 then
+							return "couldn't read DIB header"
+						end
+						-- Read relevant DIB header fields
+						local width, height, planes, bit_depth, compression, data_size = bton(header:sub(5,8)), bton(header:sub(9,12)), bton(header:sub(13,14)), bton(header:sub(15,16)), bton(header:sub(17,20)), bton(header:sub(21,24))
+						-- Check read header data
+						if width >= 2^31 then
+							return "pixels in right-to-left order are not supported"
+						elseif planes ~= 1 then
+							return "planes must be 1"
+						elseif bit_depth ~= 24 and bit_depth ~= 32 then
+							return "bit depth must be 24 or 32"
+						elseif compression ~= 0 then
+							return "must be uncompressed RGB"
+						elseif data_size == 0 then
+							return "data size must not be zero"
+						end
+						-- Fix read header data
+						if height >= 2^31 then
+							height = height - 2^32
+						end
+						-- Read image data
+						file:seek("set", data_offset)
+						local data = file:read(data_size)
+						if not data or #data ~= data_size then
+							return "not enough data"
+						end
+						-- Calculate row size (round up to multiple of 4)
+						local row_size = math.floor((bit_depth * width + 31) / 32) * 4
+						-- All data read from file -> close handle (don't wait for GC)
+						file:close()
+						-- Return relevant bitmap informations
+						return file_size, width, height, bit_depth, data_size, data, row_size
 					end
-					data_offset = bton(data_offset)
-					-- DIB Header
-					file:seek("cur", 4)	-- skip header size
-					local width = file:read(4)
-					if not width then
-						return "width not found"
-					end
-					width = bton(width)
-					if width >= 2^31 then
-						return "pixels in right-to-left order are not supported"
-					end
-					local height = file:read(4)
-					if not height then
-						return "height not found"
-					end
-					height = bton(height)
-					if height >= 2^31 then
-						height = height - 2^32
-					end
-					local planes = file:read(2)
-					if not planes or bton(planes) ~= 1 then
-						return "planes must be 1"
-					end
-					local bit_depth = file:read(2)
-					if not bit_depth then
-						return "bit depth not found"
-					end
-					bit_depth = bton(bit_depth)
-					if bit_depth ~= 24 and bit_depth ~= 32 then
-						return "bit depth must be 24 or 32"
-					end
-					local compression = file:read(4)
-					if not compression or bton(compression) ~= 0 then
-						return "must be uncompressed RGB"
-					end
-					local data_size = file:read(4)
-					if not data_size then
-						return "data size not found"
-					end
-					data_size = bton(data_size)
-					if data_size == 0 then
-						return "data size must not be zero"
-					end
-					-- Data
-					file:seek("set", data_offset)
-					local data = file:read(data_size)
-					if not data or #data ~= data_size then
-						return "not enough data"
-					end
-					-- All data read from file -> close handle (don't wait for GC)
-					file:close()
-					-- Calculate row size (round up to multiple of 4)
-					local row_size = math.floor((bit_depth * width + 31) / 32) * 4
-					-- Return relevant bitmap informations
-					return file_size, width, height, bit_depth, data_size, data, row_size
 				end
 			end
 			local function png_decode(filename)
@@ -2417,6 +2799,298 @@ Yutils = {
 			}
 			return obj
 		end,
+		-- Create WAV file reader
+		create_wav_reader = function(filename)
+			-- Check argument
+			if type(filename) ~= "string" then
+				error("audio filename expected", 2)
+			end
+			-- Open file handle
+			local file = io.open(filename, "rb")
+			if not file then
+				error("couldn't open file", 2)
+			end
+			-- Read file header
+			local header = file:read(12)
+			if not header or #header ~= 12 then
+				error("couldn't read file header", 2)
+			-- Check WAVE signature
+			elseif header:sub(1,4) ~= "RIFF" or header:sub(9,12) ~= "WAVE" then
+				error("not a wave file", 2)
+			end
+			-- Data to save (+ read relevant file header field)
+			local file_size, channels_number, sample_rate, byte_rate, block_align, bits_per_sample = bton(header:sub(5,8)) + 8	-- remaining + already read bytes
+			local data_begin, data_end
+			-- Read file chunks
+			local chunk_type, chunk_size
+			while true do
+				-- Read single chunk
+				chunk_type, chunk_size = file:read(4), file:read(4)
+				if not chunk_size or #chunk_size ~= 4 then
+					break
+				end
+				chunk_size = bton(chunk_size)
+				-- Identify chunk type
+				if chunk_type == "fmt " then
+					-- Read format informations
+					header = file:read(16)
+					if chunk_size < 16 or not header or #header ~= 16 then
+						error("format chunk corrupted", 2)
+					elseif bton(header:sub(1,2)) ~= 1 then
+						error("data must be in PCM format", 2)
+					end
+					channels_number, sample_rate, byte_rate, block_align, bits_per_sample = bton(header:sub(3,4)), bton(header:sub(5,8)), bton(header:sub(9,12)), bton(header:sub(13,14)), bton(header:sub(15,16))
+					if bits_per_sample ~= 8 and bits_per_sample ~= 16 and bits_per_sample ~= 24 and bits_per_sample ~= 32 then
+						error("bits per sample must be 8, 16, 24 or 32", 2)
+					elseif channels_number == 0 or sample_rate == 0 or byte_rate == 0 or block_align == 0 then
+						error("invalid format data", 2)
+					end
+					file:seek("cur", chunk_size-16)
+				elseif chunk_type == "data" then
+					-- Save samples reference
+					data_begin = file:seek()
+					data_end = data_begin + chunk_size
+					file:seek("cur", chunk_size)
+				else
+					-- Skip chunk
+					file:seek("cur", chunk_size)
+				end
+			end
+			-- Check all needed data are read
+			if not bits_per_sample or not data_end then
+				error("format or data are missing", 2)
+			end
+			-- Calculate extra data
+			local samples_per_channel = (data_end - data_begin) / block_align
+			-- Set file pointer ready for data reading
+			file:seek("set", data_begin)
+			-- Return wave object
+			local obj
+			obj = {
+				file_size = function()
+					return file_size
+				end,
+				channels_number = function()
+					return channels_number
+				end,
+				sample_rate = function()
+					return sample_rate
+				end,
+				byte_rate = function()
+					return byte_rate
+				end,
+				block_align = function()
+					return block_align
+				end,
+				bits_per_sample = function()
+					return bits_per_sample
+				end,
+				samples_per_channel = function()
+					return samples_per_channel
+				end,
+				min_max_amplitude = function()
+					local half_level = 2^bits_per_sample / 2
+					return -half_level, half_level-1
+				end,
+				sample_from_ms = function(ms)
+					if type(ms) ~= "number" or ms < 0 then
+						error("positive number expected", 2)
+					end
+					return ms * 0.001 * sample_rate
+				end,
+				ms_from_sample = function(sample)
+					if type(sample) ~= "number" or sample < 0 then
+						error("positive number expected", 2)
+					end
+					return sample / sample_rate * 1000
+				end,
+				position = function(pos)
+					if pos ~= nil and (type(pos) ~= "number" or pos < 0) then
+						error("optional positive number expected", 2)
+					elseif pos then
+						file:seek("set", data_begin + pos * block_align)
+					end
+					return (file:seek() - data_begin) / block_align
+				end,
+				samples_interlaced = function(n)
+					if type(n) ~= "number" or math.floor(n) < 1 then
+						error("positive number greater-equal one expected", 2)
+					end
+					local output, bytes = {n = 0}, file:read(math.floor(n) * block_align)
+					if bytes then
+						local bytes_per_sample, sample = bits_per_sample / 8
+						local max_amplitude, amplitude_fix = ({127, 32767, 8388607, 2147483647})[bytes_per_sample], ({256, 65536, 16777216, 4294967296})[bytes_per_sample]
+						for i=1, #bytes, bytes_per_sample do
+							sample = bton(bytes:sub(i,i+bytes_per_sample-1))
+							output.n = output.n + 1
+							output[output.n] = sample > max_amplitude and sample - amplitude_fix or sample
+						end
+					end
+					return output
+				end,
+				samples = function(n)
+					local success, samples = pcall(obj.samples_interlaced, n)
+					if not success then
+						error(samples, 2)
+					end
+					local output, channel_samples = {n = channels_number}
+					for c=1, output.n do
+						channel_samples = {n = math.floor(samples.n / channels_number)}
+						for s=1, channel_samples.n do
+							channel_samples[s] = samples[c + (s-1) * channels_number]
+						end
+						output[c] = channel_samples
+					end
+					return output
+				end
+			}
+			return obj
+		end,
+		create_frequency_analyzer = function(samples, sample_rate)
+			-- Check arguments
+			if type(samples) ~= "table" or type(sample_rate) ~= "number" or sample_rate < 2 or sample_rate % 2 ~= 0 then
+				error("samples table and sample rate expected", 2)
+			end
+			local samples_n = #samples
+			if samples_n < 2 then
+				error("not enough samples", 2)
+			end
+			local sample
+			for i=1, samples_n do
+				sample = samples[i]
+				if type(sample) ~= "number" then
+					error("samples have to be numbers", 2)
+				elseif sample < -1 or sample > 1 then
+					error("samples have to be in range -1 <> 1", 2)
+				end
+			end
+			-- Fix samples number to power of 2 for further processing
+			samples_n = 2^math.floor(math.log(samples_n, 2))
+			-- Complex numbers
+			local complex_t
+			do
+				local complex = {}
+				complex_t = function(r, i)
+					return setmetatable({r = r, i = i}, complex)
+				end
+				local function tocomplex(a, b)
+					if getmetatable(a) ~= complex then return {r = a, i = 0}, b
+					elseif getmetatable(b) ~= complex then return a, {r = b, i = 0}
+					else return a, b end
+				end
+				complex.__add = function(a, b)
+					local c1, c2 = tocomplex(a, b)
+					return complex_t(c1.r + c2.r, c1.i + c2.i)
+				end
+				complex.__sub = function(a, b)
+					local c1, c2 = tocomplex(a, b)
+					return complex_t(c1.r - c2.r, c1.i - c2.i)
+				end
+				complex.__mul = function(a, b)
+					local c1, c2 = tocomplex(a, b)
+					return complex_t(c1.r * c2.r - c1.i * c2.i, c1.r * c2.i + c1.i * c2.r)
+				end
+			end
+			local function polar(theta)
+				return complex_t(math.cos(theta), math.sin(theta))
+			end
+			local function magnitude(c)
+				return math.sqrt(c.r^2 + c.i^2)
+			end
+			-- Fast Fourier Transformation
+			local function fft(x)
+				-- Check recursion break
+				local N = x.n
+				if N > 1 then
+					-- Divide
+					local even, odd = {n = 0}, {n = 0}
+					for i=1, N, 2 do
+						even.n = even.n + 1
+						even[even.n] = x[i]
+					end
+					for i=2, N, 2 do
+						odd.n = odd.n + 1
+						odd[odd.n] = x[i]
+					end
+					-- Conquer
+					fft(even)
+					fft(odd)
+					--Combine
+					local t
+					for k = 1, N/2 do
+						t = polar(-2 * math.pi * (k-1) / N) * odd[k]
+						x[k] = even[k] + t
+						x[k+N/2] = even[k] - t
+					end
+				end
+			end
+			-- Samples to complex numbers
+			local data = {n = samples_n}
+			for i = 1, data.n do
+				data[i] = complex_t(samples[i], 0)
+			end
+			-- Process FFT
+			fft(data)
+			-- Complex numbers to frequencies domain data
+			for i = 1, data.n do
+				data[i] = magnitude(data[i])
+			end
+			-- Extract frequencies weights
+			local frequencies, frequency_sum, sample_rate_half = {n = data.n / 2}, 0, sample_rate / 2
+			for i=1, frequencies.n do
+				frequency_sum = frequency_sum + data[i]
+			end
+			if frequency_sum == 0 then
+				frequencies[1] = {freq = 0, weight = 1}
+				for i=2, frequencies.n do
+					frequencies[i] = {freq = (i-1) / (frequencies.n-1) * sample_rate_half, weight = 0}
+				end
+			else
+				for i=1, frequencies.n do
+					frequencies[i] = {freq = (i-1) / (frequencies.n-1) * sample_rate_half, weight = data[i] / frequency_sum}
+				end
+			end
+			-- Return frequencies object
+			return {
+				frequencies = function()
+					return Yutils.table.copy(frequencies)
+				end,
+				frequency_weight = function(freq)
+					if type(freq) ~= "number" or freq < 0 or freq > sample_rate_half then
+						error("valid frequency expected", 2)
+					end
+					local frequency
+					for i=1, frequencies.n do
+						frequency = frequencies[i]
+						if frequency.freq == freq then
+							return frequency.weight
+						elseif frequency.freq > freq then
+							local frequency_last = frequencies[i-1]
+							return (freq - frequency_last.freq) / (frequency.freq - frequency_last.freq) * (frequency.weight - frequency_last.weight) + frequency_last.weight
+						end
+					end
+				end,
+				frequency_range_weight = function(freq_min, freq_max)
+					if type(freq_min) ~= "number" or freq_min < 0 or freq_min > sample_rate_half or
+						type(freq_max) ~= "number" or freq_max < 0 or freq_max > sample_rate_half or
+						freq_min > freq_max then
+						error("valid frequencies expected", 2)
+					end
+					local weight_sum, frequency = 0
+					for i=1, frequencies.n do
+						frequency = frequencies[i]
+						if frequency.freq >= freq_min then
+							if frequency.freq <= freq_max then
+								weight_sum = weight_sum + frequency.weight
+							else
+								break
+							end
+						end
+					end
+					return weight_sum
+				end
+			}
+		end,
 		-- Creates font
 		create_font = function(family, bold, italic, underline, strikeout, size, xscale, yscale, hspace)
 			-- Check arguments
@@ -2550,8 +3224,8 @@ Yutils = {
 										shape[shape_n] = "m"
 										last_type = cur_type
 									end
-									shape[shape_n+1] = roundf(cur_point.x * downscale * xscale)
-									shape[shape_n+2] = roundf(cur_point.y * downscale * yscale)
+									shape[shape_n+1] = Yutils.math.round(cur_point.x * downscale * xscale, FP_PRECISION)
+									shape[shape_n+2] = Yutils.math.round(cur_point.y * downscale * yscale, FP_PRECISION)
 									shape_n = shape_n + 2
 									i = i + 1
 								elseif cur_type == ffi.C.PT_LINETO or cur_type == (ffi.C.PT_LINETO + ffi.C.PT_CLOSEFIGURE) then
@@ -2560,8 +3234,8 @@ Yutils = {
 										shape[shape_n] = "l"
 										last_type = cur_type
 									end
-									shape[shape_n+1] = roundf(cur_point.x * downscale * xscale)
-									shape[shape_n+2] = roundf(cur_point.y * downscale * yscale)
+									shape[shape_n+1] = Yutils.math.round(cur_point.x * downscale * xscale, FP_PRECISION)
+									shape[shape_n+2] = Yutils.math.round(cur_point.y * downscale * yscale, FP_PRECISION)
 									shape_n = shape_n + 2
 									i = i + 1
 								elseif cur_type == ffi.C.PT_BEZIERTO or cur_type == (ffi.C.PT_BEZIERTO + ffi.C.PT_CLOSEFIGURE) then
@@ -2570,12 +3244,12 @@ Yutils = {
 										shape[shape_n] = "b"
 										last_type = cur_type
 									end
-									shape[shape_n+1] = roundf(cur_point.x * downscale * xscale)
-									shape[shape_n+2] = roundf(cur_point.y * downscale * yscale)
-									shape[shape_n+3] = roundf(points[i+1].x * downscale * xscale)
-									shape[shape_n+4] = roundf(points[i+1].y * downscale * yscale)
-									shape[shape_n+5] = roundf(points[i+2].x * downscale * xscale)
-									shape[shape_n+6] = roundf(points[i+2].y * downscale * yscale)
+									shape[shape_n+1] = Yutils.math.round(cur_point.x * downscale * xscale, FP_PRECISION)
+									shape[shape_n+2] = Yutils.math.round(cur_point.y * downscale * yscale, FP_PRECISION)
+									shape[shape_n+3] = Yutils.math.round(points[i+1].x * downscale * xscale, FP_PRECISION)
+									shape[shape_n+4] = Yutils.math.round(points[i+1].y * downscale * yscale, FP_PRECISION)
+									shape[shape_n+5] = Yutils.math.round(points[i+2].x * downscale * xscale, FP_PRECISION)
+									shape[shape_n+6] = Yutils.math.round(points[i+2].y * downscale * yscale, FP_PRECISION)
 									shape_n = shape_n + 6
 									i = i + 3
 								else	-- invalid type (should never happen, but let us be safe)
@@ -2683,28 +3357,28 @@ Yutils = {
 										shape_n = shape_n + 1
 										shape[shape_n] = "m"
 									end
-									shape[shape_n+1] = roundf(path[0].data[i+1].point.x)
-									shape[shape_n+2] = roundf(path[0].data[i+1].point.y)
+									shape[shape_n+1] = Yutils.math.round(path[0].data[i+1].point.x, FP_PRECISION)
+									shape[shape_n+2] = Yutils.math.round(path[0].data[i+1].point.y, FP_PRECISION)
 									shape_n = shape_n + 2
 								elseif cur_type == ffi.C.CAIRO_PATH_LINE_TO then
 									if cur_type ~= last_type then
 										shape_n = shape_n + 1
 										shape[shape_n] = "l"
 									end
-									shape[shape_n+1] = roundf(path[0].data[i+1].point.x)
-									shape[shape_n+2] = roundf(path[0].data[i+1].point.y)
+									shape[shape_n+1] = Yutils.math.round(path[0].data[i+1].point.x, FP_PRECISION)
+									shape[shape_n+2] = Yutils.math.round(path[0].data[i+1].point.y, FP_PRECISION)
 									shape_n = shape_n + 2
 								elseif cur_type == ffi.C.CAIRO_PATH_CURVE_TO then
 									if cur_type ~= last_type then
 										shape_n = shape_n + 1
 										shape[shape_n] = "b"
 									end
-									shape[shape_n+1] = roundf(path[0].data[i+1].point.x)
-									shape[shape_n+2] = roundf(path[0].data[i+1].point.y)
-									shape[shape_n+3] = roundf(path[0].data[i+2].point.x)
-									shape[shape_n+4] = roundf(path[0].data[i+2].point.y)
-									shape[shape_n+5] = roundf(path[0].data[i+3].point.x)
-									shape[shape_n+6] = roundf(path[0].data[i+3].point.y)
+									shape[shape_n+1] = Yutils.math.round(path[0].data[i+1].point.x, FP_PRECISION)
+									shape[shape_n+2] = Yutils.math.round(path[0].data[i+1].point.y, FP_PRECISION)
+									shape[shape_n+3] = Yutils.math.round(path[0].data[i+2].point.x, FP_PRECISION)
+									shape[shape_n+4] = Yutils.math.round(path[0].data[i+2].point.y, FP_PRECISION)
+									shape[shape_n+5] = Yutils.math.round(path[0].data[i+3].point.x, FP_PRECISION)
+									shape[shape_n+6] = Yutils.math.round(path[0].data[i+3].point.y, FP_PRECISION)
 									shape_n = shape_n + 6
 								elseif cur_type == ffi.C.CAIRO_PATH_CLOSE_PATH then
 									if cur_type ~= last_type then
@@ -2744,7 +3418,7 @@ Yutils = {
 					for i=1, fonts.n do
 						font = fonts[i]
 						if font.name == fontname and font.style == style then
-							goto font_found
+							goto win_font_found
 						end
 					end
 					-- Add font entry
@@ -2755,7 +3429,7 @@ Yutils = {
 						style = style,
 						type = fonttype == ffi.C.FONTTYPE_RASTER and "Raster" or fonttype == ffi.C.FONTTYPE_DEVICE and "Device" or fonttype == ffi.C.FONTTYPE_TRUETYPE and "TrueType" or "Unknown",
 					}
-					::font_found::
+					::win_font_found::
 					-- Continue enumeration (till end)
 					return 1
 				end, 0, 0)
