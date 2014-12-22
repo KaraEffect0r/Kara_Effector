@@ -1,9 +1,9 @@
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	--[[ Copyright (c) 2014, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki	   All rights reserved / 06 September 2014 Colombia. ]]--
+	--[[ Copyright (c) 2014, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		All rights reserved / 10 December 2014 Colombia. ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	--> Kara Effector 3.2.9.1
+	--> Kara Effector 3.2.9.6
 	--> http://www.karaeffector.blogspot.com	   --> http://www.facebook.com/karaeffector
-	--> http://www.youtube.com/user/victor8607	   --> http://www.youtube.com/user/NatsuoDCE	--> http://www.youtube.com/user/karalaura2012
+	--> http://www.youtube.com/user/victor8607	   --> http://www.youtube.com/user/NatsuoKE		--> http://www.youtube.com/user/karalaura2012
 	-----------------------------------------------------------------------------------------------------------------------------------------
 	--[[ El proyecto Effector es un archivo lua que tiene la capacidad de implementar Efectos Karaoke y de Líneas de Traducción prediseñados,
 	también brinda la opción de poderlos modificar y crear nuevos Efectos si así se desea. El Effector está dotado de una amplia Librería que
@@ -16,108 +16,327 @@
 	o de su Librería, a menos que estén completamente seguros de lo que están haciendo ya que lo que más factible es que deje de funcionar de
 	manera correcta. Sin más, nos despedimos, esperando que este trabajo sea del agrado de todos ustedes. ^^'... ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	include("karaskel.lua"); include("Effector-utils-lib-3.2.lua"); leadin_fx = { }; hilight_fx = { }; leadout_fx = { }; shape_fx = { }; transla_fx = { }; leadin_fx_library = { }; hilight_fx_library = { }; leadout_fx_library = { }; shape_fx_library = { }; transla_fx_library = { }; list_mode = {"lead-in[fx]", "hi-light[fx]", "lead-out[fx]", "shape[fx]", "translation[fx]"}; list_fx = {leadin_fx, hilight_fx, leadout_fx, shape_fx, transla_fx}; list_library = {leadin_fx_library, hilight_fx_library, leadout_fx_library, shape_fx_library, transla_fx_library}  codek = {75,97,114,97,76,97,117,114,97};  script_name = "Kara Effector[fx]" script_description = "Effects Automation Karaokes. Creating Effects with Modifiable Parameters" script_author = "Project KaraLaura" script_version = "3.2"
+	include( "karaskel.lua" )
+	include( "Effector-utils-lib-3.2.lua" )
+	leadin_fx, hilight_fx, leadout_fx, shape_fx, transla_fx = { }, { }, { }, { }, { }
+	leadin_fx_library, hilight_fx_library, leadout_fx_library, shape_fx_library, transla_fx_library = { }, { }, { }, { }, { }
+	list_mode = {"lead-in[fx]", "hi-light[fx]", "lead-out[fx]", "shape[fx]", "translation[fx]"}
+	list_fx = {leadin_fx, hilight_fx, leadout_fx, shape_fx, transla_fx}
+	list_library = {leadin_fx_library, hilight_fx_library, leadout_fx_library, shape_fx_library, transla_fx_library}
 	--=====================================================================================================================================--
-
+	script_name = "Kara Effector[fx]"
+	script_description = "Effects Automation Karaokes. Creating Effects with Modifiable Parameters"
+	script_author = "Project KaraLaura"
+	script_version = "3.2"
+	--=====================================================================================================================================--
 	Path_Effector_newfx_lua = nil
-	Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
-
+	Path_Effector_newfx_lua = "C:\\Users\\VICTOR PAYARES\\Desktop\\HTDM\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
+	--Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 	--=====================================================================================================================================--
-	function do_fx( subs, meta, line, sett )
-		----------------------------------------------------------------------------------------
-		xres = meta.res_x or 1280; yres = meta.res_y or 720 ------------------------------------
-		if xres == nil then ratio = 1 else ratio = xres/1280 end -------------------------------
-		msa, msb = aegisub.ms_from_frame(1), aegisub.ms_from_frame(101) ------------------------
-		if msb  == nil then frame_dur = 41.708 else frame_dur = (msb - msa)/100 end ------------
-		----------------------------------------------------------------------------------------
-		line.i, line.n = l_counter, maxil_counter ----------------------------------------------
-		line.index     = idx_line[line.i] + count_line_dialogue - ini_line;		 ii = line.index
-		----------------------------------------------------------------------------------------
-		fx, var = { }, { }; l = linefx[ii]; L = linefx[ii].styleref; line.dur = l.duration -----
-		----------------------------------------------------------------------------------------
-		l_layer, l_style, l_actor, l_spacing	= l.layer, l.style, l.actor, l.spacing ---------
-		l_ml, l_mr, l_mt, l_mb					= l.margin_l, l.margin_r, l.margin_t, l.margin_b
-		l_align, l_dur, l_x, l_y, l_i			= l.align,  line.dur, l.center, l.middle, line.i
-		l_start, l_end, l_mid, l_n				= l.start_time,  l.end_time,  l.mid_time, line.n
-		l_left, l_center, l_right, l_width		= l.left, l.center, l.right, l.width -----------
-		l_top, l_middle, l_bottom, l_height		= l.top, l.middle, l.bottom, l.height ----------
-		l_angle, l_outline, l_shadow, l_mv		= l.angle, l.outline, l.shadow, l.margin_v -----
-		l_scale_x, l_scale_y, l_fsize, l_fname	= l.scale_x, l.scale_y, l.fontsize, l.fontname--
-		l_color1, l_color2, l_color3, l_color4	= l.color1, l.color2, l.color3, l.color4 -------
-		l_alpha1, l_alpha2, l_alpha3, l_alpha4	= l.alpha1, l.alpha2, l.alpha3, l.alpha4 -------
-		----------------------------------------------------------------------------------------
-		lfx = linefx[ii]; txt_chars = line.text_stripped:gsub("\\N", " "):gsub("  ", " ") ------
-		char, left, width, line.char = {}, l.left, 0, linefx[ii].char; char.i = 1 --------------
-		if fx__.noblank == true then char.n = unicode.len(txt_chars:gsub(" ", "")) else char.n = unicode.len(txt_chars) end
-		--------------------------------------------------------------------------------------------------------------------------------------------
-		text.color1  = color.ass(sett.color_1c)	text.color1c  = text.color1		text.alpha1  = ass_alpha(sett.alpha_1a)	text.alpha1a  =  text.alpha1
-		text.color2  = color.ass(sett.color_2c)	text.color2c  = text.color2		text.alpha2  = ass_alpha(sett.alpha_2a)	text.alpha2a  =  text.alpha2
-		text.color3  = color.ass(sett.color_3c)	text.color3c  = text.color3		text.alpha3  = ass_alpha(sett.alpha_3a)	text.alpha3a  =  text.alpha3
-		text.color4  = color.ass(sett.color_4c)	text.color4c  = text.color4		text.alpha4  = ass_alpha(sett.alpha_4a)	text.alpha4a  =  text.alpha4
-		shape.color1 = color.ass(fx__.color1)	shape.color1c = shape.color1	shape.alpha1 = ass_alpha(fx__.alpha1)	shape.alpha1a = shape.alpha1
-		shape.color3 = color.ass(fx__.color3)	shape.color3c = shape.color3	shape.alpha3 = ass_alpha(fx__.alpha3)	shape.alpha3a = shape.alpha3
-		shape.color4 = color.ass(fx__.color4)	shape.color4c = shape.color4	shape.alpha4 = ass_alpha(fx__.alpha4)	shape.alpha4a = shape.alpha4
-		--------------------------------------------------------------------------------------------------------------------------------------------
-		if text.color1 == l.color1 then txt_c1 = "" else txt_c1 = "\\1c"..text.color1 end; if text.alpha1 == l.alpha1 then txt_a1 = "" else txt_a1 = "\\1a"..text.alpha1 end
-		if text.color3 == l.color3 then txt_c3 = "" else txt_c3 = "\\3c"..text.color3 end; if text.alpha3 == l.alpha3 then txt_a3 = "" else txt_a3 = "\\3a"..text.alpha3 end
-		if text.color4 == l.color4 then txt_c4 = "" else txt_c4 = "\\4c"..text.color4 end; if text.alpha4 == l.alpha4 then txt_a4 = "" else txt_a4 = "\\4a"..text.alpha4 end
-		--------------------------------------------------------------------------------------------------------------------------------------------
-		text.color	 = format("\\1c%s\\3c%s\\4c%s", text.color1, text.color3, text.color4)
-		text.alpha	 = format("\\1a%s\\3a%s\\4a%s", text.alpha1, text.alpha3, text.alpha4)
-		text.style   = txt_c1..txt_c3..txt_c4..txt_a1..txt_a3..txt_a4
-		text.alpha0  = "\\alpha&HFF&"
-		shape.color  = format("\\1c%s\\3c%s\\4c%s", shape.color1, shape.color3, shape.color4)
-		shape.alpha  = format("\\1a%s\\3a%s\\4a%s", shape.alpha1, shape.alpha3, shape.alpha4)
-		shape.style  = shape.color..shape.alpha
+	
+	function effector.do_fx( subs, meta, line, sett )
+		--------------------------------------------------------------
+		xres = meta.res_x or 1280
+		yres = meta.res_y or 720
+		if xres == nil then
+			ratio = 1
+		else
+			ratio = xres/1280
+		end
+		msa, msb = aegisub.ms_from_frame(1), aegisub.ms_from_frame(101)
+		if msb  == nil then
+			frame_dur = 41.708
+		else
+			frame_dur = (msb - msa)/100
+		end
+		--------------------------------------------------------------
+		line.i, line.n = l_counter, maxil_counter
+		line.index = idx_line[line.i] + count_line_dialogue - ini_line
+		ii = line.index
+		--------------------------------------------------------------
+		fx, var = { }, { }
+		l = linefx[ii]
+		L = linefx[ii].styleref
+		line.dur = l.duration
+		l_fx = line.effect
+		-------------------------------------------------------------------------------
+		l_layer, l_style, l_actor, l_spacing = l.layer, l.style, l.actor, l.spacing
+		l_ml, l_mr, l_mt, l_mb = l.margin_l, l.margin_r, l.margin_t, l.margin_b
+		l_align, l_dur, l_x, l_y, l_i = l.align,  line.dur, l.center, l.middle, line.i
+		l_start, l_end, l_mid, l_n = l.start_time,  l.end_time,  l.mid_time, line.n
+		l_left, l_center, l_right, l_width = l.left, l.center, l.right, l.width
+		l_top, l_middle, l_bottom, l_height = l.top, l.middle, l.bottom, l.height
+		l_angle, l_outline, l_shadow, l_mv = l.angle, l.outline, l.shadow, l.margin_v
+		l_scale_x, l_scale_y, l_fsize, l_fname = l.scale_x, l.scale_y, l.fontsize, l.fontname
+		l_color1, l_color2, l_color3, l_color4 = l.color1, l.color2, l.color3, l.color4
+		l_alpha1, l_alpha2, l_alpha3, l_alpha4 = l.alpha1, l.alpha2, l.alpha3, l.alpha4
+		-------------------------------------------------------------------------------
+		lfx = linefx[ii]
+		txt_chars = line.text_stripped:gsub("\\N", " "):gsub("  ", " ")
+		char, left, width, line.char = { }, l.left, 0, linefx[ii].char
+		char.i = 1
+		if fx__.noblank == true then
+			char.n = unicode.len(txt_chars:gsub(" ", ""))
+		else
+			char.n = unicode.len(txt_chars)
+		end
+		--------------------------------------
+		text.color1 = color.ass(sett.color_1c)
+		text.color1c = text.color1
+		text.alpha1 = ass_alpha(sett.alpha_1a)
+		text.alpha1a = text.alpha1
+		text.color2 = color.ass(sett.color_2c)
+		text.color2c = text.color2
+		text.alpha2 = ass_alpha(sett.alpha_2a)
+		text.alpha2a = text.alpha2
+		text.color3 = color.ass(sett.color_3c)
+		text.color3c = text.color3
+		text.alpha3 = ass_alpha(sett.alpha_3a)
+		text.alpha3a = text.alpha3
+		text.color4 = color.ass(sett.color_4c)
+		text.color4c = text.color4
+		text.alpha4 = ass_alpha(sett.alpha_4a)
+		text.alpha4a = text.alpha4
+		shape.color1 = color.ass(fx__.color1)
+		shape.color1c = shape.color1
+		shape.alpha1 = ass_alpha(fx__.alpha1)
+		shape.alpha1a = shape.alpha1
+		shape.color3 = color.ass(fx__.color3)
+		shape.color3c = shape.color3
+		shape.alpha3 = ass_alpha(fx__.alpha3)
+		shape.alpha3a = shape.alpha3
+		shape.color4 = color.ass(fx__.color4)
+		shape.color4c = shape.color4
+		shape.alpha4 = ass_alpha(fx__.alpha4)
+		shape.alpha4a = shape.alpha4
+		-------------------------------------
+		if text.color1 == l.color1 then
+			txt_c1 = ""
+		else
+			txt_c1 = "\\1c"..text.color1
+		end
+		if text.alpha1 == l.alpha1 then
+			txt_a1 = ""
+		else
+			txt_a1 = "\\1a"..text.alpha1
+		end
+		if text.color3 == l.color3 then
+			txt_c3 = ""
+		else
+			txt_c3 = "\\3c"..text.color3
+		end
+		if text.alpha3 == l.alpha3 then
+			txt_a3 = ""
+		else
+			txt_a3 = "\\3a"..text.alpha3
+		end
+		if text.color4 == l.color4 then
+			txt_c4 = ""
+		else
+			txt_c4 = "\\4c"..text.color4
+		end
+		if text.alpha4 == l.alpha4 then
+			txt_a4 = ""
+		else
+			txt_a4 = "\\4a"..text.alpha4
+		end
+		----------------------------------------------------------------------------------
+		text.color = format("\\1c%s\\3c%s\\4c%s", text.color1, text.color3, text.color4)
+		text.alpha = format("\\1a%s\\3a%s\\4a%s", text.alpha1, text.alpha3, text.alpha4)
+		text.style = txt_c1..txt_c3..txt_c4..txt_a1..txt_a3..txt_a4
+		text.alpha0 = "\\alpha&HFF&"
+		shape.color = format("\\1c%s\\3c%s\\4c%s", shape.color1, shape.color3, shape.color4)
+		shape.alpha = format("\\1a%s\\3a%s\\4a%s", shape.alpha1, shape.alpha3, shape.alpha4)
+		shape.style = shape.color..shape.alpha
 		shape.alpha0 = "\\alpha&HFF&"
-		if sett.tags_filter == "No Tags Color and Alpha" or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then text.style = "" shape.style = "" end
+		if sett.tags_filter == "No Tags Color and Alpha" or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then
+			text.style = ""
+			shape.style = ""
+		end
 		---------------------------------------------
-		if fx__.v_kanji == true then fx.mode = "v" else fx.mode = "h" end
-		if fx__.noblank == true then noblank1, noblank2 = "", " " blk = "" else noblank1, noblank2 = script_name.." "..script_author, script_name.." "..script_author blk = " " end
-		if sett.tags_filter == "VSFilterMod" or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then fx.filter = "mod" fx.tm = tag.to_mod else fx.filter = "2.39" fx.tm = tag.to_vsf end
-		function maxloop(new_maxloop) fx.maxloop_fx	= new_maxloop maxj = fx.maxloop_fx return "" end
-		function replay(num_replay)   fx.replay_fx	= num_replay  maxJ = fx.replay_fx  return "" end
-		function relayer(new_layer)   fx.layer		= new_layer						   return "" end
-		function export_text(mode)
+		effector.effect_offset( )
+		---------------------------------------------
+		if fx__.v_kanji == true then
+			fx.mode = "v"
+		else
+			fx.mode = "h"
+		end
+		if fx__.noblank == true then
+			noblank1, noblank2 = "", " " blk = ""
+		else
+			noblank1, noblank2 = script_name.." "..script_author, script_name.." "..script_author
+			blk = " "
+		end
+		if sett.tags_filter == "VSFilterMod" or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then
+			fx.filter = "mod"
+			fx.tm = tag.to_mod
+		else
+			fx.filter = "2.39"
+			fx.tm = tag.to_vsf
+		end
+		function maxloop( new_maxloop )
+			fx.maxloop_fx = new_maxloop
+			maxj = fx.maxloop_fx
+			return ""
+		end
+		function replay( num_replay )
+			fx.replay_fx = num_replay
+			maxJ = fx.replay_fx
+			return ""
+		end
+		function relayer( new_layer )
+			fx.layer = new_layer
+			return ""
+		end
+		function export_text( mode )
 			local newfile = aegisub.dialog.save("Kara Effector[fx]: Export File", "", "", "Text files (.txt)|.txt", false)
-			if newfile then local file = io.open(newfile, "w")
-				if	   mode == "export times ms"	  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].start_time..","..linefx[idx_line[i] + count_line_dialogue - ini_line].end_time.."\n") end
-				elseif mode == "export times"		  then for i = 1, line.n do file:write(ms_to_HMS(linefx[idx_line[i] + count_line_dialogue - ini_line].start_time)..","..ms_to_HMS(linefx[idx_line[i] + count_line_dialogue - ini_line].end_time).."\n") end
-				elseif mode == "export lines"		  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].raw.."\n") end
-				elseif mode == "export text"		  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].text.."\n") end
-				elseif mode == "export hira"		  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].hira.text.."\n") end
-				elseif mode == "export kata"		  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].kata.text.."\n") end
-				elseif mode == "export roma"		  then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].roma.text.."\n") end
-				elseif mode == "export text_stripped" then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].text_stripped.."\n") end
-				elseif mode == "export hira_stripped" then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].hira.text_stripped.."\n") end
-				elseif mode == "export kata_stripped" then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].kata.text_stripped.."\n") end
-				elseif mode == "export roma_stripped" then for i = 1, line.n do file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].roma.text_stripped.."\n") end
-				elseif mode == "export config"		  then
-					if fx__.folderfx == "lead-in[fx]" then library_fx, library_mode, actor_fx = "leadin_fx_library", "leadin_fx", "lead-in" elseif fx__.folderfx == "hi-light[fx]" then library_fx, library_mode, actor_fx = "hilight_fx_library", "hilight_fx", "hi-light" elseif fx__.folderfx == "lead-out[fx]" then library_fx, library_mode, actor_fx = "leadout_fx_library", "leadout_fx", "lead-out" elseif fx__.folderfx == "shape[fx]" then library_fx, library_mode, actor_fx = "shape_fx_library", "shape_fx", "shape-fx" elseif fx__.folderfx == "translation[fx]" then library_fx, library_mode, actor_fx = "transla_fx_library", "transla_fx", "translation" end
-					library_title = fx__.folderfx; sett.linecomment = false; newFX = library_mode.."_"..tostring(os.time()):sub(-6, -1)
-					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then fx_GUI = "PfxM_Box" elseif fx__.folderfx == "shape[fx]" then fx_GUI = "Shape_Box" elseif fx__.folderfx == "translation[fx]" then if fx_box[29].value == "Char" then fx_box[29].value = "Translation Char" elseif fx_box[29].value == "Syl" or fx_box[29].value == "Furi" then fx_box[29].value = "Translation Word" or fx_box[29].value == "Word" or fx_box[29].value == "Convert to Hiragana" or fx_box[29].value == "Convert to Katakana" or fx_box[29].value == "Convert to Romaji" elseif fx_box[29].value == "Line" then fx_box[29].value = "Translation Line" end fx_GUI = "Trans_Box" end
+			local fxmode, fxname = mode, nil
+			if mode:match(",") then
+				fxmode = mode:match("%w+[ %w]*")
+				fxname = mode:match("%,+[ %S]*"):gsub("%,[ ]*", ""):gsub(" ", "_")
+			end
+			if newfile then
+				local file = io.open(newfile, "w")
+				if fxmode == "export times ms" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].start_time..","..linefx[idx_line[i] + count_line_dialogue - ini_line].end_time.."\n")
+					end
+				elseif fxmode == "export times" then
+					for i = 1, line.n do
+						file:write(ms_to_HMS(linefx[idx_line[i] + count_line_dialogue - ini_line].start_time)..","..ms_to_HMS(linefx[idx_line[i] + count_line_dialogue - ini_line].end_time).."\n")
+					end
+				elseif fxmode == "export lines" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].raw.."\n")
+					end
+				elseif fxmode == "export text" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].text.."\n")
+					end
+				elseif fxmode == "export hira" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].hira.text.."\n")
+					end
+				elseif fxmode == "export kata" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].kata.text.."\n")
+					end
+				elseif fxmode == "export roma" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].roma.text.."\n")
+					end
+				elseif fxmode == "export text_stripped"	then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].text_stripped.."\n")
+					end
+				elseif fxmode == "export hira_stripped" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].hira.text_stripped.."\n")
+					end
+				elseif fxmode == "export kata_stripped" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].kata.text_stripped.."\n")
+					end
+				elseif fxmode == "export roma_stripped" then
+					for i = 1, line.n do
+						file:write(linefx[idx_line[i] + count_line_dialogue - ini_line].roma.text_stripped.."\n")
+					end
+				elseif fxmode == "export config" then
+					if fx__.folderfx == "lead-in[fx]" then
+						library_fx, library_mode, actor_fx = "leadin_fx_library", "leadin_fx", "lead-in"
+					elseif fx__.folderfx == "hi-light[fx]" then
+						library_fx, library_mode, actor_fx = "hilight_fx_library", "hilight_fx", "hi-light"
+					elseif fx__.folderfx == "lead-out[fx]" then
+						library_fx, library_mode, actor_fx = "leadout_fx_library", "leadout_fx", "lead-out"
+					elseif fx__.folderfx == "shape[fx]" then
+						library_fx, library_mode, actor_fx = "shape_fx_library", "shape_fx", "shape-fx"
+					elseif fx__.folderfx == "translation[fx]" then
+						library_fx, library_mode, actor_fx = "transla_fx_library", "transla_fx", "translation"
+					end
+					library_title = fx__.folderfx
+					lines_comment = false
+					newFX = fxname or library_mode.."_"..tostring(os.time( )):sub(-6, -1)
+					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then
+						fx_GUI = "PfxM_Box"
+					elseif fx__.folderfx == "shape[fx]" then
+						fx_GUI = "Shape_Box"
+					elseif fx__.folderfx == "translation[fx]" then
+						if fx_box[29].value == "Char" then
+							fx_box[29].value = "Translation Char"
+						elseif fx_box[29].value == "Syl" or fx_box[29].value == "Furi" or fx_box[29].value == "Word"
+							or fx_box[29].value == "Convert to Hiragana" or fx_box[29].value == "Convert to Katakana"
+							or fx_box[29].value == "Convert to Romaji" then
+							fx_box[29].value = "Translation Word"
+						elseif fx_box[29].value == "Line" then
+							fx_box[29].value = "Translation Line"
+						end
+						fx_GUI = "Trans_Box"
+					end
 					New_fx_config = format("%s = table.duplicate(%s); table.inbox(%s, \"%s: %s\",\"%s\",%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s); table.insert(%s, %s); table.insert(%s, \"%s\")", newFX, fx_GUI, newFX, library_title, newFX:gsub("_", " "), fx_box[29].value, ((fx_box[30].value == true) and "true" or "false"), ((fx_box[31].value == true) and "true" or "false"), fx_box[32].value, fx_box[33].value, fx_box[34].value, fx_box[35].value, fx_box[36].value, fx_box[37].value, Ps(fx_box[38].text), Ps(fx_box[39].text), Ps(fx_box[40].text), Ps(fx_box[41].text), Ps(fx_box[42].text), Ps(fx_box[43].text), Ps(fx_box[44].text), Ps(fx_box[45].text), Ps(fx_box[46].text), Ps(fx_box[47].text), Ps(fx_box[48].text), Ps(fx_box[49].text), Ps(fx_box[50].text), Ps(fx_box[51].text), Ps(fx_box[52].text), Ps(fx_box[53].text), Ps(fx_box[54].text), Ps(fx_box[55].text), Ps(fx_box[56].text), Ps(fx_box[57].text), fx_box[66].value, ((fx_box[67].value == true) and "true" or "false"), library_fx, newFX, library_mode, newFX:gsub("_", " "))
-					fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx") while fx_libx:len() < 14 do fx_libx = fx_libx.." " end; fx_date = format("--[[%s %s]] ", fx_libx, tostring(os.date()):sub(1, -4))
+					fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx")
+					while fx_libx:len( ) < 14 do
+						fx_libx = fx_libx.." "
+					end
+					fx_date = format("--[[%s %s]] ", fx_libx, tostring(os.date()):sub(1, -4))
 					file:write(fx_date..New_fx_config.."\n	")
 				end
 			end
 		end
 		---------------------------------------------
-		if (fx__.t_type == "Line" or fx__.t_type == "Syl" or fx__.t_type == "Char" or fx__.t_type == "Furi" or fx__.t_type == "Convert to Hiragana" or fx__.t_type == "Convert to Katakana" or fx__.t_type == "Convert to Romaji" or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]" or fx__.t_type == "Template Line [Char]") and line.text_stripped:gsub(" ", ""):gsub("	", "") ~= noblank1 then
+		if (fx__.t_type == "Line" or fx__.t_type == "Syl" or fx__.t_type == "Char" or fx__.t_type == "Furi"
+			or fx__.t_type == "Convert to Hiragana" or fx__.t_type == "Convert to Katakana"
+			or fx__.t_type == "Convert to Romaji" or fx__.t_type == "Template Line [Word]"
+			or fx__.t_type == "Template Line [Syl]" or fx__.t_type == "Template Line [Char]")
+			and line.text_stripped:gsub(" ", ""):gsub("	", "") ~= noblank1 then
+			
 			if fx__.printfx == true then
-				if fx__.folderfx == "lead-in[fx]" then library_fx, library_mode, actor_fx = "leadin_fx_library", "leadin_fx", "lead-in" elseif fx__.folderfx == "hi-light[fx]" then library_fx, library_mode, actor_fx = "hilight_fx_library", "hilight_fx", "hi-light" elseif fx__.folderfx == "lead-out[fx]" then library_fx, library_mode, actor_fx = "leadout_fx_library", "leadout_fx", "lead-out" elseif fx__.folderfx == "shape[fx]" then library_fx, library_mode, actor_fx = "shape_fx_library", "shape_fx", "shape-fx" elseif fx__.folderfx == "translation[fx]" then library_fx, library_mode, actor_fx = "transla_fx_library", "transla_fx", "translation" end
-				library_title = fx__.folderfx; sett.linecomment = false
+				if fx__.folderfx == "lead-in[fx]" then
+					library_fx, library_mode, actor_fx = "leadin_fx_library", "leadin_fx", "lead-in"
+				elseif fx__.folderfx == "hi-light[fx]" then
+					library_fx, library_mode, actor_fx = "hilight_fx_library", "hilight_fx", "hi-light"
+				elseif fx__.folderfx == "lead-out[fx]" then
+					library_fx, library_mode, actor_fx = "leadout_fx_library", "leadout_fx", "lead-out"
+				elseif fx__.folderfx == "shape[fx]" then
+					library_fx, library_mode, actor_fx = "shape_fx_library", "shape_fx", "shape-fx"
+				elseif fx__.folderfx == "translation[fx]" then
+					library_fx, library_mode, actor_fx = "transla_fx_library", "transla_fx", "translation"
+				end
+				library_title = fx__.folderfx
+				lines_comment = false
 				local l = table.copy(line)
 				if line.i == 1 then
-					newFX = fx__.namefx:gsub(" ", "_"); if newFX == "" then newFX = library_mode.."_"..tostring(os.time( )):sub(-6, -1) end
-					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then fx_GUI = "PfxM_Box" elseif fx__.folderfx == "shape[fx]" then fx_GUI = "Shape_Box" elseif fx__.folderfx == "translation[fx]" then if fx_box[29].value == "Char" then fx_box[29].value = "Translation Char" elseif fx_box[29].value == "Syl" or fx_box[29].value == "Furi" then fx_box[29].value = "Translation Word" or fx_box[29].value == "Word" or fx_box[29].value == "Convert to Hiragana" or fx_box[29].value == "Convert to Katakana" or fx_box[29].value == "Convert to Romaji" elseif fx_box[29].value == "Line" then fx_box[29].value = "Translation Line" end fx_GUI = "Trans_Box" end
+					newFX = fx__.namefx:gsub(" ", "_")
+					if newFX == "" then
+						newFX = library_mode.."_"..tostring(os.time( )):sub(-6, -1)
+					end
+					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then
+						fx_GUI = "PfxM_Box"
+					elseif fx__.folderfx == "shape[fx]" then
+						fx_GUI = "Shape_Box"
+					elseif fx__.folderfx == "translation[fx]" then
+						if fx_box[29].value == "Char" then
+							fx_box[29].value = "Translation Char"
+						elseif fx_box[29].value == "Syl" or fx_box[29].value == "Furi" or fx_box[29].value == "Word"
+							or fx_box[29].value == "Convert to Hiragana" or fx_box[29].value == "Convert to Katakana"
+							or fx_box[29].value == "Convert to Romaji" then
+							fx_box[29].value = "Translation Word"
+						elseif fx_box[29].value == "Line" then
+							fx_box[29].value = "Translation Line"
+						end
+						fx_GUI = "Trans_Box"
+					end
 					New_fx_config = format("%s = table.duplicate(%s); table.inbox(%s, \"%s: %s\",\"%s\",%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s); table.insert(%s, %s); table.insert(%s, \"%s\")", newFX, fx_GUI, newFX, library_title, newFX:gsub("_", " "), fx_box[29].value, ((fx_box[30].value == true) and "true" or "false"), ((fx_box[31].value == true) and "true" or "false"), fx_box[32].value, fx_box[33].value, fx_box[34].value, fx_box[35].value, fx_box[36].value, fx_box[37].value, Ps(fx_box[38].text), Ps(fx_box[39].text), Ps(fx_box[40].text), Ps(fx_box[41].text), Ps(fx_box[42].text), Ps(fx_box[43].text), Ps(fx_box[44].text), Ps(fx_box[45].text), Ps(fx_box[46].text), Ps(fx_box[47].text), Ps(fx_box[48].text), Ps(fx_box[49].text), Ps(fx_box[50].text), Ps(fx_box[51].text), Ps(fx_box[52].text), Ps(fx_box[53].text), Ps(fx_box[54].text), Ps(fx_box[55].text), Ps(fx_box[56].text), Ps(fx_box[57].text), fx_box[66].value, ((fx_box[67].value == true) and "true" or "false"), library_fx, newFX, library_mode, newFX:gsub("_", " "))
 					if Path_Effector_newfx_lua == nil then
-						l.comment = true; l.effect = "Effector [Fx] Config"; l.start_time, l.end_time = 0, 0
+						l.comment = true
+						l.effect = "Effector [Fx] Config"
+						l.start_time, l.end_time = 0, 0
 						l.text = New_fx_config
 						subs.append(l)
 					else
-						fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx") while fx_libx:len( ) < 14 do fx_libx = fx_libx.." " end
+						fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx")
+						while fx_libx:len( ) < 14 do
+							fx_libx = fx_libx.." "
+						end
 						fx_date = format("--[[%s %s]] ", fx_libx, tostring(os.date( )):sub(1, -4))
 						effector.savefx(fx_date..New_fx_config.."\n	", Path_Effector_newfx_lua)
 						aegisub.debug.out("The effect ★%s★ is saved in the Folder %s, you must reload the script Kara Effector so you can see it in the list effects type %s.\n\nEl efecto ★%s★ se ha guardado en el Folder %s, debes recargar el script Kara Effector para que puedas verlo en la lista de efectos tipo %s.", newFX:gsub("_", " "), fx__.folderfx, fx__.folderfx, newFX:gsub("_", " "), fx__.folderfx, fx__.folderfx)
@@ -126,39 +345,61 @@
 				end
 			else
 				if fx__.namefx:sub(1, 7) == "export " then
-					if line.i == 1 then export_text(fx__.namefx) sett.linecomment = false end
+					if line.i == 1 then
+						export_text(fx__.namefx)
+						lines_comment = false
+					end
+					fx_box[62].text = ""
 				else
-				
 					actor_fx = fx__.effect:gsub("%[.+[%W+]*", "")
-					if fx__.t_type == "Syl" or fx__.t_type == "Char" or fx__.t_type == "Convert to Hiragana" or fx__.t_type == "Convert to Katakana" or fx__.t_type == "Convert to Romaji" then FX_mode = line.kara.n elseif fx__.t_type == "Furi" then FX_mode = line.furi.n elseif fx__.t_type == "Line" or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]" or fx__.t_type == "Template Line [Char]" then FX_mode = 1 end
+					if fx__.t_type == "Syl" or fx__.t_type == "Char" or fx__.t_type == "Convert to Hiragana"
+						or fx__.t_type == "Convert to Katakana" or fx__.t_type == "Convert to Romaji" then
+						FX_mode = line.kara.n
+					elseif fx__.t_type == "Furi" then
+						FX_mode = line.furi.n
+					elseif fx__.t_type == "Line" or fx__.t_type == "Template Line [Word]"
+						or fx__.t_type == "Template Line [Syl]" or fx__.t_type == "Template Line [Char]" then
+						FX_mode = 1
+					end
 					for i = 1, FX_mode do
-						furi	= line.furi[i]
-						syl		= line.kara[i]
+						furi = line.furi[i]
+						syl = line.kara[i]
 						local x = line.left + syl.center
 						local y = line.middle
 						local l = table.copy(line)
+						count_s = i
 						-----------------------------------------------------------
-						hira = linefx[ii].hira[i]; hira.i = i; hira.n = line.kara.n
-						kata = linefx[ii].kata[i]; kata.i = i; kata.n = line.kara.n
-						roma = linefx[ii].roma[i]; roma.i = i; roma.n = line.kara.n
+						hira = linefx[ii].hira[i]
+						hira.i = i
+						hira.n = line.kara.n
+						kata = linefx[ii].kata[i]
+						kata.i = i
+						kata.n = line.kara.n
+						roma = linefx[ii].roma[i]
+						roma.i = i
+						roma.n = line.kara.n
 						-----------------------------------------------------------
-						syl.n        = line.kara.n
-						syl.dur      = syl.duration
+						syl.n = line.kara.n
+						syl.dur = syl.duration
 						syl.mid_time = syl.start_time + syl.dur/2
-						syl.center   = x
-						syl.middle   = y
-						syl.left     = syl.center - syl.width/2
-						syl.right    = syl.center + syl.width/2
-						syl.top      = syl.middle - syl.height/2
-						syl.bottom   = syl.middle + syl.height/2
-						syl.widtht   = syl.width + syl.prespacewidth + syl.postspacewidth
+						syl.center = x
+						syl.middle = y
+						syl.left = syl.center - syl.width/2
+						syl.right = syl.center + syl.width/2
+						syl.top = syl.middle - syl.height/2
+						syl.bottom = syl.middle + syl.height/2
+						syl.widtht = syl.width + syl.prespacewidth + syl.postspacewidth
 						syl.widthmax = math.max(unpack(mmwth[ii].sy))
 						syl.widthmin = math.min(unpack(mmwth[ii].sy))
-						syl.durmax   = math.max(unpack(mmdur[ii].sy))
-						syl.durmin   = math.min(unpack(mmdur[ii].sy))
-						syl.text	 = syl.text_stripped
+						syl.durmax = math.max(unpack(mmdur[ii].sy))
+						syl.durmin = math.min(unpack(mmdur[ii].sy))
+						syl.text = syl.text_stripped
 						-----------------------------------------------------------
-						if fx__.t_type == "Syl" or fx__.t_type == "Line" or fx__.t_type == "Convert to Hiragana" or fx__.t_type == "Convert to Katakana" or fx__.t_type == "Convert to Romaji" or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]" or fx__.t_type == "Template Line [Char]" then
+						if fx__.t_type == "Syl" or fx__.t_type == "Line" or fx__.t_type == "Convert to Hiragana"
+							or fx__.t_type == "Convert to Katakana" or fx__.t_type == "Convert to Romaji"
+							or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]"
+							or fx__.t_type == "Template Line [Char]" then
+							
 							if syl.text ~= noblank1 and syl.text ~= noblank2 then
 								---------------------------------------------------
 								if fx__.t_type == "Syl" then
@@ -205,94 +446,258 @@
 								roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								----------------------------------------------
-								C_ = aegisub.syls2c( ); wordsyl = { }; wordsyl.i, wordsyl.n = aegisub.wordsi(syl.i)
+								C_ = aegisub.syls2c( )
+								wordsyl = { }
+								wordsyl.i, wordsyl.n = aegisub.wordsi(syl.i)
 								----------------------------------------------
-								if fx__.t_type == "Template Line [Char]" then char.n = unicode.len(line.text_stripped) end
+								if fx__.t_type == "Template Line [Char]" then
+									char.n = unicode.len(line.text_stripped)
+								end
 								----------------------------------------------
-								fx.replay_fx, J = 1, 1; maxJ = fx.replay_fx
-								while J <= fx.replay_fx do j = 1
-									if fx.replay_fx == 1 then moduler = 0 else moduler = (J - 1)/(maxJ - 1) end
-									module = 0; module1 = module; module2 = module1; fxgroup = true
+								fx.replay_fx, J = 1, 1
+								maxJ = fx.replay_fx
+								while J <= fx.replay_fx do
+									j = 1
+									if fx.replay_fx == 1 then
+										moduler = 0
+									else
+										moduler = (J - 1)/(maxJ - 1)
+									end
+									module = 0
+									module1 = module
+									module2 = module1
+									fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
 									-----------------------------------------------
 									if pcall(loadstring("return function(fx__, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
 										variable_ = loadstring(format("return function(fx__, line, x, y) %s return \"\" end", tag.HTML_to_ass(fx__.variable)))( )
-										var_KEfx_ = variable_(fx__, line, x, y)
+										var_KEfx_ = variable_( fx__, line, x, y )
 									end
 									variable_ = loadstring("return function(fx__, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
-									if line.i == 1 and syl.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, line, x, y)) else var.once = recall.v_once end
-									if syl.i  == 1 and J == 1 then				  var.line = variable_(fx__, line, x, y) end
-									if wordsyl.i == 1 and J == 1 then			  var.word = variable_(fx__, line, x, y) end
-									if J == 1 then								  var.rep  = variable_(fx__, line, x, y) end
-									var.syl  = variable_(fx__, line, x, y)		  var.furi, var.char = var.syl, var.syl
-									var.loop = variable_(fx__, line, x, y)
+									if line.i == 1 and syl.i == 1 and J == 1 then
+										var.once = remember("v_once", variable_( fx__, line, x, y ))
+									else
+										var.once = recall.v_once
+									end
+									if syl.i  == 1 and J == 1 then
+										var.line = variable_( fx__, line, x, y )
+									end
+									if wordsyl.i == 1 and J == 1 then
+										var.word = variable_( fx__, line, x, y )
+									end
+									if J == 1 then
+										var.rep  = variable_( fx__, line, x, y )
+									end
+									var.syl = variable_( fx__, line, x, y )
+									var.furi, var.char = var.syl, var.syl
+									var.loop = variable_( fx__, line, x, y )
 									-----------------------------------------------
-									maxloop1  = loadstring("return function(fx__, line, x, y) return {".. fx__.loops .."} end")( )	maxloop_fx = maxloop1(fx__, line, x, y)
-									loop_h    = ceil((maxloop_fx[1] or 1)*(val_width + 2*L.outline)/(val_height + 2*L.outline))		maxloop_fx = maxloop1(fx__, line, x, y)
-									fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1	fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
+									maxloop1 = loadstring("return function(fx__, line, x, y) return {".. fx__.loops .."} end")( )
+									maxloop_fx = maxloop1( fx__, line, x, y )
+									loop_h = ceil((maxloop_fx[1] or 1)*(val_width + 2*L.outline)/(val_height + 2*L.outline))
+									maxloop_fx = maxloop1( fx__, line, x, y )
+									fx.loop_v = maxloop_fx[1] or 1
+									fx.loop_h = maxloop_fx[2] or 1
+									fx.loop_3 = maxloop_fx[3] or 1
+									fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
+									maxj = fx.maxloop_fx
 									-----------------------------------------------
 									while j <= fx.maxloop_fx do
-										var.loop = variable_(fx__, line, x, y)
+										var.loop = variable_( fx__, line, x, y )
 										--variables de modulo--
-										if fx.maxloop_fx == 1 then module  = 0		 else module  = (j - 1)/(maxj - 1)			  end
-										if syl.n == 1		  then module1 = module  else module1 = (syl.i + module - 1)/syl.n	  end
-										if line.n == 1		  then module2 = module1 else module2 = (line.i + module1 - 1)/line.n end
+										if fx.maxloop_fx == 1 then
+											module  = 0
+										else
+											module  = (j - 1)/(maxj - 1)
+										end
+										if syl.n == 1 then
+											module1 = module
+										else
+											module1 = (syl.i + module - 1)/(syl.n + module - 1)
+										end
+										if line.n == 1 then
+											module2 = module1
+										else
+											module2 = (line.i + module1 - 1)/(line.n + module1 - 1)
+										end
 										--variables de tiempo--
-										if fx__.start_t:match("%d+%:%d+%:%d+%.%d+") then HMS_start = { }; for c in fx__.start_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_start, c ) end for i = 1, #HMS_start do fx__.start_t = fx__.start_t:gsub(HMS_start[i], tostring(HMS_to_ms(HMS_start[i])), 1) end end
-										if fx__.end_t:match("%d+%:%d+%:%d+%.%d+") then HMS_end = { }; for c in fx__.end_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_end, c ) end for i = 1, #HMS_end do fx__.end_t = fx__.end_t:gsub(HMS_end[i], tostring(HMS_to_ms(HMS_end[i])), 1) end end
-										start_t1	 = loadstring("return function(fx__, line) return {".. fx__.start_t .."} end")()	start_t	= start_t1(fx__, line)	if #start_t > 0 then fx.start_time = start_t[1] else fx.start_time = line.start_time end
+										fx__.start_t = fx__.start_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										fx__.end_t = fx__.end_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										start_t1 = loadstring("return function(fx__, line) return {".. fx__.start_t .."} end")( )
+										start_t	= start_t1( fx__, line )
+										if #start_t > 0 then
+											fx.start_time = start_t[1]
+										else
+											fx.start_time = line.start_time
+										end
 										l.start_time = fx.start_time
-										end_t1		 = loadstring("return function(fx__, line) return {".. fx__.end_t .."} end")()		end_t	= end_t1(fx__, line)	if #end_t > 0 then fx.end_time = end_t[1] else fx.end_time = line.end_time end
-										l.end_time	 = fx.end_time
-										fx.dur		 = fx.end_time - fx.start_time
-										function retime(mode, add_start, add_end)
-											add_start = HMS_to_ms(add_start) or 0; add_end = HMS_to_ms(add_end) or 0
-											if     mode == "line"		then l.start_time = line.start_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "preline"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + add_end
-											elseif mode == "postline"	then l.start_time = line.end_time   + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "word"		then l.start_time = line.start_time + word.start_time + add_start; l.end_time = line.start_time + word.end_time + add_end
-											elseif mode == "preword"	then l.start_time = line.start_time + word.start_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "postword"	then l.start_time = line.start_time + word.end_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "syl"		then l.start_time = line.start_time + syl.start_time + add_start; l.end_time = line.start_time + syl.end_time + add_end
-											elseif mode == "presyl"		then l.start_time = line.start_time + syl.start_time + add_start; l.end_time = line.start_time + syl.start_time + add_end
-											elseif mode == "postsyl"	then l.start_time = line.start_time + syl.end_time + add_start; l.end_time = line.start_time + syl.end_time + add_end
-											elseif mode == "start2word"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "word2end"	then l.start_time = line.start_time + word.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "start2syl"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + syl.start_time + add_end
-											elseif mode == "syl2end"	then l.start_time = line.start_time + syl.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "linepct"	then l.start_time = line.start_time + add_start*line.duration/100; l.end_time = line.start_time + add_end*line.duration/100
-											elseif mode == "wordpct"	then l.start_time = line.start_time + word.start_time + add_start*word.duration/100; l.end_time = line.start_time + word.start_time + add_end*word.duration/100
-											elseif mode == "sylpct"		then l.start_time = line.start_time + syl.start_time + add_start*syl.duration/100; l.end_time = line.start_time + syl.start_time + add_end*syl.duration/100
-											elseif mode == "set"		or mode == "abs" then  l.start_time = add_start; l.end_time = add_end
-											elseif mode == "fxpretime"	then l.start_time = fx.start_time	+ add_start; l.end_time = fx.start_time + add_end
-											elseif mode == "fxtime"		then l.start_time = fx.start_time	+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxposttime"	then l.start_time = fx.end_time		+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxpct"		then l.start_time = fx.start_time	+ add_start*fx.dur/100; l.end_time = fx.start_time + add_end*fx.dur/100
-											end	   fx.start_time, fx.end_time = l.start_time, l.end_time; fx.dur = fx.end_time - fx.start_time
+										end_t1 = loadstring("return function(fx__, line) return {".. fx__.end_t .."} end")( )
+										end_t = end_t1( fx__, line )
+										if #end_t > 0 then
+											fx.end_time = end_t[1]
+										else
+											fx.end_time = line.end_time
+										end
+										l.end_time = fx.end_time
+										fx.dur = fx.end_time - fx.start_time
+										function retime( mode, add_start, add_end )
+											add_start = HMS_to_ms(add_start) or 0
+											add_end = HMS_to_ms(add_end) or 0
+											if mode == "line" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "preline" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + add_end
+											elseif mode == "postline" then
+												l.start_time = line.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "word" then
+												l.start_time = line.start_time + word.start_time + add_start
+												l.end_time = line.start_time + word.end_time + add_end
+											elseif mode == "preword" then
+												l.start_time = line.start_time + word.start_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "postword" then
+												l.start_time = line.start_time + word.end_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "syl" then
+												l.start_time = line.start_time + syl.start_time + add_start
+												l.end_time = line.start_time + syl.end_time + add_end
+											elseif mode == "presyl" then
+												l.start_time = line.start_time + syl.start_time + add_start
+												l.end_time = line.start_time + syl.start_time + add_end
+											elseif mode == "postsyl" then
+												l.start_time = line.start_time + syl.end_time + add_start
+												l.end_time = line.start_time + syl.end_time + add_end
+											elseif mode == "start2word"	then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "word2end" then
+												l.start_time = line.start_time + word.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "start2syl" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + syl.start_time + add_end
+											elseif mode == "syl2end" then
+												l.start_time = line.start_time + syl.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "linepct" then
+												l.start_time = line.start_time + add_start*line.duration/100
+												l.end_time = line.start_time + add_end*line.duration/100
+											elseif mode == "wordpct" then
+												l.start_time = line.start_time + word.start_time + add_start*word.duration/100
+												l.end_time = line.start_time + word.start_time + add_end*word.duration/100
+											elseif mode == "sylpct" then
+												l.start_time = line.start_time + syl.start_time + add_start*syl.duration/100
+												l.end_time = line.start_time + syl.start_time + add_end*syl.duration/100
+											elseif mode == "set" or mode == "abs" then
+												l.start_time = add_start; l.end_time = add_end
+											elseif mode == "fxpretime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.start_time + add_end
+											elseif mode == "fxtime"	 then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxposttime"	then
+												l.start_time = fx.end_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxpct" then
+												l.start_time = fx.start_time + add_start*fx.dur/100
+												l.end_time = fx.start_time + add_end*fx.dur/100
+											end
+											fx.start_time, fx.end_time = l.start_time, l.end_time
+											fx.dur = fx.end_time - fx.start_time
 											return ""
 										end
 										---------------------------------------------------
-										without = { } ini = line.start_time - fx.start_time
-										without.syl   = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + syl.start_time, ini + syl.start_time + 1, ini + syl.end_time, ini + syl.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
+										without = { }
+										ini = line.start_time - fx.start_time
+										without.syl = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + syl.start_time, ini + syl.start_time + 1, ini + syl.end_time, ini + syl.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
 										syl.syl_start = ini + syl.start_time
-										syl.syl_end   = syl.syl_start + syl.dur
+										syl.syl_end = syl.syl_start + syl.dur
 										--variables de punto de referencia--
-										center_x1	  = loadstring("return function(fx__, meta, line, x, y, module) return {".. fx__.center_x .."} end")() center_x = center_x1(fx__, meta, line, x, y, module) if #center_x > 0 then fx.center_x = center_x[1] else fx.center_x = val_center end
-										center_y1	  = loadstring("return function(fx__, meta, line, x, y, module) return {".. fx__.center_y .."} end")() center_y = center_y1(fx__, meta, line, x, y, module) if #center_y > 0 then fx.center_y = center_y[1] else fx.center_y = val_middle end
+										center_x1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. fx__.center_x .."} end")( )
+										center_x = center_x1(fx__, meta, line, x, y, module)
+										if #center_x > 0 then
+											fx.center_x = center_x[1]
+										else
+											fx.center_x = val_center
+										end
+										center_y1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. fx__.center_y .."} end")( )
+										center_y = center_y1(fx__, meta, line, x, y, module)
+										if #center_y > 0 then
+											fx.center_y = center_y[1]
+										else
+											fx.center_y = val_middle
+										end
 										--variables de escalas de funciones paramétricas-- 
 										if j == 1 then
-											scale_x1  = loadstring("return function(fx__, meta, line) return {".. fx__.scale_x .."} end")() scale_x = scale_x1(fx__, meta, line) if #scale_x > 0 then fx.scale_x = scale_x[1] else fx.scale_x = 1 end if fx.scale_x <= 0 then fx.scale_x = 0.1 end
-											scale_y1  = loadstring("return function(fx__, meta, line) return {".. fx__.scale_y .."} end")() scale_y = scale_y1(fx__, meta, line) if #scale_y > 0 then fx.scale_y = scale_y[1] else fx.scale_y = 1 end if fx.scale_y <= 0 then fx.scale_y = 0.1 end
-										end offset_maxspace = scale_x[2] or 0; offset_h = center_y[2] or 0.9
+											scale_x1 = loadstring("return function(fx__, meta, line) return {".. fx__.scale_x .."} end")( )
+											scale_x = scale_x1( fx__, meta, line )
+											if #scale_x > 0 then
+												fx.scale_x = scale_x[1]
+											else
+												fx.scale_x = 1
+											end
+											if fx.scale_x <= 0 then
+												fx.scale_x = 0.1
+											end
+											scale_y1 = loadstring("return function(fx__, meta, line) return {".. fx__.scale_y .."} end")( )
+											scale_y = scale_y1( fx__, meta, line )
+											if #scale_y > 0 then
+												fx.scale_y = scale_y[1]
+											else
+												fx.scale_y = 1
+											end
+											if fx.scale_y <= 0 then
+												fx.scale_y = 0.1
+											end
+										end
+										offset_maxspace = scale_x[2] or 0
+										offset_h = center_y[2] or 0.9
 										--variables de dominio de funciones--
 										if j == 1 then
-											s_i1	  = loadstring("return function(fx__, meta, line) return {".. fx__.s_i .."} end")() s_i = s_i1(fx__, meta, line) if #s_i > 0 then fx.domain_i = s_i[1] else fx.domain_i = 0 end
-											s_f1	  = loadstring("return function(fx__, meta, line) return {".. fx__.s_f .."} end")() s_f = s_f1(fx__, meta, line) if #s_f > 0 then fx.domain_f = s_f[1] else fx.domain_f = 1 end
-										end local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
+											s_i1 = loadstring("return function(fx__, meta, line) return {".. fx__.s_i .."} end")( )
+											s_i = s_i1( fx__, meta, line )
+											if #s_i > 0 then
+												fx.domain_i = s_i[1]
+											else
+												fx.domain_i = 0
+											end
+											s_f1 = loadstring("return function(fx__, meta, line) return {".. fx__.s_f .."} end")( )
+											s_f = s_f1( fx__, meta, line )
+											if #s_f > 0 then
+												fx.domain_f = s_f[1]
+											else
+												fx.domain_f = 1
+											end
+										end
+										local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
 										--variables de funciones paramétricas--
-										fun_x1		  = loadstring("return function(fx__, meta, line, s) return {".. fx__.fun_x .."} end")() fun_x = fun_x1(fx__, meta, line, s) if #fun_x > 0 then fx.fun_x = fun_x[1]*fx.scale_x else fx.fun_x = 0 end
-										fun_y1		  = loadstring("return function(fx__, meta, line, s) return {".. fx__.fun_y .."} end")() fun_y = fun_y1(fx__, meta, line, s) if #fun_y > 0 then fx.fun_y = fun_y[1]*fx.scale_y else fx.fun_y = 0 end
+										fun_x1 = loadstring("return function(fx__, meta, line, s) return {".. fx__.fun_x .."} end")( )
+										fun_x = fun_x1( fx__, meta, line, s )
+										if #fun_x > 0 then
+											fx.fun_x = fun_x[1]*fx.scale_x
+										else
+											fx.fun_x = 0
+										end
+										fun_y1 = loadstring("return function(fx__, meta, line, s) return {".. fx__.fun_y .."} end")( )
+										fun_y = fun_y1( fx__, meta, line, s )
+										if #fun_y > 0 then
+											fx.fun_y = fun_y[1]*fx.scale_y
+										else
+											fx.fun_y = 0
+										end
 										--definir líneas de texto, verticales u horizontales--
 										fx.pos_x, fx.pos_y = effector.knj( fx__.v_kanji )
 										fx.off_x, fx.off_y = effector.modify_pos( )
@@ -305,78 +710,145 @@
 										fx.pos_b = fx.pos_y + l.height/2
 										x, y = fx.pos_x, fx.pos_y
 										--variables de tamaño--
-										size1 = loadstring("return function(fx__, meta, line, s) return {".. fx__.size .."} end")( ) size = size1(fx__, meta, line, s)
+										size1 = loadstring("return function(fx__, meta, line, s) return {".. fx__.size .."} end")( )
+										size = size1( fx__, meta, line, s )
 										if #size > 0 then
-											if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
+											if #size == 1 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = fx.sizex
+											elseif #size == 2 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = math.round(size[2], 2)
+											end
 											fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
 										else
-											fx.sizex 	= L.scale_x
-											fx.sizey 	= L.scale_y
+											fx.sizex = L.scale_x
+											fx.sizey = L.scale_y
 											fx.tag_size = ""
 										end
 										--variables de alineación y de capa (layer)--
-										align1	   = loadstring("return function(fx__, meta, line, s, module) return {".. fx__.align .."} end")() align = align1(fx__, meta, line, s, module) if #align > 0 then fx.align = "\\an"..align[1] else fx.align = "" end
-										layer1	   = loadstring("return function(fx__, meta, line, s, module) return {".. fx__.layer .."} end")() layer = layer1(fx__, meta, line, s, module) fx.layer = layer[1] or 0
+										align1 = loadstring("return function(fx__, meta, line, s, module) return {".. fx__.align .."} end")( )
+										align = align1( fx__, meta, line, s, module )
+										if #align > 0 then
+											fx.align = "\\an"..align[1]
+										else
+											fx.align = ""
+										end
+										layer1 = loadstring("return function(fx__, meta, line, s, module) return {".. fx__.layer .."} end")( )
+										layer = layer1( fx__, meta, line, s, module )
+										fx.layer = layer[1] or l_layer
 										--variables de posiciones definitivas, dependiendo del "move"--
-										move_x11   = loadstring("return function(fx__, meta, line, x, y, s, module) return {".. fx__.move_x .."} end")()	move_x	= math.round(move_x11(fx__, meta, line, x, y, s, module), 2)
-										move_y11   = loadstring("return function(fx__, meta, line, x, y, s, module) return {".. fx__.move_y .."} end")()	move_y	= math.round(move_y11(fx__, meta, line, x, y, s, module), 2)
+										move_x11 = loadstring("return function(fx__, meta, line, x, y, s, module) return {".. fx__.move_x .."} end")( )
+										move_x = math.round(move_x11( fx__, meta, line, x, y, s, module ), 2)
+										move_y11 = loadstring("return function(fx__, meta, line, x, y, s, module) return {".. fx__.move_y .."} end")( )
+										move_y = math.round(move_y11( fx__, meta, line, x, y, s, module ), 2)
 										--variables de tiempo del movimiento--
-										if fx__.move_t:match("%d+%:%d+%:%d+%.%d+") then HMS_movet = { }; for c in fx__.move_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_movet, c ) end for i = 1, #HMS_movet do fx__.move_t = fx__.move_t:gsub(HMS_movet[i], tostring(HMS_to_ms(HMS_movet[i])), 1) end end
-										move_t1	   = loadstring("return function(fx__, meta, line, s, module) return {".. fx__.move_t .."} end")() 		move_t	= move_t1(fx__, meta, line, s, module)
-										fx.movet_i = math.round(move_t[1] or 0, 2);	fx.movet_f = math.round(move_t[2] or fx.dur, 2)
-										if #move_t > 0 then tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f) else tags_times = "" end
+										fx__.move_t = fx__.move_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										move_t1 = loadstring("return function(fx__, meta, line, s, module) return {".. fx__.move_t .."} end")( )
+										move_t = move_t1( fx__, meta, line, s, module )
+										fx.movet_i = math.round(move_t[1] or 0, 2)
+										fx.movet_f = math.round(move_t[2] or fx.dur, 2)
+										if #move_t > 0 then
+											tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f)
+										else
+											tags_times = ""
+										end
 										--posiciones finales--
 										Nmove = math.max(#move_x, #move_y)
-										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)	fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)	fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
-										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)	fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)	fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
-										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)	fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)	fx.angle1  = fx.move_x3
-										fx.angle2  = fx.move_x4								fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)	fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
-										tb_pos     = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
+										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)
+										fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)
+										fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
+										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)
+										fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)
+										fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
+										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)
+										fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)
+										fx.angle1 = fx.move_x3
+										fx.angle2 = fx.move_x4
+										fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)
+										fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
+										tb_pos = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
 										fx.move_l1, fx.move_r1, fx.move_t1, fx.move_b1 = fx.move_x1 - val_width/2, fx.move_x1 + val_width/2, fx.move_y1 - val_height/2, fx.move_y1 + val_height/2
 										fx.move_l2, fx.move_r2, fx.move_t2, fx.move_b2 = fx.move_x2 - val_width/2, fx.move_x2 + val_width/2, fx.move_y2 - val_height/2, fx.move_y2 + val_height/2
 										fx.move_l3, fx.move_r3, fx.move_t3, fx.move_b3 = fx.move_x3 - val_width/2, fx.move_x3 + val_width/2, fx.move_y3 - val_height/2, fx.move_y3 + val_height/2
 										fx.move_l4, fx.move_r4, fx.move_t4, fx.move_b4 = fx.move_x4 - val_width/2, fx.move_x4 + val_width/2, fx.move_y4 - val_height/2, fx.move_y4 + val_height/2
-										fx.pos     = effector.pos( Nmove, tb_pos, tags_times )
+										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 										fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
-										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")() returnfx = returnfx1(fx__, meta, syl, line) else returnfx = {[1] = fx__.returnfx} end
-										Rline = 1; if returnfx[2] and returnfx[2] == "random" then Rline = 2 - R(count_fx + 1) end; T_line = false
+										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
+											returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")()
+											returnfx = returnfx1( fx__, meta, syl, line )
+										else
+											returnfx = { [1] = fx__.returnfx }
+										end
+										Rline = 1
+										if returnfx[2] and returnfx[2] == "random" then
+											Rline = 2 - R(count_fx + 1)
+										end
+										T_line = false
 										if #returnfx > 0 or returnfx[1] ~= nil then
-											if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
-											if fx__.t_type ~= "Template Line [Word]" and fx__.t_type ~= "Template Line [Syl]" and fx__.t_type ~= "Template Line [Char]" then if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end else returnfx[1] = tag.to_temp(fx__.addtag); fx.add_tags = "" T_line = true end
-											--[[
-											if fx__.language ~= "Automation Auto-4" then
-												addtag1 = loadstring("return function(fx__, meta, line, furi, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")()
-												addtag = addtag1(fx__, meta, line, furi, x, y, module)
-												t_vals = addtag[1] or "\\an5"
-												t_vals = tag.val( t_vals )
-												addtag = addtag1(fx__, meta, line, furi, x, y, module)
-												fx.add_tags = tag.do_tag(table.op(addtag, "concat"))
+											if returnfx[1]:match("m %-?%d+[%.%d+]* %-?%d+[%.%d+]*") then
+												fx.Det = "\\p1"
+												if returnfx[1]:match("\\p%d") then
+													fx.Det = ""
+												end
+												tags_style = shape.style
 											else
-												fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag))
+												fx.Det = ""
+												tags_style = text.style
 											end
-											--]]
+											if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then
+												fx.tag_size = "\\fscx100\\fscy100"
+											end
+											if fx__.t_type ~= "Template Line [Word]"
+												and fx__.t_type ~= "Template Line [Syl]"
+												and fx__.t_type ~= "Template Line [Char]" then
+												if fx__.language ~= "Automation Auto-4" then
+													addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")()
+													addtag = addtag1( fx__, meta, line, x, y, module )
+													fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
+												else
+													fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
+												end
+											else
+												returnfx[1] = tag.to_temp(fx__.addtag)
+												fx.add_tags = ""
+												T_line = true
+											end
 											if fxgroup == true then
-												if fx__.modify == false and fx__.namefx ~= "raw" then if T_line == false then Ltags_style = tags_style else Ltags_style = "" end
-													l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, Ltags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
-													l.effect = "Effector [Fx]"; l.layer = fx.layer; l.actor = actor_fx
+												if fx__.modify == false and fx__.namefx ~= "raw" then
+													if T_line == false then
+														Ltags_style = tags_style
+													else
+														Ltags_style = ""
+													end
+													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, Ltags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.effect = "Effector [Fx]"
+													l.layer = fx.layer
+													l.actor = actor_fx
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
-													l.text	 = fx.tm(returnfx[1])
+													l.text = fx.tm(returnfx[1])
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												else
-													sett.linecomment = false
+													lines_comment = false
 													line.start_time = fx.start_time
-													line.end_time	= fx.end_time
-													line.text		= fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
+													line.end_time = fx.end_time
+													line.text = fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
 												end
 											end
-										end j = j + 1
+										end
+										j = j + 1
 										aegisub.progress.task(F("Lines: [%d/%d]  Progress: [%s%%]  Lines Generated: %d", count_ln, #idx_line, math.round(100*count_ln/#idx_line, 2), count_fx))
 										aegisub.progress.set(100*line.i/line.n)
-									end J = J + 1
+									end
+									J = J + 1
 								end
 							end
 						end
@@ -384,23 +856,31 @@
 						if fx__.t_type == "Char" then
 							if syl.text ~= noblank1 and syl.text ~= noblank2 then
 								-----------------------------------------------
-								sylchar = { }; sylchar.i = 0
+								sylchar = { }
+								sylchar.i = 0
 								for cfx in unicode.chars(syl.text_stripped) do
-									char.text = cfx; char.text_stripped = cfx
+									char.text = cfx
+									char.text_stripped = cfx
 									width, height, descent, extlead = aegisub.text_extents(line.styleref, char.text)
-									char.width = width; char.height = height; char.top = l.top; char.middle = l.middle; char.bottom = l.bottom
-									char.left = left; char.right = left + char.width; char.center = left + char.width/2
+									char.width = width
+									char.height = height
+									char.top = l.top
+									char.middle = l.middle
+									char.bottom = l.bottom
+									char.left = left
+									char.right = left + char.width
+									char.center = left + char.width/2
 									sylchar.i = sylchar.i + ((char.text == " ") and 0 or 1)
 									sylchar.n = unicode.len(syl.text_stripped:gsub(" ", ""))
 									char.start_time = syl.start_time + syl.duration*(sylchar.i - 1)/sylchar.n
-									char.end_time	= syl.start_time + syl.duration*sylchar.i/sylchar.n
-									char.duration	= char.end_time - char.start_time
-									char.dur		= char.duration
-									char.mid_time	= char.start_time + char.dur/2
-									char.widthmax	= math.max(unpack(mmwth[ii].ch))
-									char.widthmin	= math.min(unpack(mmwth[ii].ch))
-									char.durmax		= math.max(unpack(mmdur[ii].ch))
-									char.durmin		= math.min(unpack(mmdur[ii].ch))
+									char.end_time = syl.start_time + syl.duration*sylchar.i/sylchar.n
+									char.duration = char.end_time - char.start_time
+									char.dur = char.duration
+									char.mid_time = char.start_time + char.dur/2
+									char.widthmax = math.max(unpack(mmwth[ii].ch))
+									char.widthmin = math.min(unpack(mmwth[ii].ch))
+									char.durmax = math.max(unpack(mmdur[ii].ch))
+									char.durmin = math.min(unpack(mmdur[ii].ch))
 									-----------------------------------------------
 									val_width, val_height, val_text = char.width, char.height, char.text
 									val_center, val_middle, val_left, val_right = char.center, char.middle, char.left, char.right
@@ -420,101 +900,280 @@
 									roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = roma.start_time, roma.end_time, roma.mid_time, roma.dur, roma.i, roma.n, roma.left, roma.center, roma.right, roma.bottom, roma.middle, roma.top, roma.width, roma.height
 									char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = char.start_time, char.end_time, char.mid_time, char.dur, char.i, char.n, char.left, char.center, char.right, char.bottom, char.middle, char.top, char.width, char.height
 									-----------------------------------------------
-									wordchar = { }; wordchar.i, wordchar.n = aegisub.wordci(char.i)
+									wordchar = { }
+									wordchar.i, wordchar.n = aegisub.wordci( char.i )
 									-----------------------------------------------
-									fx.replay_fx, J = 1, 1; maxJ = fx.replay_fx
-									while J <= fx.replay_fx do j = 1
-										if fx.replay_fx == 1 then moduler = 0 else moduler = (J - 1)/(maxJ - 1) end
-										module = 0; module1 = module; module2 = module1; fxgroup = true
+									fx.replay_fx, J = 1, 1
+									maxJ = fx.replay_fx
+									while J <= fx.replay_fx do
+										j = 1
+										if fx.replay_fx == 1 then
+											moduler = 0
+										else
+											moduler = (J - 1)/(maxJ - 1)
+										end
+										module = 0
+										module1 = module
+										module2 = module1
+										fxgroup = true
 										-----------------------------------------------
 										effector.default_val( )
 										-----------------------------------------------
 										if pcall(loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
-											variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")()
-											var_KEfx_ = variable_(fx__, meta, syl, line, x, y)
-										end variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")()
-										if line.i == 1 and syl.i == 1 and sylchar.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, meta, syl, line, x, y)) else var.once = recall.v_once end
-										if syl.i  == 1 and sylchar.i == 1 and J == 1 then 				 var.line = variable_(fx__, meta, syl, line, x, y) end
-										if wordchar.i == 1 and J == 1 then								 var.word = variable_(fx__, meta, syl, line, x, y) end
-										if sylchar.i  == 1 and J == 1 then								 var.syl  = variable_(fx__, meta, syl, line, x, y) end
-										if J == 1 then													 var.rep  = variable_(fx__, meta, syl, line, x, y) end
-										var.char  = variable_(fx__, meta, syl, line, x, y)				 var.furi = var.char
-										var.loop  = variable_(fx__, meta, syl, line, x, y)				 text.char_size( )
+											variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")( )
+											var_KEfx_ = variable_( fx__, meta, syl, line, x, y )
+										end
+										variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
+										if line.i == 1 and syl.i == 1 and sylchar.i == 1 and J == 1 then
+											var.once = remember("v_once", variable_( fx__, meta, syl, line, x, y ))
+										else
+											var.once = recall.v_once
+										end
+										if syl.i  == 1 and sylchar.i == 1 and J == 1 then
+											var.line = variable_( fx__, meta, syl, line, x, y )
+										end
+										if wordchar.i == 1 and J == 1 then
+											var.word = variable_( fx__, meta, syl, line, x, y )
+										end
+										if sylchar.i == 1 and J == 1 then
+											var.syl = variable_( fx__, meta, syl, line, x, y )
+										end
+										if J == 1 then
+											var.rep = variable_( fx__, meta, syl, line, x, y )
+										end
+										var.char = variable_( fx__, meta, syl, line, x, y )
+										var.furi = var.char
+										var.loop = variable_( fx__, meta, syl, line, x, y )
+										text.char_size( )
 										-----------------------------------------------
-										maxloop1  = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")()	maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-										loop_h    = ceil((maxloop_fx[1] or 1)*(char.width + 2*L.outline)/(line.height + 2*L.outline))				maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-										fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1; 			fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
+										maxloop1  = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")( )
+										maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+										loop_h = ceil((maxloop_fx[1] or 1)*(char.width + 2*L.outline)/(line.height + 2*L.outline))
+										maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+										fx.loop_v = maxloop_fx[1] or 1
+										fx.loop_h = maxloop_fx[2] or 1
+										fx.loop_3 = maxloop_fx[3] or 1
+										fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
+										maxj = fx.maxloop_fx
 										-----------------------------------------------
-										while j <= fx.maxloop_fx do ci = 0
-											var.loop = variable_(fx__, meta, syl, line, x, y)
+										while j <= fx.maxloop_fx do
+											ci = 0
+											var.loop = variable_( fx__, meta, syl, line, x, y )
 											--variables de modulo--
-											if fx.maxloop_fx == 1 then module  = 0		 else module  = (j - 1)/(maxj - 1) end
-											if char.n == 1		  then module1 = module  else module1 = (char.i + module - 1)/char.n end
-											if line.n == 1		  then module2 = module1 else module2 = (line.i + module1 - 1)/line.n end
+											if fx.maxloop_fx == 1 then
+												module = 0
+											else
+												module = (j - 1)/(maxj - 1)
+											end
+											if char.n == 1 then
+												module1 = module
+											else
+												module1 = (char.i + module - 1)/(char.n + module - 1)
+											end
+											if line.n == 1 then
+												module2 = module1
+											else
+												module2 = (line.i + module1 - 1)/(line.n + module1 - 1)
+											end
 											--variables de tiempo--
-											if fx__.start_t:match("%d+%:%d+%:%d+%.%d+") then HMS_start = {}; for c in fx__.start_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_start, c ) end for i = 1, #HMS_start do fx__.start_t = fx__.start_t:gsub(HMS_start[i], tostring(HMS_to_ms(HMS_start[i])), 1) end end
-											if fx__.end_t:match("%d+%:%d+%:%d+%.%d+") then HMS_end = {}; for c in fx__.end_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_end, c ) end for i = 1, #HMS_end do fx__.end_t = fx__.end_t:gsub(HMS_end[i], tostring(HMS_to_ms(HMS_end[i])), 1) end end
-											start_t1	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")() 	start_t	= start_t1(fx__, meta, syl, line, module)	if #start_t > 0 then fx.start_time = start_t[1] else fx.start_time = line.start_time end
+											fx__.start_t = fx__.start_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+												function( time_HMS )
+													return tostring( HMS_to_ms( time_HMS ) )
+												end
+											)
+											fx__.end_t = fx__.end_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+												function( time_HMS )
+													return tostring( HMS_to_ms( time_HMS ) )
+												end
+											)
+											start_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")( )
+											start_t	= start_t1( fx__, meta, syl, line, module )
+											if #start_t > 0 then
+												fx.start_time = start_t[1]
+											else
+												fx.start_time = line.start_time
+											end
 											l.start_time = fx.start_time
-											end_t1   	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")()	end_t	= end_t1(fx__, meta, syl, line, module)		if #end_t > 0 then fx.end_time = end_t[1] else fx.end_time = line.end_time end
-											l.end_time	 = fx.end_time
-											fx.dur		 = fx.end_time - fx.start_time
-											function retime(mode, add_start, add_end)
-												add_start = HMS_to_ms(add_start) or 0; add_end = HMS_to_ms(add_end) or 0
-												if	   mode == "line"		then l.start_time = line.start_time + add_start;					l.end_time = line.end_time   + add_end
-												elseif mode == "preline"	then l.start_time = line.start_time + add_start;					l.end_time = line.start_time + add_end
-												elseif mode == "postline"	then l.start_time = line.end_time   + add_start;					l.end_time = line.end_time   + add_end
-												elseif mode == "word"		then l.start_time = line.start_time + word.start_time + add_start;	l.end_time = line.start_time + word.end_time   + add_end
-												elseif mode == "preword"	then l.start_time = line.start_time + word.start_time + add_start;	l.end_time = line.start_time + word.start_time + add_end
-												elseif mode == "postword"	then l.start_time = line.start_time + word.end_time   + add_start;	l.end_time = line.start_time + word.start_time + add_end
-												elseif mode == "syl"		then l.start_time = line.start_time + syl.start_time  + add_start;	l.end_time = line.start_time + syl.end_time    + add_end
-												elseif mode == "presyl"		then l.start_time = line.start_time + syl.start_time  + add_start;	l.end_time = line.start_time + syl.start_time  + add_end
-												elseif mode == "postsyl"	then l.start_time = line.start_time + syl.end_time    + add_start;	l.end_time = line.start_time + syl.end_time    + add_end
-												elseif mode == "char"		then l.start_time = line.start_time + char.start_time + add_start;	l.end_time = line.start_time + char.end_time   + add_end
-												elseif mode == "prechar"	then l.start_time = line.start_time + char.start_time + add_start;	l.end_time = line.start_time + char.start_time + add_end
-												elseif mode == "postchar"	then l.start_time = line.start_time + char.end_time   + add_start;	l.end_time = line.start_time + char.start_time + add_end
-												elseif mode == "start2word"	then l.start_time = line.start_time + add_start;					l.end_time = line.start_time + word.start_time + add_end
-												elseif mode == "word2end"	then l.start_time = line.start_time + word.end_time   + add_start;	l.end_time = line.end_time   + add_end
-												elseif mode == "start2syl"	then l.start_time = line.start_time + add_start;					l.end_time = line.start_time + syl.start_time  + add_end
-												elseif mode == "syl2end"	then l.start_time = line.start_time + syl.end_time    + add_start;	l.end_time = line.end_time   + add_end
-												elseif mode == "start2char"	then l.start_time = line.start_time + add_start;					l.end_time = line.start_time + char.start_time + add_end
-												elseif mode == "char2end"	then l.start_time = line.start_time + char.end_time   + add_start;	l.end_time = line.end_time   + add_end
-												elseif mode == "linepct"    then l.start_time = line.start_time + add_start*line.duration/100;	l.end_time = line.start_time + add_end*line.duration/100
-												elseif mode == "wordpct"	then l.start_time = line.start_time + word.start_time + add_start*word.duration/100;	l.end_time = line.start_time + word.start_time + add_end*word.duration/100
-												elseif mode == "sylpct"		then l.start_time = line.start_time + syl.start_time  + add_start*syl.duration/100;		l.end_time = line.start_time + syl.start_time  + add_end*syl.duration/100
-												elseif mode == "charpct"	then l.start_time = line.start_time + char.start_time + add_start*char.duration/100;	l.end_time = line.start_time + char.start_time + add_end*char.duration/100
-												elseif mode == "set"		or mode == "abs" then  l.start_time = add_start;										l.end_time = add_end
-												elseif mode == "fxpretime"	then l.start_time = fx.start_time	+ add_start; l.end_time = fx.start_time + add_end
-												elseif mode == "fxtime"		then l.start_time = fx.start_time	+ add_start; l.end_time = fx.end_time + add_end
-												elseif mode == "fxposttime"	then l.start_time = fx.end_time		+ add_start; l.end_time = fx.end_time + add_end
-												elseif mode == "fxpct"		then l.start_time = fx.start_time	+ add_start*fx.dur/100; l.end_time = fx.start_time + add_end*fx.dur/100
-												end	   fx.start_time, fx.end_time = l.start_time, l.end_time; fx.dur = fx.end_time - fx.start_time
+											end_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")( )
+											end_t = end_t1( fx__, meta, syl, line, module )
+											if #end_t > 0 then
+												fx.end_time = end_t[1]
+											else
+												fx.end_time = line.end_time
+											end
+											l.end_time = fx.end_time
+											fx.dur = fx.end_time - fx.start_time
+											function retime( mode, add_start, add_end )
+												add_start = HMS_to_ms(add_start) or 0
+												add_end = HMS_to_ms(add_end) or 0
+												if mode == "line" then
+													l.start_time = line.start_time + add_start
+													l.end_time = line.end_time + add_end
+												elseif mode == "preline" then
+													l.start_time = line.start_time + add_start
+													l.end_time = line.start_time + add_end
+												elseif mode == "postline" then
+													l.start_time = line.end_time + add_start
+													l.end_time = line.end_time + add_end
+												elseif mode == "word" then
+													l.start_time = line.start_time + word.start_time + add_start
+													l.end_time = line.start_time + word.end_time + add_end
+												elseif mode == "preword" then
+													l.start_time = line.start_time + word.start_time + add_start
+													l.end_time = line.start_time + word.start_time + add_end
+												elseif mode == "postword" then
+													l.start_time = line.start_time + word.end_time + add_start
+													l.end_time = line.start_time + word.start_time + add_end
+												elseif mode == "syl" then
+													l.start_time = line.start_time + syl.start_time + add_start
+													l.end_time = line.start_time + syl.end_time + add_end
+												elseif mode == "presyl" then
+													l.start_time = line.start_time + syl.start_time + add_start
+													l.end_time = line.start_time + syl.start_time + add_end
+												elseif mode == "postsyl" then
+													l.start_time = line.start_time + syl.end_time + add_start
+													l.end_time = line.start_time + syl.end_time + add_end
+												elseif mode == "char" then
+													l.start_time = line.start_time + char.start_time + add_start
+													l.end_time = line.start_time + char.end_time + add_end
+												elseif mode == "prechar" then
+													l.start_time = line.start_time + char.start_time + add_start
+													l.end_time = line.start_time + char.start_time + add_end
+												elseif mode == "postchar" then
+													l.start_time = line.start_time + char.end_time + add_start
+													l.end_time = line.start_time + char.start_time + add_end
+												elseif mode == "start2word"	then
+													l.start_time = line.start_time + add_start
+													l.end_time = line.start_time + word.start_time + add_end
+												elseif mode == "word2end" then
+													l.start_time = line.start_time + word.end_time + add_start
+													l.end_time = line.end_time + add_end
+												elseif mode == "start2syl" then
+													l.start_time = line.start_time + add_start
+													l.end_time = line.start_time + syl.start_time + add_end
+												elseif mode == "syl2end" then
+													l.start_time = line.start_time + syl.end_time + add_start
+													l.end_time = line.end_time + add_end
+												elseif mode == "start2char"	then
+													l.start_time = line.start_time + add_start
+													l.end_time = line.start_time + char.start_time + add_end
+												elseif mode == "char2end" then
+													l.start_time = line.start_time + char.end_time + add_start
+													l.end_time = line.end_time + add_end
+												elseif mode == "linepct" then
+													l.start_time = line.start_time + add_start*line.duration/100
+													l.end_time = line.start_time + add_end*line.duration/100
+												elseif mode == "wordpct" then
+													l.start_time = line.start_time + word.start_time + add_start*word.duration/100
+													l.end_time = line.start_time + word.start_time + add_end*word.duration/100
+												elseif mode == "sylpct" then
+													l.start_time = line.start_time + syl.start_time + add_start*syl.duration/100
+													l.end_time = line.start_time + syl.start_time + add_end*syl.duration/100
+												elseif mode == "charpct" then
+													l.start_time = line.start_time + char.start_time + add_start*char.duration/100
+													l.end_time = line.start_time + char.start_time + add_end*char.duration/100
+												elseif mode == "set" or mode == "abs" then
+													l.start_time = add_start
+													l.end_time = add_end
+												elseif mode == "fxpretime" then
+													l.start_time = fx.start_time + add_start
+													l.end_time = fx.start_time + add_end
+												elseif mode == "fxtime" then
+													l.start_time = fx.start_time + add_start
+													l.end_time = fx.end_time + add_end
+												elseif mode == "fxposttime"	then
+													l.start_time = fx.end_time + add_start
+													l.end_time = fx.end_time + add_end
+												elseif mode == "fxpct" then
+													l.start_time = fx.start_time + add_start*fx.dur/100
+													l.end_time = fx.start_time + add_end*fx.dur/100
+												end
+												fx.start_time, fx.end_time = l.start_time, l.end_time
+												fx.dur = fx.end_time - fx.start_time
 												return ""
 											end
 											---------------------------------------------------
-											without = { }; ini = line.start_time - fx.start_time
-											without.char   = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + char.start_time, ini + char.start_time + 1, ini + char.end_time, ini + char.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
-											without.syl    = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + syl.start_time, ini + syl.start_time + 1, ini + syl.end_time, ini + syl.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
-											syl.syl_start  = ini + syl.start_time
-											syl.syl_end	   = syl.syl_start + syl.dur
+											without = { }
+											ini = line.start_time - fx.start_time
+											without.char = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + char.start_time, ini + char.start_time + 1, ini + char.end_time, ini + char.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
+											without.syl = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + syl.start_time, ini + syl.start_time + 1, ini + syl.end_time, ini + syl.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
+											syl.syl_start = ini + syl.start_time
+											syl.syl_end = syl.syl_start + syl.dur
 											char.syl_start = ini + char.start_time
-											char.syl_end   = char.syl_start + char.dur
+											char.syl_end = char.syl_start + char.dur
 											--variables de punto de referencia--
-											center_x1	   = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")() center_x = center_x1(fx__, meta, syl, line, x, y, module) if #center_x > 0 then fx.center_x = center_x[1] else fx.center_x = val_center end
-											center_y1	   = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")() center_y = center_y1(fx__, meta, syl, line, x, y, module) if #center_y > 0 then fx.center_y = center_y[1] else fx.center_y = val_middle end
+											center_x1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")( )
+											center_x = center_x1( fx__, meta, syl, line, x, y, module )
+											if #center_x > 0 then
+												fx.center_x = center_x[1]
+											else
+												fx.center_x = val_center
+											end
+											center_y1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")( )
+											center_y = center_y1( fx__, meta, syl, line, x, y, module )
+											if #center_y > 0 then
+												fx.center_y = center_y[1]
+											else
+												fx.center_y = val_middle
+											end
 											--variables de escalas de funciones paramétricas-- 
 											if j == 1 then
-												scale_x1   = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")()	scale_x	= scale_x1(fx__, meta, syl, line) if #scale_x > 0 then fx.scale_x = scale_x[1] else fx.scale_x = 1 end if fx.scale_x <= 0 then fx.scale_x = 0.1 end
-												scale_y1   = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")()	scale_y	= scale_y1(fx__, meta, syl, line) if #scale_y > 0 then fx.scale_y = scale_y[1] else fx.scale_y = 1 end if fx.scale_y <= 0 then fx.scale_y = 0.1 end
-											end offset_maxspace = scale_x[2] or 0; offset_h = center_y[2] or 0.9
+												scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")( )
+												scale_x	= scale_x1( fx__, meta, syl, line )
+												if #scale_x > 0 then
+													fx.scale_x = scale_x[1]
+												else
+													fx.scale_x = 1
+												end
+												if fx.scale_x <= 0 then
+													fx.scale_x = 0.1
+												end
+												scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")( )
+												scale_y	= scale_y1( fx__, meta, syl, line )
+												if #scale_y > 0 then
+													fx.scale_y = scale_y[1]
+												else
+													fx.scale_y = 1
+												end
+												if fx.scale_y <= 0 then
+													fx.scale_y = 0.1
+												end
+											end
+											offset_maxspace = scale_x[2] or 0
+											offset_h = center_y[2] or 0.9
 											--variables de dominio de funciones--
 											if j == 1 then
-												s_i1	   = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")() s_i = s_i1(fx__, meta, syl, line) if #s_i > 0 then fx.domain_i = s_i[1] else fx.domain_i = 0 end
-												s_f1	   = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")() s_f = s_f1(fx__, meta, syl, line) if #s_f > 0 then fx.domain_f = s_f[1] else fx.domain_f = 1 end
-											end local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
+												s_i1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")( )
+												s_i = s_i1( fx__, meta, syl, line )
+												if #s_i > 0 then
+													fx.domain_i = s_i[1]
+												else
+													fx.domain_i = 0
+												end
+												s_f1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")( )
+												s_f = s_f1( fx__, meta, syl, line )
+												if #s_f > 0 then
+													fx.domain_f = s_f[1]
+												else
+													fx.domain_f = 1
+												end
+											end
+											local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
 											--variables de funciones paramétricas--
-											fun_x1		   = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")() fun_x = fun_x1(fx__, meta, syl, line, s) if #fun_x > 0 then fx.fun_x = fun_x[1]*fx.scale_x else fx.fun_x = 0 end
-											fun_y1		   = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")() fun_y = fun_y1(fx__, meta, syl, line, s) if #fun_y > 0 then fx.fun_y = fun_y[1]*fx.scale_y else fx.fun_y = 0 end
+											fun_x1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")( )
+											fun_x = fun_x1( fx__, meta, syl, line, s )
+											if #fun_x > 0 then
+												fx.fun_x = fun_x[1]*fx.scale_x
+											else
+												fx.fun_x = 0
+											end
+											fun_y1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")( )
+											fun_y = fun_y1( fx__, meta, syl, line, s )
+											if #fun_y > 0 then
+												fx.fun_y = fun_y[1]*fx.scale_y
+											else
+												fx.fun_y = 0
+											end
 											--definir líneas de texto, verticales u horizontales--
 											fx.pos_x, fx.pos_y = effector.knj( fx__.v_kanji )
 											fx.off_x, fx.off_y = effector.modify_pos( )
@@ -528,67 +1187,136 @@
 											x, y = fx.pos_x, fx.pos_y
 											--variables de tamaño--
 											if fx__.size ~= nil and fx__.size ~= "" then
-												size1		= loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")() 	size = size1(fx__, meta, syl, line, s)
-												if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
+												size1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")( )
+												size = size1( fx__, meta, syl, line, s )
+												if #size == 1 then
+													fx.sizex = math.round(size[1], 2)
+													fx.sizey = fx.sizex
+												elseif #size == 2 then
+													fx.sizex = math.round(size[1], 2)
+													fx.sizey = math.round(size[2], 2)
+												end
 												fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
 											else
-												fx.sizex 	= L.scale_x
-												fx.sizey 	= L.scale_y
+												fx.sizex = L.scale_x
+												fx.sizey = L.scale_y
 												fx.tag_size = ""
 											end
 											--variables de alineación y de capa (layer)--
-											align1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")() align = align1(fx__, meta, syl, line, s, module) if #align > 0 then fx.align = "\\an"..align[1] else fx.align = "" end
-											layer1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")() layer = layer1(fx__, meta, syl, line, s, module) fx.layer = layer[1] or 0
+											align1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")( )
+											align = align1( fx__, meta, syl, line, s, module )
+											if #align > 0 then
+												fx.align = "\\an"..align[1]
+											else
+												fx.align = ""
+											end
+											layer1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")( )
+											layer = layer1( fx__, meta, syl, line, s, module )
+											fx.layer = layer[1] or l_layer
 											--variables de posiciones, dependiendo del "move"--
-											move_x11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")()	move_x	= math.round(move_x11(fx__, meta, syl, line, x, y, s, module), 2)
-											move_y11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")()	move_y	= math.round(move_y11(fx__, meta, syl, line, x, y, s, module), 2)
+											move_x11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")( )
+											move_x	= math.round(move_x11( fx__, meta, syl, line, x, y, s, module ), 2)
+											move_y11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")( )
+											move_y	= math.round(move_y11( fx__, meta, syl, line, x, y, s, module ), 2)
 											--variables de tiempo del movimiento--
-											if fx__.move_t:match("%d+%:%d+%:%d+%.%d+") then HMS_movet = {}; for c in fx__.move_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_movet, c ) end for i = 1, #HMS_movet do fx__.move_t = fx__.move_t:gsub(HMS_movet[i], tostring(HMS_to_ms(HMS_movet[i])), 1) end end
-											move_t1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")() 		move_t	= move_t1(fx__, meta, syl, line, s, module)
-											fx.movet_i = math.round(move_t[1] or 0, 2);	fx.movet_f = math.round(move_t[2] or fx.dur, 2)
-											if #move_t > 0 then tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f) else tags_times = "" end
+											fx__.move_t = fx__.move_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+												function( time_HMS )
+													return tostring( HMS_to_ms( time_HMS ) )
+												end
+											)
+											move_t1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")( ) 		move_t	= move_t1(fx__, meta, syl, line, s, module)
+											fx.movet_i = math.round(move_t[1] or 0, 2)
+											fx.movet_f = math.round(move_t[2] or fx.dur, 2)
+											if #move_t > 0 then
+												tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f)
+											else
+												tags_times = ""
+											end
 											--posiciones finales--
 											Nmove = math.max(#move_x, #move_y)
-											fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)	fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)	fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
-											fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)	fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)	fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
-											fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)	fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)	fx.angle1  = fx.move_x3
-											fx.angle2  = fx.move_x4								fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)	fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
-											tb_pos     = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
+											fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)
+											fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)
+											fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
+											fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)
+											fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)
+											fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
+											fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)
+											fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)
+											fx.angle1 = fx.move_x3
+											fx.angle2 = fx.move_x4
+											fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)
+											fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
+											tb_pos = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
 											fx.move_l1, fx.move_r1, fx.move_t1, fx.move_b1 = fx.move_x1 - val_width/2, fx.move_x1 + val_width/2, fx.move_y1 - val_height/2, fx.move_y1 + val_height/2
 											fx.move_l2, fx.move_r2, fx.move_t2, fx.move_b2 = fx.move_x2 - val_width/2, fx.move_x2 + val_width/2, fx.move_y2 - val_height/2, fx.move_y2 + val_height/2
 											fx.move_l3, fx.move_r3, fx.move_t3, fx.move_b3 = fx.move_x3 - val_width/2, fx.move_x3 + val_width/2, fx.move_y3 - val_height/2, fx.move_y3 + val_height/2
 											fx.move_l4, fx.move_r4, fx.move_t4, fx.move_b4 = fx.move_x4 - val_width/2, fx.move_x4 + val_width/2, fx.move_y4 - val_height/2, fx.move_y4 + val_height/2
-											fx.pos     = effector.pos(Nmove, tb_pos, tags_times)
+											fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 											fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 											fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
-											if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")() returnfx = returnfx1(fx__, meta, syl, line) else returnfx = {[1] = fx__.returnfx} end
-											Rline = 1; if returnfx[2] and returnfx[2] == "random" then Rline = 2 - R(count_fx + 1) end
-											if fx__.noblank == true and (returnfx[1] == "" or returnfx[1] == " ") then returnfx[1] = nil end
+											if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
+												returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")( )
+												returnfx = returnfx1( fx__, meta, syl, line )
+											else
+												returnfx = { [1] = fx__.returnfx }
+											end
+											Rline = 1
+											if returnfx[2] and returnfx[2] == "random" then
+												Rline = 2 - R(count_fx + 1)
+											end
+											if fx__.noblank == true and (returnfx[1] == "" or returnfx[1] == " ") then
+												returnfx[1] = nil
+											end
 											if #returnfx > 0 or returnfx[1] ~= nil then
-												if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
-												if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end
+												if returnfx[1]:match("m %-?%d+[%.%d+]* %-?%d+[%.%d+]*") then
+													fx.Det = "\\p1"
+													if returnfx[1]:match("\\p%d") then
+														fx.Det = ""
+													end
+													tags_style = shape.style
+												else
+													fx.Det = ""
+													tags_style = text.style
+												end
+												if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then
+													fx.tag_size = "\\fscx100\\fscy100"
+												end
+												if fx__.language ~= "Automation Auto-4" then
+													addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")( )
+													addtag = addtag1( fx__, meta, line, x, y, module )
+													fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
+												else
+													fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
+												end
 												if fxgroup == true then
 													if fx__.modify == false and fx__.namefx ~= "raw" then
-														l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
-														l.effect = "Effector [Fx]"; l.layer = fx.layer; l.actor = actor_fx
+														l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+														l.effect = "Effector [Fx]"
+														l.layer = fx.layer
+														l.actor = actor_fx
 														subs.insert(#subs + Rline, l)
 														count_fx = count_fx + 1
 													elseif fx__.modify == false and fx__.namefx == "raw" then
-														l.text	 = fx.tm(returnfx[1])
+														l.text = fx.tm(returnfx[1])
 														subs.insert(#subs + Rline, l)
 														count_fx = count_fx + 1
 													else
-														sett.linecomment = false
+														lines_comment = false
 														line.start_time = fx.start_time
-														line.end_time	= fx.end_time
-														line.text		= fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
+														line.end_time = fx.end_time
+														line.text = fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
 													end
-												end ci = 1
-											end j = j + 1
+												end
+												ci = 1
+											end
+											j = j + 1
 											aegisub.progress.task(F("Lines: [%d/%d]  Progress: [%s%%]  Lines Generated: %d", count_ln, #idx_line, math.round(100*count_ln/#idx_line, 2), count_fx))
 											aegisub.progress.set(100*line.i/line.n)
-										end J = J + 1
-									end left = left + width; char.i = char.i + ci
+										end
+										J = J + 1
+									end
+									left = left + width
+									char.i = char.i + ci
 								end
 							end
 						end
@@ -596,21 +1324,39 @@
 						if fx__.t_type == "Furi" then
 							if furi.text ~= noblank1 and furi.text ~= noblank2 then
 								-----------------------------------------------
-								maxmin = function(mode) mwidth, mduration = { }, { } for i = 1, furi.n do mwidth[i] = line.furi[i].width + line.furi[i].postspacewidth + line.furi[i].prespacewidth mduration[i] = line.furi[i].duration end if mode == "maxw" then return math.max(unpack(mwidth)) end if mode == "minw" then return math.min(unpack(mwidth)) end if mode == "maxd" then return math.max(unpack(mduration)) end if mode == "mind" then return math.min(unpack(mduration)) end end
-								furi.center   = furi.center + l.left
-								furi.middle   = syl.middle - l.height + l.descent/2
-								furi.i		  = i
-								furi.n		  = line.furi.n
-								furi.left     = furi.center - furi.width/2
-								furi.right    = furi.center + furi.width/2
-								furi.top      = furi.middle - furi.height/2
-								furi.bottom   = furi.middle + furi.height/2
-								furi.dur	  = furi.duration
+								maxmin = function(mode)
+									mwidth, mduration = { }, { }
+									for i = 1, furi.n do
+										mwidth[i] = line.furi[i].width + line.furi[i].postspacewidth + line.furi[i].prespacewidth
+										mduration[i] = line.furi[i].duration
+									end
+									if mode == "maxw" then
+										return math.max(unpack(mwidth))
+									end
+									if mode == "minw" then
+										return math.min(unpack(mwidth))
+									end
+									if mode == "maxd" then
+										return math.max(unpack(mduration))
+									end
+									if mode == "mind" then
+										return math.min(unpack(mduration))
+									end
+								end
+								furi.center = furi.center + l.left
+								furi.middle = syl.middle - l.height + l.descent/2
+								furi.i = i
+								furi.n = line.furi.n
+								furi.left = furi.center - furi.width/2
+								furi.right = furi.center + furi.width/2
+								furi.top = furi.middle - furi.height/2
+								furi.bottom = furi.middle + furi.height/2
+								furi.dur = furi.duration
 								furi.mid_time = furi.start_time + furi.dur/2
 								furi.widthmax = maxmin("maxw")
 								furi.widthmin = maxmin("minw")
-								furi.durmax   = maxmin("maxd")
-								furi.durmin   = maxmin("mind")
+								furi.durmax = maxmin("maxd")
+								furi.durmin = maxmin("mind")
 								----------------------------------------------
 								val_width, val_height, val_text = furi.width, furi.height, furi.text
 								val_center, val_middle, val_left, val_right = furi.center, furi.middle, furi.left, furi.right
@@ -628,91 +1374,251 @@
 								roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								----------------------------------------------
-								fx.replay_fx, J = 1, 1; maxJ = fx.replay_fx
-								while J <= fx.replay_fx do j = 1
-									if fx.replay_fx == 1 then moduler = 0 else moduler = (J - 1)/(maxJ - 1) end
-									module = 0; module1 = module; module2 = module1; fxgroup = true
+								fx.replay_fx, J = 1, 1
+								maxJ = fx.replay_fx
+								while J <= fx.replay_fx do
+									j = 1
+									if fx.replay_fx == 1 then
+										moduler = 0
+									else
+										moduler = (J - 1)/(maxJ - 1)
+									end
+									module = 0
+									module1 = module
+									module2 = module1
+									fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
 									-----------------------------------------------
 									if pcall(loadstring("return function(fx__, meta, syl, line, furi, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
-										variable_ = loadstring("return function(fx__, meta, syl, line, furi, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")()
-										var_KEfx_ = variable_(fx__, meta, syl, line, furi, x, y)
-									end variable_ = loadstring("return function(fx__, meta, syl, line, furi, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")()
-									if line.i == 1 and furi.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, meta, syl, line, furi, x, y)) else var.once = recall.v_once end
-									if furi.i == 1 and J == 1 then 			       var.line = variable_(fx__, meta, syl, line, furi, x, y) end
-									if J == 1 then								   var.rep  = variable_(fx__, meta, syl, line, furi, x, y) end
-									var.furi  = variable_(fx__, meta, syl, line, furi, x, y)	var.word, var.syl, var.char = var.furi, var.furi, var.furi
-									var.loop  = variable_(fx__, meta, syl, line, furi, x, y)
+										variable_ = loadstring("return function(fx__, meta, syl, line, furi, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")( )
+										var_KEfx_ = variable_( fx__, meta, syl, line, furi, x, y )
+									end
+									variable_ = loadstring("return function(fx__, meta, syl, line, furi, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
+									if line.i == 1 and furi.i == 1 and J == 1 then
+										var.once = remember("v_once", variable_( fx__, meta, syl, line, furi, x, y ))
+									else
+										var.once = recall.v_once
+									end
+									if furi.i == 1 and J == 1 then
+										var.line = variable_( fx__, meta, syl, line, furi, x, y )
+									end
+									if J == 1 then
+										var.rep  = variable_( fx__, meta, syl, line, furi, x, y )
+									end
+									var.furi = variable_( fx__, meta, syl, line, furi, x, y )
+									var.word, var.syl, var.char = var.furi, var.furi, var.furi
+									var.loop = variable_( fx__, meta, syl, line, furi, x, y )
 									-----------------------------------------------
-									maxloop1  = loadstring("return function(fx__, meta, syl, line, furi, x, y) return {".. fx__.loops .."} end")()	maxloop_fx = maxloop1(fx__, meta, syl, line, furi, x, y)
-									loop_h    = ceil((maxloop_fx[1] or 1)*(furi.width + 2*L.outline)/(furi.height + 2*L.outline))					maxloop_fx = maxloop1(fx__, meta, syl, line, furi, x, y)
-									fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1; 				fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
+									maxloop1 = loadstring("return function(fx__, meta, syl, line, furi, x, y) return {".. fx__.loops .."} end")( )
+									maxloop_fx = maxloop1( fx__, meta, syl, line, furi, x, y )
+									loop_h = ceil((maxloop_fx[1] or 1)*(furi.width + 2*L.outline)/(furi.height + 2*L.outline))
+									maxloop_fx = maxloop1( fx__, meta, syl, line, furi, x, y )
+									fx.loop_v = maxloop_fx[1] or 1
+									fx.loop_h = maxloop_fx[2] or 1
+									fx.loop_3 = maxloop_fx[3] or 1
+									fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
+									maxj = fx.maxloop_fx
 									-----------------------------------------------
 									while j <= fx.maxloop_fx do
-										var.loop = variable_(fx__, meta, syl, line, furi, x, y)
+										var.loop = variable_( fx__, meta, syl, line, furi, x, y )
 										--variables de modulo--
-										if fx.maxloop_fx == 1 then module  = 0		 else module  = (j - 1)/(maxj - 1) end
-										if furi.n == 1		  then module1 = module  else module1 = (furi.i + module - 1)/furi.n end
-										if line.n == 1		  then module2 = module1 else module2 = (line.i + module1 - 1)/line.n end
+										if fx.maxloop_fx == 1 then
+											module = 0
+										else
+											module = (j - 1)/(maxj - 1)
+										end
+										if furi.n == 1 then
+											module1 = module
+										else
+											module1 = (furi.i + module - 1)/(furi.n + module - 1)
+										end
+										if line.n == 1 then
+											module2 = module1
+										else
+											module2 = (line.i + module1 - 1)/(line.n + module1 - 1)
+										end
 										--variables de tiempo--
-										if fx__.start_t:match("%d+%:%d+%:%d+%.%d+") then HMS_start = {}; for c in fx__.start_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_start, c ) end for i = 1, #HMS_start do fx__.start_t = fx__.start_t:gsub(HMS_start[i], tostring(HMS_to_ms(HMS_start[i])), 1) end end
-										if fx__.end_t:match("%d+%:%d+%:%d+%.%d+") then HMS_end = {}; for c in fx__.end_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_end, c ) end for i = 1, #HMS_end do fx__.end_t = fx__.end_t:gsub(HMS_end[i], tostring(HMS_to_ms(HMS_end[i])), 1) end end
-										start_t1	 = loadstring("return function(fx__, meta, syl, line, furi, module) return {".. fx__.start_t .."} end")() 	start_t	= start_t1(fx__, meta, syl, line, furi, module)	if #start_t > 0 then fx.start_time = start_t[1] else fx.start_time = line.start_time end
+										fx__.start_t = fx__.start_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										fx__.end_t = fx__.end_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										start_t1 = loadstring("return function(fx__, meta, syl, line, furi, module) return {".. fx__.start_t .."} end")( )
+										start_t	= start_t1( fx__, meta, syl, line, furi, module )
+										if #start_t > 0 then
+											fx.start_time = start_t[1]
+										else
+											fx.start_time = line.start_time
+										end
 										l.start_time = fx.start_time
-										end_t1   	 = loadstring("return function(fx__, meta, syl, line, furi, module) return {".. fx__.end_t .."} end")()	end_t	= end_t1(fx__, meta, syl, line, furi, module)		if #end_t > 0 then fx.end_time = end_t[1] else fx.end_time = line.end_time end
-										l.end_time	 = fx.end_time
-										fx.dur		 = fx.end_time - fx.start_time
-										function retime(mode, add_start, add_end)
-											add_start = HMS_to_ms(add_start) or 0; add_end = HMS_to_ms(add_end) or 0
-											if     mode == "line"		then l.start_time = line.start_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "preline"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + add_end
-											elseif mode == "postline"	then l.start_time = line.end_time   + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "syl"		then l.start_time = line.start_time + syl.start_time + add_start; l.end_time = line.start_time + syl.end_time + add_end
-											elseif mode == "presyl"		then l.start_time = line.start_time + syl.start_time + add_start; l.end_time = line.start_time + syl.start_time + add_end
-											elseif mode == "postsyl"	then l.start_time = line.start_time + syl.end_time + add_start; l.end_time = line.start_time + syl.end_time + add_end
-											elseif mode == "furi"		then l.start_time = line.start_time + furi.start_time + add_start; l.end_time = line.start_time + furi.end_time + add_end
-											elseif mode == "prefuri"	then l.start_time = line.start_time + furi.start_time + add_start; l.end_time = line.start_time + furi.start_time + add_end
-											elseif mode == "postfuri"	then l.start_time = line.start_time + furi.end_time + add_start; l.end_time = line.start_time + furi.end_time + add_end
-											elseif mode == "start2syl"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + syl.start_time + add_end
-											elseif mode == "syl2end"	then l.start_time = line.start_time + syl.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "start2furi"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + furi.start_time + add_end
-											elseif mode == "furi2end"	then l.start_time = line.start_time + furi.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "linepct"	then l.start_time = line.start_time + add_start*line.duration/100; l.end_time = line.start_time + add_end*line.duration/100
-											elseif mode == "sylpct"		then l.start_time = line.start_time + syl.start_time + add_start*syl.duration/100; l.end_time = line.start_time + syl.start_time + add_end*syl.duration/100
-											elseif mode == "furipct"	then l.start_time = line.start_time + furi.start_time + add_start*furi.duration/100; l.end_time = line.start_time + furi.start_time + add_end*furi.duration/100
-											elseif mode == "set"		or mode == "abs" then  l.start_time = add_start; l.end_time = add_end
-											elseif mode == "fxpretime"	then l.start_time = fx.start_time	+ add_start; l.end_time = fx.start_time + add_end
-											elseif mode == "fxtime"		then l.start_time = fx.start_time	+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxposttime"	then l.start_time = fx.end_time		+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxpct"		then l.start_time = fx.start_time	+ add_start*fx.dur/100; l.end_time = fx.start_time + add_end*fx.dur/100
-											end	   fx.start_time, fx.end_time = l.start_time, l.end_time; fx.dur = fx.end_time - fx.start_time
+										end_t1 = loadstring("return function(fx__, meta, syl, line, furi, module) return {".. fx__.end_t .."} end")( )
+										end_t = end_t1( fx__, meta, syl, line, furi, module )
+										if #end_t > 0 then
+											fx.end_time = end_t[1]
+										else
+											fx.end_time = line.end_time
+										end
+										l.end_time = fx.end_time
+										fx.dur = fx.end_time - fx.start_time
+										function retime( mode, add_start, add_end )
+											add_start = HMS_to_ms(add_start) or 0
+											add_end = HMS_to_ms(add_end) or 0
+											if mode == "line" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "preline" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + add_end
+											elseif mode == "postline" then
+												l.start_time = line.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "syl" then
+												l.start_time = line.start_time + syl.start_time + add_start
+												l.end_time = line.start_time + syl.end_time + add_end
+											elseif mode == "presyl" then
+												l.start_time = line.start_time + syl.start_time + add_start
+												l.end_time = line.start_time + syl.start_time + add_end
+											elseif mode == "postsyl" then
+												l.start_time = line.start_time + syl.end_time + add_start
+												l.end_time = line.start_time + syl.end_time + add_end
+											elseif mode == "furi" then
+												l.start_time = line.start_time + furi.start_time + add_start
+												l.end_time = line.start_time + furi.end_time + add_end
+											elseif mode == "prefuri" then
+												l.start_time = line.start_time + furi.start_time + add_start
+												l.end_time = line.start_time + furi.start_time + add_end
+											elseif mode == "postfuri" then
+												l.start_time = line.start_time + furi.end_time + add_start
+												l.end_time = line.start_time + furi.end_time + add_end
+											elseif mode == "start2syl" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + syl.start_time + add_end
+											elseif mode == "syl2end" then
+												l.start_time = line.start_time + syl.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "start2furi"	then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + furi.start_time + add_end
+											elseif mode == "furi2end" then
+												l.start_time = line.start_time + furi.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "linepct" then
+												l.start_time = line.start_time + add_start*line.duration/100
+												l.end_time = line.start_time + add_end*line.duration/100
+											elseif mode == "sylpct" then
+												l.start_time = line.start_time + syl.start_time + add_start*syl.duration/100
+												l.end_time = line.start_time + syl.start_time + add_end*syl.duration/100
+											elseif mode == "furipct" then
+												l.start_time = line.start_time + furi.start_time + add_start*furi.duration/100
+												l.end_time = line.start_time + furi.start_time + add_end*furi.duration/100
+											elseif mode == "set" or mode == "abs" then
+												l.start_time = add_start
+												l.end_time = add_end
+											elseif mode == "fxpretime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.start_time + add_end
+											elseif mode == "fxtime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxposttime"	then
+												l.start_time = fx.end_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxpct" then
+												l.start_time = fx.start_time + add_start*fx.dur/100
+												l.end_time = fx.start_time + add_end*fx.dur/100
+											end
+											fx.start_time, fx.end_time = l.start_time, l.end_time
+											fx.dur = fx.end_time - fx.start_time
 											return ""
 										end
 										---------------------------------------------------
-										without = { }; ini = line.start_time - fx.start_time
-										without.furi   = format("\\t(%s,%s,\\1va%s\\3va%s\\4va%s)\\t(%s,%s,\\1va%s\\3va%s\\4va%s)", ini + furi.start_time, ini + furi.start_time + 1, alpha.va('&HFF&'), alpha.va('&HFF&'), alpha.va('&HFF&'), ini + furi.end_time, ini + furi.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
+										without = { }
+										ini = line.start_time - fx.start_time
+										without.furi = format("\\t(%s,%s,\\1va%s\\3va%s\\4va%s)\\t(%s,%s,\\1va%s\\3va%s\\4va%s)", ini + furi.start_time, ini + furi.start_time + 1, alpha.va('&HFF&'), alpha.va('&HFF&'), alpha.va('&HFF&'), ini + furi.end_time, ini + furi.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
 										furi.syl_start = ini + furi.start_time
-										furi.syl_end   = furi.syl_start + furi.dur
+										furi.syl_end = furi.syl_start + furi.dur
 										--variables de punto de referencia--
-										center_x1	   = loadstring("return function(fx__, meta, syl, line, furi, x, y, module) return {".. fx__.center_x .."} end")() center_x = center_x1(fx__, meta, syl, line, furi, x, y, module) if #center_x > 0 then fx.center_x = center_x[1] else fx.center_x = val_center end
-										center_y1	   = loadstring("return function(fx__, meta, syl, line, furi, x, y, module) return {".. fx__.center_y .."} end")() center_y = center_y1(fx__, meta, syl, line, furi, x, y, module) if #center_y > 0 then fx.center_y = center_y[1] else fx.center_y = val_middle end
+										center_x1 = loadstring("return function(fx__, meta, syl, line, furi, x, y, module) return {".. fx__.center_x .."} end")( )
+										center_x = center_x1( fx__, meta, syl, line, furi, x, y, module )
+										if #center_x > 0 then
+											fx.center_x = center_x[1]
+										else
+											fx.center_x = val_center
+										end
+										center_y1 = loadstring("return function(fx__, meta, syl, line, furi, x, y, module) return {".. fx__.center_y .."} end")( )
+										center_y = center_y1( fx__, meta, syl, line, furi, x, y, module )
+										if #center_y > 0 then
+											fx.center_y = center_y[1]
+										else
+											fx.center_y = val_middle
+										end
 										--variables de escalas de funciones paramétricas-- 
 										if j == 1 then
-											scale_x1   = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.scale_x .."} end")() scale_x	= scale_x1(fx__, meta, syl, line, furi) if #scale_x > 0 then fx.scale_x = scale_x[1] else fx.scale_x = 1 end if fx.scale_x <= 0 then fx.scale_x = 0.1 end
-											scale_y1   = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.scale_y .."} end")() scale_y	= scale_y1(fx__, meta, syl, line, furi) if #scale_y > 0 then fx.scale_y = scale_y[1] else fx.scale_y = 1 end if fx.scale_y <= 0 then fx.scale_y = 0.1 end
-										end offset_maxspace = scale_x[2] or 0
+											scale_x1 = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.scale_x .."} end")( )
+											scale_x	= scale_x1( fx__, meta, syl, line, furi )
+											if #scale_x > 0 then
+												fx.scale_x = scale_x[1]
+											else
+												fx.scale_x = 1
+											end
+											if fx.scale_x <= 0 then
+												fx.scale_x = 0.1
+											end
+											scale_y1 = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.scale_y .."} end")( )
+											scale_y	= scale_y1( fx__, meta, syl, line, furi )
+											if #scale_y > 0 then
+												fx.scale_y = scale_y[1]
+											else
+												fx.scale_y = 1
+											end
+											if fx.scale_y <= 0 then
+												fx.scale_y = 0.1
+											end
+										end
+										offset_maxspace = scale_x[2] or 0
 										--variables de dominio de funciones--
 										if j == 1 then
-											s_i1	   = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.s_i .."} end")() s_i = s_i1(fx__, meta, syl, line, furi) if #s_i > 0 then fx.domain_i = s_i[1] else fx.domain_i = 0 end
-											s_f1	   = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.s_f .."} end")() s_f = s_f1(fx__, meta, syl, line, furi) if #s_f > 0 then fx.domain_f = s_f[1] else fx.domain_f = 1 end
-										end local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
+											s_i1 = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.s_i .."} end")( )
+											s_i = s_i1( fx__, meta, syl, line, furi )
+											if #s_i > 0 then
+												fx.domain_i = s_i[1]
+											else
+												fx.domain_i = 0
+											end
+											s_f1 = loadstring("return function(fx__, meta, syl, line, furi) return {".. fx__.s_f .."} end")( )
+											s_f = s_f1( fx__, meta, syl, line, furi )
+											if #s_f > 0 then
+												fx.domain_f = s_f[1]
+											else
+												fx.domain_f = 1
+											end
+										end
+										local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
 										--variables de funciones paramétricas--
-										fun_x1		   = loadstring("return function(fx__, meta, syl, line, furi, s) return {".. fx__.fun_x .."} end")() fun_x = fun_x1(fx__, meta, syl, line, furi, s) if #fun_x > 0 then fx.fun_x = fun_x[1]*fx.scale_x else fx.fun_x = 0 end
-										fun_y1		   = loadstring("return function(fx__, meta, syl, line, furi, s) return {".. fx__.fun_y .."} end")() fun_y = fun_y1(fx__, meta, syl, line, furi, s) if #fun_y > 0 then fx.fun_y = fun_y[1]*fx.scale_y else fx.fun_y = 0 end
+										fun_x1 = loadstring("return function(fx__, meta, syl, line, furi, s) return {".. fx__.fun_x .."} end")( )
+										fun_x = fun_x1( fx__, meta, syl, line, furi, s )
+										if #fun_x > 0 then
+											fx.fun_x = fun_x[1]*fx.scale_x
+										else
+											fx.fun_x = 0
+										end
+										fun_y1 = loadstring("return function(fx__, meta, syl, line, furi, s) return {".. fx__.fun_y .."} end")( )
+										fun_y = fun_y1( fx__, meta, syl, line, furi, s )
+										if #fun_y > 0 then
+											fx.fun_y = fun_y[1]*fx.scale_y
+										else
+											fx.fun_y = 0
+										end
 										--definir posición inicial--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
+										--fx.pos_x, fx.pos_y = effector.knj( fx__.v_kanji )
 										fx.off_x, fx.off_y = effector.modify_pos( )
 										--variables de posiciones--
 										fx.pos_x = fx.pos_x + fx.fun_x - fx.off_x
@@ -723,92 +1629,184 @@
 										fx.pos_b = fx.pos_y + furi.height/2
 										x, y = fx.pos_x, fx.pos_y
 										--variables de tamaño--
-										size1 = loadstring("return function(fx__, meta, syl, line, furi, s) return {".. fx__.size .."} end")() size = size1(fx__, meta, syl, line, furi, s)
+										size1 = loadstring("return function(fx__, meta, syl, line, furi, s) return {".. fx__.size .."} end")( )
+										size = size1( fx__, meta, syl, line, furi, s )
 										if #size > 0 then
-											if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
+											if #size == 1 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = fx.sizex
+											elseif #size == 2 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = math.round(size[2], 2)
+											end
 											fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
 										else
-											fx.sizex 	= L.scale_x
-											fx.sizey 	= L.scale_y
+											fx.sizex = L.scale_x
+											fx.sizey = L.scale_y
 											fx.tag_size = ""
 										end
 										--variables de alineación y de capa (layer)--
-										align1	   = loadstring("return function(fx__, meta, syl, line, furi, s, module) return {".. fx__.align .."} end")() align = align1(fx__, meta, syl, line, furi, s, module) if #align > 0 then fx.align = "\\an"..align[1] else fx.align = "" end
-										layer1	   = loadstring("return function(fx__, meta, syl, line, furi, s, module) return {".. fx__.layer .."} end")() layer = layer1(fx__, meta, syl, line, furi, s, module) fx.layer = layer[1] or 0
+										align1 = loadstring("return function(fx__, meta, syl, line, furi, s, module) return {".. fx__.align .."} end")( )
+										align = align1( fx__, meta, syl, line, furi, s, module )
+										if #align > 0 then
+											fx.align = "\\an"..align[1]
+										else
+											fx.align = ""
+										end
+										layer1 = loadstring("return function(fx__, meta, syl, line, furi, s, module) return {".. fx__.layer .."} end")( )
+										layer = layer1( fx__, meta, syl, line, furi, s, module )
+										fx.layer = layer[1] or l_layer
 										--variables de posiciones definitivas, dependiendo del "move"--
-										move_x11   = loadstring("return function(fx__, meta, syl, line, furi, x, y, s, module) return {".. fx__.move_x .."} end")()	move_x	= math.round(move_x11(fx__, meta, syl, line, furi, x, y, s, module), 2)
-										move_y11   = loadstring("return function(fx__, meta, syl, line, furi, x, y, s, module) return {".. fx__.move_y .."} end")()	move_y	= math.round(move_y11(fx__, meta, syl, line, furi, x, y, s, module), 2)
+										move_x11 = loadstring("return function(fx__, meta, syl, line, furi, x, y, s, module) return {".. fx__.move_x .."} end")( )
+										move_x = math.round(move_x11( fx__, meta, syl, line, furi, x, y, s, module ), 2)
+										move_y11 = loadstring("return function(fx__, meta, syl, line, furi, x, y, s, module) return {".. fx__.move_y .."} end")( )
+										move_y = math.round(move_y11( fx__, meta, syl, line, furi, x, y, s, module ), 2)
 										--variables de tiempo del movimiento--
-										if fx__.move_t:match("%d+%:%d+%:%d+%.%d+") then HMS_movet = {}; for c in fx__.move_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_movet, c ) end for i = 1, #HMS_movet do fx__.move_t = fx__.move_t:gsub(HMS_movet[i], tostring(HMS_to_ms(HMS_movet[i])), 1) end end
-										move_t1	   = loadstring("return function(fx__, meta, syl, line, furi, s, module) return {".. fx__.move_t .."} end")() 		move_t	= move_t1(fx__, meta, syl, line, furi, s, module)
-										fx.movet_i = math.round(move_t[1] or 0, 2);	fx.movet_f = math.round(move_t[2] or fx.dur, 2)
-										if #move_t > 0 then tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f) else tags_times = "" end
+										fx__.move_t = fx__.move_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										move_t1 = loadstring("return function(fx__, meta, syl, line, furi, s, module) return {".. fx__.move_t .."} end")( )
+										move_t = move_t1( fx__, meta, syl, line, furi, s, module )
+										fx.movet_i = math.round(move_t[1] or 0, 2)
+										fx.movet_f = math.round(move_t[2] or fx.dur, 2)
+										if #move_t > 0 then
+											tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f)
+										else
+											tags_times = ""
+										end
 										--posiciones finales--
 										Nmove = math.max(#move_x, #move_y)
-										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)	fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)	fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
-										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)	fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)	fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
-										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)	fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)	fx.angle1  = fx.move_x3
-										fx.angle2  = fx.move_x4								fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)	fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
-										tb_pos     = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
+										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)
+										fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)
+										fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
+										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)
+										fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)
+										fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
+										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)
+										fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)
+										fx.angle1 = fx.move_x3
+										fx.angle2 = fx.move_x4
+										fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)
+										fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
+										tb_pos = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
 										fx.move_l1, fx.move_r1, fx.move_t1, fx.move_b1 = fx.move_x1 - val_width/2, fx.move_x1 + val_width/2, fx.move_y1 - val_height/2, fx.move_y1 + val_height/2
 										fx.move_l2, fx.move_r2, fx.move_t2, fx.move_b2 = fx.move_x2 - val_width/2, fx.move_x2 + val_width/2, fx.move_y2 - val_height/2, fx.move_y2 + val_height/2
 										fx.move_l3, fx.move_r3, fx.move_t3, fx.move_b3 = fx.move_x3 - val_width/2, fx.move_x3 + val_width/2, fx.move_y3 - val_height/2, fx.move_y3 + val_height/2
 										fx.move_l4, fx.move_r4, fx.move_t4, fx.move_b4 = fx.move_x4 - val_width/2, fx.move_x4 + val_width/2, fx.move_y4 - val_height/2, fx.move_y4 + val_height/2
-										fx.pos     = effector.pos(Nmove, tb_pos, tags_times)
+										fx.pos = effector.pos(Nmove, tb_pos, tags_times)
 										fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 										fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
-										if pcall(loadstring("return function(fx__, meta, syl, line, furi) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then returnfx1 = loadstring("return function(fx__, meta, syl, line, furi) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")() returnfx = returnfx1(fx__, meta, syl, line, furi) else returnfx = {[1] = fx__.returnfx} end
-										Rline = 1; if returnfx[2] and returnfx[2] == "random" then Rline = 2 - R(count_fx + 1) end
+										if pcall(loadstring("return function(fx__, meta, syl, line, furi) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
+											returnfx1 = loadstring("return function(fx__, meta, syl, line, furi) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")( )
+											returnfx = returnfx1( fx__, meta, syl, line, furi )
+										else
+											returnfx = { [1] = fx__.returnfx }
+										end
+										Rline = 1
+										if returnfx[2] and returnfx[2] == "random" then
+											Rline = 2 - R(count_fx + 1)
+										end
 										if #returnfx > 0 or returnfx[1] ~= nil then
-											if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
-											if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, furi, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, furi, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end
+											if returnfx[1]:match("m %-?%d+[%.%d+]* %-?%d+[%.%d+]*") then
+												fx.Det = "\\p1"
+												if returnfx[1]:match("\\p%d") then
+													fx.Det = ""
+												end
+												tags_style = shape.style
+											else
+												fx.Det = ""
+												tags_style = text.style
+											end
+											if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then
+												fx.tag_size = "\\fscx100\\fscy100"
+											end
+											if fx__.language ~= "Automation Auto-4" then
+												addtag1 = loadstring("return function(fx__, meta, line, furi, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")( )
+												addtag = addtag1( fx__, meta, line, furi, x, y, module )
+												fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
+											else
+												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
+											end
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then
-													l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
-													l.effect = "Effector [Fx]";l.style = furi.style.name; l.layer = fx.layer; l.actor = actor_fx
+													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.effect = "Effector [Fx]"
+													l.style = furi.style.name
+													l.layer = fx.layer
+													l.actor = actor_fx
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
-													l.text	 = fx.tm(returnfx[1])
+													l.text = fx.tm(returnfx[1])
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												else
-													sett.linecomment = false
+													lines_comment = false
 													line.start_time = fx.start_time
-													line.end_time	= fx.end_time
-													line.text		= fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
+													line.end_time = fx.end_time
+													line.text = fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
 												end
 											end
-										end j = j + 1
+										end
+										j = j + 1
 										aegisub.progress.task(F("Lines: [%d/%d]  Progress: [%s%%]  Lines Generated: %d", count_ln, #idx_line, math.round(100*count_ln/#idx_line, 2), count_fx))
 										aegisub.progress.set(100*line.i/line.n)
-									end J = J + 1
+									end
+									J = J + 1
 								end
 							end
 						end
 					end
-				
 				end
 			end
 		end
 		
-		if (fx__.t_type == "Translation Line" or fx__.t_type == "Translation Word" or fx__.t_type == "Translation Char" or fx__.t_type == "Word") and line.text_stripped:gsub(" ", ""):gsub("	", "") ~= noblank1 then
+		if (fx__.t_type == "Translation Line" or fx__.t_type == "Translation Word" or fx__.t_type == "Translation Char" or fx__.t_type == "Word")
+			and line.text_stripped:gsub(" ", ""):gsub("	", "") ~= noblank1 then
+			
 			local x = line.center
 			local y	= line.middle
 			local l = table.copy(line)
-			if fx__.folderfx == "lead-in[fx]" then library_fx, library_mode, actor_fx = "leadin_fx_library", "leadin_fx", "lead-in" elseif fx__.folderfx == "hi-light[fx]" then library_fx, library_mode, actor_fx = "hilight_fx_library", "hilight_fx", "hi-light" elseif fx__.folderfx == "lead-out[fx]" then library_fx, library_mode, actor_fx = "leadout_fx_library", "leadout_fx", "lead-out" elseif fx__.folderfx == "shape[fx]" then library_fx, library_mode, actor_fx = "shape_fx_library", "shape_fx", "shape-fx"elseif fx__.folderfx == "translation[fx]" then library_fx, library_mode, actor_fx = "transla_fx_library", "transla_fx", "translation" end
+			if fx__.folderfx == "lead-in[fx]" then
+				library_fx, library_mode, actor_fx = "leadin_fx_library", "leadin_fx", "lead-in"
+			elseif fx__.folderfx == "hi-light[fx]" then
+				library_fx, library_mode, actor_fx = "hilight_fx_library", "hilight_fx", "hi-light"
+			elseif fx__.folderfx == "lead-out[fx]" then
+				library_fx, library_mode, actor_fx = "leadout_fx_library", "leadout_fx", "lead-out"
+			elseif fx__.folderfx == "shape[fx]" then
+				library_fx, library_mode, actor_fx = "shape_fx_library", "shape_fx", "shape-fx"
+			elseif fx__.folderfx == "translation[fx]" then
+				library_fx, library_mode, actor_fx = "transla_fx_library", "transla_fx", "translation"
+			end
 			if fx__.printfx == true then
-				library_title = fx__.folderfx; sett.linecomment = false
+				library_title = fx__.folderfx
+				lines_comment = false
 				if line.i == 1 then
-					newFX = fx__.namefx:gsub(" ", "_"); if newFX == "" then newFX = library_mode.."_"..tostring(os.time()):sub(-6, -1) end
-					if fx__.folderfx == "translation[fx]" then fx_GUI = "Trans_Box" elseif fx__.folderfx == "shape[fx]" then fx_GUI = "Shape_Box" else fx_GUI = "PfxM_Box" end
+					newFX = fx__.namefx:gsub(" ", "_")
+					if newFX == "" then
+						newFX = library_mode.."_"..tostring(os.time()):sub(-6, -1)
+					end
+					if fx__.folderfx == "translation[fx]" then
+						fx_GUI = "Trans_Box"
+					elseif fx__.folderfx == "shape[fx]" then
+						fx_GUI = "Shape_Box"
+					else
+						fx_GUI = "PfxM_Box"
+					end
 					New_fx_config = format("%s = table.duplicate(%s); table.inbox(%s, \"%s: %s\",\"%s\",%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"); table.insert(%s, %s); table.insert(%s, \"%s\")", newFX, fx_GUI, newFX, library_title, newFX:gsub("_", " "), fx_box[29].value, ((fx_box[30].value == true) and "true" or "false"), ((fx_box[31].value == true) and "true" or "false"), fx_box[32].value, fx_box[33].value, fx_box[34].value, fx_box[35].value, fx_box[36].value, fx_box[37].value, Ps(fx_box[38].text), Ps(fx_box[39].text), Ps(fx_box[40].text), Ps(fx_box[41].text), Ps(fx_box[42].text), Ps(fx_box[43].text), Ps(fx_box[44].text), Ps(fx_box[45].text), Ps(fx_box[46].text), Ps(fx_box[47].text), Ps(fx_box[48].text), Ps(fx_box[49].text), Ps(fx_box[50].text), Ps(fx_box[51].text), Ps(fx_box[52].text), Ps(fx_box[53].text), Ps(fx_box[54].text), Ps(fx_box[55].text), Ps(fx_box[56].text), Ps(fx_box[57].text), fx_box[66].value, library_fx, newFX, library_mode, newFX:gsub("_", " "))
 					if Path_Effector_newfx_lua == nil then
-						l.comment = true; l.effect = "Effector [Fx] Config"; l.start_time, l.end_time = 0, 0
+						l.comment = true
+						l.effect = "Effector [Fx] Config"
+						l.start_time, l.end_time = 0, 0
 						l.text = New_fx_config
 						subs.append(l)
 					else
-						fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx") while fx_libx:len() < 14 do fx_libx = fx_libx.." " end
+						fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx")
+						while fx_libx:len() < 14 do
+							fx_libx = fx_libx.." "
+						end
 						fx_date = format("--[[%s %s]] ", fx_libx, tostring(os.date()):sub(1, -4))
 						effector.savefx(fx_date..New_fx_config.."\n	", Path_Effector_newfx_lua)
 						aegisub.debug.out("The effect ★%s★ is saved in the Folder %s, you must reload the script Kara Effector so you can see it in the list effects type %s.\n\nEl efecto ★%s★ se ha guardado en el Folder %s, debes recargar el script Kara Effector para que puedas verlo en la lista de efectos tipo %s.", newFX:gsub("_", " "), fx__.folderfx, fx__.folderfx, newFX:gsub("_", " "), fx__.folderfx, fx__.folderfx)
@@ -816,12 +1814,16 @@
 					end
 				end
 			else
-				if fx__.namefx:sub(1,7) == "export " then
-					if line.i == 1 then export_text(fx__.namefx) sett.linecomment = false end
+				if fx__.namefx:sub(1, 7) == "export " then
+					if line.i == 1 then
+						export_text(fx__.namefx)
+						lines_comment = false
+					end
+					fx_box[62].text = ""
 				else
 				
 					actor_fx = fx__.effect:gsub("%[.+[%W+]*", "")
-					if  line.text_stripped:gsub(" ", ""):gsub("	", "") ~= noblank1 and line.duration > 0 then
+					if line.text_stripped:gsub(" ", ""):gsub("	", "") ~= noblank1 and line.duration > 0 then
 
 						if fx__.t_type == "Translation Line" then
 							-----------------------------------------------
@@ -841,72 +1843,203 @@
 							roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 							char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 							-----------------------------------------------
-							W_ = aegisub.line2W( ); S_ = aegisub.line2S( ); C_ = aegisub.line2C( )
+							W_ = aegisub.line2W( )
+							S_ = aegisub.line2S( )
+							C_ = aegisub.line2C( )
 							-----------------------------------------------
-							fx.replay_fx, J = 1, 1; maxJ = fx.replay_fx
-							while J <= fx.replay_fx do j = 1
-								if fx.replay_fx == 1 then moduler = 0 else moduler = (J - 1)/(maxJ - 1) end
-								module = 0; module1 = module; module2 = module1; fxgroup = true
+							fx.replay_fx, J = 1, 1
+							maxJ = fx.replay_fx
+							while J <= fx.replay_fx do
+								j = 1
+								if fx.replay_fx == 1 then
+									moduler = 0
+								else
+									moduler = (J - 1)/(maxJ - 1)
+								end
+								module = 0
+								module1 = module
+								module2 = module1
+								fxgroup = true
 								-----------------------------------------------
 								effector.default_val( )
 								-----------------------------------------------
 								if pcall(loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
-									variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")()
-									var_KEfx_ = variable_(fx__, meta, syl, line, x, y)
-								end variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")()
-								if line.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, meta, syl, line, x, y)) else var.once = recall.v_once end
-								if J == 1 then				   var.rep  = variable_(fx__, meta, syl, line, x, y) end
-								var.line  = variable_(fx__, meta, syl, line, x, y)	var.word, var.syl, var.furi, var.char = var.line, var.line, var.line, var.line
-								var.loop  = variable_(fx__, meta, syl, line, x, y)
+									variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")( )
+									var_KEfx_ = variable_( fx__, meta, syl, line, x, y )
+								end
+								variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
+								if line.i == 1 and J == 1 then
+									var.once = remember("v_once", variable_( fx__, meta, syl, line, x, y ))
+								else
+									var.once = recall.v_once
+								end
+								if J == 1 then
+									var.rep = variable_( fx__, meta, syl, line, x, y )
+								end
+								var.line = variable_( fx__, meta, syl, line, x, y )
+								var.word, var.syl, var.furi, var.char = var.line, var.line, var.line, var.line
+								var.loop = variable_( fx__, meta, syl, line, x, y )
 								-----------------------------------------------
-								maxloop1  = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")()	maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-								loop_h    = ceil((maxloop_fx[1] or 1)*(line.width + 2*L.outline)/(line.height + 2*L.outline))				maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-								fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1; 			fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
+								maxloop1 = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")( )
+								maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+								loop_h = ceil((maxloop_fx[1] or 1)*(line.width + 2*L.outline)/(line.height + 2*L.outline))
+								maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+								fx.loop_v = maxloop_fx[1] or 1
+								fx.loop_h = maxloop_fx[2] or 1
+								fx.loop_3 = maxloop_fx[3] or 1
+								fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
+								maxj = fx.maxloop_fx
 								-----------------------------------------------
 								while j <= fx.maxloop_fx do
-									var.loop = variable_(fx__, meta, syl, line, x, y)
+									var.loop = variable_( fx__, meta, syl, line, x, y )
 									--variables de modulo--
-									if fx.maxloop_fx == 1 then module  = 0		 else module  = (j - 1)/(maxj - 1) end
-									if line.n == 1		  then module2 = module else module2 = (line.i + module - 1)/line.n end
+									if fx.maxloop_fx == 1 then
+										module = 0
+									else
+										module = (j - 1)/(maxj - 1)
+									end
+									if line.n == 1 then
+										module2 = module
+									else
+										module2 = (line.i + module - 1)/(line.n + module - 1)
+									end
 									--variables de tiempo--
-									if fx__.start_t:match("%d+%:%d+%:%d+%.%d+") then HMS_start = {}; for c in fx__.start_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_start, c ) end for i = 1, #HMS_start do fx__.start_t = fx__.start_t:gsub(HMS_start[i], tostring(HMS_to_ms(HMS_start[i])), 1) end end
-									if fx__.end_t:match("%d+%:%d+%:%d+%.%d+") then HMS_end = {}; for c in fx__.end_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_end, c ) end for i = 1, #HMS_end do fx__.end_t = fx__.end_t:gsub(HMS_end[i], tostring(HMS_to_ms(HMS_end[i])), 1) end end
-									start_t1	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")() 	start_t	= start_t1(fx__, meta, syl, line, module)	if #start_t > 0 then fx.start_time = start_t[1] else fx.start_time = line.start_time end
+									fx__.start_t = fx__.start_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+										function( time_HMS )
+											return tostring( HMS_to_ms( time_HMS ) )
+										end
+									)
+									fx__.end_t = fx__.end_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+										function( time_HMS )
+											return tostring( HMS_to_ms( time_HMS ) )
+										end
+									)
+									start_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")( )
+									start_t	= start_t1( fx__, meta, syl, line, module )
+									if #start_t > 0 then
+										fx.start_time = start_t[1]
+									else
+										fx.start_time = line.start_time
+									end
 									l.start_time = fx.start_time
-									end_t1   	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")()	end_t	= end_t1(fx__, meta, syl, line, module)		if #end_t > 0 then fx.end_time = end_t[1] else fx.end_time = line.end_time end
-									l.end_time	 = fx.end_time
-									fx.dur		 = fx.end_time - fx.start_time
-									function retime(mode, add_start, add_end)
-										add_start = HMS_to_ms(add_start) or 0; add_end = HMS_to_ms(add_end) or 0
-										if     mode == "line"		then l.start_time = line.start_time + add_start; l.end_time = line.end_time + add_end
-										elseif mode == "preline"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + add_end
-										elseif mode == "postline"	then l.start_time = line.end_time + add_start; l.end_time = line.end_time + add_end
-										elseif mode == "linepct"	then l.start_time = line.start_time + add_start*line.duration/100; l.end_time = line.start_time + add_end*line.duration/100
-										elseif mode == "set"		or mode == "abs" then l.start_time = add_start; l.end_time = add_end
-										elseif mode == "fxpretime"	then l.start_time = fx.start_time	+ add_start; l.end_time = fx.start_time + add_end
-										elseif mode == "fxtime"		then l.start_time = fx.start_time	+ add_start; l.end_time = fx.end_time + add_end
-										elseif mode == "fxposttime"	then l.start_time = fx.end_time		+ add_start; l.end_time = fx.end_time + add_end
-										elseif mode == "fxpct"		then l.start_time = fx.start_time	+ add_start*fx.dur/100; l.end_time = fx.start_time + add_end*fx.dur/100
-										end	   fx.start_time, fx.end_time = l.start_time, l.end_time; fx.dur = fx.end_time - fx.start_time
+									end_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")( )
+									end_t = end_t1( fx__, meta, syl, line, module )
+									if #end_t > 0 then
+										fx.end_time = end_t[1]
+									else
+										fx.end_time = line.end_time
+									end
+									l.end_time = fx.end_time
+									fx.dur = fx.end_time - fx.start_time
+									function retime( mode, add_start, add_end )
+										add_start = HMS_to_ms(add_start) or 0
+										add_end = HMS_to_ms(add_end) or 0
+										if mode == "line" then
+											l.start_time = line.start_time + add_start
+											l.end_time = line.end_time + add_end
+										elseif mode == "preline" then
+											l.start_time = line.start_time + add_start
+											l.end_time = line.start_time + add_end
+										elseif mode == "postline" then
+											l.start_time = line.end_time + add_start
+											l.end_time = line.end_time + add_end
+										elseif mode == "linepct" then
+											l.start_time = line.start_time + add_start*line.duration/100
+											l.end_time = line.start_time + add_end*line.duration/100
+										elseif mode == "set" or mode == "abs" then
+											l.start_time = add_start
+											l.end_time = add_end
+										elseif mode == "fxpretime" then
+											l.start_time = fx.start_time + add_start
+											l.end_time = fx.start_time + add_end
+										elseif mode == "fxtime" then
+											l.start_time = fx.start_time + add_start
+											l.end_time = fx.end_time + add_end
+										elseif mode == "fxposttime"	then
+											l.start_time = fx.end_time + add_start
+											l.end_time = fx.end_time + add_end
+										elseif mode == "fxpct" then
+											l.start_time = fx.start_time + add_start*fx.dur/100
+											l.end_time = fx.start_time + add_end*fx.dur/100
+										end
+										fx.start_time, fx.end_time = l.start_time, l.end_time
+										fx.dur = fx.end_time - fx.start_time
 										return ""
 									end
 									---------------------------------------------------
 									--variables de punto de referencia--
-									center_x1	 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")() center_x = center_x1(fx__, meta, syl, line, x, y, module) if #center_x > 0 then fx.center_x = center_x[1] else fx.center_x = val_center end
-									center_y1	 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")() center_y = center_y1(fx__, meta, syl, line, x, y, module) if #center_y > 0 then fx.center_y = center_y[1] else fx.center_y = val_middle end
+									center_x1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")( )
+									center_x = center_x1( fx__, meta, syl, line, x, y, module )
+									if #center_x > 0 then
+										fx.center_x = center_x[1]
+									else
+										fx.center_x = val_center
+									end
+									center_y1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")( )
+									center_y = center_y1( fx__, meta, syl, line, x, y, module )
+									if #center_y > 0 then
+										fx.center_y = center_y[1]
+									else
+										fx.center_y = val_middle
+									end
 									--variables de escalas de funciones paramétricas-- 
 									if j == 1 then
-										scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")()	scale_x	= scale_x1(fx__, meta, syl, line) if #scale_x > 0 then fx.scale_x = scale_x[1] else fx.scale_x = 1 end if fx.scale_x <= 0 then fx.scale_x = 0.1 end
-										scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")()	scale_y	= scale_y1(fx__, meta, syl, line) if #scale_y > 0 then fx.scale_y = scale_y[1] else fx.scale_y = 1 end if fx.scale_y <= 0 then fx.scale_y = 0.1 end
-									end offset_maxspace = scale_x[2] or 0
+										scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")( )
+										scale_x	= scale_x1( fx__, meta, syl, line )
+										if #scale_x > 0 then
+											fx.scale_x = scale_x[1]
+										else
+											fx.scale_x = 1
+										end
+										if fx.scale_x <= 0 then
+											fx.scale_x = 0.1
+										end
+										scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")( )
+										scale_y	= scale_y1( fx__, meta, syl, line )
+										if #scale_y > 0 then
+											fx.scale_y = scale_y[1]
+										else
+											fx.scale_y = 1
+										end
+										if fx.scale_y <= 0 then
+											fx.scale_y = 0.1
+										end
+									end
+									offset_maxspace = scale_x[2] or 0
 									--variables de dominio de funciones--
 									if j == 1 then
-										s_i1	 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")() s_i = s_i1(fx__, meta, syl, line) if #s_i > 0 then fx.domain_i = s_i[1] else fx.domain_i = 0 end
-										s_f1	 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")() s_f = s_f1(fx__, meta, syl, line) if #s_f > 0 then fx.domain_f = s_f[1] else fx.domain_f = 1 end
-									end  local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
+										s_i1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")( )
+										s_i = s_i1( fx__, meta, syl, line )
+										if #s_i > 0 then
+											fx.domain_i = s_i[1]
+										else
+											fx.domain_i = 0
+										end
+										s_f1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")( )
+										s_f = s_f1( fx__, meta, syl, line )
+										if #s_f > 0 then
+											fx.domain_f = s_f[1]
+										else
+											fx.domain_f = 1
+										end
+									end
+									local
+									s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
 									--variables de funciones paramétricas--
-									fun_x1		 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")() 	fun_x = fun_x1(fx__, meta, syl, line, s) if #fun_x > 0 then fx.fun_x = fun_x[1]*fx.scale_x else fx.fun_x = 0 end
-									fun_y1		 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")() 	fun_y = fun_y1(fx__, meta, syl, line, s) if #fun_y > 0 then fx.fun_y = fun_y[1]*fx.scale_y else fx.fun_y = 0 end
+									fun_x1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")( )
+									fun_x = fun_x1( fx__, meta, syl, line, s )
+									if #fun_x > 0 then
+										fx.fun_x = fun_x[1]*fx.scale_x
+									else
+										fx.fun_x = 0
+									end
+									fun_y1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")( )
+									fun_y = fun_y1( fx__, meta, syl, line, s )
+									if #fun_y > 0 then
+										fx.fun_y = fun_y[1]*fx.scale_y
+									else
+										fx.fun_y = 0
+									end
 									--definir las posiciones iniciales--
 									fx.pos_x = fx.center_x
 									fx.pos_y = fx.center_y
@@ -921,92 +2054,178 @@
 									x, y = fx.pos_x, fx.pos_y
 									--variables de tamaño--
 									if fx__.size ~= nil and fx__.size ~= "" then
-										size1		= loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")() 	size = size1(fx__, meta, syl, line, s)
-										if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
+										size1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")( )
+										size = size1( fx__, meta, syl, line, s )
+										if #size == 1 then
+											fx.sizex = math.round(size[1], 2)
+											fx.sizey = fx.sizex
+										elseif #size == 2 then
+											fx.sizex = math.round(size[1], 2)
+											fx.sizey = math.round(size[2], 2)
+										end
 										fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
 									else
-										fx.sizex 	= L.scale_x
-										fx.sizey 	= L.scale_y
+										fx.sizex = L.scale_x
+										fx.sizey = L.scale_y
 										fx.tag_size = ""
 									end
 									--variables de alineación y de capa (layer)--
-									align1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")() align = align1(fx__, meta, syl, line, s, module) if #align > 0 then fx.align = "\\an"..align[1] else fx.align = "" end
-									layer1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")() layer = layer1(fx__, meta, syl, line, s, module) fx.layer = layer[1] or 0
+									align1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")( )
+									align = align1( fx__, meta, syl, line, s, module )
+									if #align > 0 then
+										fx.align = "\\an"..align[1]
+									else
+										fx.align = ""
+									end
+									layer1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")( )
+									layer = layer1( fx__, meta, syl, line, s, module )
+									fx.layer = layer[1] or l_layer
 									--variables de posiciones, dependiendo del "move"--
-									move_x11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")()	move_x	= math.round(move_x11(fx__, meta, syl, line, x, y, s, module), 2)
-									move_y11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")()	move_y	= math.round(move_y11(fx__, meta, syl, line, x, y, s, module), 2)
+									move_x11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")( )
+									move_x = math.round(move_x11( fx__, meta, syl, line, x, y, s, module ), 2)
+									move_y11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")( )
+									move_y = math.round(move_y11( fx__, meta, syl, line, x, y, s, module ), 2)
 									--variables de tiempo del movimiento--
-									if fx__.move_t:match("%d+%:%d+%:%d+%.%d+") then HMS_movet = {}; for c in fx__.move_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_movet, c ) end for i = 1, #HMS_movet do fx__.move_t = fx__.move_t:gsub(HMS_movet[i], tostring(HMS_to_ms(HMS_movet[i])), 1) end end
-									move_t1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")() 		move_t	= move_t1(fx__, meta, syl, line, s, module)
-									fx.movet_i = math.round(move_t[1] or 0, 2);	fx.movet_f = math.round(move_t[2] or fx.dur, 2)
-									if #move_t > 0 then tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f) else tags_times = "" end
+									fx__.move_t = fx__.move_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+										function( time_HMS )
+											return tostring( HMS_to_ms( time_HMS ) )
+										end
+									)
+									move_t1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")( )
+									move_t = move_t1( fx__, meta, syl, line, s, module )
+									fx.movet_i = math.round(move_t[1] or 0, 2)
+									fx.movet_f = math.round(move_t[2] or fx.dur, 2)
+									if #move_t > 0 then
+										tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f)
+									else
+										tags_times = ""
+									end
 									--posiciones finales--
 									Nmove = math.max(#move_x, #move_y)
-									fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)	fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)	fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
-									fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)	fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)	fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
-									fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)	fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)	fx.angle1  = fx.move_x3
-									fx.angle2  = fx.move_x4								fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)	fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
-									tb_pos     = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
+									fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)
+									fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)
+									fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
+									fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)
+									fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)
+									fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
+									fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)
+									fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)
+									fx.angle1 = fx.move_x3
+									fx.angle2 = fx.move_x4
+									fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)
+									fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
+									tb_pos = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
 									fx.move_l1, fx.move_r1, fx.move_t1, fx.move_b1 = fx.move_x1 - val_width/2, fx.move_x1 + val_width/2, fx.move_y1 - val_height/2, fx.move_y1 + val_height/2
 									fx.move_l2, fx.move_r2, fx.move_t2, fx.move_b2 = fx.move_x2 - val_width/2, fx.move_x2 + val_width/2, fx.move_y2 - val_height/2, fx.move_y2 + val_height/2
 									fx.move_l3, fx.move_r3, fx.move_t3, fx.move_b3 = fx.move_x3 - val_width/2, fx.move_x3 + val_width/2, fx.move_y3 - val_height/2, fx.move_y3 + val_height/2
 									fx.move_l4, fx.move_r4, fx.move_t4, fx.move_b4 = fx.move_x4 - val_width/2, fx.move_x4 + val_width/2, fx.move_y4 - val_height/2, fx.move_y4 + val_height/2
-									fx.pos     = effector.pos(Nmove, tb_pos, tags_times)
+									fx.pos = effector.pos(Nmove, tb_pos, tags_times)
 									fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 									fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
-									if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")() returnfx = returnfx1(fx__, meta, syl, line) else returnfx = {[1] = fx__.returnfx} end
-									Rline = 1; if returnfx[2] and returnfx[2] == "random" then Rline = 2 - R(count_fx + 1) end
+									if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
+										returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")( )
+										returnfx = returnfx1( fx__, meta, syl, line )
+									else
+										returnfx = { [1] = fx__.returnfx }
+									end
+									Rline = 1
+									if returnfx[2] and returnfx[2] == "random" then
+										Rline = 2 - R(count_fx + 1)
+									end
 									if #returnfx > 0 or returnfx[1] ~= nil then
-										if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
-										if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end
+										if returnfx[1]:match("m %-?%d+[%.%d+]* %-?%d+[%.%d+]*") then
+											fx.Det = "\\p1"
+											if returnfx[1]:match("\\p%d") then
+												fx.Det = ""
+											end
+											tags_style = shape.style
+										else
+											fx.Det = ""
+											tags_style = text.style
+										end
+										if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then
+											fx.tag_size = "\\fscx100\\fscy100"
+										end
+										if fx__.language ~= "Automation Auto-4" then
+											addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")( )
+											addtag = addtag1( fx__, meta, line, x, y, module )
+											fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
+										else
+											fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
+										end
 										if fxgroup == true then
 											if fx__.modify == false and fx__.namefx ~= "raw" then
-												l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
-												l.effect = "Effector [Fx]"; l.layer = fx.layer; l.actor = actor_fx
+												l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+												l.effect = "Effector [Fx]"
+												l.layer = fx.layer
+												l.actor = actor_fx
 												subs.insert(#subs + Rline, l)
 												count_fx = count_fx + 1
 											elseif fx__.modify == false and fx__.namefx == "raw" then
-												l.text	 = fx.tm(returnfx[1])
+												l.text = fx.tm(returnfx[1])
 												subs.insert(#subs + Rline, l)
 												count_fx = count_fx + 1
 											else
-												sett.linecomment = false
+												lines_comment = false
 												line.start_time = fx.start_time
-												line.end_time	= fx.end_time
-												line.text		= fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
+												line.end_time = fx.end_time
+												line.text = fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
 											end
 										end
-									end j = j + 1
+									end
+									j = j + 1
 									aegisub.progress.task(F("Lines: [%d/%d]  Progress: [%s%%]  Lines Generated: %d", count_ln, #idx_line, math.round(100*count_ln/#idx_line, 2), count_fx))
 									aegisub.progress.set(100*line.i/line.n)
-								end J = J + 1
+								end
+								J = J + 1
 							end
 						end
 
 						if fx__.t_type == "Word" or fx__.t_type == "Translation Word" then
 							-----------------------------------------------
-							fx.replay_fx, J = 1, 1; maxJ = fx.replay_fx
+							fx.replay_fx, J = 1, 1
+							maxJ = fx.replay_fx
 							while J <= fx.replay_fx do
-								if fx.replay_fx == 1 then moduler = 0 else moduler = (J - 1)/(maxJ - 1) end
-								module = 0; module1 = module; module2 = module1; fxgroup = true
+								if fx.replay_fx == 1 then
+									moduler = 0
+								else
+									moduler = (J - 1)/(maxJ - 1)
+								end
+								module = 0
+								module1 = module
+								module2 = module1
+								fxgroup = true
 								--------------------------------------------------
-								word = { }; for w in line.text_stripped:gmatch("%S+") do table.insert(word, w) end
+								word = { }
+								for w in line.text_stripped:gmatch("%S+") do
+									table.insert(word, w)
+								end
 								word.i, word.n, width, left = 1, #word, 0, line.left
 								--------------------------------------------------
-								for w in line.text_stripped:gsub("\\N", " "):gsub("  ", " "):gmatch("%S+") do j = 1
-									word.text = w; word.text_stripped = w
-									width = aegisub.text_extents(line.styleref, word.text); widtht = aegisub.text_extents(line.styleref, word.text.." ")
-									word.width = width; word.height = l.height; word.top = l.top; word.middle = l.middle; word.bottom = l.bottom
-									word.left = left; word.right = left + word.width; word.center = left + word.width/2
+								for w in line.text_stripped:gsub("\\N", " "):gsub("  ", " "):gmatch("%S+") do
+									j = 1
+									word.text = w
+									word.text_stripped = w
+									width = aegisub.text_extents(line.styleref, word.text)
+									widtht = aegisub.text_extents(line.styleref, word.text.." ")
+									word.width = width
+									word.height = l.height
+									word.top = l.top
+									word.middle = l.middle
+									word.bottom = l.bottom
+									word.left = left
+									word.right = left + word.width
+									word.center = left + word.width/2
 									word.start_time = line.duration*(word.i - 1)/word.n
-									word.end_time	= line.duration*(word.i - 0)/word.n
-									word.duration	= word.end_time - word.start_time
-									word.dur		= word.duration
-									word.mid_time	= word.start_time + word.dur/2
-									word.widthmax	= math.max(unpack(mmwth[ii].wo))
-									word.widthmin	= math.min(unpack(mmwth[ii].wo))
-									word.durmax  	= math.max(unpack(mmdur[ii].wo))
-									word.durmin  	= math.min(unpack(mmdur[ii].wo))
+									word.end_time = line.duration*(word.i - 0)/word.n
+									word.duration = word.end_time - word.start_time
+									word.dur = word.duration
+									word.mid_time = word.start_time + word.dur/2
+									word.widthmax = math.max(unpack(mmwth[ii].wo))
+									word.widthmin = math.min(unpack(mmwth[ii].wo))
+									word.durmax = math.max(unpack(mmdur[ii].wo))
+									word.durmin = math.min(unpack(mmdur[ii].wo))
+									--word.text_raw	= linefx[ii].word[word.i].text_raw
 									-----------------------------------------------
 									W_ = aegisub.word(line.text, line.dur, word.i)
 									-----------------------------------------------
@@ -1026,79 +2245,218 @@
 									roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 									char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 									-----------------------------------------------
-									S_ = aegisub.word2S( ); C_ = aegisub.word2C( )
+									S_ = aegisub.word2S( )
+									C_ = aegisub.word2C( )
 									-----------------------------------------------
 									effector.default_val( )
 									-----------------------------------------------
 									if pcall(loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
-										variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")()
-										var_KEfx_ = variable_(fx__, meta, syl, line, x, y)
-									end variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")()
-									if line.i == 1 and word.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, meta, syl, line, x, y)) else var.once = recall.v_once end
-									if word.i == 1 and J == 1 then 			       var.line = variable_(fx__, meta, syl, line, x, y) end
-									if J == 1 then								   var.rep  = variable_(fx__, meta, syl, line, x, y) end
-									var.word  = variable_(fx__, meta, syl, line, x, y)	var.syl, var.furi, var.char = var.word, var.word, var.word
-									var.loop  = variable_(fx__, meta, syl, line, x, y)
+										variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")( )
+										var_KEfx_ = variable_( fx__, meta, syl, line, x, y )
+									end
+									variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
+									if line.i == 1 and word.i == 1 and J == 1 then
+										var.once = remember("v_once", variable_( fx__, meta, syl, line, x, y ))
+									else
+										var.once = recall.v_once
+									end
+									if word.i == 1 and J == 1 then
+										var.line = variable_( fx__, meta, syl, line, x, y )
+									end
+									if J == 1 then
+										var.rep = variable_( fx__, meta, syl, line, x, y )
+									end
+									var.word = variable_( fx__, meta, syl, line, x, y )
+									var.syl, var.furi, var.char = var.word, var.word, var.word
+									var.loop = variable_( fx__, meta, syl, line, x, y )
 									-----------------------------------------------
-									maxloop1  = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")()	maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-									loop_h    = ceil((maxloop_fx[1] or 1)*(word.width + 2*L.outline)/(word.height + 2*L.outline))				maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-									fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1; 			fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
+									maxloop1 = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")( )
+									maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+									loop_h = ceil((maxloop_fx[1] or 1)*(word.width + 2*L.outline)/(word.height + 2*L.outline))
+									maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+									fx.loop_v = maxloop_fx[1] or 1
+									fx.loop_h = maxloop_fx[2] or 1
+									fx.loop_3 = maxloop_fx[3] or 1
+									fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
+									maxj = fx.maxloop_fx
 									-----------------------------------------------
 									while j <= fx.maxloop_fx do
-										var.loop = variable_(fx__, meta, syl, line, x, y)
+										var.loop = variable_( fx__, meta, syl, line, x, y )
 										--variables de modulo--
-										if fx.maxloop_fx == 1 then module  = 0		 else module  = (j - 1)/(maxj - 1) end
-										if word.n == 1		  then module1 = module  else module1 = (word.i + module - 1)/word.n end
-										if line.n == 1		  then module2 = module1 else module2 = (line.i + module1 - 1)/line.n end
+										if fx.maxloop_fx == 1 then
+											module = 0
+										else
+											module = (j - 1)/(maxj - 1)
+										end
+										if word.n == 1 then
+											module1 = module
+										else
+											module1 = (word.i + module - 1)/(word.n + module - 1)
+										end
+										if line.n == 1 then
+											module2 = module1
+										else
+											module2 = (line.i + module1 - 1)/(line.n + module1 - 1)
+										end
 										--variables de tiempo--
-										if fx__.start_t:match("%d+%:%d+%:%d+%.%d+") then HMS_start = {}; for c in fx__.start_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_start, c ) end for i = 1, #HMS_start do fx__.start_t = fx__.start_t:gsub(HMS_start[i], tostring(HMS_to_ms(HMS_start[i])), 1) end end
-										if fx__.end_t:match("%d+%:%d+%:%d+%.%d+") then HMS_end = {}; for c in fx__.end_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_end, c ) end for i = 1, #HMS_end do fx__.end_t = fx__.end_t:gsub(HMS_end[i], tostring(HMS_to_ms(HMS_end[i])), 1) end end
-										start_t1	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")() 	start_t	= start_t1(fx__, meta, syl, line, module)	if #start_t > 0 then fx.start_time = start_t[1] else fx.start_time = line.start_time end
+										fx__.start_t = fx__.start_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										fx__.end_t = fx__.end_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										start_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")( )
+										start_t	= start_t1( fx__, meta, syl, line, module )
+										if #start_t > 0 then
+											fx.start_time = start_t[1]
+										else
+											fx.start_time = line.start_time
+										end
 										l.start_time = fx.start_time
-										end_t1   	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")()	end_t	= end_t1(fx__, meta, syl, line, module)		if #end_t > 0 then fx.end_time = end_t[1] else fx.end_time = line.end_time end
-										l.end_time	 = fx.end_time
-										fx.dur		 = fx.end_time - fx.start_time
-										function retime(mode, add_start, add_end)
-											add_start = HMS_to_ms(add_start) or 0; add_end = HMS_to_ms(add_end) or 0
-											if     mode == "line"		then l.start_time = line.start_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "preline"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + add_end
-											elseif mode == "postline"	then l.start_time = line.end_time   + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "word"		then l.start_time = line.start_time + word.start_time + add_start; l.end_time = line.start_time + word.end_time + add_end
-											elseif mode == "preword"	then l.start_time = line.start_time + word.start_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "postword"	then l.start_time = line.start_time + word.end_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "start2word"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "word2end"	then l.start_time = line.start_time + word.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "linepct"    then l.start_time = line.start_time + add_start*line.duration/100; l.end_time = line.start_time + add_end*line.duration/100
-											elseif mode == "wordpct"	then l.start_time = line.start_time + word.start_time + add_start*word.duration/100; l.end_time = line.start_time + word.start_time + add_end*word.duration/100
-											elseif mode == "set"		or mode == "abs" then  l.start_time = add_start; l.end_time = add_end
-											elseif mode == "fxpretime"	then l.start_time = fx.start_time	+ add_start; l.end_time = fx.start_time + add_end
-											elseif mode == "fxtime"		then l.start_time = fx.start_time	+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxposttime"	then l.start_time = fx.end_time		+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxpct"		then l.start_time = fx.start_time	+ add_start*fx.dur/100; l.end_time = fx.start_time + add_end*fx.dur/100
-											end	   fx.start_time, fx.end_time = l.start_time, l.end_time; fx.dur = fx.end_time - fx.start_time
+										end_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")( )
+										end_t = end_t1( fx__, meta, syl, line, module )
+										if #end_t > 0 then
+											fx.end_time = end_t[1]
+										else
+											fx.end_time = line.end_time
+										end
+										l.end_time = fx.end_time
+										fx.dur = fx.end_time - fx.start_time
+										function retime( mode, add_start, add_end )
+											add_start = HMS_to_ms(add_start) or 0
+											add_end = HMS_to_ms(add_end) or 0
+											if mode == "line" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "preline" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + add_end
+											elseif mode == "postline" then
+												l.start_time = line.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "word" then
+												l.start_time = line.start_time + word.start_time + add_start
+												l.end_time = line.start_time + word.end_time + add_end
+											elseif mode == "preword" then
+												l.start_time = line.start_time + word.start_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "postword" then
+												l.start_time = line.start_time + word.end_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "start2word"	then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "word2end" then
+												l.start_time = line.start_time + word.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "linepct" then
+												l.start_time = line.start_time + add_start*line.duration/100
+												l.end_time = line.start_time + add_end*line.duration/100
+											elseif mode == "wordpct" then
+												l.start_time = line.start_time + word.start_time + add_start*word.duration/100
+												l.end_time = line.start_time + word.start_time + add_end*word.duration/100
+											elseif mode == "set" or mode == "abs" then
+												l.start_time = add_start
+												l.end_time = add_end
+											elseif mode == "fxpretime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.start_time + add_end
+											elseif mode == "fxtime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxposttime"	then
+												l.start_time = fx.end_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxpct" then
+												l.start_time = fx.start_time + add_start*fx.dur/100
+												l.end_time = fx.start_time + add_end*fx.dur/100
+											end
+											fx.start_time, fx.end_time = l.start_time, l.end_time
+											fx.dur = fx.end_time - fx.start_time
 											return ""
 										end
 										---------------------------------------------------
-										without = { };  ini = line.start_time - fx.start_time
-										without.word	= format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + word.start_time, ini + word.start_time + 1, ini + word.end_time, ini + word.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
+										without = { }
+										ini = line.start_time - fx.start_time
+										without.word = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + word.start_time, ini + word.start_time + 1, ini + word.end_time, ini + word.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
 										word.word_start = ini + word.start_time
-										word.word_end   = word.word_start + word.dur
+										word.word_end = word.word_start + word.dur
 										--variables de punto de referencia--
-										center_x1	 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")() center_x = center_x1(fx__, meta, syl, line, x, y, module) if #center_x > 0 then fx.center_x = center_x[1] else fx.center_x = val_center end
-										center_y1	 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")() center_y = center_y1(fx__, meta, syl, line, x, y, module) if #center_y > 0 then fx.center_y = center_y[1] else fx.center_y = val_middle end
+										center_x1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")( )
+										center_x = center_x1( fx__, meta, syl, line, x, y, module )
+										if #center_x > 0 then
+											fx.center_x = center_x[1]
+										else
+											fx.center_x = val_center
+										end
+										center_y1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")( )
+										center_y = center_y1( fx__, meta, syl, line, x, y, module )
+										if #center_y > 0 then
+											fx.center_y = center_y[1]
+										else
+											fx.center_y = val_middle
+										end
 										--variables de escalas de funciones paramétricas-- 
 										if j == 1 then
-											scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")()	scale_x	= scale_x1(fx__, meta, syl, line) if #scale_x > 0 then fx.scale_x = scale_x[1] else fx.scale_x = 1 end if fx.scale_x <= 0 then fx.scale_x = 0.1 end
-											scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")()	scale_y	= scale_y1(fx__, meta, syl, line) if #scale_y > 0 then fx.scale_y = scale_y[1] else fx.scale_y = 1 end if fx.scale_y <= 0 then fx.scale_y = 0.1 end
-										end offset_maxspace = scale_x[2] or 0
+											scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")( )
+											scale_x	= scale_x1( fx__, meta, syl, line )
+											if #scale_x > 0 then
+												fx.scale_x = scale_x[1]
+											else
+												fx.scale_x = 1
+											end
+											if fx.scale_x <= 0 then
+												fx.scale_x = 0.1
+											end
+											scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")( )
+											scale_y	= scale_y1( fx__, meta, syl, line )
+											if #scale_y > 0 then
+												fx.scale_y = scale_y[1]
+											else
+												fx.scale_y = 1
+											end
+											if fx.scale_y <= 0 then
+												fx.scale_y = 0.1
+											end
+										end
+										offset_maxspace = scale_x[2] or 0
 										--variables de dominio de funciones--
 										if j == 1 then
-											s_i1	 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")() s_i = s_i1(fx__, meta, syl, line) if #s_i > 0 then fx.domain_i = s_i[1] else fx.domain_i = 0 end
-											s_f1	 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")() s_f = s_f1(fx__, meta, syl, line) if #s_f > 0 then fx.domain_f = s_f[1] else fx.domain_f = 1 end
-										end  local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
+											s_i1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")( )
+											s_i = s_i1( fx__, meta, syl, line )
+											if #s_i > 0 then
+												fx.domain_i = s_i[1]
+											else
+												fx.domain_i = 0
+											end
+											s_f1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")( )
+											s_f = s_f1( fx__, meta, syl, line )
+											if #s_f > 0 then
+												fx.domain_f = s_f[1]
+											else
+												fx.domain_f = 1
+											end
+										end
+										local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
 										--variables de funciones paramétricas--
-										fun_x1		 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")() 	fun_x = fun_x1(fx__, meta, syl, line, s) if #fun_x > 0 then fx.fun_x = fun_x[1]*fx.scale_x else fx.fun_x = 0 end
-										fun_y1		 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")() 	fun_y = fun_y1(fx__, meta, syl, line, s) if #fun_y > 0 then fx.fun_y = fun_y[1]*fx.scale_y else fx.fun_y = 0 end
+										fun_x1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")( )
+										fun_x = fun_x1( fx__, meta, syl, line, s )
+										if #fun_x > 0 then
+											fx.fun_x = fun_x[1]*fx.scale_x
+										else
+											fx.fun_x = 0
+										end
+										fun_y1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")( )
+										fun_y = fun_y1( fx__, meta, syl, line, s )
+										if #fun_y > 0 then
+											fx.fun_y = fun_y[1]*fx.scale_y
+										else
+											fx.fun_y = 0
+										end
 										--definir las posiciones iniciales--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
@@ -1113,85 +2471,159 @@
 										x, y = fx.pos_x, fx.pos_y
 										--variables de tamaño--
 										if fx__.size ~= nil and fx__.size ~= "" then
-											size1		= loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")() 	size = size1(fx__, meta, syl, line, s)
-											if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
+											size1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")( )
+											size = size1( fx__, meta, syl, line, s )
+											if #size == 1 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = fx.sizex
+											elseif #size == 2 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = math.round(size[2], 2)
+											end
 											fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
 										else
-											fx.sizex 	= L.scale_x
-											fx.sizey 	= L.scale_y
+											fx.sizex = L.scale_x
+											fx.sizey = L.scale_y
 											fx.tag_size = ""
 										end
 										--variables de alineación y de capa (layer)--
-										align1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")() align = align1(fx__, meta, syl, line, s, module) if #align > 0 then fx.align = "\\an"..align[1] else fx.align = "" end
-										layer1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")() layer = layer1(fx__, meta, syl, line, s, module) fx.layer = layer[1] or 0
+										align1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")( )
+										align = align1( fx__, meta, syl, line, s, module )
+										if #align > 0 then
+											fx.align = "\\an"..align[1]
+										else
+											fx.align = ""
+										end
+										layer1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")( )
+										layer = layer1( fx__, meta, syl, line, s, module )
+										fx.layer = layer[1] or l_layer
 										--variables de posiciones, dependiendo del "move"--
-										move_x11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")()	move_x	= math.round(move_x11(fx__, meta, syl, line, x, y, s, module), 2)
-										move_y11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")()	move_y	= math.round(move_y11(fx__, meta, syl, line, x, y, s, module), 2)
+										move_x11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")( )
+										move_x = math.round(move_x11( fx__, meta, syl, line, x, y, s, module ), 2)
+										move_y11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")( )
+										move_y = math.round(move_y11( fx__, meta, syl, line, x, y, s, module ), 2)
 										--variables de tiempo del movimiento--
-										if fx__.move_t:match("%d+%:%d+%:%d+%.%d+") then HMS_movet = {}; for c in fx__.move_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_movet, c ) end for i = 1, #HMS_movet do fx__.move_t = fx__.move_t:gsub(HMS_movet[i], tostring(HMS_to_ms(HMS_movet[i])), 1) end end
-										move_t1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")() 		move_t	= move_t1(fx__, meta, syl, line, s, module)
-										fx.movet_i = math.round(move_t[1] or 0, 2);	fx.movet_f = math.round(move_t[2] or fx.dur, 2)
-										if #move_t > 0 then tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f) else tags_times = "" end
+										fx__.move_t = fx__.move_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										move_t1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")( )
+										move_t = move_t1( fx__, meta, syl, line, s, module )
+										fx.movet_i = math.round(move_t[1] or 0, 2)
+										fx.movet_f = math.round(move_t[2] or fx.dur, 2)
+										if #move_t > 0 then
+											tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f)
+										else
+											tags_times = ""
+										end
 										--posiciones finales--
 										Nmove = math.max(#move_x, #move_y)
-										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)	fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)	fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
-										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)	fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)	fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
-										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)	fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)	fx.angle1  = fx.move_x3
-										fx.angle2  = fx.move_x4								fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)	fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
-										tb_pos     = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
+										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)
+										fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)
+										fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
+										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)
+										fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)
+										fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
+										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)
+										fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)
+										fx.angle1 = fx.move_x3
+										fx.angle2 = fx.move_x4
+										fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)
+										fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
+										tb_pos = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
 										fx.move_l1, fx.move_r1, fx.move_t1, fx.move_b1 = fx.move_x1 - val_width/2, fx.move_x1 + val_width/2, fx.move_y1 - val_height/2, fx.move_y1 + val_height/2
 										fx.move_l2, fx.move_r2, fx.move_t2, fx.move_b2 = fx.move_x2 - val_width/2, fx.move_x2 + val_width/2, fx.move_y2 - val_height/2, fx.move_y2 + val_height/2
 										fx.move_l3, fx.move_r3, fx.move_t3, fx.move_b3 = fx.move_x3 - val_width/2, fx.move_x3 + val_width/2, fx.move_y3 - val_height/2, fx.move_y3 + val_height/2
 										fx.move_l4, fx.move_r4, fx.move_t4, fx.move_b4 = fx.move_x4 - val_width/2, fx.move_x4 + val_width/2, fx.move_y4 - val_height/2, fx.move_y4 + val_height/2
-										fx.pos     = effector.pos(Nmove, tb_pos, tags_times)
+										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 										fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
-										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")() returnfx = returnfx1(fx__, meta, syl, line) else returnfx = {[1] = fx__.returnfx} end
-										Rline = 1; if returnfx[2] and returnfx[2] == "random" then Rline = 2 - R(count_fx + 1) end
+										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
+											returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")( )
+											returnfx = returnfx1( fx__, meta, syl, line )
+										else
+											returnfx = { [1] = fx__.returnfx }
+										end
+										Rline = 1
+										if returnfx[2] and returnfx[2] == "random" then
+											Rline = 2 - R(count_fx + 1)
+										end
 										if #returnfx > 0 or returnfx[1] ~= nil then
-											if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
-											if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end
+											if returnfx[1]:match("m %-?%d+[%.%d+]* %-?%d+[%.%d+]*") then
+												fx.Det = "\\p1"
+												if returnfx[1]:match("\\p%d") then
+													fx.Det = ""
+												end
+												tags_style = shape.style
+											else
+												fx.Det = ""
+												tags_style = text.style
+											end
+											if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then
+												fx.tag_size = "\\fscx100\\fscy100"
+											end
+											if fx__.language ~= "Automation Auto-4" then
+													addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")( )
+													addtag = addtag1( fx__, meta, line, x, y, module )
+													fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
+												else
+													fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
+												end
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then
-													l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
-													l.effect = "Effector [Fx]"; l.layer = fx.layer; l.actor = actor_fx
+													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.effect = "Effector [Fx]"
+													l.layer = fx.layer
+													l.actor = actor_fx
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
-													l.text	 = fx.tm(returnfx[1])
+													l.text = fx.tm(returnfx[1])
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												else
-													sett.linecomment = false
+													lines_comment = false
 													line.start_time = fx.start_time
-													line.end_time	= fx.end_time
-													line.text		= fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
+													line.end_time = fx.end_time
+													line.text = fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
 												end
 											end
-										end j = j + 1
+										end
+										j = j + 1
 										aegisub.progress.task(F("Lines: [%d/%d]  Progress: [%s%%]  Lines Generated: %d", count_ln, #idx_line, math.round(100*count_ln/#idx_line, 2), count_fx))
 										aegisub.progress.set(100*line.i/line.n)
-									end left = left + widtht; word.i = word.i + 1
-								end J = J + 1
+									end
+									left = left + widtht
+									word.i = word.i + 1
+								end
+								J = J + 1
 							end
 						end
 
 						if fx__.t_type == "Translation Char" then
 							-----------------------------------------------
 							for cfxt in unicode.chars(line.text_stripped:gsub("\\N", " "):gsub("  ", " ")) do
-								char.text = cfxt; char.text_stripped = cfxt
+								char.text = cfxt
+								char.text_stripped = cfxt
 								width, height, descent, extlead = aegisub.text_extents(line.styleref, char.text)
-								char.width = width; char.height = height; char.top = l.top; char.middle = l.middle; char.bottom = l.bottom
-								char.left = left; char.right = left + char.width; char.center = left + char.width/2
+								char.width = width
+								char.height = height
+								char.top = l.top
+								char.middle = l.middle
+								char.bottom = l.bottom
+								char.left = left
+								char.right = left + char.width
+								char.center = left + char.width/2
 								char.start_time = line.duration*(char.i - 1)/char.n
-								char.end_time	= line.duration*(char.i - 0)/char.n
-								char.duration	= char.end_time - char.start_time
-								char.dur		= char.duration
-								char.mid_time	= char.start_time + char.dur/2
-								char.widthmax	= math.max(unpack(mmwth[ii].ch))
-								char.widthmin	= math.min(unpack(mmwth[ii].ch))
-								char.durmax  	= math.max(unpack(mmdur[ii].ch))
-								char.durmin  	= math.min(unpack(mmdur[ii].ch))
+								char.end_time = line.duration*(char.i - 0)/char.n
+								char.duration = char.end_time - char.start_time
+								char.dur = char.duration
+								char.mid_time = char.start_time + char.dur/2
+								char.widthmax = math.max(unpack(mmwth[ii].ch))
+								char.widthmin = math.min(unpack(mmwth[ii].ch))
+								char.durmax = math.max(unpack(mmdur[ii].ch))
+								char.durmin = math.min(unpack(mmdur[ii].ch))
 								-----------------------------------------------
 								val_width, val_height, val_text = char.width, char.height, char.text
 								val_center, val_middle, val_left, val_right = char.center, char.middle, char.left, char.right
@@ -1211,91 +2643,256 @@
 								roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = char.start_time, char.end_time, char.mid_time, char.dur, char.i, char.n, char.left, char.center, char.right, char.bottom, char.middle, char.top, char.width, char.height
 								---------------------------------------------------
-								wordchar = { }; wordchar.i, wordchar.n = aegisub.wordci(char.i); syl = word
+								wordchar = { }
+								wordchar.i, wordchar.n = aegisub.wordci(char.i)
+								syl = word
 								---------------------------------------------------
-								fx.replay_fx, J = 1, 1; maxJ = fx.replay_fx
-								while J <= fx.replay_fx do j = 1
-									if fx.replay_fx == 1 then moduler = 0 else moduler = (J - 1)/(maxJ - 1) end
-									module = 0; module1 = module; module2 = module1; fxgroup = true
+								fx.replay_fx, J = 1, 1
+								maxJ = fx.replay_fx
+								while J <= fx.replay_fx do
+									j = 1
+									if fx.replay_fx == 1 then
+										moduler = 0
+									else
+										moduler = (J - 1)/(maxJ - 1)
+									end
+									module = 0
+									module1 = module
+									module2 = module1
+									fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
 									-----------------------------------------------
 									if pcall(loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")) == true then
-										variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")()
-										var_KEfx_ = variable_(fx__, meta, syl, line, x, y)
-									end variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")()
-									if line.i == 1 and char.i == 1 and J == 1 then var.once = remember("v_once", variable_(fx__, meta, syl, line, x, y)) else var.once = recall.v_once end
-									if char.i == 1 and J == 1 then 				   var.line = variable_(fx__, meta, syl, line, x, y) end
-									if wordchar.i == 1 and J == 1 then			   var.word = variable_(fx__, meta, syl, line, x, y) end
-									if J == 1 then								   var.rep  = variable_(fx__, meta, syl, line, x, y) end
-									var.char  = variable_(fx__, meta, syl, line, x, y)	var.syl, var.furi = var.char, var.char
-									var.loop  = variable_(fx__, meta, syl, line, x, y)	text.char_size( )
+										variable_ = loadstring("return function(fx__, meta, syl, line, x, y) ".. tag.HTML_to_ass(fx__.variable) .." return '' end")( )
+										var_KEfx_ = variable_( fx__, meta, syl, line, x, y )
+									end
+									variable_ = loadstring("return function(fx__, meta, syl, line, x, y) return {".. tag.HTML_to_ass(fx__.variable) .."} end")( )
+									if line.i == 1 and char.i == 1 and J == 1 then
+										var.once = remember("v_once", variable_( fx__, meta, syl, line, x, y ))
+									else
+										var.once = recall.v_once
+									end
+									if char.i == 1 and J == 1 then
+										var.line = variable_( fx__, meta, syl, line, x, y )
+									end
+									if wordchar.i == 1 and J == 1 then
+										var.word = variable_( fx__, meta, syl, line, x, y )
+									end
+									if J == 1 then
+										var.rep = variable_( fx__, meta, syl, line, x, y )
+									end
+									var.char = variable_( fx__, meta, syl, line, x, y )
+									var.syl, var.furi = var.char, var.char
+									var.loop = variable_( fx__, meta, syl, line, x, y )
+									text.char_size( )
 									-----------------------------------------------
-									maxloop1  = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")()	maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-									loop_h    = ceil((maxloop_fx[1] or 1)*(char.width + 2*L.outline)/(char.height + 2*L.outline))				maxloop_fx = maxloop1(fx__, meta, syl, line, x, y)
-									fx.loop_v = maxloop_fx[1] or 1; fx.loop_h = maxloop_fx[2] or 1; fx.loop_3 = maxloop_fx[3] or 1; 			fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3; maxj = fx.maxloop_fx
+									maxloop1 = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")( )
+									maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+									loop_h = ceil((maxloop_fx[1] or 1)*(char.width + 2*L.outline)/(char.height + 2*L.outline))
+									maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
+									fx.loop_v = maxloop_fx[1] or 1
+									fx.loop_h = maxloop_fx[2] or 1
+									fx.loop_3 = maxloop_fx[3] or 1
+									fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
+									maxj = fx.maxloop_fx
 									-----------------------------------------------
-									while j <= fx.maxloop_fx do ci = 0
-										var.loop = variable_(fx__, meta, syl, line, x, y)
+									while j <= fx.maxloop_fx do
+										ci = 0
+										var.loop = variable_( fx__, meta, syl, line, x, y )
 										--variables de modulo--
-										if fx.maxloop_fx == 1 then module  = 0		 else module  = (j - 1)/(maxj - 1) end
-										if char.n == 1		  then module1 = module  else module1 = (char.i + module - 1)/char.n end
-										if line.n == 1		  then module2 = module1 else module2 = (line.i + module1 - 1)/line.n end
+										if fx.maxloop_fx == 1 then
+											module = 0
+										else
+											module = (j - 1)/(maxj - 1)
+										end
+										if char.n == 1 then
+											module1 = module
+										else
+											module1 = (char.i + module - 1)/(char.n + module - 1)
+										end
+										if line.n == 1 then
+											module2 = module1
+										else
+											module2 = (line.i + module1 - 1)/(line.n + module1 - 1)
+										end
 										--variables de tiempo--
-										if fx__.start_t:match("%d+%:%d+%:%d+%.%d+") then HMS_start = {}; for c in fx__.start_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_start, c ) end for i = 1, #HMS_start do fx__.start_t = fx__.start_t:gsub(HMS_start[i], tostring(HMS_to_ms(HMS_start[i])), 1) end end
-										if fx__.end_t:match("%d+%:%d+%:%d+%.%d+") then HMS_end = {}; for c in fx__.end_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_end, c ) end for i = 1, #HMS_end do fx__.end_t = fx__.end_t:gsub(HMS_end[i], tostring(HMS_to_ms(HMS_end[i])), 1) end end
-										start_t1	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")() 	start_t	= start_t1(fx__, meta, syl, line, module)	if #start_t > 0 then fx.start_time = start_t[1] else fx.start_time = line.start_time end
+										fx__.start_t = fx__.start_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										fx__.end_t = fx__.end_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										start_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.start_t .."} end")( )
+										start_t	= start_t1( fx__, meta, syl, line, module )
+										if #start_t > 0 then
+											fx.start_time = start_t[1]
+										else
+											fx.start_time = line.start_time
+										end
 										l.start_time = fx.start_time
-										end_t1   	 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")()	end_t	= end_t1(fx__, meta, syl, line, module)		if #end_t > 0 then fx.end_time = end_t[1] else fx.end_time = line.end_time end
-										l.end_time	 = fx.end_time
-										fx.dur		 = fx.end_time - fx.start_time
-										function retime(mode, add_start, add_end)
-											add_start = HMS_to_ms(add_start) or 0; add_end = HMS_to_ms(add_end) or 0
-											if     mode == "line"		then l.start_time = line.start_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "preline"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + add_end
-											elseif mode == "postline"	then l.start_time = line.end_time   + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "word"		then l.start_time = line.start_time + word.start_time + add_start; l.end_time = line.start_time + word.end_time + add_end
-											elseif mode == "preword"	then l.start_time = line.start_time + word.start_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "postword"	then l.start_time = line.start_time + word.end_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "char"		then l.start_time = line.start_time + char.start_time + add_start; l.end_time = line.start_time + char.end_time + add_end
-											elseif mode == "prechar"	then l.start_time = line.start_time + char.start_time + add_start; l.end_time = line.start_time + char.start_time + add_end
-											elseif mode == "postchar"	then l.start_time = line.start_time + char.end_time + add_start; l.end_time = line.start_time + char.start_time + add_end
-											elseif mode == "start2word"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + word.start_time + add_end
-											elseif mode == "word2end"	then l.start_time = line.start_time + word.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "start2char"	then l.start_time = line.start_time + add_start; l.end_time = line.start_time + char.start_time + add_end
-											elseif mode == "char2end"	then l.start_time = line.start_time + char.end_time + add_start; l.end_time = line.end_time + add_end
-											elseif mode == "linepct"	then l.start_time = line.start_time + add_start*line.duration/100; l.end_time = line.start_time + add_end*line.duration/100
-											elseif mode == "wordpct"	then l.start_time = line.start_time + word.start_time + add_start*word.duration/100; l.end_time = line.start_time + word.start_time + add_end*word.duration/100
-											elseif mode == "charpct"	then l.start_time = line.start_time + char.start_time + add_start*char.duration/100; l.end_time = line.start_time + char.start_time + add_end*char.duration/100
-											elseif mode == "set"		or mode == "abs" then  l.start_time = add_start; l.end_time = add_end
-											elseif mode == "fxpretime"	then l.start_time = fx.start_time	+ add_start; l.end_time = fx.start_time + add_end
-											elseif mode == "fxtime"		then l.start_time = fx.start_time	+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxposttime"	then l.start_time = fx.end_time		+ add_start; l.end_time = fx.end_time + add_end
-											elseif mode == "fxpct"		then l.start_time = fx.start_time	+ add_start*fx.dur/100; l.end_time = fx.start_time + add_end*fx.dur/100
-											end	   fx.start_time, fx.end_time = l.start_time, l.end_time; fx.dur = fx.end_time - fx.start_time
+										end_t1 = loadstring("return function(fx__, meta, syl, line, module) return {".. fx__.end_t .."} end")( )
+										end_t = end_t1( fx__, meta, syl, line, module )
+										if #end_t > 0 then
+											fx.end_time = end_t[1]
+										else
+											fx.end_time = line.end_time
+										end
+										l.end_time = fx.end_time
+										fx.dur = fx.end_time - fx.start_time
+										function retime( mode, add_start, add_end )
+											add_start = HMS_to_ms(add_start) or 0
+											add_end = HMS_to_ms(add_end) or 0
+											if mode == "line" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "preline" then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + add_end
+											elseif mode == "postline" then
+												l.start_time = line.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "word" then
+												l.start_time = line.start_time + word.start_time + add_start
+												l.end_time = line.start_time + word.end_time + add_end
+											elseif mode == "preword" then
+												l.start_time = line.start_time + word.start_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "postword" then
+												l.start_time = line.start_time + word.end_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "char" then
+												l.start_time = line.start_time + char.start_time + add_start
+												l.end_time = line.start_time + char.end_time + add_end
+											elseif mode == "prechar" then
+												l.start_time = line.start_time + char.start_time + add_start
+												l.end_time = line.start_time + char.start_time + add_end
+											elseif mode == "postchar" then
+												l.start_time = line.start_time + char.end_time + add_start
+												l.end_time = line.start_time + char.start_time + add_end
+											elseif mode == "start2word"	then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + word.start_time + add_end
+											elseif mode == "word2end" then
+												l.start_time = line.start_time + word.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "start2char"	then
+												l.start_time = line.start_time + add_start
+												l.end_time = line.start_time + char.start_time + add_end
+											elseif mode == "char2end" then
+												l.start_time = line.start_time + char.end_time + add_start
+												l.end_time = line.end_time + add_end
+											elseif mode == "linepct" then
+												l.start_time = line.start_time + add_start*line.duration/100
+												l.end_time = line.start_time + add_end*line.duration/100
+											elseif mode == "wordpct" then
+												l.start_time = line.start_time + word.start_time + add_start*word.duration/100
+												l.end_time = line.start_time + word.start_time + add_end*word.duration/100
+											elseif mode == "charpct" then
+												l.start_time = line.start_time + char.start_time + add_start*char.duration/100
+												l.end_time = line.start_time + char.start_time + add_end*char.duration/100
+											elseif mode == "set" or mode == "abs" then
+												l.start_time = add_start
+												l.end_time = add_end
+											elseif mode == "fxpretime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.start_time + add_end
+											elseif mode == "fxtime" then
+												l.start_time = fx.start_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxposttime"	then
+												l.start_time = fx.end_time + add_start
+												l.end_time = fx.end_time + add_end
+											elseif mode == "fxpct" then
+												l.start_time = fx.start_time + add_start*fx.dur/100
+												l.end_time = fx.start_time + add_end*fx.dur/100
+											end
+											fx.start_time, fx.end_time = l.start_time, l.end_time
+											fx.dur = fx.end_time - fx.start_time
 											return ""
 										end
 										---------------------------------------------------
-										without = { };  ini = line.start_time - fx.start_time
-										without.char	= format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + char.start_time, ini + char.start_time + 1, ini + char.end_time, ini + char.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
+										without = { }
+										ini = line.start_time - fx.start_time
+										without.char = format("\\t(%s,%s,\\1a&HFF&\\3a&HFF&\\4a&HFF&)\\t(%s,%s,\\1a%s\\3a%s\\4a%s)", ini + char.start_time, ini + char.start_time + 1, ini + char.end_time, ini + char.end_time + 1, text.alpha1, text.alpha3, text.alpha4)
 										char.char_start = ini + char.start_time
-										char.char_end   = char.char_start + char.dur
+										char.char_end = char.char_start + char.dur
 										--variables de punto de referencia--
-										center_x1	 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")() center_x = center_x1(fx__, meta, syl, line, x, y, module) if #center_x > 0 then fx.center_x = center_x[1] else fx.center_x = val_center end
-										center_y1	 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")() center_y = center_y1(fx__, meta, syl, line, x, y, module) if #center_y > 0 then fx.center_y = center_y[1] else fx.center_y = val_middle end
+										center_x1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_x .."} end")( )
+										center_x = center_x1( fx__, meta, syl, line, x, y, module )
+										if #center_x > 0 then
+											fx.center_x = center_x[1]
+										else
+											fx.center_x = val_center
+										end
+										center_y1 = loadstring("return function(fx__, meta, syl, line, x, y, module) return {".. fx__.center_y .."} end")( )
+										center_y = center_y1( fx__, meta, syl, line, x, y, module )
+										if #center_y > 0 then
+											fx.center_y = center_y[1]
+										else
+											fx.center_y = val_middle
+										end
 										--variables de escalas de funciones paramétricas-- 
 										if j == 1 then
-											scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")()	scale_x	= scale_x1(fx__, meta, syl, line) if #scale_x > 0 then fx.scale_x = scale_x[1] else fx.scale_x = 1 end if fx.scale_x <= 0 then fx.scale_x = 0.1 end
-											scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")()	scale_y	= scale_y1(fx__, meta, syl, line) if #scale_y > 0 then fx.scale_y = scale_y[1] else fx.scale_y = 1 end if fx.scale_y <= 0 then fx.scale_y = 0.1 end
-										end offset_maxspace = scale_x[2] or 0
+											scale_x1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_x .."} end")( )
+											scale_x	= scale_x1( fx__, meta, syl, line )
+											if #scale_x > 0 then
+												fx.scale_x = scale_x[1]
+											else
+												fx.scale_x = 1
+											end
+											if fx.scale_x <= 0 then
+												fx.scale_x = 0.1
+											end
+											scale_y1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.scale_y .."} end")( )
+											scale_y	= scale_y1( fx__, meta, syl, line )
+											if #scale_y > 0 then
+												fx.scale_y = scale_y[1]
+											else
+												fx.scale_y = 1
+											end
+											if fx.scale_y <= 0 then
+												fx.scale_y = 0.1
+											end
+										end
+										offset_maxspace = scale_x[2] or 0
 										--variables de dominio de funciones--
 										if j == 1 then
-											s_i1	 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")() s_i = s_i1(fx__, meta, syl, line) if #s_i > 0 then fx.domain_i = s_i[1] else fx.domain_i = 0 end
-											s_f1	 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")() s_f = s_f1(fx__, meta, syl, line) if #s_f > 0 then fx.domain_f = s_f[1] else fx.domain_f = 1 end
-										end  local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
+											s_i1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_i .."} end")( )
+											s_i = s_i1( fx__, meta, syl, line )
+											if #s_i > 0 then
+												fx.domain_i = s_i[1]
+											else
+												fx.domain_i = 0
+											end
+											s_f1 = loadstring("return function(fx__, meta, syl, line) return {".. fx__.s_f .."} end")( )
+											s_f = s_f1( fx__, meta, syl, line )
+											if #s_f > 0 then
+												fx.domain_f = s_f[1]
+											else
+												fx.domain_f = 1
+											end
+										end
+										local s = fx.domain_i + module*(fx.domain_f - fx.domain_i)
 										--variables de funciones paramétricas--
-										fun_x1		 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")() 	fun_x = fun_x1(fx__, meta, syl, line, s) if #fun_x > 0 then fx.fun_x = fun_x[1]*fx.scale_x else fx.fun_x = 0 end
-										fun_y1		 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")() 	fun_y = fun_y1(fx__, meta, syl, line, s) if #fun_y > 0 then fx.fun_y = fun_y[1]*fx.scale_y else fx.fun_y = 0 end
+										fun_x1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_x .."} end")( )
+										fun_x = fun_x1( fx__, meta, syl, line, s )
+										if #fun_x > 0 then
+											fx.fun_x = fun_x[1]*fx.scale_x
+										else
+											fx.fun_x = 0
+										end
+										fun_y1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.fun_y .."} end")( )
+										fun_y = fun_y1( fx__, meta, syl, line, s )
+										if #fun_y > 0 then
+											fx.fun_y = fun_y[1]*fx.scale_y
+										else
+											fx.fun_y = 0
+										end
 										--definir las posiciones iniciales--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
@@ -1310,67 +2907,137 @@
 										x, y = fx.pos_x, fx.pos_y
 										--variables de tamaño--
 										if fx__.size ~= nil and fx__.size ~= "" then
-											size1		= loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")() 	size = size1(fx__, meta, syl, line, s)
-											if #size == 1 then fx.sizex	= math.round(size[1], 2) fx.sizey = fx.sizex elseif #size == 2 then fx.sizex = math.round(size[1], 2) fx.sizey = math.round(size[2], 2) end
+											size1 = loadstring("return function(fx__, meta, syl, line, s) return {".. fx__.size .."} end")( )
+											size = size1( fx__, meta, syl, line, s )
+											if #size == 1 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = fx.sizex
+											elseif #size == 2 then
+												fx.sizex = math.round(size[1], 2)
+												fx.sizey = math.round(size[2], 2)
+											end
 											fx.tag_size = format("\\fscx%s\\fscy%s", fx.sizex, fx.sizey)
 										else
-											fx.sizex 	= L.scale_x
-											fx.sizey 	= L.scale_y
+											fx.sizex = L.scale_x
+											fx.sizey = L.scale_y
 											fx.tag_size = ""
 										end
 										--variables de alineación y de capa (layer)--
-										align1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")() align = align1(fx__, meta, syl, line, s, module) if #align > 0 then fx.align = "\\an"..align[1] else fx.align = "" end
-										layer1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")() layer = layer1(fx__, meta, syl, line, s, module) fx.layer = layer[1] or 0
+										align1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.align .."} end")( )
+										align = align1( fx__, meta, syl, line, s, module )
+										if #align > 0 then
+											fx.align = "\\an"..align[1]
+										else
+											fx.align = ""
+										end
+										layer1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.layer .."} end")( )
+										layer = layer1( fx__, meta, syl, line, s, module )
+										fx.layer = layer[1] or l_layer
 										--variables de posiciones, dependiendo del "move"--
-										move_x11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")()	move_x	= math.round(move_x11(fx__, meta, syl, line, x, y, s, module), 2)
-										move_y11   = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")()	move_y	= math.round(move_y11(fx__, meta, syl, line, x, y, s, module), 2)
+										move_x11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_x .."} end")( )
+										move_x = math.round(move_x11( fx__, meta, syl, line, x, y, s, module ), 2)
+										move_y11 = loadstring("return function(fx__, meta, syl, line, x, y, s, module) return {".. fx__.move_y .."} end")( )
+										move_y = math.round(move_y11( fx__, meta, syl, line, x, y, s, module ), 2)
 										--variables de tiempo del movimiento--
-										if fx__.move_t:match("%d+%:%d+%:%d+%.%d+") then HMS_movet = {}; for c in fx__.move_t:gmatch("%d+%:%d+%:%d+%.%d+") do table.insert( HMS_movet, c ) end for i = 1, #HMS_movet do fx__.move_t = fx__.move_t:gsub(HMS_movet[i], tostring(HMS_to_ms(HMS_movet[i])), 1) end end
-										move_t1	   = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")() 		move_t	= move_t1(fx__, meta, syl, line, s, module)
-										fx.movet_i = math.round(move_t[1] or 0, 2);	fx.movet_f = math.round(move_t[2] or fx.dur, 2)
-										if #move_t > 0 then tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f) else tags_times = "" end
+										fx__.move_t = fx__.move_t:gsub("(%d+%:%d+%:%d+%.%d+)",
+											function( time_HMS )
+												return tostring( HMS_to_ms( time_HMS ) )
+											end
+										)
+										move_t1 = loadstring("return function(fx__, meta, syl, line, s, module) return {".. fx__.move_t .."} end")( )
+										move_t = move_t1( fx__, meta, syl, line, s, module )
+										fx.movet_i = math.round(move_t[1] or 0, 2)
+										fx.movet_f = math.round(move_t[2] or fx.dur, 2)
+										if #move_t > 0 then
+											tags_times = ","..tostring(fx.movet_i)..","..tostring(fx.movet_f)
+										else
+											tags_times = ""
+										end
 										--posiciones finales--
 										Nmove = math.max(#move_x, #move_y)
-										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)	fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)	fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
-										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)	fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)	fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
-										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)	fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)	fx.angle1  = fx.move_x3
-										fx.angle2  = fx.move_x4								fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)	fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
-										tb_pos     = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
+										fx.move_x1 = math.round(move_x[1] or fx.pos_x, 2)
+										fx.move_y1 = math.round(move_y[1] or fx.pos_y, 2)
+										fx.move_x2 = math.round(move_x[2] or fx.move_x1, 2)
+										fx.move_y2 = math.round(move_y[2] or fx.move_y1, 2)
+										fx.move_x3 = math.round(move_x[3] or fx.move_x2, 2)
+										fx.move_y3 = math.round(move_y[3] or fx.move_y2, 2)
+										fx.move_x4 = math.round(move_x[4] or fx.move_x3, 2)
+										fx.move_y4 = math.round(move_y[4] or fx.move_y3, 2)
+										fx.angle1 = fx.move_x3
+										fx.angle2 = fx.move_x4
+										fx.radius1 = math.round(move_x[5] or fx.pos_x, 2)
+										fx.radius2 = math.round(move_x[6] or fx.radius1, 2)
+										tb_pos = {fx.move_x1, fx.move_y1, fx.move_x2, fx.move_y2, fx.move_x3, fx.move_y3, fx.move_x4, fx.move_y4, fx.angle1, fx.angle2, fx.radius1, fx.radius2}
 										fx.move_l1, fx.move_r1, fx.move_t1, fx.move_b1 = fx.move_x1 - val_width/2, fx.move_x1 + val_width/2, fx.move_y1 - val_height/2, fx.move_y1 + val_height/2
 										fx.move_l2, fx.move_r2, fx.move_t2, fx.move_b2 = fx.move_x2 - val_width/2, fx.move_x2 + val_width/2, fx.move_y2 - val_height/2, fx.move_y2 + val_height/2
 										fx.move_l3, fx.move_r3, fx.move_t3, fx.move_b3 = fx.move_x3 - val_width/2, fx.move_x3 + val_width/2, fx.move_y3 - val_height/2, fx.move_y3 + val_height/2
 										fx.move_l4, fx.move_r4, fx.move_t4, fx.move_b4 = fx.move_x4 - val_width/2, fx.move_x4 + val_width/2, fx.move_y4 - val_height/2, fx.move_y4 + val_height/2
-										fx.pos     = effector.pos(Nmove, tb_pos, tags_times)
+										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 										fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
-										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")() returnfx = returnfx1(fx__, meta, syl, line) else returnfx = {[1] = fx__.returnfx} end
-										Rline = 1; if returnfx[2] and returnfx[2] == "random" then Rline = 2 - R(count_fx + 1) end
-										if fx__.noblank == true and (returnfx[1] == "" or returnfx[1] == " ") then returnfx[1] = nil end
+										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
+											returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")( )
+											returnfx = returnfx1( fx__, meta, syl, line )
+										else
+											returnfx = { [1] = fx__.returnfx }
+										end
+										Rline = 1
+										if returnfx[2] and returnfx[2] == "random" then
+											Rline = 2 - R(count_fx + 1)
+										end
+										if fx__.noblank == true and (returnfx[1] == "" or returnfx[1] == " ") then
+											returnfx[1] = nil
+										end
 										if #returnfx > 0 or returnfx[1] ~= nil then
-											if returnfx[1]:match("m %-?%d+ %-?%d+") then fx.Det = "\\p1" if returnfx[1]:match("\\p%d") then fx.Det = "" end tags_style = shape.style else fx.Det = "" tags_style = text.style end	if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then fx.tag_size = "\\fscx100\\fscy100" end
-											if fx__.language ~= "Automation Auto-4" then addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")() addtag = addtag1(fx__, meta, line, x, y, module) fx.add_tags = tag.do_tag(table.op(addtag, "concat")) else fx.add_tags = tag.to_Auto4(tag.HTML_to_ass(fx__.addtag)) end
+											if returnfx[1]:match("m %-?%d+[%.%d+]* %-?%d+[%.%d+]*") then
+												fx.Det = "\\p1"
+												if returnfx[1]:match("\\p%d") then
+													fx.Det = ""
+												end
+												tags_style = shape.style
+											else
+												fx.Det = ""
+												tags_style = text.style
+											end
+											if (fx.Det == "\\p1" or returnfx[1]:match("\\p%d")) and fx.tag_size == "" then
+												fx.tag_size = "\\fscx100\\fscy100"
+											end
+											if fx__.language ~= "Automation Auto-4" then
+												addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")( )
+												addtag = addtag1( fx__, meta, line, x, y, module )
+												fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
+											else
+												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
+											end
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then
-													l.text   = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
-													l.effect = "Effector [Fx]"; l.layer = fx.layer; l.actor = actor_fx
+													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.effect = "Effector [Fx]"
+													l.layer = fx.layer
+													l.actor = actor_fx
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
-													l.text	 = fx.tm(returnfx[1])
+													l.text = fx.tm(returnfx[1])
 													subs.insert(#subs + Rline, l)
 													count_fx = count_fx + 1
 												else
-													sett.linecomment = false
+													lines_comment = false
 													line.start_time = fx.start_time
-													line.end_time	= fx.end_time
-													line.text		= fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
+													line.end_time = fx.end_time
+													line.text = fx.tm(format("{%s}%s", fx.add_tags, returnfx[1]))
 												end
-											end ci = 1
-										end j = j + 1
+											end
+											ci = 1
+										end
+										j = j + 1
 										aegisub.progress.task(F("Lines: [%d/%d]  Progress: [%s%%]  Lines Generated: %d", count_ln, #idx_line, math.round(100*count_ln/#idx_line, 2), count_fx))
 										aegisub.progress.set(100*line.i/line.n)
-									end J = J + 1
-								end left = left + width; char.i = char.i + ci
+									end
+									J = J + 1
+								end
+								left = left + width
+								char.i = char.i + ci
 							end
 						end
 					end
@@ -1379,36 +3046,37 @@
 		end
 	end
 
-	
 	--lead-in FX List
 	Agitation_Char = table.duplicate(PfxM_Box); table.inbox(Agitation_Char, "lead-in[fx]: Agitation Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 + 8)","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x - char.height, fx.pos_x","fx.pos_y, fx.pos_y","0, 400","1","","char.text","tag.oscill(450, 150, '\\\\fsvp'..var.char.dy, '\\\\fsvp'..-var.char.dy, '\\\\fsvp0'), '\\\\fad(150,0)'","dy = 7*ratio"); table.insert(leadin_fx_library, Agitation_Char); table.insert(leadin_fx, "Agitation Char")
 	Asault = table.duplicate(PfxM_Box); table.inbox(Asault, "lead-in[fx]: Asault","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - var.loop.delay","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y - var.syl.d, fx.pos_y","200, 400","1","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\fscx%s\\\\fscy%s\\\\blur3\\\\t(0,400,0.5,\\\\frx0\\\\fscx%s\\\\blur0)\\\\t(0,400,\\\\fscy%s)\\\\fad(150,0)', fx.pos_x, fx.pos_y, 0.3*l.scale_x, 3*l.scale_y, l.scale_x, l.scale_y)","delay = R(400, 800), d = 100"); table.insert(leadin_fx_library, Asault); table.insert(leadin_fx, "Asault")
 	Asault_Sequence_Char = table.duplicate(PfxM_Box); table.inbox(Asault_Sequence_Char, "lead-in[fx]: Asault Sequence Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 70*(syl.i - syl.n/2 - 1) - var.loop.delay","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y - var.syl.d, fx.pos_y","200, 400","1","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\fscx%s\\\\fscy%s\\\\blur3\\\\t(0,400,0.5,\\\\frx0\\\\fscx%s\\\\blur0)\\\\t(0,400,\\\\fscy%s)\\\\fad(150,0)', fx.pos_x, fx.pos_y, 0.3*l.scale_x, 3*l.scale_y, l.scale_x, l.scale_y)","delay = R(400, 800), d = 100*ratio"); table.insert(leadin_fx_library, Asault_Sequence_Char); table.insert(leadin_fx, "Asault Sequence Char")
 	Asault_Line_I = table.duplicate(PfxM_Box); table.inbox(Asault_Line_I, "lead-in[fx]: Asault Line I","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - var.syl.delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x - var.syl.d1, fx.pos_x","fx.pos_y, fx.pos_y","0, var.syl.delay","1","","syl.text","format('\\\\org(%s,%s)\\\\frx-180\\\\t(0,%s,\\\\frx0)\\\\fad(300,0)', fx.pos_x - var.syl.d2*(1 - 2*(syl.i - 1)/(syl.n - 2)), fx.pos_y + var.syl.d2/2, var.syl.delay)","delay = 500, d1 = 150*ratio*(1 - 2*(syl.i - 1)/(syl.n - 2)), d2 = 100*ratio"); table.insert(leadin_fx_library, Asault_Line_I); table.insert(leadin_fx, "Asault Line I")
 	Asault_Line_II = table.duplicate(PfxM_Box); table.inbox(Asault_Line_II, "lead-in[fx]: Asault Line II","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - var.syl.delay + 25*(syl.i - syl.n -1)","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x - var.syl.d1, fx.pos_x","fx.pos_y, fx.pos_y","0, var.syl.delay","1","","syl.text","format('\\\\org(%s,%s)\\\\frx-180\\\\t(0,%s,\\\\frx0)\\\\fad(300,0)', fx.pos_x - var.syl.d2*(1 - 2*(syl.i - 1)/(syl.n - 2)), fx.pos_y + var.syl.d2/2, var.syl.delay)","delay = 500, d1 = 150*ratio*(1 - 2*(syl.i - 1)/(syl.n - 2)), d2 = 100*ratio"); table.insert(leadin_fx_library, Asault_Line_II); table.insert(leadin_fx, "Asault Line II")
+	Char_Random_LI = table.duplicate(PfxM_Box); table.inbox(Char_Random_LI, "lead-in[fx]: Char Random LI","Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + time_li(30) + delay*(j - 1)","tag.only( j == maxj, l.start_time + syl.start_time, fx.start_time + delay)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","5","","tag.only( j == maxj, char.text, string.char(R(56,99)))","tag.only(j ~= maxj, format('\\\\alpha%s\\\\t(\\\\alpha%s)', alpha.interpolate('&HFF&', '&H00&', (j-1)/maxj), alpha.interpolate('&HFF&', '&H00&', j/maxj)))","delay = 80","Lua",false); table.insert(leadin_fx_library, Char_Random_LI); table.insert(leadin_fx, "Char Random LI")
+	Char_Random_LI_II = table.duplicate(PfxM_Box); table.inbox(Char_Random_LI_II, "lead-in[fx]: Char Random LI II","Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + delay*(j - 1) + var.syl.delay2 - delay*maxj","tag.only( j == maxj, l.start_time + syl.start_time, fx.start_time + delay)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","5","","tag.only( j == maxj, char.text, string.char(R(56,99)))","tag.only(j ~= maxj, format('\\\\alpha%s\\\\t(\\\\alpha%s)', alpha.interpolate('&HFF&', '&H00&', (j-1)/maxj), alpha.interpolate('&HFF&', '&H00&', j/maxj)))","delay = 2*frame_dur; delay2 = R(-300,100)","Lua",false); table.insert(leadin_fx_library, Char_Random_LI_II); table.insert(leadin_fx, "Char Random LI II")
 	Chess_Multi_Color = table.duplicate(PfxM_Box); table.inbox(Chess_Multi_Color, "lead-in[fx]: Chess Multi Color","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","2, 2","","char.text","tag.clip(fx.pos_l, fx.pos_t, char.width, char.height, 71), '\\\\bord0\\\\1vc'..color.vc(var.char.C[(j + char.i - 2)%4 + 1])","C = {'&H00F3F3&', '&HFF8D00&', '&H0102FB&', '&H15F905&'}"); table.insert(leadin_fx_library, Chess_Multi_Color); table.insert(leadin_fx, "Chess Multi Color")
 	Distort_Clip_in_Line = table.duplicate(PfxM_Box); table.inbox(Distort_Clip_in_Line, "lead-in[fx]: Distort Clip in Line","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time - var.syl.delay1 - var.syl.delay2*j","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.syl.dx, fx.pos_x","fx.pos_y, fx.pos_y","0, var.loop.delay1","3","","syl.text","format('%s\\\\t(0,%s,0.7,\\\\frx-360)\\\\fad(300,0)', tag.clip(fx.pos_l, fx.pos_t, meta.res_x, syl.height), var.loop.delay1)","delay1 = 500, delay2 = 100, dx = 180*ratio"); table.insert(leadin_fx_library, Distort_Clip_in_Line); table.insert(leadin_fx, "Distort Clip in Line")
 	Distort_in_Syl_I = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I, "lead-in[fx]: Distort in Syl I","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 70*(syl.i - syl.n/2 - 1) - 300","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\3vc%s\\\\org(%s,%s)\\\\rnd6\\\\blur10\\\\bord2\\\\shad0\\\\fscy%s\\\\t(0,300,0.8,\\\\rnd0\\\\blur0)\\\\t(0,500,0.8,\\\\bord%s\\\\shad%s\\\\3vc%s\\\\fscy%s)\\\\fad(150,0)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, 0.8*l.scale_y, l.outline, l.shadow, text.color3, l.scale_y)",""); table.insert(leadin_fx_library, Distort_in_Syl_I); table.insert(leadin_fx, "Distort in Syl I")
-	Distort_in_Syl_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_buttLine, "lead-in[fx]: Distort in Syl I buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid2(70) - 60*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\3vc%s\\\\org(%s,%s)\\\\rnd6\\\\blur10\\\\bord2\\\\shad0\\\\fscy%s\\\\t(0,300,0.8,\\\\rnd0\\\\blur0)\\\\t(0,500,0.8,\\\\bord%s\\\\shad%s\\\\3vc%s\\\\fscy%s)\\\\fad(150,0)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, 0.8*l.scale_y, l.outline, l.shadow, text.color3, l.scale_y)",""); table.insert(leadin_fx_library, Distort_in_Syl_I_buttLine); table.insert(leadin_fx, "Distort in Syl I buttLine")
+	Distort_in_Syl_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_buttLine, "lead-in[fx]: Distort in Syl I buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid2(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\3vc%s\\\\org(%s,%s)\\\\rnd6\\\\blur10\\\\bord2\\\\shad0\\\\fscy%s\\\\t(0,300,0.8,\\\\rnd0\\\\blur0)\\\\t(0,500,0.8,\\\\bord%s\\\\shad%s\\\\3vc%s\\\\fscy%s)\\\\fad(150,0)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, 0.8*l.scale_y, l.outline, l.shadow, text.color3, l.scale_y)",""); table.insert(leadin_fx_library, Distort_in_Syl_I_buttLine); table.insert(leadin_fx, "Distort in Syl I buttLine")
 	Distort_in_Syl_I_Inverse = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_Inverse, "lead-in[fx]: Distort in Syl I Inverse","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - 50*(syl.i - 1) - 500","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\3vc%s\\\\org(%s,%s)\\\\rnd6\\\\blur10\\\\bord2\\\\shad0\\\\fscy%s\\\\t(0,300,0.8,\\\\rnd0\\\\blur0)\\\\t(0,500,0.8,\\\\bord%s\\\\shad%s\\\\3vc%s\\\\fscy%s)\\\\fad(150,0)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, 0.8*l.scale_y, l.outline, l.shadow, text.color3, l.scale_y)",""); table.insert(leadin_fx_library, Distort_in_Syl_I_Inverse); table.insert(leadin_fx, "Distort in Syl I Inverse")
-	Distort_in_Syl_I_midLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_midLine, "lead-in[fx]: Distort in Syl I midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid1(70) - 70*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\3vc%s\\\\org(%s,%s)\\\\rnd6\\\\blur10\\\\bord2\\\\shad0\\\\fscy%s\\\\t(0,300,0.8,\\\\rnd0\\\\blur0)\\\\t(0,500,0.8,\\\\bord%s\\\\shad%s\\\\3vc%s\\\\fscy%s)\\\\fad(150,0)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, 0.8*l.scale_y, l.outline, l.shadow, text.color3, l.scale_y)",""); table.insert(leadin_fx_library, Distort_in_Syl_I_midLine); table.insert(leadin_fx, "Distort in Syl I midLine")
+	Distort_in_Syl_I_midLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_midLine, "lead-in[fx]: Distort in Syl I midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid1(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\3vc%s\\\\org(%s,%s)\\\\rnd6\\\\blur10\\\\bord2\\\\shad0\\\\fscy%s\\\\t(0,300,0.8,\\\\rnd0\\\\blur0)\\\\t(0,500,0.8,\\\\bord%s\\\\shad%s\\\\3vc%s\\\\fscy%s)\\\\fad(150,0)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, 0.8*l.scale_y, l.outline, l.shadow, text.color3, l.scale_y)",""); table.insert(leadin_fx_library, Distort_in_Syl_I_midLine); table.insert(leadin_fx, "Distort in Syl I midLine")
 	Emerge_Clip_Grip_I = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I, "lead-in[fx]: Emerge Clip Grip I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 60*(syl.i - syl.n/2 - 1) - 400","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","dx = R(-30, 30), dy = R(-30, 30)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_I); table.insert(leadin_fx, "Emerge Clip Grip I")
-	Emerge_Clip_Grip_I_buttline = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_buttline, "lead-in[fx]: Emerge Clip Grip I buttline","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 70*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","dx = R(-30, 30), dy = R(-30, 30)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_I_buttline); table.insert(leadin_fx, "Emerge Clip Grip I buttline")
+	Emerge_Clip_Grip_I_buttline = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_buttline, "lead-in[fx]: Emerge Clip Grip I buttline","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","dx = R(-30, 30), dy = R(-30, 30)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_I_buttline); table.insert(leadin_fx, "Emerge Clip Grip I buttline")
 	Emerge_Clip_Grip_I_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_Inverse, "lead-in[fx]: Emerge Clip Grip I Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time - 50*(syl.i - 1) - 600","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","dx = R(-30, 30), dy = R(-30, 30)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_I_Inverse); table.insert(leadin_fx, "Emerge Clip Grip I Inverse")
-	Emerge_Clip_Grip_I_midline = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_midline, "lead-in[fx]: Emerge Clip Grip I midline","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 80*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","dx = R(-30, 30), dy = R(-30, 30)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_I_midline); table.insert(leadin_fx, "Emerge Clip Grip I midline")
+	Emerge_Clip_Grip_I_midline = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_midline, "lead-in[fx]: Emerge Clip Grip I midline","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","dx = R(-30, 30), dy = R(-30, 30)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_I_midline); table.insert(leadin_fx, "Emerge Clip Grip I midline")
 	Emerge_Clip_Grip_II = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II, "lead-in[fx]: Emerge Clip Grip II","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 60*(syl.i - syl.n/2 - 1) - R(30, 50)*10","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","format('%s\\\\t(0,450,%s)\\\\fad(120,0)', tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height), tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height))","dx = R(-50, 50), dy = R(-50, 50)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_II); table.insert(leadin_fx, "Emerge Clip Grip II")
-	Emerge_Clip_Grip_II_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_buttLine, "lead-in[fx]: Emerge Clip Grip II buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 50*syl.n - R(30, 50)*10","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","format('%s\\\\t(0,450,%s)\\\\fad(120,0)', tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height), tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height))","dx = R(-50, 50), dy = R(-50, 50)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_II_buttLine); table.insert(leadin_fx, "Emerge Clip Grip II buttLine")
+	Emerge_Clip_Grip_II_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_buttLine, "lead-in[fx]: Emerge Clip Grip II buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 120 - R(30, 50)*10","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","format('%s\\\\t(0,450,%s)\\\\fad(120,0)', tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height), tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height))","dx = R(-50, 50), dy = R(-50, 50)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_II_buttLine); table.insert(leadin_fx, "Emerge Clip Grip II buttLine")
 	Emerge_Clip_Grip_II_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_Inverse, "lead-in[fx]: Emerge Clip Grip II Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time - 50*(syl.i - 1) - 300 - R(30, 50)*10","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","format('%s\\\\t(0,450,%s)\\\\fad(120,0)', tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height), tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height))","dx = R(-50, 50), dy = R(-50, 50)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_II_Inverse); table.insert(leadin_fx, "Emerge Clip Grip II Inverse")
-	Emerge_Clip_Grip_II_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_midLine, "lead-in[fx]: Emerge Clip Grip II midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 70*syl.n - R(30, 50)*10","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","format('%s\\\\t(0,450,%s)\\\\fad(120,0)', tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height), tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height))","dx = R(-50, 50), dy = R(-50, 50)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_II_midLine); table.insert(leadin_fx, "Emerge Clip Grip II midLine")
+	Emerge_Clip_Grip_II_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_midLine, "lead-in[fx]: Emerge Clip Grip II midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 120 - R(30, 50)*10","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","5, loop_h","","syl.text","format('%s\\\\t(0,450,%s)\\\\fad(120,0)', tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height), tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height))","dx = R(-50, 50), dy = R(-50, 50)"); table.insert(leadin_fx_library, Emerge_Clip_Grip_II_midLine); table.insert(leadin_fx, "Emerge Clip Grip II midLine")
 	Emerge_Clip_Grip_III = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_III, "lead-in[fx]: Emerge Clip Grip III","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 70*(syl.i - syl.n/2 - 1) - R(var.loop.d1 - var.loop.d2)","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300,0)'","d1 = 1000, d2 = 300"); table.insert(leadin_fx_library, Emerge_Clip_Grip_III); table.insert(leadin_fx, "Emerge Clip Grip III")
 	Emerge_Clip_Horizontal = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal, "lead-in[fx]: Emerge Clip Horizontal","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 60*(syl.i - syl.n/2 - 1) - 300","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","8","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Horizontal); table.insert(leadin_fx, "Emerge Clip Horizontal")
-	Emerge_Clip_Horizontal_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_buttLine, "lead-in[fx]: Emerge Clip Horizontal buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 70*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","8","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Horizontal_buttLine); table.insert(leadin_fx, "Emerge Clip Horizontal buttLine")
+	Emerge_Clip_Horizontal_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_buttLine, "lead-in[fx]: Emerge Clip Horizontal buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","8","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Horizontal_buttLine); table.insert(leadin_fx, "Emerge Clip Horizontal buttLine")
 	Emerge_Clip_Horizontal_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_Inverse, "lead-in[fx]: Emerge Clip Horizontal Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time - 50*(syl.i - 1) - 600","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","8","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Horizontal_Inverse); table.insert(leadin_fx, "Emerge Clip Horizontal Inverse")
-	Emerge_Clip_Horizontal_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_midLine, "lead-in[fx]: Emerge Clip Horizontal midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 75*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","8","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Horizontal_midLine); table.insert(leadin_fx, "Emerge Clip Horizontal midLine")
+	Emerge_Clip_Horizontal_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_midLine, "lead-in[fx]: Emerge Clip Horizontal midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","8","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Horizontal_midLine); table.insert(leadin_fx, "Emerge Clip Horizontal midLine")
 	Emerge_Clip_Vertical = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical, "lead-in[fx]: Emerge Clip Vertical","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 60*(syl.i - syl.n/2 - 1) - 600","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","1, ceil(syl.width/7)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Vertical); table.insert(leadin_fx, "Emerge Clip Vertical")
-	Emerge_Clip_Vertical_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_buttLine, "lead-in[fx]: Emerge Clip Vertical buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 70*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","1, ceil(syl.width/7)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Vertical_buttLine); table.insert(leadin_fx, "Emerge Clip Vertical buttLine")
+	Emerge_Clip_Vertical_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_buttLine, "lead-in[fx]: Emerge Clip Vertical buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid2(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","1, ceil(syl.width/7)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Vertical_buttLine); table.insert(leadin_fx, "Emerge Clip Vertical buttLine")
 	Emerge_Clip_Vertical_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_Inverse, "lead-in[fx]: Emerge Clip Vertical Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time - 50*(syl.i - 1) - 600","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","1, ceil(syl.width/7)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Vertical_Inverse); table.insert(leadin_fx, "Emerge Clip Vertical Inverse")
-	Emerge_Clip_Vertical_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_midLine, "lead-in[fx]: Emerge Clip Vertical midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 75*syl.n","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","1, ceil(syl.width/7)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Vertical_midLine); table.insert(leadin_fx, "Emerge Clip Vertical midLine")
+	Emerge_Clip_Vertical_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_midLine, "lead-in[fx]: Emerge Clip Vertical midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + time_mid1(70) - 120","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, 450","1, ceil(syl.width/7)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), '\\\\fad(300, 0)'","dx = R(-50, 50), dy = R(-40, 40)"); table.insert(leadin_fx_library, Emerge_Clip_Vertical_midLine); table.insert(leadin_fx, "Emerge Clip Vertical midLine")
 	Emerge_Clip_Sequence_HV_Syl = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Sequence_HV_Syl, "lead-in[fx]: Emerge Clip Sequence HV Syl","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 60*(char.i - char.n/2 - 1) - 300","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x + ((char.i%2 == 0) and var.loop.dx or 0), fx.pos_x","fx.pos_y + ((char.i%2 == 1) and var.loop.dy or 0), fx.pos_y","0, 450","(char.i%2 == 0) and 8 or 1, (char.i%2 == 1) and 8 or 1","","char.text","tag.clip(fx.pos_l - 20, fx.pos_t - 20, char.width + 40, char.height + 40), '\\\\fad(300, 0)'","dx = R(-80, 80)*ratio, dy = R(-80, 80)*ratio"); table.insert(leadin_fx_library, Emerge_Clip_Sequence_HV_Syl); table.insert(leadin_fx, "Emerge Clip Sequence HV Syl")
 	Flashing_Intro_Aux = table.duplicate(PfxM_Box); table.inbox(Flashing_Intro_Aux, "lead-in[fx]: Flashing Intro Aux","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - var.syl.delay","l.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","15","","syl.text","format('\\\\bord0\\\\blur3\\\\org(%s,%s)\\\\fr%s\\\\1va%s\\\\3va%s\\\\4va%s\\\\t(0,%s,0.8,\\\\fr0\\\\blur0%s)', fx.pos_x - 10000*ratio, fx.pos_y, var.syl.a*(2*module - 1), alpha.va('&HDD&'), alpha.va('&HEE&'), alpha.va('&HEE&'), var.syl.delay, tag.only((j == maxj/2), format('\\\\1va%s\\\\3va%s\\\\4va%s', text.alpha1, text.alpha3, text.alpha4), ''))","delay = 400, a = 0.2"); table.insert(leadin_fx_library, Flashing_Intro_Aux); table.insert(leadin_fx, "Flashing Intro Aux")
 	Function_Alpha_Delay = table.duplicate(PfxM_Box); table.inbox(Function_Alpha_Delay, "lead-in[fx]: Function Alpha Delay","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 60*(syl.i - syl.n/2 - 1) - var.loop.delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","alpha.delay(0, 800, '&HFF&', text.alpha1a, '\\\\1va', '\\\\3va')","delay = 600 - R(0, 20)*10"); table.insert(leadin_fx_library, Function_Alpha_Delay); table.insert(leadin_fx, "Function Alpha Delay")
@@ -1427,10 +3095,13 @@
 	Function_MoveVC_Demo_II = table.duplicate(PfxM_Box); table.inbox(Function_MoveVC_Demo_II, "lead-in[fx]: Function MoveVC Demo II","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + 50*(char.i - char.n/2 - 1) - 500","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","shape.movevc(shape.multi1('default', 5), 'tag', 0, 0, fx.pos_x - var.loop.dx, fx.pos_y - var.loop.dy, var.loop.dx, var.loop.dy, 0, var.loop.delay + 70*j), '\\\\fad(300,0)'","delay = 600, dx = R(-25, 25)*ratio, dy = R(-25, 25)*ratio"); table.insert(leadin_fx_library, Function_MoveVC_Demo_II); table.insert(leadin_fx, "Function MoveVC Demo II")
 	Function_Oscill_Color_And_Blur = table.duplicate(PfxM_Box); table.inbox(Function_Oscill_Color_And_Blur, "lead-in[fx]: Function Oscill Color And Blur","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 200","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","format('\\\\bord3\\\\fad(300,0)%s%s', tag.oscill(fx.dur, 300, table.concat1(color.vc({'&HFF8D00&', '&HFF00FF&', '&H00FF00&'}), '\\\\3vc')), tag.oscill(fx.dur, 300, '\\\\blur4', '\\\\blur1'))",""); table.insert(leadin_fx_library, Function_Oscill_Color_And_Blur); table.insert(leadin_fx, "Function Oscill Color And Blur")
 	Function_Oscill_Snake_Move = table.duplicate(PfxM_Box); table.inbox(Function_Oscill_Snake_Move, "lead-in[fx]: Function Oscill Snake Move","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 200","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","format('\\\\fad(300,0)%s\\\\t(%s,%s,\\\\fsvp0)', tag.oscill(var.syl.delay, 140, '\\\\fsvp'..var.syl.height, '\\\\fsvp'..-var.syl.height), var.syl.delay, var.syl.delay + 1)","height = 5*ratio, delay = 800"); table.insert(leadin_fx_library, Function_Oscill_Snake_Move); table.insert(leadin_fx, "Function Oscill Snake Move")
+	Ghost_Line_line = table.duplicate(PfxM_Box); table.inbox(Ghost_Line_line, "lead-in[fx]: Ghost Line line","Line",true,false,"#6E6E6E","#ADC4D6","#6A8DD6","0","0","0","l.start_time + R(line.dur - 600)","fx.start_time + 600","","","","","line.center","line.middle","","","5","0","fx.pos_x","fx.pos_y","","(line.dur - 600)/920","","line.text_stripped","shape.Rmove(15*ratio, 15*ratio), format(\"\\\\bord0\\\\shad0\\\\blur0.4\\\\t(\\\\blur4)\\\\1c%s\", color1)","color1 = shape.color1","Lua",false); table.insert(leadin_fx_library, Ghost_Line_line); table.insert(leadin_fx, "Ghost Line line")
+	Ghost_Shake_leadin = table.duplicate(PfxM_Box); table.inbox(Ghost_Shake_leadin, "lead-in[fx]: Ghost Shake leadin","Syl",true,false,"#2991FF","#FFFFFF","#6A8DD6","0","0","0","l.start_time","l.end_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","mi_leadin( ), \"\\\\fad(120,0)\"","color1 = shape.color1; color2 = shape.color3;\nmi_leadin = function( )\n	maxloop( 4 )\n	if j < maxj then\n		retime( \"preline\", 40*(syl.i - 1) - 400, 40*(syl.i - 1) + 40 )\n		relayer( 1 )\n		return format(\"%s\\\\bord0\\\\shad0\\\\blur0.8\\\\1c%s\", shape.Rmove(15*ratio, 15*ratio, 0, 440), color.module( color1, color2 ))\n	end\n	retime( \"start2syl\", 40*(syl.i - 1) - 200, 0 )\n	relayer( 0 )\n	return \"\"\nend","Lua",false); table.insert(leadin_fx_library, Ghost_Shake_leadin); table.insert(leadin_fx, "Ghost Shake leadin")
+	Ghost_Shake_simple = table.duplicate(PfxM_Box); table.inbox(Ghost_Shake_simple, "lead-in[fx]: Ghost Shake simple","Syl",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + time_li(50) - delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Rmove( 20, 20, 0, delay, 1, {200} ), \"\\\\fad(800,0)\"","delay = 800","Lua",false); table.insert(leadin_fx_library, Ghost_Shake_simple); table.insert(leadin_fx, "Ghost Shake simple")
 	Helical_Char = table.duplicate(PfxM_Box); table.inbox(Helical_Char, "lead-in[fx]: Helical Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 300","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n, fx.pos_y","0, 1.5*var.char.delay","2","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\t(0,%s,0.8,\\\\frx0)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)\\\\fad(300,0)',fx.pos_x, fx.pos_y, var.char.delay, var.char.delay + 300, var.char.delay + 301, var.loop.a1, var.loop.a3, var.loop.a4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, alpha.va('&HFF&'), text.alpha1), a3 = tag.only(j==1, alpha.va('&HFF&'), text.alpha3), a4 = tag.only(j==1, alpha.va('&HFF&'), text.alpha4)"); table.insert(leadin_fx_library, Helical_Char); table.insert(leadin_fx, "Helical Char")
-	Helical_Char_buttLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_buttLine, "lead-in[fx]: Helical Char buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid2(70) - 55*char.n","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n, fx.pos_y","0, 1.5*var.char.delay","2","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\t(0,%s,0.8,\\\\frx0)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)\\\\fad(300,0)',fx.pos_x, fx.pos_y, var.char.delay, var.char.delay + 300, var.char.delay + 301, var.loop.a1, var.loop.a3, var.loop.a4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, alpha.va('&HFF&'), text.alpha1), a3 = tag.only(j==1, alpha.va('&HFF&'), text.alpha3), a4 = tag.only(j==1, alpha.va('&HFF&'), text.alpha4)"); table.insert(leadin_fx_library, Helical_Char_buttLine); table.insert(leadin_fx, "Helical Char buttLine")
+	Helical_Char_buttLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_buttLine, "lead-in[fx]: Helical Char buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid2(70) - 120","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n, fx.pos_y","0, 1.5*var.char.delay","2","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\t(0,%s,0.8,\\\\frx0)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)\\\\fad(300,0)',fx.pos_x, fx.pos_y, var.char.delay, var.char.delay + 300, var.char.delay + 301, var.loop.a1, var.loop.a3, var.loop.a4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, alpha.va('&HFF&'), text.alpha1), a3 = tag.only(j==1, alpha.va('&HFF&'), text.alpha3), a4 = tag.only(j==1, alpha.va('&HFF&'), text.alpha4)"); table.insert(leadin_fx_library, Helical_Char_buttLine); table.insert(leadin_fx, "Helical Char buttLine")
 	Helical_Char_Inverse = table.duplicate(PfxM_Box); table.inbox(Helical_Char_Inverse, "lead-in[fx]: Helical Char Inverse","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - 30*(char.i - 1) - 750","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n, fx.pos_y","0, 1.5*var.char.delay","2","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\t(0,%s,0.8,\\\\frx0)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)\\\\fad(300,0)',fx.pos_x, fx.pos_y, var.char.delay, var.char.delay + 300, var.char.delay + 301, var.loop.a1, var.loop.a3, var.loop.a4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, alpha.va('&HFF&'), text.alpha1), a3 = tag.only(j==1, alpha.va('&HFF&'), text.alpha3), a4 = tag.only(j==1, alpha.va('&HFF&'), text.alpha4)"); table.insert(leadin_fx_library, Helical_Char_Inverse); table.insert(leadin_fx, "Helical Char Inverse")
-	Helical_Char_midLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_midLine, "lead-in[fx]: Helical Char midLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid1(70) - 60*char.n","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n, fx.pos_y","0, 1.5*var.char.delay","2","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\t(0,%s,0.8,\\\\frx0)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)\\\\fad(300,0)',fx.pos_x, fx.pos_y, var.char.delay, var.char.delay + 300, var.char.delay + 301, var.loop.a1, var.loop.a3, var.loop.a4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, alpha.va('&HFF&'), text.alpha1), a3 = tag.only(j==1, alpha.va('&HFF&'), text.alpha3), a4 = tag.only(j==1, alpha.va('&HFF&'), text.alpha4)"); table.insert(leadin_fx_library, Helical_Char_midLine); table.insert(leadin_fx, "Helical Char midLine")
+	Helical_Char_midLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_midLine, "lead-in[fx]: Helical Char midLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid1(70) - 120","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n, fx.pos_y","0, 1.5*var.char.delay","2","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\t(0,%s,0.8,\\\\frx0)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)\\\\fad(300,0)',fx.pos_x, fx.pos_y, var.char.delay, var.char.delay + 300, var.char.delay + 301, var.loop.a1, var.loop.a3, var.loop.a4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, alpha.va('&HFF&'), text.alpha1), a3 = tag.only(j==1, alpha.va('&HFF&'), text.alpha3), a4 = tag.only(j==1, alpha.va('&HFF&'), text.alpha4)"); table.insert(leadin_fx_library, Helical_Char_midLine); table.insert(leadin_fx, "Helical Char midLine")
 	Move_Char_I = table.duplicate(PfxM_Box); table.inbox(Move_Char_I, "lead-in[fx]: Move Char I","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 200","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, var.syl.delay","1","","char.text","'\\\\fad(200,0)'","delay = 450, dx = R(50, 100)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadin_fx_library, Move_Char_I); table.insert(leadin_fx, "Move Char I")
 	Move_Char_Gyre = table.duplicate(PfxM_Box); table.inbox(Move_Char_Gyre, "lead-in[fx]: Move Char Gyre","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 200","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x + var.loop.dx, fx.pos_x","fx.pos_y + var.loop.dy, fx.pos_y","0, var.syl.delay","1","","char.text","format('\\\\frx%s\\\\fry%s\\\\frz%s\\\\t(0,%s,\\\\frx0\\\\fry0\\\\frz0)\\\\fad(200,0)', R(-360,360), R(-360,360), R(-360,360), var.syl.delay)","delay = 450, dx = R(40, 80)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadin_fx_library, Move_Char_Gyre); table.insert(leadin_fx, "Move Char Gyre")
 	Move_Line_Bottom = table.duplicate(PfxM_Box); table.inbox(Move_Line_Bottom, "lead-in[fx]: Move Line Bottom","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - var.syl.delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y + var.syl.d, fx.pos_y","0, var.syl.delay","1","","syl.text","format('\\\\shad0\\\\bord2\\\\1vc%s\\\\3vc%s\\\\blur3\\\\t(%s,%s,\\\\shad%s\\\\bord%s\\\\1vc%s\\\\3vc%s)', color.vc('&HFFFFFF&'), color.vc('&HFFFFFF&'), 3*var.syl.delay/4, var.syl.delay, l.shadow, l.outline, text.color1, text.color3)","d = l.height, delay = 260"); table.insert(leadin_fx_library, Move_Line_Bottom); table.insert(leadin_fx, "Move Line Bottom")
@@ -1446,8 +3117,8 @@
 	Palpitations_Char = table.duplicate(PfxM_Box); table.inbox(Palpitations_Char, "lead-in[fx]: Palpitations Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 30*(char.i - char.n - 1)","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","var.once.Tag()","Tag = function() return format('\\\\fad(200,0)\\\\fscx0\\\\fscy0\\\\t(0,250,\\\\fscx%s\\\\fscy%s)\\\\t(250,350,\\\\fscx%s\\\\fscy%s)\\\\t(350,550,\\\\fscx%s\\\\fscy%s)\\\\t(550,650,\\\\fscx%s\\\\fscy%s)\\\\t(650,750,\\\\fscx%s\\\\fscy%s)\\\\t(750,850,\\\\fscx%s\\\\fscy%s)', 1.8*l.scale_x, 1.8*l.scale_y, 0.8*l.scale_x, 0.8*l.scale_y, 1.2*l.scale_x, 1.2*l.scale_y, 1.5*l.scale_x, 1.5*l.scale_y, 1.2*l.scale_x, 1.2*l.scale_y, l.scale_x, l.scale_y) end"); table.insert(leadin_fx_library, Palpitations_Char); table.insert(leadin_fx, "Palpitations Char")
 	Phantom_Syl_moves4_presyl = table.duplicate(PfxM_Box); table.inbox(Phantom_Syl_moves4_presyl, "lead-in[fx]: Phantom Syl moves4 presyl","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time - 2000 + 300*module","l.start_time + syl.start_time + 300*module","","","","","syl.center","syl.middle","","","5","maxj - j + 1","fx.pos_x + var.syl.dx1, fx.pos_x + var.syl.dx2, fx.pos_x + var.syl.dx3, fx.pos_x","fx.pos_y + var.syl.dy1, fx.pos_y + var.syl.dy2, fx.pos_y + var.syl.dy3, fx.pos_y","0, fx.dur - 300","10","","syl.text","format('\\\\3vc%s\\\\blur%s\\\\fad(300,0)', color.vc(interpolate_color(module, text.color3, text.color1)), 4*module)","dx1 =  R(-100,100)*ratio, dx2 =  R(-100,100)*ratio, dx3 =  R(-100,100)*ratio, dy1 =  R(-100,100)*ratio, dy2 =  R(-100,100)*ratio, dy3 =  R(-100,100)*ratio"); table.insert(leadin_fx_library, Phantom_Syl_moves4_presyl); table.insert(leadin_fx, "Phantom Syl moves4 presyl")
 	Screw_Char = table.duplicate(PfxM_Box); table.inbox(Screw_Char, "lead-in[fx]: Screw Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 200","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\frx180\\\\t(0,440,0.8,\\\\frx0)\\\\fad(300,0)'",""); table.insert(leadin_fx_library, Screw_Char); table.insert(leadin_fx, "Screw Char")
-	Screw_Char_buttLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_buttLine, "lead-in[fx]: Screw Char buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid2(40) - 35*char.n","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\frx180\\\\t(0,440,0.8,\\\\frx0)\\\\fad(300,0)'",""); table.insert(leadin_fx_library, Screw_Char_buttLine); table.insert(leadin_fx, "Screw Char buttLine")
-	Screw_Char_midLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_midLine, "lead-in[fx]: Screw Char midLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid1(40) - 35*char.n","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\frx180\\\\t(0,440,0.8,\\\\frx0)\\\\fad(300,0)'",""); table.insert(leadin_fx_library, Screw_Char_midLine); table.insert(leadin_fx, "Screw Char midLine")
+	Screw_Char_buttLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_buttLine, "lead-in[fx]: Screw Char buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid2(40) - 120","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\frx180\\\\t(0,440,0.8,\\\\frx0)\\\\fad(300,0)'",""); table.insert(leadin_fx_library, Screw_Char_buttLine); table.insert(leadin_fx, "Screw Char buttLine")
+	Screw_Char_midLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_midLine, "lead-in[fx]: Screw Char midLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_mid1(40) - 120","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\frx180\\\\t(0,440,0.8,\\\\frx0)\\\\fad(300,0)'",""); table.insert(leadin_fx_library, Screw_Char_midLine); table.insert(leadin_fx, "Screw Char midLine")
 	Screw_Char_Inverse = table.duplicate(PfxM_Box); table.inbox(Screw_Char_Inverse, "lead-in[fx]: Screw Char Inverse","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - 30*(char.i - 1) - 600","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\frx180\\\\t(0,440,0.8,\\\\frx0)\\\\fad(300,0)'",""); table.insert(leadin_fx_library, Screw_Char_Inverse); table.insert(leadin_fx, "Screw Char Inverse")
 	Simple_Moves3_Char = table.duplicate(PfxM_Box); table.inbox(Simple_Moves3_Char, "lead-in[fx]: Simple Moves3 Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 200","l.start_time + char.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x - var.syl.dx, fx.pos_x","fx.pos_y, fx.pos_y, fx.pos_y","0, var.syl.delay","1","","char.text","'\\\\fad(300,0)'","dx = 70*ratio, delay = 460"); table.insert(leadin_fx_library, Simple_Moves3_Char); table.insert(leadin_fx, "Simple Moves3 Char")
 	Snake_Char_I = table.duplicate(PfxM_Box); table.inbox(Snake_Char_I, "lead-in[fx]: Snake Char I","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 - 1) - 500","l.start_time + syl.start_time","","","","","char.center","char.middle","","","5","0","fx.pos_x + var.syl.d, fx.pos_x","fx.pos_y, fx.pos_y","0, 4*var.syl.delay","1","","char.text","format('%s\\\\t(%s,%s,\\\\fsvp0)\\\\fad(300,0)', tag.oscill(4*var.syl.delay, var.syl.delay, '\\\\fsvp'..var.syl.height, '\\\\fsvp'..-var.syl.height), 4*var.syl.delay, 4*var.syl.delay + 1)","height = 7*ratio, delay = 180, d = 40*ratio"); table.insert(leadin_fx_library, Snake_Char_I); table.insert(leadin_fx, "Snake Char I")
@@ -1489,6 +3160,11 @@
 	
 	--hi-light FX List
 	ABC_Template_Hilight_Syl = table.duplicate(PfxM_Box); table.inbox(ABC_Template_Hilight_Syl, "hi-light[fx]: ABC Template Hilight Syl","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","",""); table.insert(hilight_fx_library, ABC_Template_Hilight_Syl); table.insert(hilight_fx, "ABC Template Hilight Syl")
+	Char_Zoom_fscy = table.duplicate(PfxM_Box); table.inbox(Char_Zoom_fscy, "hi-light[fx]: Char Zoom fscy","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","char.center","char.bottom","","","2","1","fx.pos_x","fx.pos_y","","1","","char.text","format(\"\\\\t(%s,%s,\\\\fscy%s)\\\\t(%s,%s,\\\\fscy%s)\", char.syl_start, char.syl_start + frame_dur, 1.5*l.scale_y, char.syl_start + frame_dur, char.syl_end + delay, l.scale_y)","delay = 120","Lua",false); table.insert(hilight_fx_library, Char_Zoom_fscy); table.insert(hilight_fx, "Char Zoom fscy")
+	Char_Zoom_fscy_move_left_I = table.duplicate(PfxM_Box); table.inbox(Char_Zoom_fscy_move_left_I, "hi-light[fx]: Char Zoom fscy move left I","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","char.center","char.bottom","","","2","1","fx.pos_x, fx.pos_x - Dx","fx.pos_y","char.syl_start, char.syl_end + delay","1","","char.text","format(\"\\\\t(%s,%s,\\\\fscy%s)\\\\t(%s,%s,\\\\fscy%s)\", char.syl_start, char.syl_start + char.dur/2, 1.5*l.scale_y, char.syl_start + char.dur/2, char.syl_end + delay, l.scale_y)","delay = 120; Dx = 14","Lua",false); table.insert(hilight_fx_library, Char_Zoom_fscy_move_left_I); table.insert(hilight_fx, "Char Zoom fscy move left I")
+	Char_Zoom_fscy_move_left_II = table.duplicate(PfxM_Box); table.inbox(Char_Zoom_fscy_move_left_II, "hi-light[fx]: Char Zoom fscy move left II","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","char.center","char.top","","","8","1","fx.pos_x, fx.pos_x - Dx","fx.pos_y","char.syl_start, char.syl_end + delay","1","","char.text","format(\"\\\\t(%s,%s,\\\\fscy%s)\\\\t(%s,%s,\\\\fscy%s)\", char.syl_start, char.syl_start + char.dur/2, 1.5*l.scale_y, char.syl_start + char.dur/2, char.syl_end + delay, l.scale_y)","delay = 120; Dx = 14","Lua",false); table.insert(hilight_fx_library, Char_Zoom_fscy_move_left_II); table.insert(hilight_fx, "Char Zoom fscy move left II")
+	Char_Zoom_fscy_move_left_III = table.duplicate(PfxM_Box); table.inbox(Char_Zoom_fscy_move_left_III, "hi-light[fx]: Char Zoom fscy move left III","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","char.center","char.middle + 0.5*l.height*(-1)^char.i","","","tag.only( char.i%2 == 1, 8, 2 )","1","fx.pos_x, fx.pos_x - Dx","fx.pos_y","char.syl_start, char.syl_end + delay","1","","char.text","format(\"\\\\t(%s,%s,\\\\fscy%s)\\\\t(%s,%s,\\\\fscy%s)\", char.syl_start, char.syl_start + char.dur/2, 1.5*l.scale_y, char.syl_start + char.dur/2, char.syl_end + delay, l.scale_y)","delay = 120; Dx = 14","Lua",false); table.insert(hilight_fx_library, Char_Zoom_fscy_move_left_III); table.insert(hilight_fx, "Char Zoom fscy move left III")
+	Char_Zoom_move_left = table.duplicate(PfxM_Box); table.inbox(Char_Zoom_move_left, "hi-light[fx]: Char Zoom move left","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","char.center","char.middle","","","5","1","fx.pos_x, fx.pos_x - Dx","fx.pos_y","char.syl_start, char.syl_end + delay","1","","char.text","format(\"\\\\t(%s,%s,\\\\fscx%s\\\\fscy%s)\\\\t(%s,%s,\\\\fscx%s\\\\fscy%s)\", char.syl_start, char.syl_start + char.dur/2, 1.4*l.scale_x, 1.65*l.scale_y, char.syl_start + char.dur/2, char.syl_end + delay, l.scale_x, l.scale_y)","delay = 120; Dx = 14","Lua",false); table.insert(hilight_fx_library, Char_Zoom_move_left); table.insert(hilight_fx, "Char Zoom move left")
 	Clip_Grip_Multi_Alpha = table.duplicate(PfxM_Box); table.inbox(Clip_Grip_Multi_Alpha, "hi-light[fx]: Clip Grip Multi Alpha","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","7, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), tag.oscill(fx.dur, R(60,150), '\\\\1va'..alpha.va('&HFF&'), '\\\\1va'..text.alpha1)",""); table.insert(hilight_fx_library, Clip_Grip_Multi_Alpha); table.insert(hilight_fx, "Clip Grip Multi Alpha")
 	Clip_Grip_Multi_Color_Chameleon = table.duplicate(PfxM_Box); table.inbox(Clip_Grip_Multi_Color_Chameleon, "hi-light[fx]: Clip Grip Multi Color Chameleon","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","7, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), tag.oscill(fx.dur, R(60,150), '\\\\1vc'..random.colorvc(), '\\\\1vc'..random.colorvc())",""); table.insert(hilight_fx_library, Clip_Grip_Multi_Color_Chameleon); table.insert(hilight_fx, "Clip Grip Multi Color Chameleon")
 	Clip_Grip_Multi_Distort = table.duplicate(PfxM_Box); table.inbox(Clip_Grip_Multi_Distort, "hi-light[fx]: Clip Grip Multi Distort","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","7, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), tag.oscill(fx.dur, R(50,120), '\\\\fsvp'..var.loop.hight*(-1)^j, '\\\\fsvp'..var.loop.hight*(-1)^(j + 1))","hight = 7"); table.insert(hilight_fx_library, Clip_Grip_Multi_Distort); table.insert(hilight_fx, "Clip Grip Multi Distort")
@@ -1508,15 +3184,24 @@
 	Ghost_Shake_Halo_Border = table.duplicate(PfxM_Box); table.inbox(Ghost_Shake_Halo_Border, "hi-light[fx]: Ghost Shake Halo Border","Syl",true,false,"#0E72FF","#ADC4D6","#6A8DD6","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Rmove(10*ratio, 10*ratio), format('\\\\1a&HFF&\\\\bord%s\\\\shad0\\\\blur1.4\\\\3c%s', 3*ratio, shape.color1)","delay = 0","Lua",false); table.insert(hilight_fx_library, Ghost_Shake_Halo_Border); table.insert(hilight_fx, "Ghost Shake Halo Border")
 	Ghost_Shake_I = table.duplicate(PfxM_Box); table.inbox(Ghost_Shake_I, "hi-light[fx]: Ghost Shake I","Syl",true,false,"#CE04D9","#ADC4D6","#6A8DD6","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Rmove(10*ratio, 10*ratio), format('\\\\bord0\\\\shad0\\\\blur1.4\\\\1c%s', shape.color1)","delay = 0","Lua",false); table.insert(hilight_fx_library, Ghost_Shake_I); table.insert(hilight_fx, "Ghost Shake I")
 	Ghost_Shake_II = table.duplicate(PfxM_Box); table.inbox(Ghost_Shake_II, "hi-light[fx]: Ghost Shake II","Syl",true,false,"#FD9601","#ADC4D6","#6A8DD6","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Rmove(10*ratio, 10*ratio, 0, fx.dur, 1, -2*frame_dur), format('\\\\bord0\\\\shad0\\\\blur1.4\\\\1c%s', shape.color1)","delay = 0","Lua",false); table.insert(hilight_fx_library, Ghost_Shake_II); table.insert(hilight_fx, "Ghost Shake II")
+	Ghost_Shake_Multi = table.duplicate(PfxM_Box); table.inbox(Ghost_Shake_Multi, "hi-light[fx]: Ghost Shake Multi","Syl",true,false,"#E508DC","#FFFFFF","#6A8DD6","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","3","","syl.text","shape.Rmove(10*ratio, 10*ratio), format('\\\\bord0\\\\shad0\\\\blur0.8\\\\1c%s', color.module( color1, color2 ))","delay = 0; color1 = shape.color1; color2 = shape.color3","Lua",false); table.insert(hilight_fx_library, Ghost_Shake_Multi); table.insert(hilight_fx, "Ghost Shake Multi")
 	Hidden_Clip_Left_Right = table.duplicate(PfxM_Box); table.inbox(Hidden_Clip_Left_Right, "hi-light[fx]: Hidden Clip Left Right","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('%s\\\\t(%s))', tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), tag.clip(fx.pos_l + syl.widtht, fx.pos_t, 0, syl.height))","delay = 300"); table.insert(hilight_fx_library, Hidden_Clip_Left_Right); table.insert(hilight_fx, "Hidden Clip Left Right")
 	Hidden_Clip_Top_Bottom = table.duplicate(PfxM_Box); table.inbox(Hidden_Clip_Top_Bottom, "hi-light[fx]: Hidden Clip Top Bottom","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('%s\\\\t(%s))', tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height), tag.clip(fx.pos_l, fx.pos_b, syl.widtht, 0))","delay = 300"); table.insert(hilight_fx_library, Hidden_Clip_Top_Bottom); table.insert(hilight_fx, "Hidden Clip Top Bottom")
 	Halo_Border_Shine = table.duplicate(PfxM_Box); table.inbox(Halo_Border_Shine, "hi-light[fx]: Halo Border Shine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + 300","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\shad0\\\\bord%s\\\\3c&HFFFFFF&\\\\1a&HFF&\\\\blur1\\\\t(\\\\blur4\\\\3a&HFF&\\\\fscx%s\\\\fscy%s)', 3*ratio, 1.8*l.scale_x, 1.8*l.scale_y)","","Lua",false); table.insert(hilight_fx_library, Halo_Border_Shine); table.insert(hilight_fx, "Halo Border Shine")
 	Halo_Border_Shine_Multi = table.duplicate(PfxM_Box); table.inbox(Halo_Border_Shine_Multi, "hi-light[fx]: Halo Border Shine Multi","Syl",true,false,"#8AB9FC","#3F3C3C","#FFFFFF","100","0","0","l.start_time + syl.start_time + 1.2*syl.dur*module","fx.start_time + 350","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","syl.dur/100","","syl.text","format('\\\\fad(0,100)\\\\bord3\\\\blur1\\\\1a&HFF&\\\\3c%s\\\\3a%s\\\\t(\\\\fscx%s\\\\fscy%s\\\\blur4)', shape.color1, shape.alpha1, 2*l.scale_x, 2*l.scale_y)","","Lua",false); table.insert(hilight_fx_library, Halo_Border_Shine_Multi); table.insert(hilight_fx, "Halo Border Shine Multi")
 	Halo_Border_Shine_Vertical = table.duplicate(PfxM_Box); table.inbox(Halo_Border_Shine_Vertical, "hi-light[fx]: Halo Border Shine Vertical","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","fx.start_time + syl.dur/2","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\shad0\\\\bord%s\\\\3c&HFFFFFF&\\\\1a&HFF&\\\\blur1\\\\t(\\\\blur4\\\\3a&HFF&\\\\fscx0\\\\fscy%s)', 2*ratio, 2.8*l.scale_y)","","Lua",false); table.insert(hilight_fx_library, Halo_Border_Shine_Vertical); table.insert(hilight_fx, "Halo Border Shine Vertical")
-	Jump_Simple = table.duplicate(PfxM_Box); table.inbox(Jump_Simple, "hi-light[fx]: Jump Simple","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\t(0,80,\\\\fsvp%s)\\\\t(80,%s,\\\\fsvp0)', var.syl.jump, fx.dur)","jump = 20"); table.insert(hilight_fx_library, Jump_Simple); table.insert(hilight_fx, "Jump Simple")
-	Jump_Gyre = table.duplicate(PfxM_Box); table.inbox(Jump_Gyre, "hi-light[fx]: Jump Gyre","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\t(0,80,\\\\fsvp%s)\\\\t(%s,%s,\\\\fsvp0\\\\fry360)', var.syl.jump, fx.dur - 80, fx.dur)","jump = 20"); table.insert(hilight_fx_library, Jump_Gyre); table.insert(hilight_fx, "Jump Gyre")
-	Jump_Shine = table.duplicate(PfxM_Box); table.inbox(Jump_Shine, "hi-light[fx]: Jump Shine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\shad0\\\\1vc%s\\\\3vc%s\\\\bord2\\\\blur3\\\\t(0,80,\\\\fsvp%s)\\\\t(80,%s,\\\\1vc%s\\\\3vc%s\\\\bord%s\\\\blur0\\\\fsvp0)', color.vc('&HFFFFFF&'), color.vc('&HFFFFFF&'), var.syl.jump, fx.dur, text.color1, text.color3, l.outline)","jump = 20"); table.insert(hilight_fx_library, Jump_Shine); table.insert(hilight_fx, "Jump Shine")
-	Jump_Multi = table.duplicate(PfxM_Box); table.inbox(Jump_Multi, "hi-light[fx]: Jump Multi","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","tag.oscill(fx.dur, 70, '\\\\fsvp'..var.syl.jump, '\\\\fsvp'..-var.syl.jump)","jump = 20"); table.insert(hilight_fx_library, Jump_Multi); table.insert(hilight_fx, "Jump Multi")
+	Jitter_ShadOscill_Darkara = table.duplicate(PfxM_Box); table.inbox(Jitter_ShadOscill_Darkara, "hi-light[fx]: Jitter ShadOscill Darkara","Syl",true,false,"#AA32AB","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time + (j-1)*(dark_ciclo)","fx.start_time + dark_ciclo + tag.only(j == maxj, 0, var.loop.delay)","","","","","syl.center","syl.middle","","","5","1","fx.pos_x + var.loop.Dx, fx.pos_x","fx.pos_y + var.loop.Dy, fx.pos_y","","dark_loop","","syl.text","format(\"\\\\1c%s\\\\4c%s\\\\fscx%s\\\\fscy%s\\\\bord0\\\\blur1)\", color.module(shape.color1, shape.color4), color.module(shape.color4, shape.color1), 140 - 40*module, 140 - 40*module), tag.oscill(fx.dur, 80, \"\\\\xshad1.2\", \"\\\\xshad-1.2\")","dark_loop = syl.dur*0.01; dark_ciclo = syl.dur/dark_loop; delay=R(20,50); Dx=R(-5,5); Dy= R(-5,5)","Lua",false); table.insert(hilight_fx_library, Jitter_ShadOscill_Darkara); table.insert(hilight_fx, "Jitter ShadOscill Darkara")
+	Jump_Alternate = table.duplicate(PfxM_Box); table.inbox(Jump_Alternate, "hi-light[fx]: Jump Alternate","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Lmove2( {fx.pos_x, fx.pos_y, fx.pos_x, fx.pos_y + jump*(-1)^syl.i, fx.pos_x, fx.pos_y}, {0, 80, 80, fx.dur} )","jump = 20","Lua",false); table.insert(hilight_fx_library, Jump_Alternate); table.insert(hilight_fx, "Jump Alternate")
+	Jump_Gyre = table.duplicate(PfxM_Box); table.inbox(Jump_Gyre, "hi-light[fx]: Jump Gyre","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Lmove2( {fx.pos_x, fx.pos_y, fx.pos_x, fx.pos_y - jump, fx.pos_x, fx.pos_y}, {0, 80, 80, fx.dur} ), format(\"\\\\org(%s,%s)\\\\t(80,%s,\\\\fry360)\", fx.pos_x, fx.pos_y, fx.dur)","jump = 20","Lua",false); table.insert(hilight_fx_library, Jump_Gyre); table.insert(hilight_fx, "Jump Gyre")
+	Jump_Multi = table.duplicate(PfxM_Box); table.inbox(Jump_Multi, "hi-light[fx]: Jump Multi","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format(\"\\\\org(%s,%s)\", fx.pos_x - 10000, fx.pos_y), tag.oscill( fx.dur, 70, \"\\\\frz(0.12*(-1)^i)\" )","","Lua",false); table.insert(hilight_fx_library, Jump_Multi); table.insert(hilight_fx, "Jump Multi")
+	Jump_Shine = table.duplicate(PfxM_Box); table.inbox(Jump_Shine, "hi-light[fx]: Jump Shine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Lmove2( {fx.pos_x, fx.pos_y, fx.pos_x, fx.pos_y - jump, fx.pos_x, fx.pos_y}, {0, 80, 80, fx.dur} ), format(\"\\\\shad0\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&\\\\bord3\\\\blur4\\\\t(80,%s,\\\\1c%s\\\\3c%s\\\\bord%s\\\\blur0)\", fx.dur, text.color1, text.color3, l.outline)","jump = 20","Lua",false); table.insert(hilight_fx_library, Jump_Shine); table.insert(hilight_fx, "Jump Shine")
+	Jump_Shine_II = table.duplicate(PfxM_Box); table.inbox(Jump_Shine_II, "hi-light[fx]: Jump Shine II","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","2","","syl.text","format(\"\\\\org(%s,%s)\\\\t(0,80,\\\\fscx%s\\\\fscy%s\\\\frz0.1)\\\\t(120,%s,\\\\fscx%s\\\\fscy%s\\\\frz0)\", fx.pos_x - 10000, fx.pos_y, (1.1 + 0.4*(j - 1))*l.scale_x, (1.1 + 0.4*(j - 1))*l.scale_y, fx.dur, l.scale_x, l.scale_y ), tag.only( j == 2, \"\\\\1a&HFF&\\\\shad0\\\\3c&HFFFFFF&\\\\blur3\" )","","Lua",false); table.insert(hilight_fx_library, Jump_Shine_II); table.insert(hilight_fx, "Jump Shine II")
+	Jump_Shine_II_an1 = table.duplicate(PfxM_Box); table.inbox(Jump_Shine_II_an1, "hi-light[fx]: Jump Shine II an1","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","1","1","fx.pos_l","fx.pos_b","","2","","syl.text","format(\"\\\\t(0,80,\\\\fscx%s\\\\fscy%s)\\\\t(120,%s,\\\\fscx%s\\\\fscy%s)\", (1.2 + 0.4*(j - 1))*l.scale_x, (1.2 + 0.4*(j - 1))*l.scale_y, fx.dur, l.scale_x, l.scale_y ), tag.only( j == 2, \"\\\\1a&HFF&\\\\shad0\\\\3c&HFFFFFF&\\\\blur3\" )","","Lua",false); table.insert(hilight_fx_library, Jump_Shine_II_an1); table.insert(hilight_fx, "Jump Shine II an1")
+	Jump_Simple = table.duplicate(PfxM_Box); table.inbox(Jump_Simple, "hi-light[fx]: Jump Simple","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","shape.Lmove2( {fx.pos_x, fx.pos_y, fx.pos_x, fx.pos_y - jump, fx.pos_x, fx.pos_y}, {0, 80, 80, fx.dur} )","jump = 20","Lua",false); table.insert(hilight_fx_library, Jump_Simple); table.insert(hilight_fx, "Jump Simple")
+	Move_Double_Syl_prehilight_Vertical = table.duplicate(PfxM_Box); table.inbox(Move_Double_Syl_prehilight_Vertical, "hi-light[fx]: Move Double Syl prehilight Vertical","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time - delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","2","fx.pos_x","fx.pos_y + Dy*(-1)^j, fx.pos_y","","2","","syl.text","\\bord0\\shad0\\1c&HFFFFFF&\\blur1.6\\t(\\blur3.2)\\fad(100,0)","delay = 320; Dy = 0.6*l.height","Automation Auto-4",false); table.insert(hilight_fx_library, Move_Double_Syl_prehilight_Vertical); table.insert(hilight_fx, "Move Double Syl prehilight Vertical")
+	Move_Double_Syl_prehilight_Horizontal = table.duplicate(PfxM_Box); table.inbox(Move_Double_Syl_prehilight_Horizontal, "hi-light[fx]: Move Double Syl prehilight Horizontal","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time - delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","2","fx.pos_x + Dx*(-1)^j, fx.pos_x","fx.pos_y","","2","","syl.text","\\bord0\\shad0\\1c&HFFFFFF&\\blur1.6\\t(\\blur3.2)\\fad(100,0)","delay = 320; Dx = 0.6*l.height","Automation Auto-4",false); table.insert(hilight_fx_library, Move_Double_Syl_prehilight_Horizontal); table.insert(hilight_fx, "Move Double Syl prehilight Horizontal")
+	Move_Four_Syl_prehilight_I = table.duplicate(PfxM_Box); table.inbox(Move_Four_Syl_prehilight_I, "hi-light[fx]: Move Four Syl prehilight I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time - delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","2","fx.pos_x + (j%2)*Dx*(-1)^ceil(j/2), fx.pos_x","fx.pos_y + ((j + 1)%2)*Dy*(-1)^ceil(j/2), fx.pos_y","","4","","syl.text","\\bord0\\shad0\\1c&HFFFFFF&\\blur1.6\\t(\\blur3.2)\\fad(100,0)","delay = 320; Dx = 0.6*l.height; Dy = 0.6*l.height","Automation Auto-4",false); table.insert(hilight_fx_library, Move_Four_Syl_prehilight_I); table.insert(hilight_fx, "Move Four Syl prehilight I")
+	Move_Four_Syl_prehilight_II = table.duplicate(PfxM_Box); table.inbox(Move_Four_Syl_prehilight_II, "hi-light[fx]: Move Four Syl prehilight II","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time - delay","l.start_time + syl.start_time","","","","","syl.center","syl.middle","","","5","2","fx.pos_x +Dx*(-1)^ceil(j/2), fx.pos_x","fx.pos_y + Dy*(-1)^j, fx.pos_y","","4","","syl.text","\\bord0\\shad0\\1c&HFFFFFF&\\blur1.6\\t(\\blur3.2)\\1a40\\fad(100,0)","delay = 320; Dx = 0.6*l.height; Dy = 0.6*l.height","Automation Auto-4",false); table.insert(hilight_fx_library, Move_Four_Syl_prehilight_II); table.insert(hilight_fx, "Move Four Syl prehilight II")
 	Shineline_Clip_Move_Left_Right = table.duplicate(PfxM_Box); table.inbox(Shineline_Clip_Move_Left_Right, "hi-light[fx]: Shineline Clip Move Left Right","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","2","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\shad0\\\\blur3\\\\1vc%s\\\\3vc%s\\\\ybord%s%s\\\\t(%s))', color.vc('&HFFFFFF&'), color.vc('&HFFFFFF&'), 8*ratio, tag.clip(fx.pos_l, fx.pos_t -  l.fontsize, 2*ratio, 3*l.fontsize), tag.clip(fx.pos_r, fx.pos_t -  l.fontsize, 2*ratio, 3*l.fontsize))",""); table.insert(hilight_fx_library, Shineline_Clip_Move_Left_Right); table.insert(hilight_fx, "Shineline Clip Move Left Right")
 	Simple_Shine = table.duplicate(PfxM_Box); table.inbox(Simple_Shine, "hi-light[fx]: Simple Shine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","1.3*l.scale_x, 1.3*l.scale_y","syl.text","format('\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&\\\\shad0\\\\blur3\\\\t(\\\\1c%s\\\\3c%s\\\\fscx%s\\\\fscy%s\\\\blur1)\\\\fad(0,%s)', text.color1, text.color3, l.scale_x, l.scale_y, delay)","delay = 300","Lua",false); table.insert(hilight_fx_library, Simple_Shine); table.insert(hilight_fx, "Simple Shine")
 	Simple_Shine_Alternate_Angle = table.duplicate(PfxM_Box); table.inbox(Simple_Shine_Alternate_Angle, "hi-light[fx]: Simple Shine Alternate Angle","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","1.3*l.scale_x, 1.3*l.scale_y","syl.text","format('\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&\\\\shad0\\\\blur3\\\\fr%s\\\\t(\\\\1c%s\\\\3c%s\\\\fscx%s\\\\fscy%s\\\\blur1\\\\fr0)\\\\fad(0,%s)', angle*(-1)^syl.i, text.color1, text.color3, l.scale_x, l.scale_y, delay)","delay = 300; angle = 15","Lua",false); table.insert(hilight_fx_library, Simple_Shine_Alternate_Angle); table.insert(hilight_fx, "Simple Shine Alternate Angle")
@@ -1532,6 +3217,8 @@
 	Spark_Shine_II = table.duplicate(PfxM_Box); table.inbox(Spark_Shine_II, "hi-light[fx]: Spark Shine II","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time + var.loop.delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","12","","syl.text","format('\\\\1vc%s\\\\shad0\\\\bord0\\\\org(%s,%s)\\\\1va(%s,%s,%s,%s)\\\\t(0,80,\\\\fr%s\\\\blur1.5\\\\t(80,%s,\\\\fscx%s\\\\fscy%s\\\\blur3)\\\\be1\\\\fad(0,%s)', color.vc('&HFFFFFF&'), -10000*ratio, fx.pos_y, var.loop.a1, var.loop.a2, var.loop.a3, var.loop.a4, math.round(var.loop.angle*(2*module - 1), 3), fx.dur, 0.6*l.scale_x, 1.3*l.scale_y, var.loop.delay)","angle = 0.1, delay = 300, a1 = ass_alpha(R(100,250)), a2 = ass_alpha(R(100,250)), a3 = ass_alpha(R(100,250)), a4 = ass_alpha(R(100,250))"); table.insert(hilight_fx_library, Spark_Shine_II); table.insert(hilight_fx, "Spark Shine II")
 	Spark_Shine_II_Horizontal = table.duplicate(PfxM_Box); table.inbox(Spark_Shine_II_Horizontal, "hi-light[fx]: Spark Shine II Horizontal","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time - var.loop.delay","l.start_time + syl.end_time + var.loop.delay","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","12","1.2*l.scale_x, 1.2*l.scale_y","syl.text","format('\\\\1vc%s\\\\shad0\\\\bord0\\\\org(%s,%s)\\\\1va(%s,%s,%s,%s)\\\\t(0,80,\\\\fr%s\\\\blur1.5\\\\t(80,%s,\\\\fscy%s\\\\blur2)\\\\be1\\\\fad(100,100)', color.vc('&HFFFFFF&'), fx.pos_x, -10000*ratio, var.loop.a1, var.loop.a2, var.loop.a3, var.loop.a4, math.round(var.loop.angle*(2*module - 1), 3), fx.dur, l.scale_y)","angle = 0.12, delay = 100, a1 = ass_alpha(R(100,250)), a2 = ass_alpha(R(100,250)), a3 = ass_alpha(R(100,250)), a4 = ass_alpha(R(100,250))"); table.insert(hilight_fx_library, Spark_Shine_II_Horizontal); table.insert(hilight_fx, "Spark Shine II Horizontal")
 	Spark_Shine_III_Dance = table.duplicate(PfxM_Box); table.inbox(Spark_Shine_III_Dance, "hi-light[fx]: Spark Shine III Dance","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time + var.loop.delay1*module","l.start_time + syl.end_time + var.loop.delay2 - var.loop.delay1*module","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","12","l.scale_x, 1.2*l.scale_y","syl.text","format('\\\\shad0\\\\bord0\\\\1vc%s\\\\blur2\\\\fsvp%s\\\\1a%s\\\\org(%s,%s)%s\\\\fad(0,%s)', color.vc('&HFFFFFF&'), var.loop.height*module, interpolate_alpha(module, var.loop.a1, var.loop.a2), fx.pos_x, fx.pos_y - 10000*ratio, tag.oscill(fx.dur, 120, '\\\\fr-0.024', '\\\\fr0.024'), var.loop.delay1)","delay1 = 150, delay2 = 500, height = 28*ratio, a1 = ass_alpha(120), a2 = ass_alpha(240)"); table.insert(hilight_fx_library, Spark_Shine_III_Dance); table.insert(hilight_fx, "Spark Shine III Dance")
+	Syl_Deformed_I = table.duplicate(PfxM_Box); table.inbox(Syl_Deformed_I, "hi-light[fx]: Syl Deformed I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","1.35*l.scale_x, 1.35*l.scale_y","syl.text","tag.oscill( fx.dur, 2*frame_dur, \"\\\\faxRc(-0.12,0.12)\\\\fayRc(-0.12,0.12)\\\\frxR(-8,8)\\\\fryR(-8,8)\\\\frzR(-8,8)\" ), format(\"\\\\t(\\\\fscx%s\\\\fscy%s)\", l.scale_x, l.scale_y)","","Lua",false); table.insert(hilight_fx_library, Syl_Deformed_I); table.insert(hilight_fx, "Syl Deformed I")
+	Syl_Deformed_II = table.duplicate(PfxM_Box); table.inbox(Syl_Deformed_II, "hi-light[fx]: Syl Deformed II","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","1.35*l.scale_x, 1.35*l.scale_y","syl.text","shape.Rmove( 10, 10, 0, fx.dur, 1, {2.6*frame_dur} ), tag.oscill( fx.dur, 2*frame_dur, \"\\\\faxRc(-0.15,0.15)\\\\fayRc(-0.15,0.15)\" ), format(\"\\\\t(\\\\fscx%s\\\\fscy%s)\", l.scale_x, l.scale_y)","","Lua",false); table.insert(hilight_fx_library, Syl_Deformed_II); table.insert(hilight_fx, "Syl Deformed II")
 	Syl_Zomm_fry = table.duplicate(PfxM_Box); table.inbox(Syl_Zomm_fry, "hi-light[fx]: Syl Zomm fry","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","0","0","0","l.start_time + syl.start_time","l.start_time + syl.end_time","","","","","syl.center","syl.middle","","","5","1","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\t(0,60,\\\\fscx%s\\\\fscy%s)\\\\t(%s,%s,\\\\fscx%s\\\\fscy%s\\\\fry360)', 1.2*l.scale_x, 1.2*l.scale_y, fx.dur - 120, fx.dur, l.scale_x, l.scale_y)",""); table.insert(hilight_fx_library, Syl_Zomm_fry); table.insert(hilight_fx, "Syl Zomm fry")
 	
 	
@@ -1540,24 +3227,24 @@
 	Asault_Line_Leadout = table.duplicate(PfxM_Box); table.inbox(Asault_Line_Leadout, "lead-out[fx]: Asault Line Leadout","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + var.syl.delay + 25*(syl.i - syl.n +1)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - var.syl.d1","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","l.scale_x, l.scale_y","syl.text","format('\\\\org(%s,%s)\\\\t(%s,%s,\\\\frx180)\\\\fad(0,300)', fx.pos_x - var.syl.d2*(1 - 2*(syl.i - 1)/(syl.n - 2)), fx.pos_y + var.syl.d2/2, fx.dur - var.syl.delay, fx.dur)","delay = 500, d1 = 150*ratio*(1 - 2*(syl.i - 1)/(syl.n - 2)), d2 = 100*ratio"); table.insert(leadout_fx_library, Asault_Line_Leadout); table.insert(leadout_fx, "Asault Line Leadout")
 	Distort_in_Line_I = table.duplicate(PfxM_Box); table.inbox(Distort_in_Line_I, "lead-out[fx]: Distort in Line I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + var.syl.delay1 + var.syl.delay2*j","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - var.syl.dx","fx.pos_y, fx.pos_y","fx.dur - var.loop.delay1, fx.dur","3","","syl.text","tag.clip(0, fx.pos_t, meta.res_x, syl.height), format('\\\\t(%s,%s,0.7,\\\\frx360)\\\\fad(0,300)', fx.dur - var.loop.delay1, fx.dur)","delay1 = 500, delay2 = 100, dx = 180*ratio"); table.insert(leadout_fx_library, Distort_in_Line_I); table.insert(leadout_fx, "Distort in Line I")
 	Distort_in_Syl_I = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I, "lead-out[fx]: Distort in Syl I","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","format('\\\\org(%s,%s)\\\\t(%s,%s,\\\\bord2\\\\shad0)\\\\t(%s,%s,0.8,\\\\rnd7\\\\blur10\\\\fscy%s)\\\\fad(0,250)', fx.pos_x, -10000*ratio, fx.dur - 501, fx.dur - 500, fx.dur - 500, fx.dur, 0.55*l.scale_y)",""); table.insert(leadout_fx_library, Distort_in_Syl_I); table.insert(leadout_fx, "Distort in Syl I")
-	Distort_in_Syl_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_buttLine, "lead-out[fx]: Distort in Syl I buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(70)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","0, fx.dur","1","","syl.text","format('\\\\org(%s,%s)\\\\t(%s,%s,\\\\bord2\\\\shad0)\\\\t(%s,%s,0.8,\\\\rnd6\\\\blur10\\\\fscy%s)\\\\fad(0,150)', fx.pos_x, -10000*ratio, fx.dur - 501, fx.dur - 500, fx.dur - 500, fx.dur, 0.55*l.scale_y)",""); table.insert(leadout_fx_library, Distort_in_Syl_I_buttLine); table.insert(leadout_fx, "Distort in Syl I buttLine")
+	Distort_in_Syl_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_buttLine, "lead-out[fx]: Distort in Syl I buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(70) + 70*syl.n","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","0, fx.dur","1","","syl.text","format('\\\\org(%s,%s)\\\\t(%s,%s,\\\\bord2\\\\shad0)\\\\t(%s,%s,0.8,\\\\rnd6\\\\blur10\\\\fscy%s)\\\\fad(0,150)', fx.pos_x, -10000*ratio, fx.dur - 501, fx.dur - 500, fx.dur - 500, fx.dur, 0.55*l.scale_y)",""); table.insert(leadout_fx_library, Distort_in_Syl_I_buttLine); table.insert(leadout_fx, "Distort in Syl I buttLine")
 	Distort_in_Syl_I_Inverse = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_Inverse, "lead-out[fx]: Distort in Syl I Inverse","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","l.scale_x, l.scale_y","syl.text","format('\\\\org(%s,%s)\\\\t(%s,%s,\\\\bord2\\\\shad0)\\\\t(%s,%s,0.8,\\\\rnd6\\\\blur10\\\\fscy%s)\\\\fad(0,250)', fx.pos_x, -10000*ratio, fx.dur - 501, fx.dur - 500, fx.dur - 500, fx.dur, 0.55*l.scale_y)",""); table.insert(leadout_fx_library, Distort_in_Syl_I_Inverse); table.insert(leadout_fx, "Distort in Syl I Inverse")
 	Distort_in_Syl_I_midLine = table.duplicate(PfxM_Box); table.inbox(Distort_in_Syl_I_midLine, "lead-out[fx]: Distort in Syl I midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(70)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","0, fx.dur","1","","syl.text","format('\\\\org(%s,%s)\\\\t(%s,%s,\\\\bord2\\\\shad0)\\\\t(%s,%s,0.8,\\\\rnd6\\\\blur10\\\\fscy%s)\\\\fad(0,150)', fx.pos_x, -10000*ratio, fx.dur - 501, fx.dur - 500, fx.dur - 500, fx.dur, 0.55*l.scale_y)",""); table.insert(leadout_fx_library, Distort_in_Syl_I_midLine); table.insert(leadout_fx, "Distort in Syl I midLine")
 	Emerge_Clip_Grip_I = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I, "lead-out[fx]: Emerge Clip Grip I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 60*(syl.i - syl.n/2 - 1) + 100","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - 450, fx.dur","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_I); table.insert(leadout_fx, "Emerge Clip Grip I")
-	Emerge_Clip_Grip_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_buttLine, "lead-out[fx]: Emerge Clip Grip I buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70)","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","6, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_I_buttLine); table.insert(leadout_fx, "Emerge Clip Grip I buttLine")
+	Emerge_Clip_Grip_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_buttLine, "lead-out[fx]: Emerge Clip Grip I buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70) + 70*syl.n","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","6, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_I_buttLine); table.insert(leadout_fx, "Emerge Clip Grip I buttLine")
 	Emerge_Clip_Grip_I_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_Inverse, "lead-out[fx]: Emerge Clip Grip I Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - 450, fx.dur","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_I_Inverse); table.insert(leadout_fx, "Emerge Clip Grip I Inverse")
 	Emerge_Clip_Grip_I_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_I_midLine, "lead-out[fx]: Emerge Clip Grip I midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid1(70)","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","6, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_I_midLine); table.insert(leadout_fx, "Emerge Clip Grip I midLine")
 	Emerge_Clip_Grip_II = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II, "lead-out[fx]: Emerge Clip Grip II","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 60*(syl.i - syl.n/2 - 1) + 100","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","5, loop_h","","syl.text","format('%s\\\\t(%s,%s,%s)\\\\fad(0,200)', tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), fx.dur - var.loop.delay, fx.dur, tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height))","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_II); table.insert(leadout_fx, "Emerge Clip Grip II")
-	Emerge_Clip_Grip_II_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_buttLine, "lead-out[fx]: Emerge Clip Grip II buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","5, loop_h","","syl.text","format('%s\\\\t(%s,%s,%s)\\\\fad(0,200)', tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), fx.dur - var.loop.delay, fx.dur, tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height))","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_II_buttLine); table.insert(leadout_fx, "Emerge Clip Grip II buttLine")
+	Emerge_Clip_Grip_II_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_buttLine, "lead-out[fx]: Emerge Clip Grip II buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70) + 70*syl.n","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","5, loop_h","","syl.text","format('%s\\\\t(%s,%s,%s)\\\\fad(0,200)', tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), fx.dur - var.loop.delay, fx.dur, tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height))","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_II_buttLine); table.insert(leadout_fx, "Emerge Clip Grip II buttLine")
 	Emerge_Clip_Grip_II_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_Inverse, "lead-out[fx]: Emerge Clip Grip II Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","5, loop_h","","syl.text","format('%s\\\\t(%s,%s,%s)\\\\fad(0,200)', tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), fx.dur - var.loop.delay, fx.dur, tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height))","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_II_Inverse); table.insert(leadout_fx, "Emerge Clip Grip II Inverse")
 	Emerge_Clip_Grip_II_midLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_II_midLine, "lead-out[fx]: Emerge Clip Grip II midLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid1(70)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","5, loop_h","","syl.text","format('%s\\\\t(%s,%s,%s)\\\\fad(0,200)', tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), fx.dur - var.loop.delay, fx.dur, tag.clip(fx.pos_l + var.loop.dx, fx.pos_t + var.loop.dy, syl.width, syl.height))","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Grip_II_midLine); table.insert(leadout_fx, "Emerge Clip Grip II midLine")
 	Emerge_Clip_Grip_III = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Grip_III, "lead-out[fx]: Emerge Clip Grip III","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 70*(syl.i - syl.n + 1) + R(var.loop.d1 - var.loop.d2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","5, loop_h","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,150)'","d1 = 1000, d2 = 300"); table.insert(leadout_fx_library, Emerge_Clip_Grip_III); table.insert(leadout_fx, "Emerge Clip Grip III")
 	Emerge_Clip_Horizontal_I = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_I, "lead-out[fx]: Emerge Clip Horizontal I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 60*(syl.i - syl.n/2 - 1) + 100","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - 450, fx.dur","ceil(syl.height/5)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Horizontal_I); table.insert(leadout_fx, "Emerge Clip Horizontal I")
-	Emerge_Clip_Horizontal_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_I_buttLine, "lead-out[fx]: Emerge Clip Horizontal I buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70)","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","ceil(syl.height/5)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Horizontal_I_buttLine); table.insert(leadout_fx, "Emerge Clip Horizontal I buttLine")
+	Emerge_Clip_Horizontal_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_I_buttLine, "lead-out[fx]: Emerge Clip Horizontal I buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70) + 70*syl.n","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","ceil(syl.height/5)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Horizontal_I_buttLine); table.insert(leadout_fx, "Emerge Clip Horizontal I buttLine")
 	Emerge_Clip_Horizontal_I_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_I_Inverse, "lead-out[fx]: Emerge Clip Horizontal I Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - 450, fx.dur","ceil(syl.height/5)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Horizontal_I_Inverse); table.insert(leadout_fx, "Emerge Clip Horizontal I Inverse")
 	Emerge_Clip_Horizontal_I_mid_line = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Horizontal_I_mid_line, "lead-out[fx]: Emerge Clip Horizontal I mid line","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid1(70)","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","ceil(syl.height/5)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Horizontal_I_mid_line); table.insert(leadout_fx, "Emerge Clip Horizontal I mid line")
 	Emerge_Clip_Vertical_I = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_I, "lead-out[fx]: Emerge Clip Vertical I","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 60*(syl.i - syl.n/2 - 1) + 100","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - 450, fx.dur","1, ceil(syl.width/6)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Vertical_I); table.insert(leadout_fx, "Emerge Clip Vertical I")
-	Emerge_Clip_Vertical_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_I_buttLine, "lead-out[fx]: Emerge Clip Vertical I buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70)","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","1, ceil(syl.width/6)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Vertical_I_buttLine); table.insert(leadout_fx, "Emerge Clip Vertical I buttLine")
+	Emerge_Clip_Vertical_I_buttLine = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_I_buttLine, "lead-out[fx]: Emerge Clip Vertical I buttLine","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid2(70) + 70*syl.n","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","1, ceil(syl.width/6)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Vertical_I_buttLine); table.insert(leadout_fx, "Emerge Clip Vertical I buttLine")
 	Emerge_Clip_Vertical_I_Inverse = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_I_Inverse, "lead-out[fx]: Emerge Clip Vertical I Inverse","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - 450, fx.dur","1, ceil(syl.width/6)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Vertical_I_Inverse); table.insert(leadout_fx, "Emerge Clip Vertical I Inverse")
 	Emerge_Clip_Vertical_I_mid_line = table.duplicate(PfxM_Box); table.inbox(Emerge_Clip_Vertical_I_mid_line, "lead-out[fx]: Emerge Clip Vertical I mid line","Syl",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + time_mid1(70)","","","","0","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + var.loop.dx","fx.pos_y, fx.pos_y + var.loop.dy","fx.dur - var.loop.delay, fx.dur","1, ceil(syl.width/6)","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height), '\\\\fad(0,300)'","delay = 450, dx = R(-30, 30)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Emerge_Clip_Vertical_I_mid_line); table.insert(leadout_fx, "Emerge Clip Vertical I mid line")
 	Function_Alpha_Delay = table.duplicate(PfxM_Box); table.inbox(Function_Alpha_Delay, "lead-out[fx]: Function Alpha Delay","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 60*(syl.i - syl.n + 8) + var.loop.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","syl.text","alpha.delay(fx.dur - 1000, 250, '&H00&', '&HFF&', '\\\\1va', '\\\\3va'), '\\\\fad(0,120)'","delay = 600 - R(0, 20)*10"); table.insert(leadout_fx_library, Function_Alpha_Delay); table.insert(leadout_fx, "Function Alpha Delay")
@@ -1575,7 +3262,7 @@
 	Function_Oscill_Snake_Move_Char = table.duplicate(PfxM_Box); table.inbox(Function_Oscill_Snake_Move_Char, "lead-out[fx]: Function Oscill Snake Move Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 30*(char.i - char.n + 1) + 300","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","tag.oscill({fx.dur - var.syl.delay, fx.dur}, 120, '\\\\fsvp'..var.syl.height, '\\\\fsvp'..-var.syl.height), '\\\\fad(0,300)'","height = 4*ratio, delay = 800"); table.insert(leadout_fx_library, Function_Oscill_Snake_Move_Char); table.insert(leadout_fx, "Function Oscill Snake Move Char")
 	Flashing_Outro_Aux = table.duplicate(PfxM_Box); table.inbox(Flashing_Outro_Aux, "lead-out[fx]: Flashing Outro Aux","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.end_time","l.end_time + var.syl.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x","fx.pos_y","","16","","syl.text","format('\\\\org(%s,%s)\\\\bord0\\\\shad0\\\\blur3\\\\1va%s\\\\t(%s,%s,0.8,\\\\fr%s)', var.syl.orgx, var.syl.orgy, alpha.va('&HDD&'), fx.dur - var.syl.delay, fx.dur, 2*var.syl.a*module - var.syl.a)","delay = 400, orgx = syl.center - 10000*ratio, orgy = syl.middle, a = 0.2"); table.insert(leadout_fx_library, Flashing_Outro_Aux); table.insert(leadout_fx, "Flashing Outro Aux")
 	Helical_Char_Leadout = table.duplicate(PfxM_Box); table.inbox(Helical_Char_Leadout, "lead-out[fx]: Helical Char Leadout","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 30*(char.i - char.n + 1) + 1.5*var.char.delay","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n","fx.dur - 1.5*var.char.delay, fx.dur","2","","char.text","format('\\\\fad(0,300)\\\\org(%s,%s)\\\\1va%s\\\\3va%s\\\\4va%s\\\\t(%s,%s,0.8,\\\\frx180)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)',fx.pos_x, fx.pos_y, alpha.va(var.loop.a1),  alpha.va(var.loop.a3),  alpha.va(var.loop.a4), fx.dur - var.char.delay, fx.dur, fx.dur - var.char.delay - 301, fx.dur - var.char.delay - 300, text.alpha1, text.alpha3, text.alpha4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, '&HFF&', text.alpha1a), a3 = tag.only(j==1, '&HFF&', text.alpha3a), a4 = tag.only(j==1, '&HFF&', text.alpha4a)"); table.insert(leadout_fx_library, Helical_Char_Leadout); table.insert(leadout_fx, "Helical Char Leadout")
-	Helical_Char_Leadout_buttLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_Leadout_buttLine, "lead-out[fx]: Helical Char Leadout buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(35)","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n","fx.dur - 1.5*var.char.delay, fx.dur","2","","char.text","format('\\\\fad(0,300)\\\\org(%s,%s)\\\\1va%s\\\\3va%s\\\\4va%s\\\\t(%s,%s,0.8,\\\\frx180)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)',fx.pos_x, fx.pos_y, alpha.va(var.loop.a1),  alpha.va(var.loop.a3),  alpha.va(var.loop.a4), fx.dur - var.char.delay, fx.dur, fx.dur - var.char.delay - 301, fx.dur - var.char.delay - 300, text.alpha1, text.alpha3, text.alpha4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, '&HFF&', text.alpha1a), a3 = tag.only(j==1, '&HFF&', text.alpha3a), a4 = tag.only(j==1, '&HFF&', text.alpha4a)"); table.insert(leadout_fx_library, Helical_Char_Leadout_buttLine); table.insert(leadout_fx, "Helical Char Leadout buttLine")
+	Helical_Char_Leadout_buttLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_Leadout_buttLine, "lead-out[fx]: Helical Char Leadout buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(35) + 35*char.n","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n","fx.dur - 1.5*var.char.delay, fx.dur","2","","char.text","format('\\\\fad(0,300)\\\\org(%s,%s)\\\\1va%s\\\\3va%s\\\\4va%s\\\\t(%s,%s,0.8,\\\\frx180)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)',fx.pos_x, fx.pos_y, alpha.va(var.loop.a1),  alpha.va(var.loop.a3),  alpha.va(var.loop.a4), fx.dur - var.char.delay, fx.dur, fx.dur - var.char.delay - 301, fx.dur - var.char.delay - 300, text.alpha1, text.alpha3, text.alpha4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, '&HFF&', text.alpha1a), a3 = tag.only(j==1, '&HFF&', text.alpha3a), a4 = tag.only(j==1, '&HFF&', text.alpha4a)"); table.insert(leadout_fx_library, Helical_Char_Leadout_buttLine); table.insert(leadout_fx, "Helical Char Leadout buttLine")
 	Helical_Char_Leadout_Inverse = table.duplicate(PfxM_Box); table.inbox(Helical_Char_Leadout_Inverse, "lead-out[fx]: Helical Char Leadout Inverse","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n","fx.dur - 1.5*var.char.delay, fx.dur","2","","char.text","format('\\\\fad(0,300)\\\\org(%s,%s)\\\\1va%s\\\\3va%s\\\\4va%s\\\\t(%s,%s,0.8,\\\\frx180)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)',fx.pos_x, fx.pos_y, alpha.va(var.loop.a1),  alpha.va(var.loop.a3),  alpha.va(var.loop.a4), fx.dur - var.char.delay, fx.dur, fx.dur - var.char.delay - 301, fx.dur - var.char.delay - 300, text.alpha1, text.alpha3, text.alpha4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, '&HFF&', text.alpha1a), a3 = tag.only(j==1, '&HFF&', text.alpha3a), a4 = tag.only(j==1, '&HFF&', text.alpha4a)"); table.insert(leadout_fx_library, Helical_Char_Leadout_Inverse); table.insert(leadout_fx, "Helical Char Leadout Inverse")
 	Helical_Char_Leadout_midLine = table.duplicate(PfxM_Box); table.inbox(Helical_Char_Leadout_midLine, "lead-out[fx]: Helical Char Leadout midLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(35)","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + var.char.d*(-1)^j + (2*var.char.d*(-1)^(j+1))*(char.i-1)/char.n","fx.dur - 1.5*var.char.delay, fx.dur","2","","char.text","format('\\\\fad(0,300)\\\\org(%s,%s)\\\\1va%s\\\\3va%s\\\\4va%s\\\\t(%s,%s,0.8,\\\\frx180)\\\\t(%s,%s,\\\\1va%s\\\\3va%s\\\\4va%s)',fx.pos_x, fx.pos_y, alpha.va(var.loop.a1),  alpha.va(var.loop.a3),  alpha.va(var.loop.a4), fx.dur - var.char.delay, fx.dur, fx.dur - var.char.delay - 301, fx.dur - var.char.delay - 300, text.alpha1, text.alpha3, text.alpha4)","delay = 450, d = 70*ratio, a1 = tag.only(j==1, '&HFF&', text.alpha1a), a3 = tag.only(j==1, '&HFF&', text.alpha3a), a4 = tag.only(j==1, '&HFF&', text.alpha4a)"); table.insert(leadout_fx_library, Helical_Char_Leadout_midLine); table.insert(leadout_fx, "Helical Char Leadout midLine")
 	Move_Char_I = table.duplicate(PfxM_Box); table.inbox(Move_Char_I, "lead-out[fx]: Move Char I","Char",true,false,"#E2EAFD","#3F3C3C","#FFFFFF","20","40","0","l.start_time + syl.end_time","l.end_time + 30*(syl.i - syl.n + 1) + var.loop.delay","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x - var.loop.dx","fx.pos_y, fx.pos_y - var.loop.dy","fx.dur - var.syl.delay, fx.dur","1","","char.text","'\\\\fad(0,200)'","delay = 450, dx = R(50, 100)*ratio, dy = R(-30, 30)*ratio"); table.insert(leadout_fx_library, Move_Char_I); table.insert(leadout_fx, "Move Char I")
@@ -1592,7 +3279,7 @@
 	Move_Line_Top_Bottom = table.duplicate(PfxM_Box); table.inbox(Move_Line_Top_Bottom, "lead-out[fx]: Move Line Top Bottom","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + var.syl.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + var.syl.d*(-1)^line.i","fx.dur - var.syl.delay, fx.dur","1","","syl.text","format('\\\\t(%s,%s,\\\\shad0\\\\bord2\\\\1vc%s\\\\3vc%s\\\\blur3)', fx.dur - var.syl.delay, fx.dur - 3*var.syl.delay/4, color.vc('&HFFFFFF&'), color.vc('&HFFFFFF&'))","d = l.height, delay = 260"); table.insert(leadout_fx_library, Move_Line_Top_Bottom); table.insert(leadout_fx, "Move Line Top Bottom")
 	Move_Syl_From_Center_Line = table.duplicate(PfxM_Box); table.inbox(Move_Syl_From_Center_Line, "lead-out[fx]: Move Syl From Center Line","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.loop.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, l.center","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","'\\\\fad(0,300)'","delay = 460"); table.insert(leadout_fx_library, Move_Syl_From_Center_Line); table.insert(leadout_fx, "Move Syl From Center Line")
 	Screw_Char = table.duplicate(PfxM_Box); table.inbox(Screw_Char, "lead-out[fx]: Screw Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 30*(char.i - char.n + 1) + var.loop.delay","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","fx.dur - var.char.delay, fx.dur","1","","char.text","format('\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(0,300)', fx.dur - var.char.delay, fx.dur)","delay = 440"); table.insert(leadout_fx_library, Screw_Char); table.insert(leadout_fx, "Screw Char")
-	Screw_Char_buttLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_buttLine, "lead-out[fx]: Screw Char buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(40)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","fx.dur - var.char.delay, fx.dur","1","","char.text","format('\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(0,300)', fx.dur - var.char.delay, fx.dur)","delay = 440"); table.insert(leadout_fx_library, Screw_Char_buttLine); table.insert(leadout_fx, "Screw Char buttLine")
+	Screw_Char_buttLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_buttLine, "lead-out[fx]: Screw Char buttLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(40) + 40*char.n","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","fx.dur - var.char.delay, fx.dur","1","","char.text","format('\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(0,300)', fx.dur - var.char.delay, fx.dur)","delay = 440"); table.insert(leadout_fx_library, Screw_Char_buttLine); table.insert(leadout_fx, "Screw Char buttLine")
 	Screw_Char_Inverse = table.duplicate(PfxM_Box); table.inbox(Screw_Char_Inverse, "lead-out[fx]: Screw Char Inverse","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","fx.dur - var.char.delay, fx.dur","1","","char.text","format('\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(0,300)', fx.dur - var.char.delay, fx.dur)","delay = 440"); table.insert(leadout_fx_library, Screw_Char_Inverse); table.insert(leadout_fx, "Screw Char Inverse")
 	Screw_Char_midLine = table.duplicate(PfxM_Box); table.inbox(Screw_Char_midLine, "lead-out[fx]: Screw Char midLine","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(40)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","fx.dur - var.char.delay, fx.dur","1","","char.text","format('\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(0,300)', fx.dur - var.char.delay, fx.dur)","delay = 440"); table.insert(leadout_fx_library, Screw_Char_midLine); table.insert(leadout_fx, "Screw Char midLine")
 	Simple_Moves3_Char_I = table.duplicate(PfxM_Box); table.inbox(Simple_Moves3_Char_I, "lead-out[fx]: Simple Moves3 Char I","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 30*(char.i - char.n + 1) + var.loop.delay","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x - var.char.dx, fx.pos_x","fx.pos_y, fx.pos_y, fx.pos_y","fx.dur - var.char.delay, fx.dur","1","","char.text","'\\\\fad(0,300)'","dx = 70*ratio, delay = 460"); table.insert(leadout_fx_library, Simple_Moves3_Char_I); table.insert(leadout_fx, "Simple Moves3 Char I")
@@ -1601,23 +3288,23 @@
 	Snake_Move_Char_II = table.duplicate(PfxM_Box); table.inbox(Snake_Move_Char_II, "lead-out[fx]: Snake Move Char II","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 30*(char.i - char.n + 1) + 5*var.loop.delay","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x - var.char.dx","fx.pos_y, fx.pos_y","fx.dur - 4*var.char.delay, fx.dur","1","","char.text","tag.oscill({fx.dur - 4*var.char.delay, fx.dur}, var.char.delay, '\\\\fsvp'..var.char.height, '\\\\fsvp'..-var.char.height), format('\\\\fad(0,300)\\\\t(%s,%s,0.8,\\\\frx270)', fx.dur - 5*var.char.delay, fx.dur)","height = 20*ratio, delay = 180, dx = 40*ratio"); table.insert(leadout_fx_library, Snake_Move_Char_II); table.insert(leadout_fx, "Snake Move Char II")
 	Spectrum_Move_Char = table.duplicate(PfxM_Box); table.inbox(Spectrum_Move_Char, "lead-out[fx]: Spectrum Move Char","Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 25*(char.i - char.n + 1) + var.char.delay","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","format('\\\\org(%s,%s)\\\\t(%s,%s,0.7,\\\\frx%s\\\\frz%s)\\\\fad(0,300)', fx.pos_x, fx.pos_y - 20*ratio, fx.dur - 700 - 8*char.i, fx.dur, -140 - 2*char.i, -40 - char.i)","delay = 1200"); table.insert(leadout_fx_library, Spectrum_Move_Char); table.insert(leadout_fx, "Spectrum Move Char")
 	Static_Clip_Ascend = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend, "lead-out[fx]: Static Clip Ascend","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.syl.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y - syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend); table.insert(leadout_fx, "Static Clip Ascend")
-	Static_Clip_Ascend_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend_buttLine, "lead-out[fx]: Static Clip Ascend buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y - syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend_buttLine); table.insert(leadout_fx, "Static Clip Ascend buttLine")
+	Static_Clip_Ascend_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend_buttLine, "lead-out[fx]: Static Clip Ascend buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60) + 60*syl.n","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y - syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend_buttLine); table.insert(leadout_fx, "Static Clip Ascend buttLine")
 	Static_Clip_Ascend_Inverse = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend_Inverse, "lead-out[fx]: Static Clip Ascend Inverse","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y - syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend_Inverse); table.insert(leadout_fx, "Static Clip Ascend Inverse")
 	Static_Clip_Ascend_midLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend_midLine, "lead-out[fx]: Static Clip Ascend midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y - syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend_midLine); table.insert(leadout_fx, "Static Clip Ascend midLine")
 	Static_Clip_Ascend_Descend_in_Line = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend_Descend_in_Line, "lead-out[fx]: Static Clip Ascend Descend in Line","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.syl.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height*(-1)^line.i","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend_Descend_in_Line); table.insert(leadout_fx, "Static Clip Ascend Descend in Line")
 	Static_Clip_Ascend_Descend_in_Syl = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Ascend_Descend_in_Syl, "lead-out[fx]: Static Clip Ascend Descend in Syl","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.syl.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height*(-1)^syl.i","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Ascend_Descend_in_Syl); table.insert(leadout_fx, "Static Clip Ascend Descend in Syl")
 	Static_Clip_Descend = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Descend, "lead-out[fx]: Static Clip Descend","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.syl.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Descend); table.insert(leadout_fx, "Static Clip Descend")
-	Static_Clip_Descend_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Descend_buttLine, "lead-out[fx]: Static Clip Descend buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Descend_buttLine); table.insert(leadout_fx, "Static Clip Descend buttLine")
+	Static_Clip_Descend_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Descend_buttLine, "lead-out[fx]: Static Clip Descend buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60) + 60*syl.n","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.widtht, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Descend_buttLine); table.insert(leadout_fx, "Static Clip Descend buttLine")
 	Static_Clip_Descend_Inverse = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Descend_Inverse, "lead-out[fx]: Static Clip Descend Inverse","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Descend_Inverse); table.insert(leadout_fx, "Static Clip Descend Inverse")
 	Static_Clip_Descend_midLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Descend_midLine, "lead-out[fx]: Static Clip Descend midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y, fx.pos_y + syl.height","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Descend_midLine); table.insert(leadout_fx, "Static Clip Descend midLine")
 	Static_Clip_Left = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left, "lead-out[fx]: Static Clip Left","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.loop.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left); table.insert(leadout_fx, "Static Clip Left")
-	Static_Clip_Left_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left_buttLine, "lead-out[fx]: Static Clip Left buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left_buttLine); table.insert(leadout_fx, "Static Clip Left buttLine")
+	Static_Clip_Left_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left_buttLine, "lead-out[fx]: Static Clip Left buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60) + 60*syl.n","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left_buttLine); table.insert(leadout_fx, "Static Clip Left buttLine")
 	Static_Clip_Left_Inverse = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left_Inverse, "lead-out[fx]: Static Clip Left Inverse","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left_Inverse); table.insert(leadout_fx, "Static Clip Left Inverse")
 	Static_Clip_Left_midLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left_midLine, "lead-out[fx]: Static Clip Left midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x - syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left_midLine); table.insert(leadout_fx, "Static Clip Left midLine")
 	Static_Clip_Left_Right_in_Line = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left_Right_in_Line, "lead-out[fx]: Static Clip Left Right in Line","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + var.line.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width*(-1)^line.i","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left_Right_in_Line); table.insert(leadout_fx, "Static Clip Left Right in Line")
 	Static_Clip_Left_Right_in_Syl = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Left_Right_in_Syl, "lead-out[fx]: Static Clip Left Right in Syl","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + var.line.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width*(-1)^syl.i","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Left_Right_in_Syl); table.insert(leadout_fx, "Static Clip Left Right in Syl")
 	Static_Clip_Right = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Right, "lead-out[fx]: Static Clip Right","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.loop.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Right); table.insert(leadout_fx, "Static Clip Right")
-	Static_Clip_Right_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Right_buttLine, "lead-out[fx]: Static Clip Right buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Right_buttLine); table.insert(leadout_fx, "Static Clip Right buttLine")
+	Static_Clip_Right_buttLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Right_buttLine, "lead-out[fx]: Static Clip Right buttLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid2(60) + 60*syl.n","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Right_buttLine); table.insert(leadout_fx, "Static Clip Right buttLine")
 	Static_Clip_Right_Inverse = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Right_Inverse, "lead-out[fx]: Static Clip Right Inverse","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.n - syl.i/2 + 2)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Right_Inverse); table.insert(leadout_fx, "Static Clip Right Inverse")
 	Static_Clip_Right_midLine = table.duplicate(PfxM_Box); table.inbox(Static_Clip_Right_midLine, "lead-out[fx]: Static Clip Right midLine","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + time_mid1(60)","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","1","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_Right_midLine); table.insert(leadout_fx, "Static Clip Right midLine")
 	Static_Clip_H_Multi = table.duplicate(PfxM_Box); table.inbox(Static_Clip_H_Multi, "lead-out[fx]: Static Clip H Multi","Syl",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + syl.end_time","l.end_time + 50*(syl.i - syl.n + 1) + var.loop.delay","","","","","syl.center","syl.middle","","","5","0","fx.pos_x, fx.pos_x + syl.width*(-1)^j","fx.pos_y, fx.pos_y","fx.dur - var.syl.delay, fx.dur","5","","syl.text","tag.clip(fx.pos_l, fx.pos_t, syl.width, syl.height)","delay = 400"); table.insert(leadout_fx_library, Static_Clip_H_Multi); table.insert(leadout_fx, "Static Clip H Multi")
@@ -1692,26 +3379,77 @@
 	
 	--translation FX List
 	Agitation_Char = table.duplicate(Trans_Box); table.inbox(Agitation_Char, "translation[fx]: Agitation Char","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(char.i - char.n/2 + 8)","l.end_time","","","","","char.center","char.middle","","","5","0","fx.pos_x - char.height, fx.pos_x","fx.pos_y, fx.pos_y","0, 400","1","","char.text","tag.oscill(450, 150, '\\\\fsvp'..var.char.dy, '\\\\fsvp'..-var.char.dy, '\\\\fsvp0'), '\\\\fad(200,300)'","dy = 7*ratio"); table.insert(transla_fx_library, Agitation_Char); table.insert(transla_fx, "Agitation Char")
+	Agitation_Char_VSFilter = table.duplicate(Trans_Box); table.inbox(Agitation_Char_VSFilter, "translation[fx]: Agitation Char VSFilter","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + time_li(30) + 100","l.end_time + time_lo(30) - 100","","","","","char.center","char.middle","","","5","0","fx.pos_x - char.height, fx.pos_x","fx.pos_y, fx.pos_y","0, 400","1","","char.text","format('\\\\org(%s,%s)\\\\fad(200,200)', fx.move_x1 - 10000*ratio, fx.move_y1), tag.oscill(450, 150, '\\\\fr'..angle, '\\\\fr'..-angle, '\\\\fr0')","angle = 0.04*ratio","Lua"); table.insert(transla_fx_library, Agitation_Char_VSFilter); table.insert(transla_fx, "Agitation Char VSFilter")
 	Asault_Translation = table.duplicate(Trans_Box); table.inbox(Asault_Translation, "translation[fx]: Asault Translation","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time - var.loop.delay","l.end_time - 300","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x","fx.pos_y - var.syl.d, fx.pos_y","200, 400","1","","char.text","format('\\\\org(%s,%s)\\\\frx180\\\\fscx%s\\\\fscy%s\\\\blur3\\\\t(0,400,0.5,\\\\frx0\\\\fscx%s\\\\blur0)\\\\t(0,400,\\\\fscy%s)\\\\fad(150,300)', fx.pos_x, fx.pos_y, 0.3*l.scale_x, 3*l.scale_y, l.scale_x, l.scale_y)","delay = R(400, 800), d = 100"); table.insert(transla_fx_library, Asault_Translation); table.insert(transla_fx, "Asault Translation")
-	Blur_Line = table.duplicate(Trans_Box); table.inbox(Blur_Line, "translation[fx]: Blur Line","Translation Line",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","0","0","0","0","l.center","l.middle","0","0","5","0","fx.pos_x","fx.pos_y","0, fx.dur","1","l.scale_x, l.scale_y","line.text_stripped","format('\\\\bord0\\\\fscy%s\\\\blur12\\\\t(0,300,\\\\fscy%s\\\\blur0)\\\\t(299,300,\\\\bord%s)\\\\t(%s,%s,\\\\bord0)\\\\t(%s,%s,\\\\fscy%s\\\\blur12)', 2.6*l.scale_y, l.scale_y, l.outline, fx.dur - 301, fx.dur - 300, fx.dur - 300, fx.dur, 2.6*l.scale_y)",""); table.insert(transla_fx_library, Blur_Line); table.insert(transla_fx, "Blur Line")
+	Blur_Line = table.duplicate(Trans_Box); table.inbox(Blur_Line, "translation[fx]: Blur Line","Translation Line",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","","","","","l.center","l.middle","","","5","0","fx.pos_x","fx.pos_y","","1","l.scale_x, l.scale_y","line.text_stripped","format('\\\\bord0\\\\fscy%s\\\\blur12\\\\t(0,300,\\\\fscy%s\\\\blur0)\\\\t(299,300,\\\\bord%s)\\\\t(%s,%s,\\\\bord0)\\\\t(%s,%s,\\\\fscy%s\\\\blur12)', 2.6*l.scale_y, l.scale_y, l.outline, fx.dur - 301, fx.dur - 300, fx.dur - 300, fx.dur, 2.6*l.scale_y)","","Lua"); table.insert(transla_fx_library, Blur_Line); table.insert(transla_fx, "Blur Line")
+	Char_Dancing_I = table.duplicate(Trans_Box); table.inbox(Char_Dancing_I, "translation[fx]: Char Dancing I","Translation Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + time_li(25)","l.end_time + time_lo(25)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","tag.oscill( fx.dur, 360, format(\"\\\\fr%s\", -Angle*(-1)^char.i), format(\"\\\\fr%s\", Angle*(-1)^char.i) ), \"\\\\fad(200,200)\"","Angle = 8","Lua"); table.insert(transla_fx_library, Char_Dancing_I); table.insert(transla_fx, "Char Dancing I")
+	Char_Dancing_II = table.duplicate(Trans_Box); table.inbox(Char_Dancing_II, "translation[fx]: Char Dancing II","Translation Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + time_li(25)","l.end_time + time_lo(25)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","format(\"\\\\org(%s,%s)\\\\fad(200,200)\", fx.move_x1 - 10000, fx.move_y1), tag.oscill( fx.dur, 360, format(\"\\\\fr%s\", -Angle*(-1)^char.i), format(\"\\\\fr%s\", Angle*(-1)^char.i) )","Angle = 0.02","Lua"); table.insert(transla_fx_library, Char_Dancing_II); table.insert(transla_fx, "Char Dancing II")
 	Char_Move_Wind = table.duplicate(Trans_Box); table.inbox(Char_Move_Wind, "translation[fx]: Char Move Wind","Translation Char",true,false,"#CE04D9","#ADC4D6","#6A8DD6","0","0","0","l.start_time + time_li(20)","l.end_time + time_lo(20) - 200","","","","","char.center","char.middle","","","5","","fx.pos_x","fx.pos_y","","1","","char.text","'\\\\fad(200,200)', shape.Smove(var.line.random_move)","random_move = shape.ratio(shape.trajectory( ), 0.25)","Lua"); table.insert(transla_fx_library, Char_Move_Wind); table.insert(transla_fx, "Char Move Wind")
+	Char_Random_LI = table.duplicate(Trans_Box); table.inbox(Char_Random_LI, "translation[fx]: Char Random LI","Translation Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + time_li(30) + delay*(j - 1)","tag.only( j == maxj, l.end_time + time_lo(30), fx.start_time + delay)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","5","","tag.only( j == maxj, char.text, string.char(R(56,99)))","tag.only(j ~= maxj, format('\\\\alpha%s\\\\t(\\\\alpha%s)', alpha.interpolate('&HFF&', '&H00&', (j-1)/maxj), alpha.interpolate('&HFF&', '&H00&', j/maxj)), '\\\\fad(0,200)')","delay = 80","Lua"); table.insert(transla_fx_library, Char_Random_LI); table.insert(transla_fx, "Char Random LI")
+	Char_Random_LI_II = table.duplicate(Trans_Box); table.inbox(Char_Random_LI_II, "translation[fx]: Char Random LI II","Translation Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + delay*(j - 1) + R(-200,200)","tag.only( j == maxj, l.end_time - 160, fx.start_time + delay)","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","5","","tag.only( j == maxj, char.text, string.char(R(56,99)))","tag.only(j ~= maxj, format('\\\\alpha%s\\\\t(\\\\alpha%s)', alpha.interpolate('&HFF&', '&H00&', (j-1)/maxj), alpha.interpolate('&HFF&', '&H00&', j/maxj)), '\\\\fad(0,200)')","delay = 2*frame_dur","Lua"); table.insert(transla_fx_library, Char_Random_LI_II); table.insert(transla_fx, "Char Random LI II")
+	Char_Twister = table.duplicate(Trans_Box); table.inbox(Char_Twister, "translation[fx]: Char Twister","Translation Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + char.i*20 -1250","l.end_time + time_lo(30)","","","","","char.center","char.middle","","","5","0","fx.pos_x + Dxy, fx.pos_x","fx.pos_y - Dxy, fx.pos_y","800, 1000","1","","char.text","format('\\\\org(%s,%s)\\\\alpha&HFF&\\\\frz180\\\\fscx%s\\\\fscy%s\\\\t(0,800,0.6,\\\\frz720\\\\fscx%s\\\\fscy%s\\\\3a&H00&)\\\\t(800,1000,\\\\alpha&H00&)\\\\fad(0,200)', fx.pos_x, fx.pos_y, 0.6*l.scale_x, 0.6*l.scale_y, l.scale_x, l.scale_y)","Dxy = 16*ratio","Lua"); table.insert(transla_fx_library, Char_Twister); table.insert(transla_fx, "Char Twister")
+	Char_Twister_Double = table.duplicate(Trans_Box); table.inbox(Char_Twister_Double, "translation[fx]: Char Twister Double","Translation Char",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time + char.i*20 -1250","l.end_time + time_lo(30)","","","","","char.center","char.middle","","","5","0","fx.pos_x + Dxy*(-1)^j, fx.pos_x","fx.pos_y - Dxy*(-1)^j, fx.pos_y","800, 1000","2","","char.text","format('\\\\org(%s,%s)\\\\alpha&HFF&\\\\frz180\\\\fscx%s\\\\fscy%s\\\\t(0,800,0.6,\\\\frz720\\\\fscx%s\\\\fscy%s\\\\3a&H00&)\\\\t(800,1000,\\\\alpha&H00&)\\\\fad(0,200)', fx.pos_x, fx.pos_y, 0.6*l.scale_x, 0.6*l.scale_y, l.scale_x, l.scale_y), tag.only(j == 1, '\\\\t(1000,1001,\\\\alpha&HFF&)')","Dxy = 16*ratio","Lua"); table.insert(transla_fx_library, Char_Twister_Double); table.insert(transla_fx, "Char Twister Double")
 	Clasic_Fade = table.duplicate(Trans_Box); table.inbox(Clasic_Fade, "translation[fx]: Clasic Fade","Translation Line",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","","","","","line.center","line.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","line.text_stripped","'\\\\fad(300,300)'",""); table.insert(transla_fx_library, Clasic_Fade); table.insert(transla_fx, "Clasic Fade")
 	Crazy_Dancing_Char = table.duplicate(Trans_Box); table.inbox(Crazy_Dancing_Char, "translation[fx]: Crazy Dancing Char","Translation Char",true,false,"#CE04D9","#ADC4D6","#6A8DD6","0","0","0","l.start_time","l.end_time","","","","","char.center","char.middle","","","5","","fx.pos_x","fx.pos_y","","1","","char.text","shape.Rmove(5*ratio, 5*ratio, 0, fx.dur, 1, 200)","","Lua"); table.insert(transla_fx_library, Crazy_Dancing_Char); table.insert(transla_fx, "Crazy Dancing Char")
 	Move_Char_I = table.duplicate(Trans_Box); table.inbox(Move_Char_I, "translation[fx]: Move Char I","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 30*(char.i - char.n/2 -1)","l.end_time + 30*(char.i - char.n/2 -1)","","","","","char.center","char.middle","","","5","0","fx.pos_x + R(-25, 25), fx.pos_x","fx.pos_y + R(-25, 25), fx.pos_y","0, 400","1","","char.text","'\\\\fad(300,300)'",""); table.insert(transla_fx_library, Move_Char_I); table.insert(transla_fx, "Move Char I")
 	Move_Char_II = table.duplicate(Trans_Box); table.inbox(Move_Char_II, "translation[fx]: Move Char II","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","","","","","char.center","char.middle","","","5","0","fx.pos_x + R(-25, 25), fx.pos_x","fx.pos_y + R(-25, 25), fx.pos_y","0, 400","1","","char.text","'\\\\fad(300,300)'",""); table.insert(transla_fx_library, Move_Char_II); table.insert(transla_fx, "Move Char II")
 	Move_Char_III_postline = table.duplicate(Trans_Box); table.inbox(Move_Char_III_postline, "translation[fx]: Move Char III postline","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","","","","","char.center","char.middle","","","5","0","fx.pos_x, fx.pos_x + R(-10, 10)*ratio","fx.pos_y, fx.pos_y + R(20, 30)*ratio","fx.dur - 400, fx.dur","1","","char.text","format('\\\\t(%s,%s,\\\\frx%s\\\\fry%s\\\\frz%s)\\\\fad(300,300)', fx.dur - 400, fx.dur, R(-360,360), R(-360,360), R(-360,360))",""); table.insert(transla_fx_library, Move_Char_III_postline); table.insert(transla_fx, "Move Char III postline")
 	Move_Char_III_preline = table.duplicate(Trans_Box); table.inbox(Move_Char_III_preline, "translation[fx]: Move Char III preline","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time","l.end_time","","","","","char.center","char.middle","","","5","0","fx.pos_x + R(-10, 10)*ratio, fx.pos_x","fx.pos_y - R(20, 30)*ratio, fx.pos_y","0, 400","1","","char.text","format('\\\\frx%s\\\\fry%s\\\\frz%s\\\\t(0,400,\\\\frx0\\\\fry0\\\\frz0)\\\\fad(300,300)', R(-360,360), R(-360,360), R(-360,360))",""); table.insert(transla_fx_library, Move_Char_III_preline); table.insert(transla_fx, "Move Char III preline")
-	Screw_Char = table.duplicate(Trans_Box); table.inbox(Screw_Char, "translation[fx]: Screw Char","Translation Char",true,false,"#DBF5FF","#415462","#000000","0","0","0","l.start_time + 30*(char.i - char.n/2 -1) - 200","l.end_time + 30*(char.i - char.n/2 -1) - 200","0","0","0","0","char.center","char.middle","0","0","5","0","fx.pos_x","fx.pos_y","0, fx.dur","1","","char.text","format('\\\\frx-180\\\\t(0,400,0.8,\\\\frx0)\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(220,220)', fx.dur - 400, fx.dur)",""); table.insert(transla_fx_library, Screw_Char); table.insert(transla_fx, "Screw Char")
-	Translation_Clasic_Char = table.duplicate(Trans_Box); table.inbox(Translation_Clasic_Char, "translation[fx]: Translation Clasic Char","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 15*(char.i - char.n -1)","l.end_time","0","0","0","0","char.center","char.middle","0","0","5","0","fx.pos_x","fx.pos_y","0, fx.dur","1","l.scale_x, l.scale_y","char.text","'\\\\fad(300,300)'","delay = R(100,500)"); table.insert(transla_fx_library, Translation_Clasic_Char); table.insert(transla_fx, "Translation Clasic Char")
-	Translation_Word = table.duplicate(Trans_Box); table.inbox(Translation_Word, "translation[fx]: Translation Word","Translation Word",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(word.i - word.n -1)","l.end_time","0","0","0","0","word.center","word.middle","0","0","5","0","fx.pos_x + R(-25, 25), fx.pos_x","fx.pos_y + R(-25, 25), fx.pos_y","0, 400","1","l.scale_x, l.scale_y","word.text","'\\\\fad(300,300)'","delay = R(100,500)"); table.insert(transla_fx_library, Translation_Word); table.insert(transla_fx, "Translation Word")
+	Move_ShineLine_LR = table.duplicate(Trans_Box); table.inbox(Move_ShineLine_LR, "translation[fx]: Move ShineLine LR","Translation Line",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time","l.end_time","","","","","line.center","line.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","line.text_stripped","shape.Lmove2({-l.width/2, fx.pos_y, fx.pos_x, fx.pos_y, xres + l.width/2, fx.pos_y}, {0, delay, fx.dur - delay, fx.dur}), format('\\\\bord5\\\\blur4\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&\\\\t(%s,%s,\\\\bord%s\\\\blur0\\\\1c%s\\\\3c%s)\\\\t(%s,%s,\\\\bord5\\\\blur4\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&)', delay, delay + 1, l.outline, text.color1, text.color3, fx.dur - delay, fx.dur - delay + 1)","delay = 260","Lua"); table.insert(transla_fx_library, Move_ShineLine_LR); table.insert(transla_fx, "Move ShineLine LR")
+	Move_ShineLine_RL = table.duplicate(Trans_Box); table.inbox(Move_ShineLine_RL, "translation[fx]: Move ShineLine RL","Translation Line",true,false,"#F6F3F3","#ADC4D6","#6A8DD6","0","0","0","l.start_time","l.end_time","","","","","line.center","line.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","line.text_stripped","shape.Lmove2({xres + l.width/2, fx.pos_y, fx.pos_x, fx.pos_y, -l.width/2, fx.pos_y}, {0, delay, fx.dur - delay, fx.dur}), format('\\\\bord5\\\\blur4\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&\\\\t(%s,%s,\\\\bord%s\\\\blur0\\\\1c%s\\\\3c%s)\\\\t(%s,%s,\\\\bord5\\\\blur4\\\\1c&HFFFFFF&\\\\3c&HFFFFFF&)', delay, delay + 1, l.outline, text.color1, text.color3, fx.dur - delay, fx.dur - delay + 1)","delay = 260","Lua"); table.insert(transla_fx_library, Move_ShineLine_RL); table.insert(transla_fx, "Move ShineLine RL")
+	Screw_Char = table.duplicate(Trans_Box); table.inbox(Screw_Char, "translation[fx]: Screw Char","Translation Char",true,false,"#DBF5FF","#415462","#000000","0","0","0","l.start_time + time_li(30) + 100","l.end_time + time_lo(30) - 100","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","","char.text","format('\\\\frx-180\\\\t(0,400,0.8,\\\\frx0)\\\\t(%s,%s,0.8,\\\\frx180)\\\\fad(220,220)', fx.dur - 400, fx.dur)",""); table.insert(transla_fx_library, Screw_Char); table.insert(transla_fx, "Screw Char")
+	Translation_Clasic_Char = table.duplicate(Trans_Box); table.inbox(Translation_Clasic_Char, "translation[fx]: Translation Clasic Char","Translation Char",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 15*(char.i - char.n -1)","l.end_time","","","","","char.center","char.middle","","","5","0","fx.pos_x","fx.pos_y","","1","l.scale_x, l.scale_y","char.text","'\\\\fad(300,300)'","delay = R(100,500)"); table.insert(transla_fx_library, Translation_Clasic_Char); table.insert(transla_fx, "Translation Clasic Char")
+	Translation_Word = table.duplicate(Trans_Box); table.inbox(Translation_Word, "translation[fx]: Translation Word","Translation Word",true,false,"#FFFFFF","#008DFF","#000000","0","0","0","l.start_time + 50*(word.i - word.n -1)","l.end_time","","","","","word.center","word.middle","","","5","0","fx.pos_x + R(-25, 25), fx.pos_x","fx.pos_y + R(-25, 25), fx.pos_y","0, 400","1","l.scale_x, l.scale_y","word.text","'\\\\fad(300,300)'","delay = R(100,500)"); table.insert(transla_fx_library, Translation_Word); table.insert(transla_fx, "Translation Word")
 	
 	--===========================================================================================--
 	include("Effector-newfx-3.2.lua")
 	--include(Path_Effector_newfx_lua)
-	for i = 1, #leadin_fx  do if i < 10 then leadin_fx[i]  = "[00"..i.."] "..leadin_fx[i]  elseif i < 100 then leadin_fx[i]  = "[0"..i.."] "..leadin_fx[i]  else leadin_fx[i]  = "["..i.."] "..leadin_fx[i]  end end
-	for i = 1, #hilight_fx do if i < 10 then hilight_fx[i] = "[00"..i.."] "..hilight_fx[i] elseif i < 100 then hilight_fx[i] = "[0"..i.."] "..hilight_fx[i] else hilight_fx[i] = "["..i.."] "..hilight_fx[i] end end
-	for i = 1, #leadout_fx do if i < 10 then leadout_fx[i] = "[00"..i.."] "..leadout_fx[i] elseif i < 100 then leadout_fx[i] = "[0"..i.."] "..leadout_fx[i] else leadout_fx[i] = "["..i.."] "..leadout_fx[i] end end
-	for i = 1, #shape_fx   do if i < 10 then shape_fx[i]   = "[00"..i.."] "..shape_fx[i]   elseif i < 100 then shape_fx[i]   = "[0"..i.."] "..shape_fx[i]   else shape_fx[i]   = "["..i.."] "..shape_fx[i]   end end
-	for i = 1, #transla_fx do if i < 10 then transla_fx[i] = "[00"..i.."] "..transla_fx[i] elseif i < 100 then transla_fx[i] = "[0"..i.."] "..transla_fx[i] else transla_fx[i] = "["..i.."] "..transla_fx[i] end end
-	aegisub.register_macro(script_name.." "..script_version, script_description, Effector_fx_macro)
-	--===========================================================================================--
+	for i = 1, #leadin_fx do
+		if i < 10 then
+			leadin_fx[i] = "[00"..i.."] "..leadin_fx[i]
+		elseif i < 100 then
+			leadin_fx[i] = "[0"..i.."] "..leadin_fx[i]
+		else
+			leadin_fx[i] = "["..i.."] "..leadin_fx[i]
+		end
+	end
+	for i = 1, #hilight_fx do
+		if i < 10 then
+			hilight_fx[i] = "[00"..i.."] "..hilight_fx[i]
+		elseif i < 100 then
+			hilight_fx[i] = "[0"..i.."] "..hilight_fx[i]
+		else
+			hilight_fx[i] = "["..i.."] "..hilight_fx[i]
+		end
+	end
+	for i = 1, #leadout_fx do
+		if i < 10 then
+			leadout_fx[i] = "[00"..i.."] "..leadout_fx[i]
+		elseif i < 100 then
+			leadout_fx[i] = "[0"..i.."] "..leadout_fx[i]
+		else
+			leadout_fx[i] = "["..i.."] "..leadout_fx[i]
+		end
+	end
+	for i = 1, #shape_fx do
+		if i < 10 then
+			shape_fx[i] = "[00"..i.."] "..shape_fx[i]
+		elseif i < 100 then
+			shape_fx[i] = "[0"..i.."] "..shape_fx[i]
+		else
+			shape_fx[i] = "["..i.."] "..shape_fx[i]
+		end
+	end
+	for i = 1, #transla_fx do
+		if i < 10 then
+			transla_fx[i] = "[00"..i.."] "..transla_fx[i]
+		elseif i < 100 then
+			transla_fx[i] = "[0"..i.."] "..transla_fx[i]
+		else
+			transla_fx[i] = "["..i.."] "..transla_fx[i]
+		end
+	end
+	--=========================================================================================================--
+	aegisub.register_macro(script_name.." "..script_version..script_update, script_description, effector.macro_fx)
+	aegisub.register_filter(script_name.." "..script_version..script_update, "", 2000, effector.macro_fx)
+	--=========================================================================================================--
