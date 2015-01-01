@@ -1,19 +1,18 @@
-	-- Effector-utils-lib ----------------------------------------------------------------------------
+	-- Effector-utils-lib ----------------------------------------------------------------
 	Effector_Lib_authors  = "Itachi Akatsuki & Vict8r"
 	Effector_Lib_testers  = "NatsuoDC, Nagato Akatsuki & Vict8r"
-	Effector_Lib_approved = "KaraLaura & Nagato Akatsuki"
 	Effector_Lib_version  = "3.2.3"
-	Effector_Lib_modified = "10 December 2014"
-	-- functions abbreviations -----------------------------------------------------------------------
-	sin = math.sin			asin = math.asin		log   = math.log10			pi = math.pi
-	cos = math.cos			acos = math.acos		ceil  = math.ceil			ln = math.log
-	tan = math.tan			atan = math.atan		rand  = math.random			r  = math.random
-	abs = math.abs			sinh = math.sinh		floor = math.floor			F  = string.format
-	deg = math.deg			cosh = math.cosh		atan2 = math.atan2			format = string.format
-	rad = math.rad			tanh = math.tanh		script_version = "3.2"		script_update = ".9.6"
-	-- Yutils by Christoph "Youka" Spanknebel --------------------------------------------------------
-	Yutils = include("Yutils.lua") 								 -- https://github.com/Youka/Yutils --
-	-- Effector-utils-lib-3.2 functions --------------------------------------------------------------
+	Effector_Lib_modified = "01 January 2015"
+	-- functions abbreviations -----------------------------------------------------------
+	sin = math.sin		asin = math.asin	log   = math.log10		pi = math.pi
+	cos = math.cos		acos = math.acos	ceil  = math.ceil		ln = math.log
+	tan = math.tan		atan = math.atan	rand  = math.random		r  = math.random
+	abs = math.abs		sinh = math.sinh	floor = math.floor		F  = string.format
+	deg = math.deg		cosh = math.cosh	atan2 = math.atan2		format = string.format
+	rad = math.rad		tanh = math.tanh	script_version = "3.2"	script_update = ".9.6"
+	-- Yutils by Christoph "Youka" Spanknebel --------------------------------------------
+	Yutils = include("Yutils.lua") 					 -- https://github.com/Youka/Yutils --
+	-- Effector-utils-lib-3.2 functions --------------------------------------------------
 	--[[
 	Effector-utils-lib-3.2
 	{
@@ -882,11 +881,11 @@
 		local Table_dis = table_or_number
 		local newt, newtable, newt1, newtable1, table_n = { }, { }, { }, { }, { }
 		if type(Table_dis) == "table" then
-			newt = table.duplicate(Table_dis)
+			newt = table.duplicate( Table_dis )
 			while #newt > 0 do
-				idx = R(1, #newt)
+				idx = R( 1, #newt )
 				newtable[#newtable + 1] = newt[idx]
-				table.remove(newt, idx)
+				table.remove( newt, idx )
 			end
 			return newtable
 		elseif type(Table_dis) == "number" then
@@ -895,9 +894,9 @@
 			end
 			newt1 = table.duplicate(table_n)
 			while #newt1 > 0 do
-				idx = R(1, #newt1)
+				idx = R( 1, #newt1 )
 				newtable1[#newtable1 + 1] = newt1[idx]
-				table.remove(newt1, idx)
+				table.remove( newt1, idx )
 			end
 			return newtable1
 		end
@@ -1090,7 +1089,7 @@
 			table.insert(chars_, c)
 		end
 		if nN_str > Len_str then
-			return {String}
+			return { String }
 		end
 		for i = 1, Len_str - nN_str + 1 do
 			Table_str[i] = ""
@@ -2008,7 +2007,7 @@
 					end
 				end
 			end
-			maxloop(MB_m)
+			maxloop( MB_m )
 			MB_t = j/MB_m
 			if Return == "x" then
 				return MBpos_x[j]
@@ -2265,7 +2264,7 @@
 		targetLength, rot_Bzr = 0, 0
 		PtNo, targetLength = pyointa.length2PtNo( cont_point, lineoffset + val_center - l_left, nN )
 		if mode == 5 then -- para trazar una curva por medio de shapes
-			maxloop((0.68 + offset_maxspace)*Blength)
+			maxloop( (0.68 + offset_maxspace)*Blength )
 			PtNo, targetLength = pyointa.length2PtNo( cont_point, Blength*module , nN )
 		end
 		if PtNo ~= false then
@@ -2362,9 +2361,12 @@
 		for c in Shape:gmatch("%-?%d+[%.%d+]*") do
 			table.insert(coor, tonumber(c))
 		end
-		P1 = {x = coor[1], y = coor[2]} P1.z = -(P1.x^2 + P1.y^2)
-		P2 = {x = coor[3], y = coor[4]} P2.z = -(P2.x^2 + P2.y^2)
-		P3 = {x = coor[5], y = coor[6]} P3.z = -(P3.x^2 + P3.y^2)
+		P1 = {x = coor[1], y = coor[2]}
+		P1.z = -(P1.x^2 + P1.y^2)
+		P2 = {x = coor[3], y = coor[4]}
+		P2.z = -(P2.x^2 + P2.y^2)
+		P3 = {x = coor[5], y = coor[6]}
+		P3.z = -(P3.x^2 + P3.y^2)
 		local Det_i = (P1.x*P2.y + P2.x*P3.y + P3.x*P1.y) - (P1.y*P2.x + P2.y*P3.x + P3.y*P1.x)
 		local Det_D = (P1.z*P2.y + P2.z*P3.y + P3.z*P1.y) - (P1.y*P2.z + P2.y*P3.z + P3.y*P1.z)
 		local Det_E = (P1.x*P2.z + P2.x*P3.z + P3.x*P1.z) - (P1.z*P2.x + P2.z*P3.x + P3.z*P1.x)
@@ -2407,6 +2409,7 @@
 				return capture
 			end
 		)
+		tag_rdf = tag.dark( tag_rdf ):gsub( "\\\\", "\\" )
 		return tag_rdf
 	end
 	
@@ -2518,27 +2521,11 @@
 				t_2 = math.round((dt + dilat)*(i + 1) + Ini, 2)
 			end
 			indicator = #Tags - #Tags*ceil((i + 1 + Index_i)/#Tags) + i + 1 + Index_i
-			tag_osc = Tags[indicator]:gsub( "(\\%w+R[dcm]*%b())",
-				function( capture )
-					local line = linefx[ii]
-					local tag_oscll = tag.operation( capture:match("(\\%w+)R[dcm]*%b()") ) .. "%s"
-					local rnd_oscll = capture:match("\\%w+(R[dcm]*)%b()")
-					local val_oscll = capture:match("\\%w+R[dcm]*(%b())"):sub(2, -2)
-					local fun_oscll = loadstring( format("return function( fx__, meta, line, module, i ) return {%s} end", val_oscll) )( )
-					local tbl_oscll = fun_oscll( fx__, meta, line, module, i )
-					if rnd_oscll == "R" then
-						return format( tag_oscll, R(unpack(tbl_oscll)) )
-					elseif rnd_oscll == "Rd" then
-						return format( tag_oscll, Rd(unpack(tbl_oscll)) )
-					elseif rnd_oscll == "Rc" then
-						return format( tag_oscll, Rc(unpack(tbl_oscll)) )
-					elseif rnd_oscll == "Rm" then
-						return format( tag_oscll, Rm(unpack(tbl_oscll)) )
-					end
-				end
-			)
+			tag_osc = Tags[indicator]:gsub( "\\[%+%-]*%w+R[dcm]*%b()", "\\[%+%-]*%w+%(R[dcm]*%b()%)" )
+			
 			tag_osc = tag.redefine( tag_osc )
 			Tag_fx = Tag_fx..format("\\t(%s,%s,%s,%s)", t_1, t_2, accel, tag_osc)
+			Tag_fx = Tag_fx:gsub( "\\t%(%d+[%.%d+]*%,%d+[%.%d+]*%,%d+[%.%d+]*%,%)", "" )
 			dt	= dt + dilat
 			i	= i + 1
 			Dur	= Dur - dt
@@ -2956,6 +2943,7 @@
 				end
 			)
 		end
+		--Text = Text:gsub("\\\\", "\\")
 		return Text
 	end
 	
@@ -5338,7 +5326,7 @@
 	function shape.ASSDraw3( Shape, Round )
 		effector.print_error( Shape, "shape", "shape.ASSDraw3", 1 )
 		local Shape = Shape:gsub("  ", " ")
-		local Round = Round or 3
+		local Round = Round or 2
 		effector.print_error( Round, "number", "shape.ASSDraw3", 2 )
 		if fx.filter == "mod" then
 			Shape = Shape:gsub("%S+",
@@ -5378,7 +5366,7 @@
 		end
 		for k = 1, #segments do
 			coor2[k] = { }
-			for c6 in segments[k]:gmatch("%S+") do --captura: signo, número y puntos
+			for c6 in segments[k]:gmatch("%S+") do --captura: signo, número, letra y puntos
 				table.insert(coor2[k], c6.." ")
 			end
 		end
@@ -5843,16 +5831,22 @@
 		return shape.ASSDraw3(shapefx)
 	end
 	
-	function shape.size( Shape, SizeX, SizeY )
+	function shape.size( Shape, SizeX, SizeY ) --actualizada 23-12-14
 		effector.print_error( Shape, "shape", "shape.size", 1 )
 		local Shape = shape.ASSDraw3(Shape)
 		local Szx = SizeX or shape.width(Shape)
 		local Szy = SizeY or Szx
-		effector.print_error( Szx, "number", "shape.size", 2 )
-		effector.print_error( Szy, "number", "shape.size", 3 )
+		if type(Szx) == "table" then
+			Szx = shape.width(Shape) + Szx[1]
+		end
+		if type(Szy) == "table" then
+			Szy = shape.height(Shape) + Szy[1]
+		end
+		effector.print_error( Szx, "numbertable", "shape.size", 2 )
+		effector.print_error( Szy, "numbertable", "shape.size", 3 )
 		Shape = shape.ratio(Shape, Szx/shape.width(Shape), Szy/shape.height(Shape))
 		return shape.ASSDraw3(Shape)
-	end --shape.size( shape.circle, 80, 20 )
+	end --shape.size( shape.rectangle, 120, 45 )
 
 	function shape.array( Shape, loops, Angle_or_mode, Dxy )
 		shape.array2 = function(Shp2, loops2, A_or_m, Dxy2, Sh_center)
@@ -6710,14 +6704,17 @@
 		return format("{%s\\1img(%s,0,0)\\p1}%s", Tag_fx, frames[j], shape.size(shape.rectangle, size_x, size_y))
 	end
 	
-	function shape.animated2( dur, frame_duration, Shapes, Pscale )
+	function shape.animated2( dur, frame_duration, Shapes, Pscale, Random )
 		local prop = Pscale or "\\p1"
 		effector.print_error( dur, "number", "shape.animated2", 1 )
 		effector.print_error( frame_duration, "number", "shape.animated2", 2 )
 		effector.print_error( Shapes, "table", "shape.animated2", 3 )
-		effector.print_error( prop, "string", "shape.animated2", 4 )
+		effector.print_error( prop, "numberstring", "shape.animated2", 4 )
+		if type(prop) == "number" then
+			prop = format("\\p%d", math.round( math.log(prop, 2) + 1 ))
+		end
 		local t_dur, f_dur = dur, frame_duration
-		local Tag_fx, last_alpha, i =  "\\alpha&HFF&", "\\alpha&HFF&", 0
+		local Tag_fx, last_alpha, i = "\\alpha&HFF&", "\\alpha&HFF&", 0
 		if t_dur/f_dur < #Shapes then
 			maxloop( ceil(t_dur/f_dur) )
 		else
@@ -6736,6 +6733,9 @@
 			Tag_fx = Tag_fx..format("\\t(%s,%s,\\alpha&H00&)\\t(%s,%s,%s)", t1, t2, t3, t4, last_alpha)
 			i = i + 1
 			t_dur = t_dur - #Shapes*f_dur
+		end
+		if Random then
+			return format("{%s%s}%s", Tag_fx, prop, Shapes[R(maxj)])
 		end
 		return format("{%s%s}%s", Tag_fx, prop, Shapes[j])
 	end
@@ -6921,7 +6921,7 @@
 		end
 		local k, tags = 0, "m 0 0 "
 		while k <= Loop_Lt - 1 do
-			tags = tags..format("b %s %s %s %s %s %s ", 
+			tags = tags .. format("b %s %s %s %s %s %s ", 
 			px[3*k + 1], py[3*k + 1], px[3*k + 2], py[3*k + 2], px[3*k + 3], py[3*k + 3])
 			k = k + 1
 		end
@@ -8054,7 +8054,7 @@
 	function text.to_shape( Text, Scale, Tags )
 		local Text = Text or val_text
 		local text_scale = Scale or 1
-		local shape_scale = math.round( math.log(text_scale, 2)	+ 1 )
+		local shape_scale = math.round( math.log(text_scale, 2) + 1 )
 		local text_font = Yutils.decode.create_font(l.fontname, l.bold, l.italic, l.underline, l.strikeout, l.fontsize, text_scale*l.scale_x/100, text_scale*l.scale_y/100, l.spacing)
 		local text_shape = shape.ASSDraw3(text_font.text_to_shape( Text ))
 		local text_pos = effector.new_pos( fx.pos_l, fx.pos_t )
@@ -8682,15 +8682,15 @@
 	-------------------------------------------------------------------------------------------------
 	-- Librería de funciones Effector ---------------------------------------------------------------
 	setting_box = {
-		[1]  = {							class = "label";	x = 1; y = 0;	height = 1; width = 2;	label = " [::Primary Setting::]"},
-		[2]  = {							class = "label";	x = 0; y = 1;	height = 1; width = 1;	label = "               Apply to Style:"},
-		[3]  = {name = "line_style";		class = "dropdown";	x = 1; y = 1;	height = 1; width = 4;	hint  = "Selected Lines or Lines Styles to which you Apply the Effect.";	items = { };	value = ""},
-		[4]  = {							class = "label";	x = 0; y = 2;	height = 1; width = 1;	label = "            Selection Effect:"},
-		[5]  = {name = "effect_mode";		class = "dropdown";	x = 1; y = 2;	height = 1; width = 4;	hint  = "Select the Effect Mode, lead-in[fx], hi-light[fx], lead-out[fx], shape[fx] and translation[fx].";	items = {"lead-in[fx]", "hi-light[fx]", "lead-out[fx]", "shape[fx]", "translation[fx]"};	value = "lead-in[fx]"},
-		[6]  = {							class = "label";	x = 1; y = 4;	height = 1; width = 2;	label = " [::Text Setting::]"},
-		[7]  = {							class = "label";	x = 1; y = 5;	height = 1; width = 2;	label = " Primary Color                         "},
-		[8]  = {							class = "label";	x = 3; y = 5;	height = 1; width = 2;	label = " Secondary Color                     "},
-		[9]  = {							class = "label";	x = 1; y = 9;	height = 1; width = 2;	label = " Border Color"},
+		[01] = {							class = "label";	x = 1; y = 0;	height = 1; width = 2;	label = " [::Primary Setting::]"},
+		[02] = {							class = "label";	x = 0; y = 1;	height = 1; width = 1;	label = "               Apply to Style:"},
+		[03] = {name = "line_style";		class = "dropdown";	x = 1; y = 1;	height = 1; width = 4;	hint  = "Selected Lines or Lines Styles to which you Apply the Effect.";	items = { };	value = ""},
+		[04] = {							class = "label";	x = 0; y = 2;	height = 1; width = 1;	label = "            Selection Effect:"},
+		[05] = {name = "effect_mode";		class = "dropdown";	x = 1; y = 2;	height = 1; width = 4;	hint  = "Select the Effect Mode, lead-in[fx], hi-light[fx], lead-out[fx], shape[fx] and translation[fx].";	items = {"lead-in[fx]", "hi-light[fx]", "lead-out[fx]", "shape[fx]", "translation[fx]"};	value = "lead-in[fx]"},
+		[06] = {							class = "label";	x = 1; y = 4;	height = 1; width = 2;	label = " [::Text Setting::]"},
+		[07] = {							class = "label";	x = 1; y = 5;	height = 1; width = 2;	label = " Primary Color                         "},
+		[08] = {							class = "label";	x = 3; y = 5;	height = 1; width = 2;	label = " Secondary Color                     "},
+		[09] = {							class = "label";	x = 1; y = 9;	height = 1; width = 2;	label = " Border Color"},
 		[10] = {							class = "label";	x = 3; y = 9;	height = 1; width = 2;	label = " Shadow Color"},
 		[11] = {name = "color_1c";			class = "color";	x = 1; y = 6;	height = 2; width = 2;	hint  = "text.color1, text.color1c: Select the Primary Color of Text.";		value = "#FFFFFF"},
 		[12] = {name = "color_2c";			class = "color";	x = 3; y = 6;	height = 2; width = 2;	hint  = "text.color2, text.color2c: Select the Secondary Color of Text.";	value = "#FF0000"},
@@ -8712,15 +8712,15 @@
 	}
 	-------------------------------------
 	PfxM_Box = {
-		[1]  = { 					class = "label"; 	x = 0;  y = 0;  height = 1; width = 6;	label = " Shape[fx]: Template Shape"},
-		[2]  = { 					class = "label"; 	x = 10; y = 0;  height = 1; width = 2;	label = "            Template Type [fx]:"},
-		[3]  = { 					class = "label"; 	x = 0;  y = 1;  height = 1; width = 2;	label = "           Line Start Time ="},
-		[4]  = { 					class = "label"; 	x = 0;  y = 2;  height = 1; width = 2;	label = "            Line End Time ="},
-		[5]  = { 					class = "label"; 	x = 0;  y = 3;  height = 1; width = 2;	label = "                               x(s) ="},
-		[6]  = { 					class = "label"; 	x = 0;  y = 4;  height = 1; width = 2;	label = "                               y(s) ="},
-		[7]  = { 					class = "label"; 	x = 0;  y = 5;  height = 1; width = 2;	label = "                                   s ="},
-		[8]  = { 					class = "label"; 	x = 4;  y = 5;  height = 1; width = 2;	label = "                   to"},
-		[9]  = { 					class = "label"; 	x = 8;  y = 1;  height = 1; width = 2;	label = "                Center in \"X\" ="},
+		[01] = { 					class = "label"; 	x = 0;  y = 0;  height = 1; width = 6;	label = " Shape[fx]: Template Shape"},
+		[02] = { 					class = "label"; 	x = 10; y = 0;  height = 1; width = 2;	label = "            Template Type [fx]:"},
+		[03] = { 					class = "label"; 	x = 0;  y = 1;  height = 1; width = 2;	label = "           Line Start Time ="},
+		[04] = { 					class = "label"; 	x = 0;  y = 2;  height = 1; width = 2;	label = "            Line End Time ="},
+		[05] = { 					class = "label"; 	x = 0;  y = 3;  height = 1; width = 2;	label = "                               x(s) ="},
+		[06] = { 					class = "label"; 	x = 0;  y = 4;  height = 1; width = 2;	label = "                               y(s) ="},
+		[07] = { 					class = "label"; 	x = 0;  y = 5;  height = 1; width = 2;	label = "                                   s ="},
+		[08] = { 					class = "label"; 	x = 4;  y = 5;  height = 1; width = 2;	label = "                   to"},
+		[09] = { 					class = "label"; 	x = 8;  y = 1;  height = 1; width = 2;	label = "                Center in \"X\" ="},
 		[10] = { 					class = "label"; 	x = 8;  y = 2;  height = 1; width = 2;	label = "                Center in \"Y\" ="},
 		[11] = { 					class = "label"; 	x = 8;  y = 3;  height = 1; width = 2;	label = "                   Scale in \"X\" ="},
 		[12] = { 					class = "label"; 	x = 8;  y = 4;  height = 1; width = 2;	label = "                   Scale in \"Y\" ="},
@@ -8735,6 +8735,7 @@
 		[21] = {					class = "label";	x = 8; 	y = 9;	height = 1; width = 2;	label = " Add Tags:               "},
 		[65] = {					class = "label";	x = 10;	y = 9;	height = 1; width = 2;	label = "         Add Tags Language: "},
 		[66] = {name = "language";	class = "dropdown";	x = 12;	y = 9;	height = 1; width = 2;	items = {"Lua", "Automation Auto-4"};	value = "Lua"},
+		[69] = { 					class = "label"; 	x = 0;  y = 21; height = 1; width = 2;	label = "IRC: #KaraEffector"},	
 		[24] = { 					class = "label"; 	x = 0;  y = 14; height = 1; width = 2;	label = "         Shape Colors [fx]:"},
 		[25] = { 					class = "label"; 	x = 2;  y = 14; height = 1; width = 2;	label = "    Shape Primary Color"},
 		[26] = { 					class = "label"; 	x = 4;  y = 14; height = 1; width = 2;	label = "     Shape Border Color"},
@@ -8778,55 +8779,79 @@
 		[61] = {name = "printfx";	class = "checkbox"; x = 8;	y = 17;	height = 1; width = 2;	label = "Print Config [fx]";	value = false},
 		[62] = {name = "namefx";	class = "textbox";	x = 8;  y = 18;	height = 1; width = 6;	text  = ""},
  		[63] = {name = "folderfx";	class = "dropdown";	x = 12; y = 17;	height = 1; width = 2;	items = {"lead-in[fx]","hi-light[fx]","lead-out[fx]","shape[fx]","translation[fx]"};	value = nil},
-		[64] = { 					class = "label"; 	x = 2;  y = 18;	height = 1; width = 4;	label = F("▼ Kara Effector %s ▼        [ %s ]", script_version..script_update, Effector_Lib_modified)},
+		[64] = { 					class = "label"; 	x = 2;  y = 18;	height = 1; width = 4;	label = format("▼ Kara Effector %s ▼        [ %s ]", script_version..script_update, Effector_Lib_modified)},
 	}--▲
 	
 	-------------------------------------
 	function table.inbox( tablefx, ... )
-		config_FX = {...}
-		tablefx[1].label  = config_FX[1]; 	tablefx[29].value = config_FX[2];	tablefx[30].value = config_FX[3];	tablefx[31].value = config_FX[4];
-		tablefx[32].value = config_FX[5];	tablefx[33].value = config_FX[6];	tablefx[34].value = config_FX[7];	tablefx[35].value = config_FX[8];
-		tablefx[36].value = config_FX[9];	tablefx[37].value = config_FX[10];	tablefx[38].text  = config_FX[11];	tablefx[39].text  = config_FX[12];
-		tablefx[40].text  = config_FX[13];	tablefx[41].text  = config_FX[14];	tablefx[42].text  = config_FX[15];	tablefx[43].text  = config_FX[16];
-		tablefx[44].text  = config_FX[17];	tablefx[45].text  = config_FX[18];	tablefx[46].text  = config_FX[19];	tablefx[47].text  = config_FX[20];
-		tablefx[48].text  = config_FX[21];	tablefx[49].text  = config_FX[22];	tablefx[50].text  = config_FX[23];	tablefx[51].text  = config_FX[24];
-		tablefx[52].text  = config_FX[25];	tablefx[53].text  = config_FX[26];	tablefx[54].text  = config_FX[27];	tablefx[55].text  = config_FX[28];
-		tablefx[56].text  = config_FX[29];	tablefx[57].text  = config_FX[30];
-		tablefx[66].value = config_FX[31] or "Lua";
-		tablefx[67].value = config_FX[32] or false;
-		tablefx[29].hint = 'Effect Type to Apply at Line Effect'
-		tablefx[32].hint = 'shape.color1 or shape.color1c: Primary Color Shape'
-		tablefx[33].hint = 'shape.color3 or shape.color3c: Border Color Shape'
-		tablefx[34].hint = 'shape.color4 or shape.color4c: Shadow Color Shape'
-		tablefx[35].hint = 'shape.alpha1 or shape.alpha1a: Primary Alpha Shape'
-		tablefx[36].hint = 'shape.alpha3 or shape.alpha3a: Border Alpha Shape'
-		tablefx[37].hint = 'shape.alpha4 or shape.alpha4a: Shadow Alpha Shape'
-		tablefx[38].hint = 'fx.start_time: Is the Start Time Line Effect'
-		tablefx[39].hint = 'fx.end_time: Is the End Time Line Effect\nfx.dur = fx.end_time - fx.start_time'
-		tablefx[40].hint = 'fx.fun_x: Parametric Function Equation for X, example: x(s) = 3*sin(s + 1)'
-		tablefx[41].hint = 'fx.fun_y: Parametric Function Equation for Y, example: y(s) = s^2 + cos(s)'
-		tablefx[42].hint = 'fx.domain_i: Initial Domain of Parametric Function'
-		tablefx[43].hint = 'fx.domain_f: Final Domain of Parametric Function'
-		tablefx[44].hint = 'fx.center_x: x-coordinate of the Reference Point of the Position'
-		tablefx[45].hint = 'fx.center_y: y-coordinate of the Reference Point of the Position'
-		tablefx[46].hint = 'fx.scale_x: x-scale of the Parametric Function'
-		tablefx[47].hint = 'fx.scale_y: y-scale of the Parametric Function'
-		tablefx[48].hint = 'fx.align: Line Effect Alignment, for example \\an5'
-		tablefx[49].hint = 'fx.layer: Line Effect Layer'
-		tablefx[50].hint = 'x-coordinate of the Final Position of Line Effect\nfx.pos_x = fx.center_x + fx.fun_x*fx.scale_x'
-		tablefx[51].hint = 'y-coordinate of the Final Position of Line Effect\nfx.pos_y = fx.center_y + fx.fun_y*fx.scale_y'
-		tablefx[52].hint = 'fx.movet_i, fx.movet_f: Time Move, for default: 0, fx.dur'
-		tablefx[53].hint = 'fx.loop_v, fx.loop_h: Line Effect Loop\nmaxj = fx.loop_v*fx.loop_h'
-		tablefx[54].hint = 'fx.sizex, fx.sizey: Line Effect Size'
-		tablefx[55].hint = 'Line Effect Return, example: syl.text, char.text, "m 0 0 l 0 1 l 1 1 l 1 0 "'
-		tablefx[56].hint = 'Line Effect Add Tags, example: "\\\\bord0"; format("\\\\3vc%s", shape.color3) in lua Language, or: !maxloop($width/$syln)!!retime("start2syl", -1000 + $si*50, 0)!{\\1c!random.color()!} in Automation Auto-4 Language'
-		tablefx[57].hint = 'Declare Variables and Functions'
-		tablefx[58].hint = 'Line Effect Save Configuration'
-		tablefx[61].hint = 'Print Configurations of the Line Effect'
-		tablefx[62].hint = 'New Effect Name, not use Special Characters'
-		tablefx[63].hint = 'Destination Folder for the New Effect'
-		tablefx[66].hint = 'Select Language for Add Tags'
-		tablefx[67].hint = 'Decide whether the settings made will generate fx lines or will modify existing karaoke lines'
+		local config_FX = {...}
+		---------------------------------
+		tablefx[01].label = config_FX[01]
+		tablefx[29].value = config_FX[02]
+		tablefx[30].value = config_FX[03]
+		tablefx[31].value = config_FX[04]
+		tablefx[32].value = config_FX[05]
+		tablefx[33].value = config_FX[06]
+		tablefx[34].value = config_FX[07]
+		tablefx[35].value = config_FX[08]
+		tablefx[36].value = config_FX[09]
+		tablefx[37].value = config_FX[10]
+		tablefx[38].text = config_FX[11]
+		tablefx[39].text = config_FX[12]
+		tablefx[40].text = config_FX[13]
+		tablefx[41].text = config_FX[14]
+		tablefx[42].text = config_FX[15]
+		tablefx[43].text = config_FX[16]
+		tablefx[44].text = config_FX[17]
+		tablefx[45].text = config_FX[18]
+		tablefx[46].text = config_FX[19]
+		tablefx[47].text = config_FX[20]
+		tablefx[48].text = config_FX[21]
+		tablefx[49].text = config_FX[22]
+		tablefx[50].text = config_FX[23]
+		tablefx[51].text = config_FX[24]
+		tablefx[52].text = config_FX[25]
+		tablefx[53].text = config_FX[26]
+		tablefx[54].text = config_FX[27]
+		tablefx[55].text = config_FX[28]
+		tablefx[56].text = config_FX[29]
+		tablefx[57].text = config_FX[30]
+		tablefx[66].value = config_FX[31] or "Lua"
+		tablefx[67].value = config_FX[32] or false
+		------------------------------------------
+		tablefx[29].hint = "Effect Type to Apply at Line Effect"
+		tablefx[32].hint = "shape.color1 or shape.color1c: Primary Color Shape"
+		tablefx[33].hint = "shape.color3 or shape.color3c: Border Color Shape"
+		tablefx[34].hint = "shape.color4 or shape.color4c: Shadow Color Shape"
+		tablefx[35].hint = "shape.alpha1 or shape.alpha1a: Primary Alpha Shape"
+		tablefx[36].hint = "shape.alpha3 or shape.alpha3a: Border Alpha Shape"
+		tablefx[37].hint = "shape.alpha4 or shape.alpha4a: Shadow Alpha Shape"
+		tablefx[38].hint = "fx.start_time: Is the Start Time Line Effect"
+		tablefx[39].hint = "fx.end_time: Is the End Time Line Effect\nfx.dur = fx.end_time - fx.start_time"
+		tablefx[40].hint = "fx.fun_x: Parametric Function Equation for X, example: x(s) = 3*sin(s + 1)"
+		tablefx[41].hint = "fx.fun_y: Parametric Function Equation for Y, example: y(s) = s^2 + cos(s)"
+		tablefx[42].hint = "fx.domain_i: Initial Domain of Parametric Function"
+		tablefx[43].hint = "fx.domain_f: Final Domain of Parametric Function"
+		tablefx[44].hint = "fx.center_x: x-coordinate of the Reference Point of the Position"
+		tablefx[45].hint = "fx.center_y: y-coordinate of the Reference Point of the Position"
+		tablefx[46].hint = "fx.scale_x: x-scale of the Parametric Function"
+		tablefx[47].hint = "fx.scale_y: y-scale of the Parametric Function"
+		tablefx[48].hint = "fx.align: Line Effect Alignment, for example \\an5"
+		tablefx[49].hint = "fx.layer: Line Effect Layer"
+		tablefx[50].hint = "x-coordinate of the Final Position of Line Effect\nfx.pos_x = fx.center_x + fx.fun_x*fx.scale_x"
+		tablefx[51].hint = "y-coordinate of the Final Position of Line Effect\nfx.pos_y = fx.center_y + fx.fun_y*fx.scale_y"
+		tablefx[52].hint = "fx.movet_i, fx.movet_f: Time Move, for default: 0, fx.dur"
+		tablefx[53].hint = "fx.loop_v, fx.loop_h: Line Effect Loop\nmaxj = fx.loop_v*fx.loop_h"
+		tablefx[54].hint = "fx.sizex, fx.sizey: Line Effect Size"
+		tablefx[55].hint = "Line Effect Return, example: syl.text, char.text, \"m 0 0 l 0 1 l 1 1 l 1 0 \""
+		tablefx[56].hint = "Line Effect Add Tags, example: \"\\\\bord0\"; format(\"\\\\3vc%s\", shape.color3) in lua Language, or: !maxloop($width/$syln)!!retime(\"start2syl\", -1000 + $si*50, 0)!{\\1c!random.color()!} in Automation Auto-4 Language"
+		tablefx[57].hint = "Declare Variables and Functions"
+		tablefx[58].hint = "Line Effect Save Configuration"
+		tablefx[61].hint = "Print Configurations of the Line Effect"
+		tablefx[62].hint = "New Effect Name, not use Special Characters"
+		tablefx[63].hint = "Destination Folder for the New Effect"
+		tablefx[66].hint = "Select Language for Add Tags"
+		tablefx[67].hint = "Decide whether the settings made will generate fx lines or will modify existing karaoke lines"
 		return ""
 	end
 	
@@ -8840,17 +8865,37 @@
 	
 	function table.inbox2( table_data )
 		table__ = { }
-		table__.effect	 = table_data[1].label
-		table__.t_type   = table_data[29].value		table__.noblank  = table_data[30].value		table__.v_kanji  = table_data[31].value
-		table__.color1   = table_data[32].value		table__.color3   = table_data[33].value		table__.color4   = table_data[34].value
-		table__.alpha1   = table_data[35].value		table__.alpha3   = table_data[36].value		table__.alpha4   = table_data[37].value
-		table__.start_t  = table_data[38].text		table__.end_t    = table_data[39].text		table__.fun_x    = table_data[40].text
-		table__.fun_y    = table_data[41].text		table__.s_i      = table_data[42].text		table__.s_f      = table_data[43].text
-		table__.center_x = table_data[44].text		table__.center_y = table_data[45].text		table__.scale_x  = table_data[46].text
-		table__.scale_y  = table_data[47].text		table__.align    = table_data[48].text		table__.layer    = table_data[49].text
-		table__.move_x   = table_data[50].text		table__.move_y   = table_data[51].text		table__.move_t   = table_data[52].text
-		table__.loops    = table_data[53].text		table__.size     = table_data[54].text		table__.returnfx = table_data[55].text
-		table__.addtag   = table_data[56].text		table__.variable = table_data[57].text		table__.namefx   = table_data[62].text
+		table__.effect	 = table_data[01].label
+		table__.t_type   = table_data[29].value
+		table__.noblank  = table_data[30].value
+		table__.v_kanji  = table_data[31].value
+		table__.color1   = table_data[32].value
+		table__.color3   = table_data[33].value
+		table__.color4   = table_data[34].value
+		table__.alpha1   = table_data[35].value
+		table__.alpha3   = table_data[36].value
+		table__.alpha4   = table_data[37].value
+		table__.start_t  = table_data[38].text
+		table__.end_t    = table_data[39].text
+		table__.fun_x    = table_data[40].text
+		table__.fun_y    = table_data[41].text
+		table__.s_i      = table_data[42].text
+		table__.s_f      = table_data[43].text
+		table__.center_x = table_data[44].text
+		table__.center_y = table_data[45].text
+		table__.scale_x  = table_data[46].text
+		table__.scale_y  = table_data[47].text
+		table__.align    = table_data[48].text
+		table__.layer    = table_data[49].text
+		table__.move_x   = table_data[50].text
+		table__.move_y   = table_data[51].text
+		table__.move_t   = table_data[52].text
+		table__.loops    = table_data[53].text
+		table__.size     = table_data[54].text
+		table__.returnfx = table_data[55].text
+		table__.addtag   = table_data[56].text
+		table__.variable = table_data[57].text
+		table__.namefx   = table_data[62].text
 		table__.folderfx = table_data[63].value
 		table__.language = table_data[66].value or "Lua"
 		table__.modify	 = table_data[67].value or false
@@ -8858,16 +8903,50 @@
 	end
 	
 	-------------------------------------
-	PfxM_Box  = table.duplicate(PfxM_Box)
-	PfxM_Box[29].items  = {"Line", "Word", "Syl", "Furi", "Char", "Convert to Hiragana", "Convert to Katakana", "Convert to Romaji", "Translation Line", "Translation Word", "Translation Char", "Template Line [Word]", "Template Line [Syl]", "Template Line [Char]"}
-	PfxM_Box[29].value  = "Syl"
+	PfxM_Box = table.duplicate(PfxM_Box)
+	PfxM_Box[29].items = {
+		[01] = "Line",
+		[02] = "Word",
+		[03] = "Syl",
+		[04] = "Furi",
+		[05] = "Char",
+		[06] = "Convert to Hiragana",
+		[07] = "Convert to Katakana",
+		[08] = "Convert to Romaji",
+		[09] = "Translation Line",
+		[10] = "Translation Word",
+		[11] = "Translation Char",
+		[12] = "Template Line [Word]",
+		[13] = "Template Line [Syl]",
+		[14] = "Template Line [Char]"
+	}
+	PfxM_Box[29].value = "Syl"
 	-------------------------------------
 	Shape_Box = table.duplicate(PfxM_Box)
-	Shape_Box[29].items = {"Line", "Word", "Syl", "Furi", "Char", "Convert to Hiragana", "Convert to Katakana", "Convert to Romaji", "Translation Line", "Translation Word", "Translation Char", "Template Line [Word]", "Template Line [Syl]", "Template Line [Char]"}
+	Shape_Box[29].items = {
+		[01] = "Line",
+		[02] = "Word",
+		[03] = "Syl",
+		[04] = "Furi",
+		[05] = "Char",
+		[06] = "Convert to Hiragana",
+		[07] = "Convert to Katakana",
+		[08] = "Convert to Romaji",
+		[09] = "Translation Line",
+		[10] = "Translation Word",
+		[11] = "Translation Char",
+		[12] = "Template Line [Word]",
+		[13] = "Template Line [Syl]",
+		[14] = "Template Line [Char]"
+	}
 	Shape_Box[29].value = "Syl"
 	-------------------------------------
 	Trans_Box = table.duplicate(PfxM_Box)
-	Trans_Box[29].items = {"Translation Line", "Translation Word", "Translation Char"}
+	Trans_Box[29].items = {
+		[1] = "Translation Line",
+		[2] = "Translation Word",
+		[3] = "Translation Char"
+	}
 	Trans_Box[29].value = "Translation Char"
 	-------------------------------------
 
@@ -9260,11 +9339,9 @@
 	end
 
 	function effector.run_fx( subs, sett, index )
-		--effector.decide( )
-		local meta, styles = karaskel.collect_head(subs)
+		local meta, styles = karaskel.collect_head( subs )
 		local maxi = #index
 		local subtitles = subs
-		--subtitles = subs
 		ini_line, count_line_dialogue = 0, 0
 		for i = 1, #subtitles do
 			if subtitles[i].class == "dialogue" and subtitles[i].effect ~= "Effector [Fx]" and subtitles[i].effect ~= "fx" then
@@ -9323,7 +9400,6 @@
 	end
 	
 	function effector.preprosses_macro( subtitles, sett, fx__, selected_lines )
-		--effector.decide( )
 		local subs = { }
 		if sett.line_style == "Selected Lines" then
 			for _, i in ipairs(selected_lines) do
@@ -9371,8 +9447,8 @@
 			width, height, descent, extlead	= aegisub.text_extents(l_style, text.remove_extra_space(text.remove_tags(linefx[i].text:gsub("\\N", " "):gsub("  ", " "))))
 			options_lft = {l_style.margin_l, (xres + l_style.margin_l - l_style.margin_r)/2 - width/2, xres - l_style.margin_r - width}
 			options_top = {yres - l_style.margin_b - height, yres/2 - height/2, l_style.margin_t}
-			mmwth[i] = {wo = { }, sy = { }, ro = { }, hi = { }, ka = { }, ch = { }}
-			mmdur[i] = {wo = { }, sy = { }, ro = { }, hi = { }, ka = { }, ch = { }}
+			mmwth[i] = { wo = { }, sy = { }, ro = { }, hi = { }, ka = { }, ch = { } }
+			mmdur[i] = { wo = { }, sy = { }, ro = { }, hi = { }, ka = { }, ch = { } }
 			------------▼ line
 			linefx.ii				= i
 			linefx[i].styleref		= l_style
@@ -9717,40 +9793,58 @@
 			------------------------------------------------------------------------------------------------
 		end
 		for k = -linefx.nn, 0 do linefx[k] = linefx[1] end
-		for k = linefx.nn + 1,2*linefx.nn do linefx[k] = linefx[linefx.nn] end
+		for k = linefx.nn + 1, 2*linefx.nn do linefx[k] = linefx[linefx.nn] end
 	end
 	
 	function effector.macro_fx( subtitles, selected_lines, active_line )
 		effector.decide( )
-		effector.preprosses_styles(styles, subtitles, #selected_lines > 0)
-		local meta, styles = karaskel.collect_head(subtitles)
-		repeat box_res, sett = aegisub.dialog.display(setting_box, {"Apply Selection", "Cancel", "Style Manager"})
+		effector.preprosses_styles( styles, subtitles, #selected_lines > 0 )
+		local meta, styles = karaskel.collect_head( subtitles )
+		repeat box_res, sett = aegisub.dialog.display( setting_box, {"Apply Selection", "Cancel", "Style Manager"} )
 			---------------------------------------------------
 			if sett.saveconfiguration == true then
-				setting_box[3].value  = sett.line_style		setting_box[5].value  = sett.effect_mode	setting_box[11].value = sett.color_1c
-				setting_box[12].value = sett.color_2c		setting_box[13].value = sett.color_3c		setting_box[14].value = sett.color_4c
-				setting_box[15].value = sett.alpha_1a		setting_box[16].value = sett.alpha_2a		setting_box[17].value = sett.alpha_3a
-				setting_box[18].value = sett.alpha_4a		setting_box[19].value = sett.linecomment	setting_box[24].value = sett.tags_filter
+				setting_box[3].value  = sett.line_style
+				setting_box[5].value  = sett.effect_mode
+				setting_box[11].value = sett.color_1c
+				setting_box[12].value = sett.color_2c
+				setting_box[13].value = sett.color_3c
+				setting_box[14].value = sett.color_4c
+				setting_box[15].value = sett.alpha_1a
+				setting_box[16].value = sett.alpha_2a
+				setting_box[17].value = sett.alpha_3a
+				setting_box[18].value = sett.alpha_4a
+				setting_box[19].value = sett.linecomment
+				setting_box[24].value = sett.tags_filter
 			end
 			---------------------------------------------------
 			if box_res == "Back <" then
-				repeat box_res, sett = aegisub.dialog.display(setting_box, {"Apply Selection", "Cancel", "Style Manager"})
+				repeat box_res, sett = aegisub.dialog.display( setting_box, {"Apply Selection", "Cancel", "Style Manager"} )
 				until box_res == "Apply Selection" or box_res == "Cancel" or box_res == "Apply "..sett.effect_mode or box_res == "Modify "..sett.effect_mode
 			end
 			---------------------------------------------------
 			if box_res == "Style Manager" then
 				if sett.line_style == "Selected Lines" or sett.line_style == "All Lines" or sett.line_style == "" then
-					if  setting_box[3].items[1] then style1 = setting_box[3].items[1]
-						setting_box[11].value = styles[style1].color1	setting_box[15].value = tonumber(alpha_from_style(styles[style1].color1):match("(%x%x)"), 16)
-						setting_box[12].value = styles[style1].color2	setting_box[16].value = tonumber(alpha_from_style(styles[style1].color2):match("(%x%x)"), 16)
-						setting_box[13].value = styles[style1].color3	setting_box[17].value = tonumber(alpha_from_style(styles[style1].color3):match("(%x%x)"), 16)
-						setting_box[14].value = styles[style1].color4	setting_box[18].value = tonumber(alpha_from_style(styles[style1].color4):match("(%x%x)"), 16)
+					if  setting_box[3].items[1] then
+						style1 = setting_box[3].items[1]
+						setting_box[11].value = styles[style1].color1
+						setting_box[12].value = styles[style1].color2
+						setting_box[13].value = styles[style1].color3
+						setting_box[14].value = styles[style1].color4
+						setting_box[15].value = tonumber(alpha_from_style(styles[style1].color1):match("(%x%x)"), 16)
+						setting_box[16].value = tonumber(alpha_from_style(styles[style1].color2):match("(%x%x)"), 16)
+						setting_box[17].value = tonumber(alpha_from_style(styles[style1].color3):match("(%x%x)"), 16)
+						setting_box[18].value = tonumber(alpha_from_style(styles[style1].color4):match("(%x%x)"), 16)
 					end
-				else style_kara = sett.line_style
-					setting_box[11].value = styles[style_kara].color1	setting_box[15].value = tonumber(alpha_from_style(styles[style_kara].color1):match("(%x%x)"), 16)
-					setting_box[12].value = styles[style_kara].color2	setting_box[16].value = tonumber(alpha_from_style(styles[style_kara].color2):match("(%x%x)"), 16)
-					setting_box[13].value = styles[style_kara].color3	setting_box[17].value = tonumber(alpha_from_style(styles[style_kara].color3):match("(%x%x)"), 16)
-					setting_box[14].value = styles[style_kara].color4	setting_box[18].value = tonumber(alpha_from_style(styles[style_kara].color4):match("(%x%x)"), 16)
+				else
+					style_kara = sett.line_style
+					setting_box[11].value = styles[style_kara].color1
+					setting_box[12].value = styles[style_kara].color2
+					setting_box[13].value = styles[style_kara].color3
+					setting_box[14].value = styles[style_kara].color4
+					setting_box[15].value = tonumber(alpha_from_style(styles[style_kara].color1):match("(%x%x)"), 16)
+					setting_box[16].value = tonumber(alpha_from_style(styles[style_kara].color2):match("(%x%x)"), 16)
+					setting_box[17].value = tonumber(alpha_from_style(styles[style_kara].color3):match("(%x%x)"), 16)
+					setting_box[18].value = tonumber(alpha_from_style(styles[style_kara].color4):match("(%x%x)"), 16)
 				end
 			end
 			---------------------------------------------------
@@ -9774,16 +9868,32 @@
 				---------------------------------------------------
 				repeat box_res, sett = aegisub.dialog.display(setting_box, {"Apply "..sett.effect_mode, "Cancel", "Modify "..sett.effect_mode, "Back <"})
 					if sett.saveconfiguration == true then
-						if	   sett.effect_mode == "lead-in[fx]"	 then setting_box[22].value = sett.lead_in_fx		sett.effect = sett.lead_in_fx
-						elseif sett.effect_mode == "hi-light[fx]"	 then setting_box[22].value = sett.hi_light_fx		sett.effect = sett.hi_light_fx
-						elseif sett.effect_mode == "lead-out[fx]"	 then setting_box[22].value = sett.lead_out_fx		sett.effect = sett.lead_out_fx
-						elseif sett.effect_mode == "shape[fx]"		 then setting_box[22].value = sett.shape_fx_fx		sett.effect = sett.shape_fx_fx
-						elseif sett.effect_mode == "translation[fx]" then setting_box[22].value = sett.transla_fx_fx	sett.effect = sett.transla_fx_fx
+						if sett.effect_mode == "lead-in[fx]" then
+							setting_box[22].value = sett.lead_in_fx
+							sett.effect = sett.lead_in_fx
+						elseif sett.effect_mode == "hi-light[fx]" then
+							setting_box[22].value = sett.hi_light_fx
+							sett.effect = sett.hi_light_fx
+						elseif sett.effect_mode == "lead-out[fx]" then
+							setting_box[22].value = sett.lead_out_fx
+							sett.effect = sett.lead_out_fx
+						elseif sett.effect_mode == "shape[fx]" then
+							setting_box[22].value = sett.shape_fx_fx
+							sett.effect = sett.shape_fx_fx
+						elseif sett.effect_mode == "translation[fx]" then
+							setting_box[22].value = sett.transla_fx_fx
+							sett.effect = sett.transla_fx_fx
 						end
 					end
 				until box_res == "Apply "..sett.effect_mode or box_res == "Cancel" or box_res == "Modify "..sett.effect_mode or box_res == "Back <"
 			end
-			mode5_fx = {sett.lead_in_fx, sett.hi_light_fx, sett.lead_out_fx, sett.shape_fx_fx, sett.transla_fx_fx}
+			mode5_fx = {
+				[1] = sett.lead_in_fx,
+				[2] = sett.hi_light_fx,
+				[3] = sett.lead_out_fx,
+				[4] = sett.shape_fx_fx,
+				[5] = sett.transla_fx_fx
+			}
 			---------------------------------------------------
 			index1 = table.index(list_mode, sett.effect_mode)
 			index2 = table.index(list_fx[index1], mode5_fx[index1])
@@ -9792,14 +9902,19 @@
 			---------------------------------------------------
 			if box_res == "Apply "..sett.effect_mode and sett.line_style ~= ""  then
 				effector.list = { [1] = fx__ }
-				for kik, v in ipairs(effector.list) do
+				for kik, v in ipairs( effector.list ) do
 					fx__ = v
-					if #effector.list == 1 or kik == #effector.list then lines_comment = sett.linecomment else lines_comment = false end
+					if #effector.list == 1 or kik == #effector.list then
+						lines_comment = sett.linecomment
+					else
+						lines_comment = false
+					end
 					aegisub.progress.title( format("KEfx %s: %s", script_version, fx__.effect:gsub("%S+%[fx%]%: ", "")) )
 					effector.preprosses_macro(subtitles, sett, fx__, selected_lines)
-				end local meta, styles = karaskel.collect_head(subtitles, true)
-				aegisub.set_undo_point(script_name)
-				aegisub.progress.task("Script successfully implemented!!")
+				end
+				local meta, styles = karaskel.collect_head( subtitles, true )
+				aegisub.set_undo_point( script_name )
+				aegisub.progress.task( "Script successfully implemented!!" )
 			end
 			---------------------------------------------------
 			if box_res == "Modify "..sett.effect_mode and sett.line_style ~= "" then
@@ -9809,50 +9924,87 @@
 					fx__.effect = fx_box[1].label
 					if box_res == "insert function" then
 						include("insert function.lua")
-						repeat box_ins, config__ = aegisub.dialog.display( conf_insert, {"Insert","Cancel"})
-							if box_ins == "Insert" then fx__.addtag = fx__.addtag.."Insert Demo" end
-						until  box_ins == "Insert" or box_ins == "Cancel"
+						repeat box_ins, config__ = aegisub.dialog.display( conf_insert, {"Insert","Cancel"} )
+							if box_ins == "Insert" then
+								fx__.addtag = fx__.addtag.."Insert Demo"
+							end
+						until box_ins == "Insert" or box_ins == "Cancel"
 					end
 					if fx__.saveFX == true then
-						fx_box[29].value,fx_box[30].value,fx_box[31].value,fx_box[32].value,fx_box[33].value,fx_box[34].value,fx_box[35].value,fx_box[36].value,fx_box[37].value,fx_box[38].text,fx_box[39].text,fx_box[40].text,fx_box[41].text,fx_box[42].text,fx_box[43].text,fx_box[44].text,fx_box[45].text,fx_box[46].text,fx_box[47].text,fx_box[48].text,fx_box[49].text,fx_box[50].text,fx_box[51].text,fx_box[52].text,fx_box[53].text,fx_box[54].text,fx_box[55].text,fx_box[56].text,fx_box[57].text,fx_box[62].text,fx_box[63].value,fx_box[66].value,fx_box[67].value = fx__.t_type, fx__.noblank, fx__.v_kanji, fx__.color1, fx__.color3, fx__.color4, fx__.alpha1, fx__.alpha3, fx__.alpha4, fx__.start_t, fx__.end_t, fx__.fun_x, fx__.fun_y, fx__.s_i, fx__.s_f, fx__.center_x, fx__.center_y, fx__.scale_x, fx__.scale_y, fx__.align, fx__.layer, fx__.move_x, fx__.move_y, fx__.move_t, fx__.loops, fx__.size, fx__.returnfx, fx__.addtag, fx__.variable, fx__.namefx, fx__.folderfx, fx__.language, fx__.modify
+						fx_box[29].value, fx_box[30].value, fx_box[31].value = fx__.t_type, fx__.noblank, fx__.v_kanji
+						fx_box[32].value, fx_box[33].value, fx_box[34].value = fx__.color1, fx__.color3, fx__.color4
+						fx_box[35].value, fx_box[36].value, fx_box[37].value = fx__.alpha1, fx__.alpha3, fx__.alpha4
+						fx_box[38].text, fx_box[39].text, fx_box[40].text	 = fx__.start_t, fx__.end_t, fx__.fun_x
+						fx_box[41].text, fx_box[42].text, fx_box[43].text	 = fx__.fun_y, fx__.s_i, fx__.s_f
+						fx_box[44].text, fx_box[45].text, fx_box[46].text	 = fx__.center_x, fx__.center_y, fx__.scale_x
+						fx_box[47].text, fx_box[48].text, fx_box[49].text	 = fx__.scale_y, fx__.align, fx__.layer
+						fx_box[50].text, fx_box[51].text, fx_box[52].text	 = fx__.move_x, fx__.move_y, fx__.move_t
+						fx_box[53].text, fx_box[54].text, fx_box[55].text	 = fx__.loops, fx__.size, fx__.returnfx
+						fx_box[56].text, fx_box[57].text, fx_box[62].text	 = fx__.addtag, fx__.variable, fx__.namefx
+						fx_box[63].value, fx_box[66].value, fx_box[67].value = fx__.folderfx, fx__.language, fx__.modify
 					end
 					if box_res == "Style Manager Colors" then
 						if sett.line_style == "Selected Lines" or sett.line_style == "All Lines" or sett.line_style == "" then
-							if setting_box[3].items[1] then style1 = setting_box[3].items[1]
-								fx_box[32].value = styles[style1].color1	fx_box[35].value = tonumber(alpha_from_style(styles[style1].color1):match("(%x%x)"), 16)
-								fx_box[33].value = styles[style1].color3	fx_box[36].value = tonumber(alpha_from_style(styles[style1].color3):match("(%x%x)"), 16)
-								fx_box[34].value = styles[style1].color4	fx_box[37].value = tonumber(alpha_from_style(styles[style1].color4):match("(%x%x)"), 16)
+							if setting_box[3].items[1] then
+								style1 = setting_box[3].items[1]
+								fx_box[32].value = styles[style1].color1
+								fx_box[33].value = styles[style1].color3
+								fx_box[34].value = styles[style1].color4
+								fx_box[35].value = tonumber(alpha_from_style(styles[style1].color1):match("(%x%x)"), 16)
+								fx_box[36].value = tonumber(alpha_from_style(styles[style1].color3):match("(%x%x)"), 16)
+								fx_box[37].value = tonumber(alpha_from_style(styles[style1].color4):match("(%x%x)"), 16)
 							end
-						else style_kara = sett.line_style
-							fx_box[32].value = styles[style_kara].color1	fx_box[35].value = tonumber(alpha_from_style(styles[style_kara].color1):match("(%x%x)"), 16)
-							fx_box[33].value = styles[style_kara].color3	fx_box[36].value = tonumber(alpha_from_style(styles[style_kara].color3):match("(%x%x)"), 16)
-							fx_box[34].value = styles[style_kara].color4	fx_box[37].value = tonumber(alpha_from_style(styles[style_kara].color4):match("(%x%x)"), 16)
+						else
+							style_kara = sett.line_style
+							fx_box[32].value = styles[style_kara].color1
+							fx_box[33].value = styles[style_kara].color3
+							fx_box[34].value = styles[style_kara].color4
+							fx_box[35].value = tonumber(alpha_from_style(styles[style_kara].color1):match("(%x%x)"), 16)
+							fx_box[36].value = tonumber(alpha_from_style(styles[style_kara].color3):match("(%x%x)"), 16)
+							fx_box[37].value = tonumber(alpha_from_style(styles[style_kara].color4):match("(%x%x)"), 16)
 						end
 					end
 					if box_res == "Change Template Type" then	
 						for i = 38, 57 do
-							if     fx__.t_type == "Char" or fx__.t_type == "Translation Char" then fx_box[i].text = fx_box[i].text:gsub("line%.", "char."):gsub("word%.", "char."):gsub("furi%.", "char."):gsub("syl%.",  "char."):gsub("hira%.", "char."):gsub("kata%.", "char."):gsub("roma%.", "char."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("char.kara", "line.kara")
-							elseif fx__.t_type == "Syl"										  then fx_box[i].text = fx_box[i].text:gsub("line%.",  "syl."):gsub("word%.",  "syl."):gsub("furi%.",  "syl."):gsub("hira%.",  "syl."):gsub("kata%.",  "syl."):gsub("roma%.",  "syl."):gsub("char%.",  "syl."):gsub("_stripped",   ""):gsub("syl.kara", "line.kara")
-							elseif fx__.t_type == "Convert to Hiragana"						  then fx_box[i].text = fx_box[i].text:gsub("line%.", "hira."):gsub("word%.", "hira."):gsub("furi%.", "hira."):gsub("syl%.",  "hira."):gsub("kata%.", "hira."):gsub("roma%.", "hira."):gsub("char%.", "hira."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("hira.kara", "line.kara")
-							elseif fx__.t_type == "Convert to Katakana"						  then fx_box[i].text = fx_box[i].text:gsub("line%.", "kata."):gsub("word%.", "kata."):gsub("furi%.", "kata."):gsub("syl%.",  "kata."):gsub("hira%.", "kata."):gsub("roma%.", "kata."):gsub("char%.", "kata."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("kata.kara", "line.kara")
-							elseif fx__.t_type == "Convert to Romaji"						  then fx_box[i].text = fx_box[i].text:gsub("line%.", "roma."):gsub("word%.", "roma."):gsub("furi%.", "roma."):gsub("syl%.",  "roma."):gsub("hira%.", "roma."):gsub("kata%.", "roma."):gsub("char%.", "roma."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("roma.kara", "line.kara")
-							elseif fx__.t_type == "Furi"									  then fx_box[i].text = fx_box[i].text:gsub("line%.", "furi."):gsub("word%.", "furi."):gsub("syl%.",  "furi."):gsub("hira%.", "furi."):gsub("kata%.", "furi."):gsub("roma%.", "furi."):gsub("char%.", "furi."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("furi.kara", "line.kara")
-							elseif fx__.t_type == "Word" or fx__.t_type == "Translation Word" then fx_box[i].text = fx_box[i].text:gsub("line%.", "word."):gsub("syl%.",  "word."):gsub("furi%.", "word."):gsub("hira%.", "word."):gsub("kata%.", "word."):gsub("roma%.", "word."):gsub("char%.", "word."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("word.kara", "line.kara")
-							elseif fx__.t_type == "Line" or fx__.t_type == "Translation Line" or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]" or fx__.t_type == "Template Line [Char]" then fx_box[i].text = fx_box[i].text:gsub("word%.", "line."):gsub("syl%.",  "line."):gsub("furi%.", "line."):gsub("hira%.", "line."):gsub("kata%.", "line."):gsub("roma%.", "line."):gsub("char%.", "line."):gsub("widtht", "width"):gsub("%.text", "%.text_stripped"):gsub("_stripped_stripped", "_stripped"):gsub("%.[ ]*%.text_stripped", "%.%.text")
+							if fx__.t_type == "Char" or fx__.t_type == "Translation Char" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "char."):gsub("word%.", "char."):gsub("furi%.", "char."):gsub("syl%.",  "char."):gsub("hira%.", "char."):gsub("kata%.", "char."):gsub("roma%.", "char."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("char.kara", "line.kara")
+							elseif fx__.t_type == "Syl" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.",  "syl."):gsub("word%.",  "syl."):gsub("furi%.",  "syl."):gsub("hira%.",  "syl."):gsub("kata%.",  "syl."):gsub("roma%.",  "syl."):gsub("char%.",  "syl."):gsub("_stripped",   ""):gsub("syl.kara", "line.kara")
+							elseif fx__.t_type == "Convert to Hiragana" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "hira."):gsub("word%.", "hira."):gsub("furi%.", "hira."):gsub("syl%.",  "hira."):gsub("kata%.", "hira."):gsub("roma%.", "hira."):gsub("char%.", "hira."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("hira.kara", "line.kara")
+							elseif fx__.t_type == "Convert to Katakana" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "kata."):gsub("word%.", "kata."):gsub("furi%.", "kata."):gsub("syl%.",  "kata."):gsub("hira%.", "kata."):gsub("roma%.", "kata."):gsub("char%.", "kata."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("kata.kara", "line.kara")
+							elseif fx__.t_type == "Convert to Romaji" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "roma."):gsub("word%.", "roma."):gsub("furi%.", "roma."):gsub("syl%.",  "roma."):gsub("hira%.", "roma."):gsub("kata%.", "roma."):gsub("char%.", "roma."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("roma.kara", "line.kara")
+							elseif fx__.t_type == "Furi" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "furi."):gsub("word%.", "furi."):gsub("syl%.",  "furi."):gsub("hira%.", "furi."):gsub("kata%.", "furi."):gsub("roma%.", "furi."):gsub("char%.", "furi."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("furi.kara", "line.kara")
+							elseif fx__.t_type == "Word" or fx__.t_type == "Translation Word" then
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "word."):gsub("syl%.",  "word."):gsub("furi%.", "word."):gsub("hira%.", "word."):gsub("kata%.", "word."):gsub("roma%.", "word."):gsub("char%.", "word."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("word.kara", "line.kara")
+							elseif fx__.t_type == "Line" or fx__.t_type == "Translation Line"
+								or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]"
+								or fx__.t_type == "Template Line [Char]" then
+								fx_box[i].text = fx_box[i].text:gsub("word%.", "line."):gsub("syl%.",  "line."):gsub("furi%.", "line."):gsub("hira%.", "line."):gsub("kata%.", "line."):gsub("roma%.", "line."):gsub("char%.", "line."):gsub("widtht", "width"):gsub("%.text", "%.text_stripped"):gsub("_stripped_stripped", "_stripped"):gsub("%.[ ]*%.text_stripped", "%.%.text")
 							end
 						end
 					end
 				until box_res == "Apply "..sett.effect_mode or box_res == "Cancel" or box_res == "Back <"
 				if box_res == "Apply "..sett.effect_mode then
 					effector.list = { [1] = fx__ }
-					for kik, v in ipairs(effector.list) do
+					for kik, v in ipairs( effector.list ) do
 						fx__ = v
-						if #effector.list == 1 or kik == #effector.list then lines_comment = sett.linecomment else lines_comment = false end
+						if #effector.list == 1 or kik == #effector.list then
+							lines_comment = sett.linecomment
+						else
+							lines_comment = false
+						end
 						aegisub.progress.title( format("KEfx %s: %s", script_version, fx__.effect:gsub("%S+%[fx%]%: ", "")) )
-						effector.preprosses_macro(subtitles, sett, fx__, selected_lines)
-					end if fx__.printfx == false then local meta, styles = karaskel.collect_head(subtitles, true) end
-					aegisub.set_undo_point(script_name)
-					aegisub.progress.task("Script successfully implemented!!")
+						effector.preprosses_macro( subtitles, sett, fx__, selected_lines )
+					end
+					if fx__.printfx == false then
+						local meta, styles = karaskel.collect_head( subtitles, true )
+					end
+					aegisub.set_undo_point( script_name )
+					aegisub.progress.task( "Script successfully implemented!!" )
 				end
 			end
 			---------------------------------------------------
