@@ -1,7 +1,7 @@
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	--[[ Copyright (c) 2014, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		All rights reserved / 10 December 2014 Colombia. ]]--
+	--[[ Copyright (c) 2015, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		All rights reserved / 01 January 2015 Colombia. ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	--> Kara Effector 3.2.9.6
+	--> Kara Effector 3.2.9.6					   --> IRC Chanel: #KaraEffector
 	--> http://www.karaeffector.blogspot.com	   --> http://www.facebook.com/karaeffector
 	--> http://www.youtube.com/user/victor8607	   --> http://www.youtube.com/user/NatsuoKE		--> http://www.youtube.com/user/karalaura2012
 	-----------------------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,6 @@
 	script_version = "3.2"
 	--=====================================================================================================================================--
 	Path_Effector_newfx_lua = nil
-	Path_Effector_newfx_lua = "C:\\Users\\VICTOR PAYARES\\Desktop\\HTDM\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 	--Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 	--=====================================================================================================================================--
 	
@@ -62,8 +61,8 @@
 		-------------------------------------------------------------------------------
 		l_layer, l_style, l_actor, l_spacing = l.layer, l.style, l.actor, l.spacing
 		l_ml, l_mr, l_mt, l_mb = l.margin_l, l.margin_r, l.margin_t, l.margin_b
-		l_align, l_dur, l_x, l_y, l_i = l.align,  line.dur, l.center, l.middle, line.i
-		l_start, l_end, l_mid, l_n = l.start_time,  l.end_time,  l.mid_time, line.n
+		l_align, l_dur, l_x, l_y, l_i = l.align, line.dur, l.center, l.middle, line.i
+		l_start, l_end, l_mid, l_n = l.start_time, l.end_time, l.mid_time, line.n
 		l_left, l_center, l_right, l_width = l.left, l.center, l.right, l.width
 		l_top, l_middle, l_bottom, l_height = l.top, l.middle, l.bottom, l.height
 		l_angle, l_outline, l_shadow, l_mv = l.angle, l.outline, l.shadow, l.margin_v
@@ -140,7 +139,7 @@
 		else
 			txt_a4 = "\\4a"..text.alpha4
 		end
-		----------------------------------------------------------------------------------
+		--------------------------------------------------------------------------------
 		text.color = format("\\1c%s\\3c%s\\4c%s", text.color1, text.color3, text.color4)
 		text.alpha = format("\\1a%s\\3a%s\\4a%s", text.alpha1, text.alpha3, text.alpha4)
 		text.style = txt_c1..txt_c3..txt_c4..txt_a1..txt_a3..txt_a4
@@ -149,25 +148,29 @@
 		shape.alpha = format("\\1a%s\\3a%s\\4a%s", shape.alpha1, shape.alpha3, shape.alpha4)
 		shape.style = shape.color..shape.alpha
 		shape.alpha0 = "\\alpha&HFF&"
-		if sett.tags_filter == "No Tags Color and Alpha" or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then
+		if sett.tags_filter == "No Tags Color and Alpha"
+			or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then
 			text.style = ""
 			shape.style = ""
 		end
-		---------------------------------------------
+		----------------------------
 		effector.effect_offset( )
-		---------------------------------------------
+		----------------------------
 		if fx__.v_kanji == true then
 			fx.mode = "v"
 		else
 			fx.mode = "h"
 		end
 		if fx__.noblank == true then
-			noblank1, noblank2 = "", " " blk = ""
+			noblank1, noblank2 = "", " "
+			blk = ""
 		else
-			noblank1, noblank2 = script_name.." "..script_author, script_name.." "..script_author
+			noblank1 = script_name .. " " .. script_author
+			noblank2 = script_name .. " " .. script_author
 			blk = " "
 		end
-		if sett.tags_filter == "VSFilterMod" or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then
+		if sett.tags_filter == "VSFilterMod"
+			or sett.tags_filter == "No Tags Color and Alpha [VSFilterMod]" then
 			fx.filter = "mod"
 			fx.tm = tag.to_mod
 		else
@@ -255,7 +258,7 @@
 					end
 					library_title = fx__.folderfx
 					lines_comment = false
-					newFX = fxname or library_mode.."_"..tostring(os.time( )):sub(-6, -1)
+					newFX = fxname or library_mode .. "_" .. tostring(os.time( )):sub(-6, -1)
 					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then
 						fx_GUI = "PfxM_Box"
 					elseif fx__.folderfx == "shape[fx]" then
@@ -273,12 +276,12 @@
 						fx_GUI = "Trans_Box"
 					end
 					New_fx_config = format("%s = table.duplicate(%s); table.inbox(%s, \"%s: %s\",\"%s\",%s,%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s); table.insert(%s, %s); table.insert(%s, \"%s\")", newFX, fx_GUI, newFX, library_title, newFX:gsub("_", " "), fx_box[29].value, ((fx_box[30].value == true) and "true" or "false"), ((fx_box[31].value == true) and "true" or "false"), fx_box[32].value, fx_box[33].value, fx_box[34].value, fx_box[35].value, fx_box[36].value, fx_box[37].value, Ps(fx_box[38].text), Ps(fx_box[39].text), Ps(fx_box[40].text), Ps(fx_box[41].text), Ps(fx_box[42].text), Ps(fx_box[43].text), Ps(fx_box[44].text), Ps(fx_box[45].text), Ps(fx_box[46].text), Ps(fx_box[47].text), Ps(fx_box[48].text), Ps(fx_box[49].text), Ps(fx_box[50].text), Ps(fx_box[51].text), Ps(fx_box[52].text), Ps(fx_box[53].text), Ps(fx_box[54].text), Ps(fx_box[55].text), Ps(fx_box[56].text), Ps(fx_box[57].text), fx_box[66].value, ((fx_box[67].value == true) and "true" or "false"), library_fx, newFX, library_mode, newFX:gsub("_", " "))
-					fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx")
+					fx_libx = format("%s", fx__.folderfx:sub(1, -5) .. " fx")
 					while fx_libx:len( ) < 14 do
-						fx_libx = fx_libx.." "
+						fx_libx = fx_libx .. " "
 					end
-					fx_date = format("--[[%s %s]] ", fx_libx, tostring(os.date()):sub(1, -4))
-					file:write(fx_date..New_fx_config.."\n	")
+					fx_date = format("--[[%s %s]] ", fx_libx, tostring( os.date( ) ):sub(1, -4))
+					file:write( fx_date .. New_fx_config .. "\n	" )
 				end
 			end
 		end
@@ -307,7 +310,7 @@
 				if line.i == 1 then
 					newFX = fx__.namefx:gsub(" ", "_")
 					if newFX == "" then
-						newFX = library_mode.."_"..tostring(os.time( )):sub(-6, -1)
+						newFX = library_mode .. "_" .. tostring(os.time( )):sub(-6, -1)
 					end
 					if fx__.folderfx == "lead-in[fx]" or fx__.folderfx == "hi-light[fx]" or fx__.folderfx == "lead-out[fx]" then
 						fx_GUI = "PfxM_Box"
@@ -333,12 +336,12 @@
 						l.text = New_fx_config
 						subs.append(l)
 					else
-						fx_libx = format("%s", fx__.folderfx:sub(1, -5).." fx")
+						fx_libx = format("%s", fx__.folderfx:sub(1, -5) .. " fx")
 						while fx_libx:len( ) < 14 do
-							fx_libx = fx_libx.." "
+							fx_libx = fx_libx .. " "
 						end
-						fx_date = format("--[[%s %s]] ", fx_libx, tostring(os.date( )):sub(1, -4))
-						effector.savefx(fx_date..New_fx_config.."\n	", Path_Effector_newfx_lua)
+						fx_date = format("--[[%s %s]] ", fx_libx, tostring( os.date( ) ):sub(1, -4))
+						effector.savefx( fx_date .. New_fx_config .. "\n	", Path_Effector_newfx_lua )
 						aegisub.debug.out("The effect ★%s★ is saved in the Folder %s, you must reload the script Kara Effector so you can see it in the list effects type %s.\n\nEl efecto ★%s★ se ha guardado en el Folder %s, debes recargar el script Kara Effector para que puedas verlo en la lista de efectos tipo %s.", newFX:gsub("_", " "), fx__.folderfx, fx__.folderfx, newFX:gsub("_", " "), fx__.folderfx, fx__.folderfx)
 						aegisub.progress.set(100)
 					end
@@ -436,7 +439,7 @@
 								shape.trapeze1t = format("m 0 0 l 0 %d l %d %d l %d 0 ", syl.height, syl.width, syl.height, syl.width + syl.height)
 								shape.trapeze1b = format("m 0 0 l 0 %d l %d %d l %d 0 ", syl.height, syl.width + syl.height, syl.height, syl.width)
 								----------------------------------------------
-								S_ = aegisub.word(line.text, line.dur, aegisub.word2s( ))
+								S_ = aegisub.word( line.text, line.dur, aegisub.word2s( ) )
 								----------------------------------------------
 								word_start, word_end, word_mid, word_dur, word_i, word_n, word_left, word_center, word_right, word_bottom, word_middle, word_top, word_width, word_height = word.start_time, word.end_time, word.mid_time, word.dur, word.i, word.n, word.left, word.center, word.right, word.bottom, word.middle, word.top, word.width, word.height
 								syl_start,  syl_end,  syl_mid,  syl_dur,  syl_i,  syl_n,  syl_left,  syl_center,  syl_right,  syl_bottom,  syl_middle,  syl_top,  syl_width,  syl_height  = syl.start_time, syl.end_time, syl.mid_time, syl.dur, syl.i, syl.n, syl.left, syl.center, syl.right, syl.bottom, syl.middle, syl.top, syl.width, syl.height
@@ -448,7 +451,7 @@
 								----------------------------------------------
 								C_ = aegisub.syls2c( )
 								wordsyl = { }
-								wordsyl.i, wordsyl.n = aegisub.wordsi(syl.i)
+								wordsyl.i, wordsyl.n = aegisub.wordsi( syl.i )
 								----------------------------------------------
 								if fx__.t_type == "Template Line [Char]" then
 									char.n = unicode.len(line.text_stripped)
@@ -550,8 +553,8 @@
 										l.end_time = fx.end_time
 										fx.dur = fx.end_time - fx.start_time
 										function retime( mode, add_start, add_end )
-											add_start = HMS_to_ms(add_start) or 0
-											add_end = HMS_to_ms(add_end) or 0
+											add_start = HMS_to_ms( add_start ) or 0
+											add_end = HMS_to_ms( add_end ) or 0
 											if mode == "line" then
 												l.start_time = line.start_time + add_start
 												l.end_time = line.end_time + add_end
@@ -627,14 +630,14 @@
 										syl.syl_end = syl.syl_start + syl.dur
 										--variables de punto de referencia--
 										center_x1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. fx__.center_x .."} end")( )
-										center_x = center_x1(fx__, meta, line, x, y, module)
+										center_x = center_x1( fx__, meta, line, x, y, module )
 										if #center_x > 0 then
 											fx.center_x = center_x[1]
 										else
 											fx.center_x = val_center
 										end
 										center_y1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. fx__.center_y .."} end")( )
-										center_y = center_y1(fx__, meta, line, x, y, module)
+										center_y = center_y1( fx__, meta, line, x, y, module )
 										if #center_y > 0 then
 											fx.center_y = center_y[1]
 										else
@@ -780,7 +783,7 @@
 										fx_start, fx_end, fx_mid, fx_dur, fx_i, fx_n, fx_x, fx_y = fx.start_time, fx.end_time, fx.start_time + fx.dur/2, fx.dur, j, maxj, fx.move_x1, fx.move_y1
 										fx_left, fx_center, fx_right, fx_width, fx_top, fx_middle, fx_bottom, fx_height = fx.move_l1, fx.move_x1, fx.move_r1, fx.move_r1 - fx.move_l1, fx.move_t1, fx.move_y1, fx.move_b1, fx.move_b1 - fx.move_t1
 										if pcall(loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")) == true then
-											returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")()
+											returnfx1 = loadstring("return function(fx__, meta, syl, line) return {".. tag.HTML_to_ass(fx__.returnfx) .."} end")( )
 											returnfx = returnfx1( fx__, meta, syl, line )
 										else
 											returnfx = { [1] = fx__.returnfx }
@@ -808,14 +811,14 @@
 												and fx__.t_type ~= "Template Line [Syl]"
 												and fx__.t_type ~= "Template Line [Char]" then
 												if fx__.language ~= "Automation Auto-4" then
-													addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")()
+													addtag1 = loadstring("return function(fx__, meta, line, x, y, module) return {".. tag.HTML_to_ass(fx__.addtag) .."} end")( )
 													addtag = addtag1( fx__, meta, line, x, y, module )
 													fx.add_tags = tag.do_tag( table.op(addtag, "concat") )
 												else
 													fx.add_tags = tag.to_Auto4( tag.HTML_to_ass(fx__.addtag) )
 												end
 											else
-												returnfx[1] = tag.to_temp(fx__.addtag)
+												returnfx[1] = tag.to_temp( fx__.addtag )
 												fx.add_tags = ""
 												T_line = true
 											end
@@ -826,15 +829,15 @@
 													else
 														Ltags_style = ""
 													end
-													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, Ltags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.text = fx.tm(format("{%s %s: %s [line origin: %s - line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), ii, count_fx + 1, fx.align, fx.pos, Ltags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
 													l.effect = "Effector [Fx]"
 													l.layer = fx.layer
 													l.actor = actor_fx
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
 													l.text = fx.tm(returnfx[1])
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												else
 													lines_comment = false
@@ -946,7 +949,7 @@
 										var.loop = variable_( fx__, meta, syl, line, x, y )
 										text.char_size( )
 										-----------------------------------------------
-										maxloop1  = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")( )
+										maxloop1 = loadstring("return function(fx__, meta, syl, line, x, y) return {".. fx__.loops .."} end")( )
 										maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
 										loop_h = ceil((maxloop_fx[1] or 1)*(char.width + 2*L.outline)/(line.height + 2*L.outline))
 										maxloop_fx = maxloop1( fx__, meta, syl, line, x, y )
@@ -1004,8 +1007,8 @@
 											l.end_time = fx.end_time
 											fx.dur = fx.end_time - fx.start_time
 											function retime( mode, add_start, add_end )
-												add_start = HMS_to_ms(add_start) or 0
-												add_end = HMS_to_ms(add_end) or 0
+												add_start = HMS_to_ms( add_start ) or 0
+												add_end = HMS_to_ms( add_end ) or 0
 												if mode == "line" then
 													l.start_time = line.start_time + add_start
 													l.end_time = line.end_time + add_end
@@ -1290,15 +1293,15 @@
 												end
 												if fxgroup == true then
 													if fx__.modify == false and fx__.namefx ~= "raw" then
-														l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+														l.text = fx.tm(format("{%s %s: %s [line origin: %s - line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), ii, count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
 														l.effect = "Effector [Fx]"
 														l.layer = fx.layer
 														l.actor = actor_fx
-														subs.insert(#subs + Rline, l)
+														subs.insert( #subs + Rline, l )
 														count_fx = count_fx + 1
 													elseif fx__.modify == false and fx__.namefx == "raw" then
 														l.text = fx.tm(returnfx[1])
-														subs.insert(#subs + Rline, l)
+														subs.insert( #subs + Rline, l )
 														count_fx = count_fx + 1
 													else
 														lines_comment = false
@@ -1324,8 +1327,8 @@
 						if fx__.t_type == "Furi" then
 							if furi.text ~= noblank1 and furi.text ~= noblank2 then
 								-----------------------------------------------
-								maxmin = function(mode)
-									mwidth, mduration = { }, { }
+								function maxmin( mode )
+									local mwidth, mduration = { }, { }
 									for i = 1, furi.n do
 										mwidth[i] = line.furi[i].width + line.furi[i].postspacewidth + line.furi[i].prespacewidth
 										mduration[i] = line.furi[i].duration
@@ -1467,8 +1470,8 @@
 										l.end_time = fx.end_time
 										fx.dur = fx.end_time - fx.start_time
 										function retime( mode, add_start, add_end )
-											add_start = HMS_to_ms(add_start) or 0
-											add_end = HMS_to_ms(add_end) or 0
+											add_start = HMS_to_ms( add_start ) or 0
+											add_end = HMS_to_ms( add_end ) or 0
 											if mode == "line" then
 												l.start_time = line.start_time + add_start
 												l.end_time = line.end_time + add_end
@@ -1731,16 +1734,16 @@
 											end
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then
-													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.text = fx.tm(format("{%s %s: %s [line origin: %s - line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), ii, count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
 													l.effect = "Effector [Fx]"
 													l.style = furi.style.name
 													l.layer = fx.layer
 													l.actor = actor_fx
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
 													l.text = fx.tm(returnfx[1])
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												else
 													lines_comment = false
@@ -1932,8 +1935,8 @@
 									l.end_time = fx.end_time
 									fx.dur = fx.end_time - fx.start_time
 									function retime( mode, add_start, add_end )
-										add_start = HMS_to_ms(add_start) or 0
-										add_end = HMS_to_ms(add_end) or 0
+										add_start = HMS_to_ms( add_start ) or 0
+										add_end = HMS_to_ms( add_end ) or 0
 										if mode == "line" then
 											l.start_time = line.start_time + add_start
 											l.end_time = line.end_time + add_end
@@ -2155,15 +2158,15 @@
 										end
 										if fxgroup == true then
 											if fx__.modify == false and fx__.namefx ~= "raw" then
-												l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+												l.text = fx.tm(format("{%s %s: %s [line origin: %s - line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), ii, count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
 												l.effect = "Effector [Fx]"
 												l.layer = fx.layer
 												l.actor = actor_fx
-												subs.insert(#subs + Rline, l)
+												subs.insert( #subs + Rline, l )
 												count_fx = count_fx + 1
 											elseif fx__.modify == false and fx__.namefx == "raw" then
 												l.text = fx.tm(returnfx[1])
-												subs.insert(#subs + Rline, l)
+												subs.insert( #subs + Rline, l )
 												count_fx = count_fx + 1
 											else
 												lines_comment = false
@@ -2327,8 +2330,8 @@
 										l.end_time = fx.end_time
 										fx.dur = fx.end_time - fx.start_time
 										function retime( mode, add_start, add_end )
-											add_start = HMS_to_ms(add_start) or 0
-											add_end = HMS_to_ms(add_end) or 0
+											add_start = HMS_to_ms( add_start ) or 0
+											add_end = HMS_to_ms( add_end ) or 0
 											if mode == "line" then
 												l.start_time = line.start_time + add_start
 												l.end_time = line.end_time + add_end
@@ -2572,15 +2575,15 @@
 												end
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then
-													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.text = fx.tm(format("{%s %s: %s [line origin: %s - line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), ii, count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
 													l.effect = "Effector [Fx]"
 													l.layer = fx.layer
 													l.actor = actor_fx
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
 													l.text = fx.tm(returnfx[1])
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												else
 													lines_comment = false
@@ -2745,8 +2748,8 @@
 										l.end_time = fx.end_time
 										fx.dur = fx.end_time - fx.start_time
 										function retime( mode, add_start, add_end )
-											add_start = HMS_to_ms(add_start) or 0
-											add_end = HMS_to_ms(add_end) or 0
+											add_start = HMS_to_ms( add_start ) or 0
+											add_end = HMS_to_ms( add_end ) or 0
 											if mode == "line" then
 												l.start_time = line.start_time + add_start
 												l.end_time = line.end_time + add_end
@@ -3011,15 +3014,15 @@
 											end
 											if fxgroup == true then
 												if fx__.modify == false and fx__.namefx ~= "raw" then
-													l.text = fx.tm(format("{%s %s: %s [line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
+													l.text = fx.tm(format("{%s %s: %s [line origin: %s - line fx: %s] %s%s%s%s%s%s}%s", script_name, script_version, fx__.effect:gsub("%S+[%-%S+]*%[fx%]: ", ""), ii, count_fx + 1, fx.align, fx.pos, tags_style, fx.tag_size, fx.add_tags, fx.Det, returnfx[1]))
 													l.effect = "Effector [Fx]"
 													l.layer = fx.layer
 													l.actor = actor_fx
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												elseif fx__.modify == false and fx__.namefx == "raw" then
 													l.text = fx.tm(returnfx[1])
-													subs.insert(#subs + Rline, l)
+													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												else
 													lines_comment = false
