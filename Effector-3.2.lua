@@ -1,5 +1,5 @@
 	-----------------------------------------------------------------------------------------------------------------------------------------
-	--[[ Copyright (c) 2015, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		All rights reserved / 01 January 2015 Colombia. ]]--
+	--[[ Copyright (c) 2015, Vict8r, Karalaura, Nagato Akatsuki & Itachi Akatsuki		All rights reserved / 04 January 2015 Colombia. ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.2.9.6					   --> IRC Chanel: #KaraEffector
 	--> http://www.karaeffector.blogspot.com	   --> http://www.facebook.com/karaeffector
@@ -30,6 +30,7 @@
 	script_version = "3.2"
 	--=====================================================================================================================================--
 	Path_Effector_newfx_lua = nil
+	Path_Effector_newfx_lua = "C:\\Users\\VICTOR PAYARES\\Desktop\\HTDM\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 	--Path_Effector_newfx_lua = "C:\\Users\\DM4\\Kara Effector 3.2\\Effector-newfx-3.2.lua"
 	--=====================================================================================================================================--
 	
@@ -177,8 +178,11 @@
 			fx.filter = "2.39"
 			fx.tm = tag.to_vsf
 		end
-		function maxloop( new_maxloop )
-			fx.maxloop_fx = new_maxloop
+		function maxloop( new_maxloop_v, new_maxloop_h, new_maxloop_3 )
+			fx.loop_v = new_maxloop_v or 1
+			fx.loop_h = new_maxloop_h or 1
+			fx.loop_3 = new_maxloop_3 or 1
+			fx.maxloop_fx = fx.loop_v*fx.loop_h*fx.loop_3
 			maxj = fx.maxloop_fx
 			return ""
 		end
