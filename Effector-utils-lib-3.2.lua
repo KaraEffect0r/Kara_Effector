@@ -2,7 +2,7 @@
 	Effector_Lib_authors  = "Itachi Akatsuki & Vict8r"
 	Effector_Lib_testers  = "NatsuoDC, Nagato Akatsuki & Vict8r"
 	Effector_Lib_version  = "3.2.3"
-	Effector_Lib_modified = "01 January 2015"
+	Effector_Lib_modified = "04 January 2015"
 	-- functions abbreviations -----------------------------------------------------------
 	sin = math.sin		asin = math.asin	log   = math.log10		pi = math.pi
 	cos = math.cos		acos = math.acos	ceil  = math.ceil		ln = math.log
@@ -760,7 +760,6 @@
 		local repl1 = str1 or ""
 		local repl2 = str2 or ""
 		effector.print_error( Table, "table", "table.index", 1 )
-		--effector.print_error( e, "true", "table.index", 2 )
 		effector.print_error( repl1, "string", "table.index", 3 )
 		effector.print_error( repl2, "string", "table.index", 4 )
 		if table.inside( Table, e, repl1, repl2 ) == true then
@@ -3254,7 +3253,8 @@
 				i = i + 1
 			end
 		end
-		return tag.coupling(str_vsf:gsub("}{", ""):gsub("{}", ""):gsub("{{", "{"):gsub("}}", "}"))
+		str_vsf = tag.coupling(str_vsf:gsub("}{", ""):gsub("{}", ""):gsub("{{", "{"):gsub("}}", "}"))
+		return str_vsf:gsub("}|{", "}{")
 	end
 	
 	function tag.to_mod( str_vsf )
@@ -3279,7 +3279,8 @@
 			str_mod = str_mod:gsub("\\alpha%&.-%&", math.format2("\\1va%s\\3va%s\\4va%s", A_vsf[ki]), 1)
 			ki = ki + 1
 		end
-		return tag.coupling(str_mod:gsub("\\vc", "\\1vc"):gsub("}{", ""):gsub("{}", ""):gsub("{{", "{"):gsub("}}", "}"))
+		str_mod = tag.coupling(str_mod:gsub("\\vc", "\\1vc"):gsub("}{", ""):gsub("{}", ""):gsub("{{", "{"):gsub("}}", "}"))
+		return str_mod:gsub("}|{", "}{")
 	end
 	
 	function tag.colorchange( Color_or_Table, dur )
@@ -7488,6 +7489,12 @@
 				return format("{\\k%d}", A:match("%d+") + B:match("%d+"))
 			end
 		)
+		txt_2kr = txt_2kr:gsub("%b{} ",
+			function( A )
+				A = A:gsub(" ", "")
+				return " " .. A .. "|"
+			end
+		)
 		return txt_2kr
 	end --text.kara( )
 	
@@ -8345,8 +8352,8 @@
 	-- Librería de Funciones "aegisub" --------------------------------------------------------------
 	function aegisub.word( line_text, line_dur, ci_ )
 		line_text = line_text:gsub("\\N", " "):gsub("  ", " ")
-		words_line2, words_dur2 = text.text2word(line_text, line_dur)
-		word_fx = { n = #words_line2}
+		words_line2, words_dur2 = text.text2word( line_text, line_dur )
+		word_fx = { n = #words_line2 }
 		words_left2 = l_left
 		words_start2 = 0
 		for k = 1, #words_line2 do
@@ -8383,7 +8390,7 @@
 	end
 	
 	function aegisub.word2s( )
-		w_txt, w_dur = text.text2word(linefx[ii].text, linefx[ii].duration)
+		w_txt, w_dur = text.text2word( linefx[ii].text, linefx[ii].duration )
 		s_txt, w_len, w_fnl = { }, { }, { [0] = 0 }
 		for i = 1, #w_txt do
 			s_txt[i] = text.text2syl(w_txt[i], w_dur[i])
@@ -8400,10 +8407,10 @@
 	end
 
 	function aegisub.wordsi( ws_ )
-		ws_txt, ws_dur = text.text2word(linefx[ii].text, linefx[ii].duration)
+		ws_txt, ws_dur = text.text2word( linefx[ii].text, linefx[ii].duration )
 		sw_txt, w_syli, w_syln = { }, { }, { }
 		for i = 1, #ws_txt do
-			sw_txt[i] = text.text2syl(ws_txt[i], ws_dur[i])
+			sw_txt[i] = text.text2syl( ws_txt[i], ws_dur[i] )
 		end
 		for i = 1, #ws_txt do
 			for k = 1, #sw_txt[i] do
@@ -8416,13 +8423,13 @@
 	
 	function aegisub.syls2c( )
 		c_txt = { }
-		for char_1 in unicode.chars(syl.text:gsub("KEfx", ""):gsub(noblank2, "")) do
+		for char_1 in unicode.chars( syl.text:gsub("KEfx", ""):gsub(noblank2, "") ) do
 			table.insert(c_txt, char_1)
 		end
 		if #c_txt == 0 then
 			c_txt[1] = ""
 		end
-		charsyl   = {n = #c_txt}
+		charsyl   = { n = #c_txt }
 		charsyl_d = syl.dur/charsyl.n
 		charsyl_l = syl.left
 		charsyl_s = syl.start_time
@@ -8451,11 +8458,11 @@
 	end
 	
 	function aegisub.line2W( )
-		w_txt, w_dur = text.text2word(linefx[ii].text, linefx[ii].duration)
+		w_txt, w_dur = text.text2word( linefx[ii].text, linefx[ii].duration )
 		if #w_txt == 0 then
 			w_txt[1] = ""
 		end
-		wordline   = {n = #w_txt}
+		wordline   = { n = #w_txt }
 		wordline_l = linefx[ii].left
 		wordline_s = 0
 		for k = 1, wordline.n do
@@ -8488,11 +8495,11 @@
 	end
 	
 	function aegisub.line2S( )
-		s_txt, s_dur = text.text2syl(linefx[ii].text, linefx[ii].duration)
+		s_txt, s_dur = text.text2syl( linefx[ii].text, linefx[ii].duration )
 		if #s_txt == 0 then
 			s_txt[1] = ""
 		end
-		sylline   = {n = #s_txt}
+		sylline   = { n = #s_txt }
 		sylline_l = linefx[ii].left
 		sylline_s = 0
 		for k = 1, sylline.n do
@@ -8526,13 +8533,13 @@
 	
 	function aegisub.line2C( )
 		c_txt = { }
-		for char_2 in unicode.chars(linefx[ii].text_stripped:gsub(noblank2, "")) do
+		for char_2 in unicode.chars( linefx[ii].text_stripped:gsub(noblank2, "") ) do
 			table.insert(c_txt, char_2)
 		end
 		if #c_txt == 0 then
 			c_txt[1] = ""
 		end
-		charline   = {n = #c_txt}
+		charline   = { n = #c_txt }
 		charline_d = linefx[ii].duration/charline.n
 		charline_l = linefx[ii].left
 		charline_s = 0
@@ -8562,11 +8569,11 @@
 	end
 	
 	function aegisub.word2S( )
-		s_txt, s_dur = text.text2syl(word.text_, word.dur)
+		s_txt, s_dur = text.text2syl( word.text_, word.dur )
 		if #s_txt == 0 then
 			s_txt[1] = ""
 		end
-		sylword   = {n = #s_txt}
+		sylword   = { n = #s_txt }
 		sylword_l = word.left
 		sylword_s = word.start_time
 		for k = 1, sylword.n do
@@ -8600,13 +8607,13 @@
 	
 	function aegisub.word2C( )
 		c_txt = { }
-		for char_3 in unicode.chars(word.text) do
+		for char_3 in unicode.chars( word.text ) do
 			table.insert(c_txt, char_3)
 		end
 		if #c_txt == 0 then
 			c_txt[1] = ""
 		end
-		charword   = {n = #c_txt}
+		charword   = { n = #c_txt }
 		charword_d = word.dur/charword.n
 		charword_l = word.left
 		charword_s = word.start_time
@@ -8636,10 +8643,10 @@
 	end
 	
 	function aegisub.word2c( )
-		w_txt = text.text2word(linefx[ii].text, linefx[ii].duration)
+		w_txt = text.text2word( linefx[ii].text, linefx[ii].duration )
 		w_len, w_fnl = { }, { [0] = 0 }
 		for i = 1, #w_txt do
-			w_len[i] = unicode.len(text.text2stripped(w_txt[i])..blk)
+			w_len[i] = unicode.len( text.text2stripped(w_txt[i])..blk )
 		end
 		for i = 1, #w_txt do
 			w_fnl[i] = w_fnl[i - 1] + w_len[i]
@@ -8652,10 +8659,10 @@
 	end
 	
 	function aegisub.wordci( wc_ )
-		wc_txt = text.text2word(linefx[ii].text, linefx[ii].duration)
+		wc_txt = text.text2word( linefx[ii].text, linefx[ii].duration )
 		w_len, w_chari, w_charn = { }, { }, { }
 		for i = 1, #wc_txt do
-			w_len[i] = unicode.len(text.text2stripped(wc_txt[i])..blk)
+			w_len[i] = unicode.len( text.text2stripped(wc_txt[i])..blk )
 		end
 		for i = 1, #wc_txt do
 			for k = 1, w_len[i] do
@@ -8663,7 +8670,8 @@
 				table.insert(w_charn, w_len[i])
 			end
 		end
-		w_chari[#w_chari + 1], w_charn[#w_charn + 1] = w_chari[#w_chari], w_charn[#w_charn]
+		w_chari[#w_chari + 1] = w_chari[#w_chari]
+		w_charn[#w_charn + 1] = w_charn[#w_charn]
 		return w_chari[wc_], w_charn[wc_]
 	end
 	
@@ -9077,7 +9085,13 @@
 	end import = effector.import
 	
 	function effector.addfx( Library_fx, Name_fx )
-		local fx_lib = {[1] = "lead-in", [2] = "hi-light", [3] = "lead-out", [4] = "shape", [5] = "translation"}
+		local fx_lib = {
+			[1] = "lead-in",
+			[2] = "hi-light",
+			[3] = "lead-out",
+			[4] = "shape",
+			[5] = "translation"
+		}
 		local n1, n2
 		if type( Library_fx ) == "string" then
 			n1 = table.index( fx_lib, Library_fx )
@@ -9433,10 +9447,42 @@
 		linefx = { }
 		xres = meta.res_x or 1280
 		yres = meta.res_y or 720
-		DefaultKE = {class = "style"; section = "[V4+ Styles]"; raw = "Style: DefaultKE,Arial,25,&H0000FFFF,&H000000FF,&H14000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,20,20,20,1"; name = "DefaultKE"; fontname = "Arial"; fontsize = 25; color1 = "&H00FFFFFF&"; color2 = "&H000000FF&"; color3 = "&H00000000&"; color4 = "&H00000000&"; bold = false; italic = false; underline = false; strikeout = false; scale_x = 100; scale_y = 100; spacing = 0; angle = 0; borderstyle = 1; outline = 2; shadow = 2; alignment = 2; align = 2; margin_l = 20; margin_r = 20; margin_v = 20; margin_b = 20; margin_t = 20; encoding = 1}
+		DefaultKE = {
+			class = "style";
+			section = "[V4+ Styles]";
+			raw = "Style: DefaultKE,Arial,25,&H0000FFFF,&H000000FF,&H14000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,20,20,20,1";
+			name = "DefaultKE";
+			fontname = "Arial";
+			fontsize = 25;
+			color1 = "&H00FFFFFF&";
+			color2 = "&H000000FF&";
+			color3 = "&H00000000&";
+			color4 = "&H00000000&";
+			bold = false;
+			italic = false;
+			underline = false;
+			strikeout = false;
+			scale_x = 100;
+			scale_y = 100;
+			spacing = 0;
+			angle = 0;
+			borderstyle = 1;
+			outline = 2;
+			shadow = 2;
+			alignment = 2;
+			align = 2;
+			margin_l = 20;
+			margin_r = 20;
+			margin_v = 20;
+			margin_b = 20;
+			margin_t = 20;
+			encoding = 1
+		}
 		table.insert(styles, 1, DefaultKE)
 		for i = 1, #subtitles do
-			if subtitles[i].class == "dialogue" and subtitles[i].effect ~= "Effector [Fx]" and subtitles[i].effect ~= "fx" then
+			if subtitles[i].class == "dialogue"
+				and subtitles[i].effect ~= "Effector [Fx]"
+				and subtitles[i].effect ~= "fx" then
 				table.insert(linefx, subtitles[i])
 			end
 		end
@@ -9824,41 +9870,31 @@
 			---------------------------------------------------
 			if box_res == "Style Manager" then
 				if sett.line_style == "Selected Lines" or sett.line_style == "All Lines" or sett.line_style == "" then
-					if  setting_box[3].items[1] then
-						style1 = setting_box[3].items[1]
-						setting_box[11].value = styles[style1].color1
-						setting_box[12].value = styles[style1].color2
-						setting_box[13].value = styles[style1].color3
-						setting_box[14].value = styles[style1].color4
-						setting_box[15].value = tonumber(alpha_from_style(styles[style1].color1):match("(%x%x)"), 16)
-						setting_box[16].value = tonumber(alpha_from_style(styles[style1].color2):match("(%x%x)"), 16)
-						setting_box[17].value = tonumber(alpha_from_style(styles[style1].color3):match("(%x%x)"), 16)
-						setting_box[18].value = tonumber(alpha_from_style(styles[style1].color4):match("(%x%x)"), 16)
-					end
+					style_fx = setting_box[3].items[1]
 				else
-					style_kara = sett.line_style
-					setting_box[11].value = styles[style_kara].color1
-					setting_box[12].value = styles[style_kara].color2
-					setting_box[13].value = styles[style_kara].color3
-					setting_box[14].value = styles[style_kara].color4
-					setting_box[15].value = tonumber(alpha_from_style(styles[style_kara].color1):match("(%x%x)"), 16)
-					setting_box[16].value = tonumber(alpha_from_style(styles[style_kara].color2):match("(%x%x)"), 16)
-					setting_box[17].value = tonumber(alpha_from_style(styles[style_kara].color3):match("(%x%x)"), 16)
-					setting_box[18].value = tonumber(alpha_from_style(styles[style_kara].color4):match("(%x%x)"), 16)
+					style_fx = sett.line_style
 				end
+				setting_box[11].value = styles[style_fx].color1
+				setting_box[12].value = styles[style_fx].color2
+				setting_box[13].value = styles[style_fx].color3
+				setting_box[14].value = styles[style_fx].color4
+				setting_box[15].value = tonumber(alpha_from_style(styles[style_fx].color1):match("(%x%x)"), 16)
+				setting_box[16].value = tonumber(alpha_from_style(styles[style_fx].color2):match("(%x%x)"), 16)
+				setting_box[17].value = tonumber(alpha_from_style(styles[style_fx].color3):match("(%x%x)"), 16)
+				setting_box[18].value = tonumber(alpha_from_style(styles[style_fx].color4):match("(%x%x)"), 16)
 			end
 			---------------------------------------------------
 			if box_res == "Apply Selection" and sett.line_style ~= "" then
-				if     sett.effect_mode == "lead-in[fx]"     then
+				if  sett.effect_mode == "lead-in[fx]" then
 					setting_box[21] = {class = "label"; 							x = 1; y = 13;	height = 1; width = 2; label = " Select lead-in[fx]:"}
 					setting_box[22] = {name = "lead_in_fx";		class = "dropdown";	x = 1; y = 14;	height = 1; width = 4;  hint = "Select the Effect lead-in[fx] for Karaoke."; items = leadin_fx; value = sett.lead_in_fx or leadin_fx[1]}
-				elseif sett.effect_mode == "hi-light[fx]"    then
+				elseif sett.effect_mode == "hi-light[fx]" then
 					setting_box[21] = {class = "label"; 							x = 1; y = 13;	height = 1; width = 2; label = " Select hi-light[fx]:"}
 					setting_box[22] = {name = "hi_light_fx";	class = "dropdown";	x = 1; y = 14;	height = 1; width = 4;  hint = "Select the Effect hi-light[fx] for Karaoke."; items = hilight_fx; value = sett.hi_light_fx or hilight_fx[1]}
-				elseif sett.effect_mode == "lead-out[fx]"    then
+				elseif sett.effect_mode == "lead-out[fx]" then
 					setting_box[21] = {class = "label"; 							x = 1; y = 13;	height = 1; width = 2; label = " Select lead-out[fx]:"}
 					setting_box[22] = {name = "lead_out_fx"; 	class = "dropdown";	x = 1; y = 14;	height = 1; width = 4;  hint = "Select the Effect lead-out[fx] for Karaoke."; items = leadout_fx; value = sett.lead_out_fx or leadout_fx[1]}
-				elseif sett.effect_mode == "shape[fx]" 		 then
+				elseif sett.effect_mode == "shape[fx]" then
 					setting_box[21] = {class = "label"; 							x = 1; y = 13;	height = 1; width = 2; label = " Select shape[fx]:"}
 					setting_box[22] = {name = "shape_fx_fx"; 	class = "dropdown";	x = 1; y = 14;	height = 1; width = 4;  hint = "Select the Effect shape[fx] for Karaoke."; items = shape_fx; value = sett.shape_fx_fx or shape_fx[1]}
 				elseif sett.effect_mode == "translation[fx]" then
@@ -9900,7 +9936,7 @@
 			fx_box = list_library[index1][index2]
 			fx__   = table.inbox2(fx_box or list_library[1][1])
 			---------------------------------------------------
-			if box_res == "Apply "..sett.effect_mode and sett.line_style ~= ""  then
+			if box_res == "Apply " .. sett.effect_mode and sett.line_style ~= ""  then
 				effector.list = { [1] = fx__ }
 				for kik, v in ipairs( effector.list ) do
 					fx__ = v
@@ -9910,7 +9946,7 @@
 						lines_comment = false
 					end
 					aegisub.progress.title( format("KEfx %s: %s", script_version, fx__.effect:gsub("%S+%[fx%]%: ", "")) )
-					effector.preprosses_macro(subtitles, sett, fx__, selected_lines)
+					effector.preprosses_macro( subtitles, sett, fx__, selected_lines )
 				end
 				local meta, styles = karaskel.collect_head( subtitles, true )
 				aegisub.set_undo_point( script_name )
@@ -9934,61 +9970,77 @@
 						fx_box[29].value, fx_box[30].value, fx_box[31].value = fx__.t_type, fx__.noblank, fx__.v_kanji
 						fx_box[32].value, fx_box[33].value, fx_box[34].value = fx__.color1, fx__.color3, fx__.color4
 						fx_box[35].value, fx_box[36].value, fx_box[37].value = fx__.alpha1, fx__.alpha3, fx__.alpha4
-						fx_box[38].text, fx_box[39].text, fx_box[40].text	 = fx__.start_t, fx__.end_t, fx__.fun_x
-						fx_box[41].text, fx_box[42].text, fx_box[43].text	 = fx__.fun_y, fx__.s_i, fx__.s_f
-						fx_box[44].text, fx_box[45].text, fx_box[46].text	 = fx__.center_x, fx__.center_y, fx__.scale_x
-						fx_box[47].text, fx_box[48].text, fx_box[49].text	 = fx__.scale_y, fx__.align, fx__.layer
-						fx_box[50].text, fx_box[51].text, fx_box[52].text	 = fx__.move_x, fx__.move_y, fx__.move_t
-						fx_box[53].text, fx_box[54].text, fx_box[55].text	 = fx__.loops, fx__.size, fx__.returnfx
-						fx_box[56].text, fx_box[57].text, fx_box[62].text	 = fx__.addtag, fx__.variable, fx__.namefx
+						fx_box[38].text,  fx_box[39].text,  fx_box[40].text	 = fx__.start_t, fx__.end_t, fx__.fun_x
+						fx_box[41].text,  fx_box[42].text,  fx_box[43].text	 = fx__.fun_y, fx__.s_i, fx__.s_f
+						fx_box[44].text,  fx_box[45].text,  fx_box[46].text	 = fx__.center_x, fx__.center_y, fx__.scale_x
+						fx_box[47].text,  fx_box[48].text,  fx_box[49].text	 = fx__.scale_y, fx__.align, fx__.layer
+						fx_box[50].text,  fx_box[51].text,  fx_box[52].text	 = fx__.move_x, fx__.move_y, fx__.move_t
+						fx_box[53].text,  fx_box[54].text,  fx_box[55].text	 = fx__.loops, fx__.size, fx__.returnfx
+						fx_box[56].text,  fx_box[57].text,  fx_box[62].text	 = fx__.addtag, fx__.variable, fx__.namefx
 						fx_box[63].value, fx_box[66].value, fx_box[67].value = fx__.folderfx, fx__.language, fx__.modify
 					end
 					if box_res == "Style Manager Colors" then
 						if sett.line_style == "Selected Lines" or sett.line_style == "All Lines" or sett.line_style == "" then
-							if setting_box[3].items[1] then
-								style1 = setting_box[3].items[1]
-								fx_box[32].value = styles[style1].color1
-								fx_box[33].value = styles[style1].color3
-								fx_box[34].value = styles[style1].color4
-								fx_box[35].value = tonumber(alpha_from_style(styles[style1].color1):match("(%x%x)"), 16)
-								fx_box[36].value = tonumber(alpha_from_style(styles[style1].color3):match("(%x%x)"), 16)
-								fx_box[37].value = tonumber(alpha_from_style(styles[style1].color4):match("(%x%x)"), 16)
-							end
+							style_fx = setting_box[3].items[1]
 						else
-							style_kara = sett.line_style
-							fx_box[32].value = styles[style_kara].color1
-							fx_box[33].value = styles[style_kara].color3
-							fx_box[34].value = styles[style_kara].color4
-							fx_box[35].value = tonumber(alpha_from_style(styles[style_kara].color1):match("(%x%x)"), 16)
-							fx_box[36].value = tonumber(alpha_from_style(styles[style_kara].color3):match("(%x%x)"), 16)
-							fx_box[37].value = tonumber(alpha_from_style(styles[style_kara].color4):match("(%x%x)"), 16)
+							style_fx = sett.line_style
 						end
+						fx_box[32].value = styles[style_fx].color1
+						fx_box[33].value = styles[style_fx].color3
+						fx_box[34].value = styles[style_fx].color4
+						fx_box[35].value = tonumber(alpha_from_style(styles[style_fx].color1):match("(%x%x)"), 16)
+						fx_box[36].value = tonumber(alpha_from_style(styles[style_fx].color3):match("(%x%x)"), 16)
+						fx_box[37].value = tonumber(alpha_from_style(styles[style_fx].color4):match("(%x%x)"), 16)
 					end
 					if box_res == "Change Template Type" then	
 						for i = 38, 57 do
 							if fx__.t_type == "Char" or fx__.t_type == "Translation Char" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.", "char."):gsub("word%.", "char."):gsub("furi%.", "char."):gsub("syl%.",  "char."):gsub("hira%.", "char."):gsub("kata%.", "char."):gsub("roma%.", "char."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("char.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "char."):gsub("word%.", "char.")
+								fx_box[i].text = fx_box[i].text:gsub("furi%.", "char."):gsub("syl%.",  "char."):gsub("hira%.", "char.")
+								fx_box[i].text = fx_box[i].text:gsub("kata%.", "char."):gsub("roma%.", "char."):gsub("widtht", "width")
+								fx_box[i].text = fx_box[i].text:gsub("_stripped",   ""):gsub("char.kara", "line.kara")
 							elseif fx__.t_type == "Syl" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.",  "syl."):gsub("word%.",  "syl."):gsub("furi%.",  "syl."):gsub("hira%.",  "syl."):gsub("kata%.",  "syl."):gsub("roma%.",  "syl."):gsub("char%.",  "syl."):gsub("_stripped",   ""):gsub("syl.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.",  "syl."):gsub("word%.",  "syl.")
+								fx_box[i].text = fx_box[i].text:gsub("furi%.",  "syl."):gsub("hira%.",  "syl."):gsub("kata%.",  "syl.")
+								fx_box[i].text = fx_box[i].text:gsub("roma%.",  "syl."):gsub("char%.",  "syl."):gsub("_stripped",   "")
+								fx_box[i].text = fx_box[i].text:gsub("syl.kara", "line.kara")
 							elseif fx__.t_type == "Convert to Hiragana" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.", "hira."):gsub("word%.", "hira."):gsub("furi%.", "hira."):gsub("syl%.",  "hira."):gsub("kata%.", "hira."):gsub("roma%.", "hira."):gsub("char%.", "hira."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("hira.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "hira."):gsub("word%.", "hira.")
+								fx_box[i].text = fx_box[i].text:gsub("furi%.", "hira."):gsub("syl%.",  "hira."):gsub("kata%.", "hira.")
+								fx_box[i].text = fx_box[i].text:gsub("roma%.", "hira."):gsub("char%.", "hira."):gsub("widtht", "width")
+								fx_box[i].text = fx_box[i].text:gsub("_stripped",   ""):gsub("hira.kara", "line.kara")
 							elseif fx__.t_type == "Convert to Katakana" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.", "kata."):gsub("word%.", "kata."):gsub("furi%.", "kata."):gsub("syl%.",  "kata."):gsub("hira%.", "kata."):gsub("roma%.", "kata."):gsub("char%.", "kata."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("kata.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "kata."):gsub("word%.", "kata.")
+								fx_box[i].text = fx_box[i].text:gsub("furi%.", "kata."):gsub("syl%.",  "kata."):gsub("hira%.", "kata.")
+								fx_box[i].text = fx_box[i].text:gsub("roma%.", "kata."):gsub("char%.", "kata."):gsub("widtht", "width")
+								fx_box[i].text = fx_box[i].text:gsub("_stripped",   ""):gsub("kata.kara", "line.kara")
 							elseif fx__.t_type == "Convert to Romaji" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.", "roma."):gsub("word%.", "roma."):gsub("furi%.", "roma."):gsub("syl%.",  "roma."):gsub("hira%.", "roma."):gsub("kata%.", "roma."):gsub("char%.", "roma."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("roma.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "roma."):gsub("word%.", "roma.")
+								fx_box[i].text = fx_box[i].text:gsub("furi%.", "roma."):gsub("syl%.",  "roma."):gsub("hira%.", "roma.")
+								fx_box[i].text = fx_box[i].text:gsub("kata%.", "roma."):gsub("char%.", "roma."):gsub("widtht", "width")
+								fx_box[i].text = fx_box[i].text:gsub("_stripped",   ""):gsub("roma.kara", "line.kara")
 							elseif fx__.t_type == "Furi" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.", "furi."):gsub("word%.", "furi."):gsub("syl%.",  "furi."):gsub("hira%.", "furi."):gsub("kata%.", "furi."):gsub("roma%.", "furi."):gsub("char%.", "furi."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("furi.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "furi."):gsub("word%.", "furi.")
+								fx_box[i].text = fx_box[i].text:gsub("syl%.",  "furi."):gsub("hira%.", "furi."):gsub("kata%.", "furi.")
+								fx_box[i].text = fx_box[i].text:gsub("roma%.", "furi."):gsub("char%.", "furi."):gsub("widtht", "width")
+								fx_box[i].text = fx_box[i].text:gsub("_stripped",   ""):gsub("furi.kara", "line.kara")
 							elseif fx__.t_type == "Word" or fx__.t_type == "Translation Word" then
-								fx_box[i].text = fx_box[i].text:gsub("line%.", "word."):gsub("syl%.",  "word."):gsub("furi%.", "word."):gsub("hira%.", "word."):gsub("kata%.", "word."):gsub("roma%.", "word."):gsub("char%.", "word."):gsub("widtht", "width"):gsub("_stripped",   ""):gsub("word.kara", "line.kara")
+								fx_box[i].text = fx_box[i].text:gsub("line%.", "word."):gsub("syl%.",  "word."):gsub("furi%.", "word.")
+								fx_box[i].text = fx_box[i].text:gsub("hira%.", "word."):gsub("kata%.", "word."):gsub("roma%.", "word.")
+								fx_box[i].text = fx_box[i].text:gsub("char%.", "word."):gsub("widtht", "width"):gsub("_stripped",   "")
+								fx_box[i].text = fx_box[i].text:gsub("word.kara", "line.kara")
 							elseif fx__.t_type == "Line" or fx__.t_type == "Translation Line"
 								or fx__.t_type == "Template Line [Word]" or fx__.t_type == "Template Line [Syl]"
 								or fx__.t_type == "Template Line [Char]" then
-								fx_box[i].text = fx_box[i].text:gsub("word%.", "line."):gsub("syl%.",  "line."):gsub("furi%.", "line."):gsub("hira%.", "line."):gsub("kata%.", "line."):gsub("roma%.", "line."):gsub("char%.", "line."):gsub("widtht", "width"):gsub("%.text", "%.text_stripped"):gsub("_stripped_stripped", "_stripped"):gsub("%.[ ]*%.text_stripped", "%.%.text")
+								fx_box[i].text = fx_box[i].text:gsub("word%.", "line."):gsub("syl%.",  "line."):gsub("furi%.", "line.")
+								fx_box[i].text = fx_box[i].text:gsub("hira%.", "line."):gsub("kata%.", "line."):gsub("roma%.", "line.")
+								fx_box[i].text = fx_box[i].text:gsub("char%.", "line."):gsub("widtht", "width"):gsub("%.text", "%.text_stripped")
+								fx_box[i].text = fx_box[i].text:gsub("_stripped_stripped", "_stripped"):gsub("%.[ ]*%.text_stripped", "%.%.text")
 							end
 						end
 					end
-				until box_res == "Apply "..sett.effect_mode or box_res == "Cancel" or box_res == "Back <"
-				if box_res == "Apply "..sett.effect_mode then
+				until box_res == "Apply " .. sett.effect_mode or box_res == "Cancel" or box_res == "Back <"
+				if box_res == "Apply " .. sett.effect_mode then
 					effector.list = { [1] = fx__ }
 					for kik, v in ipairs( effector.list ) do
 						fx__ = v
