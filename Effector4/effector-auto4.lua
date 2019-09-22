@@ -1,9 +1,9 @@
 	--[[  La Librería effector-auto4.lua está diseñada con el fin de poder ampliar la gama de efectos
 	hechos con Automation-auto4 del aegisub. Posee diversas funciones que ampliarán las posibilidades
-	a la hora de desarrolllar efectos karaokes o de edición.
+	a la hora de desarrollar efectos karaokes o de edición.
 	Un gran porcentaje de las funciones del Kara Effector 3.5 se podrán usar en los templates auto-4,
 	con unas ligeras modificaciones en la forma de usarlas, ya que éstas han tenido que ser adaptadas
-	para que funcionen en Automotion.
+	para que funcionen en Automation.
 	
 	--> Kara Effector 3.5 aratani
 	--> Contáctanos:
@@ -16,9 +16,9 @@
 	
 	-- effector-auto4.lua ---------------------------------------------------------------------------
 	ke4_script_name		   = "effector-auto4.lua"
-	ke4_script_description = "Librería de funciones para el Automation-auto4"
+	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "july 06rd 2019; 18:22 (GMT + 5)"
+	ke4_script_modified	   = "september 22nd 2019; 18:33 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	
 	--[[
@@ -36,6 +36,7 @@
 			rmake( objet, size, limit_i, limit_f, ... )
 			duplicate( Table )
 			op( Table, mode, add )
+			reverse( Table )
 			view( Table, Table_name, indent )
 			show( Table )
 			compare( Table1, Table2 )
@@ -56,7 +57,6 @@
 			retire( Table, ... )
 			combine( Table, n_combinations )
 			inserttable( Table1, Table2, index_insert )
-			reverse( Table )
 			cyclic( Table )
 			random( Table_or_Number )
 			delete( Table, ... )
@@ -69,6 +69,8 @@
 			tostring( t )
 			gradient( Left, Right, algorithm, Size )
 			gradient2( Size, ... )
+			gradient3( Size, ... )
+			type( Table )
 		}
 		utf8 = {
 			charrange( s, i )
@@ -85,6 +87,14 @@
 			Rds( Rand_i, Rand_f, Step )
 			Rcs( Rand_i, Rand_f, Step )
 			Rms( Rand_i, Rand_f, Step )
+			Rr( Rand_i, Rand_f, Step )
+			Rsr( Rand_i, Rand_f, Step )
+			Rdr( Rand_i, Rand_f, Step )
+			Rcr( Rand_i, Rand_f, Step )
+			Rmr( Rand_i, Rand_f, Step )
+			Rdrs( Rand_i, Rand_f, Step )
+			Rcrs( Rand_i, Rand_f, Step )
+			Rmrs( Rand_i, Rand_f, Step )
 			Re( Table )
 			arc_curve( x, y, cx, cy, angle )
 			angle( px1, py1, px2, py2 )
@@ -135,9 +145,12 @@
 			matrix_fil( Filxy, Axis )
 			bezier( j, maxj, Pos_x, Pos_y, Return, ... )
 			bezier2( pct, pts )
+			to16( Num )
+			clamp( Num, Min, Max )
 		}
 		random = {
 			color( H, S, V )
+			color2( H, S, V )
 			colorvc( H, S, V )
 			alpha( alpha_i, alpha_f )
 			alphava( Ai, Af )
@@ -158,18 +171,19 @@
 			parts( String, Parts )
 		}
 		text = {
-			to_shape( Text_Confi, Text, Scale )
-			bord_to_shape( Text_Confi, Text, Scale, Bord )
-			deformed( Text_Confi, Text, Deformed, Pixel, Axis )
-			deformed2( Text_Confi, Text, Mode )
-			to_clip( Text_Confi, Text, relative_pos, iclip, Scale )
-			to_pixels( Text_Confi, Text, Ratio )
-			bord_to_pixels( Text_Confi, Text, Pixel )
-			filter( Text_Confi, Text, Split, ... )
-			gradienth( Text_Confi, Text, Relative_pos, ... )
-			gradientv( Text_Confi, Text, Relative_pos, ... )
-			gradientangle( Text_Confi, Text, Relative_pos, Angle, ... )
-			bezier( Text_Config, Shape, Char_x, Char_y, Mode, OffsetB )
+			to_shape( Text_Config, Text, Scale )
+			bord_to_shape( Text_Config, Text, Scale, Bord )
+			deformed( Text_Config, Text, Deformed, Pixel, Axis )
+			deformed2( Text_Config, Text, Mode )
+			to_clip( Text_Config, Text, relative_pos, iclip, Scale )
+			to_pixels( Text_Config, Text, Ratio )
+			bord_to_pixels( Text_Config, Text, Pixel )
+			filter( Text_Config, Text, Split, ... )
+			gradienth( Text_Config, Text, Relative_pos, ... )
+			gradientv( Text_Config, Text, Relative_pos, ... )
+			gradientangle( Text_Config, Text, Relative_pos, Angle, ... )
+			bezier( Text_Config, Shape, Char_x, Char_y, Mode, Offset )
+			rand( Text_Config, Text_ran, num_tran, dur_tran, extra_tags, table_rand, text_rand, text_all )
 			upper( Text )
 			lower( Text )
 			karaoke_true( Table )
@@ -181,7 +195,7 @@
 			text2word( Text, Duration )
 			text2syl( Text, Duration )
 			text2char( Text, Duration )
-			text2part( Text_Confi, Text, Duration, Text_left, Parts )
+			text2part( Text_Config, Text, Duration, Text_left, Parts )
 			to_kara( Text, K_mode )
 			syl2hiragana( Text )
 			syl2katakana( Text )
@@ -274,7 +288,7 @@
 			}
 			gradient( Size, Valor, ... )
 			gradient_line( Text, ... )
-			linefx( Table_Line )
+			linefx( Table_Line, Parts, Complete, Real )
 		}
 		tag = {
 			oscill( DurTotal, DurDelay, ... )
@@ -286,16 +300,40 @@
 			glitterx( DurTotal, ExtraTags_i, ExtraTags_f )
 			glittery( DurTotal, ExtraTags_i, ExtraTags_f )
 			clip_shape( Shapes, Center_x, Center_y )
-			ipol( Ipol_1, Ipol_2, Ipol_i )
+			ipol( Ipol_i, ... )
 			clip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
 			iclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
 			clip2( left_cx, top_cy, width_clip, height_clip )
 			iclip2( left_cx, top_cy, width_clip, height_clip )
+			rclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
+			riclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
 			moveclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
 			moveiclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
 			moveclip2( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f )
 			moveiclip2( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f )
+			moverclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
+			movericlip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
 			operation( String )
+			lmove( Configs, Coor, Times, Times2 )
+			pmove( Configs, F_x, F_y, domainF, t1, t2, Accel, offset_t )
+			smove( Configs, Shape, t1, t2, Relative )
+			rmove( Configs, Rx, Ry, t1, t2, Accel, offset_t, Counter2 )
+			rmove2( Configs, Rx, Ry, t, Accel )
+			rmove3( Configs, Rx, Ry, t, Accel, offset_t )
+			rmove4( Configs, Rx, Ry, t1, t2, Accel, offset_t, move4 )
+			omove( Configs, P, t1, t2, Dur, Accel )
+			default( Text_Config, String )
+			default2( Text_Config, String )
+			inverse( Text_Config, String )
+			redefine( Text_Config, String )
+			dark( Text_Config, String )
+			HTML_to_ass( Text_Config, String )
+			timefx( Text_Config, String )
+			modify( Text_Config, String )
+			do_alpha( String )
+			tonumber( String )
+			cyclic( j, maxj, Dur, Dur_tr, Delay, Fad_i, Fad_f, tags_ini, tags_fin )
+			sec( j, maxj, Dur, Dur_tr, tags_ini, tags_fin )
 		}
 		color = {
 			ass( html_color )
@@ -328,6 +366,11 @@
 			from_error( color_or_table )
 			to_HTML( ASScolor )
 			matrix( Color_or_table, ... )
+			colorchange( Color_or_Table, dur )
+			fromstyle( ColorAlpha )
+			val2ass( val_R, val_G, val_B )
+			ipolfx( Ipol, Color1, Color2 )
+			HSV_to_RGB( Hue, Saturation, Value )
 		}
 		alpha = {
 			from_error( alpha_or_table )
@@ -346,7 +389,9 @@
 			ipol( Size, ... )
 			loop( j, maxj, ... )
 			bigradient( Alpha_or_Table1, Alpha_or_Table2, Size_Table, val_i )
-			colorchange( Color_or_Table, dur )
+			fromstyle( ColorAlpha )
+			val2ass( val_A )
+			ipolfx( Ipol, Alpha1, Alpha2 )
 		}
 		decode = {
 			create_bmp_reader( filename ) = {
@@ -400,7 +445,7 @@
 	local LIBASS_FONTHACK = true	-- Scale font data to fontsize? (no effect on windows)
 	local LIBPNG_PATH = "libpng"	-- libpng dynamic library location or shortcut (for system library loading function)
 
-	local ffix = require("ffi")
+	local ffix = require( "ffi" )
 	local advapix, pangocairo, fontconfig
 	if ffix.os == "Windows" then
 		advapix = ffix.load( "Advapi32" )
@@ -544,31 +589,31 @@
 			pangocairo = ffix.load( "pangocairo-1.0.so" )
 			ffix.cdef( [[
 			typedef enum{
-				CAIRO_FORMAT_INVALID   = -1,
-				CAIRO_FORMAT_ARGB32    = 0,
-				CAIRO_FORMAT_RGB24     = 1,
-				CAIRO_FORMAT_A8        = 2,
-				CAIRO_FORMAT_A1        = 3,
-				CAIRO_FORMAT_RGB16_565 = 4,
-				CAIRO_FORMAT_RGB30     = 5
+				CAIRO_FORMAT_INVALID2   = -1,
+				CAIRO_FORMAT_ARGB32X    = 0,
+				CAIRO_FORMAT_RGB24X     = 1,
+				CAIRO_FORMAT_A8X        = 2,
+				CAIRO_FORMAT_A1X        = 3,
+				CAIRO_FORMAT_RGB16_565X = 4,
+				CAIRO_FORMAT_RGB30X     = 5
 			}cairo_format_t;
 			typedef void cairo_surface_t;
 			typedef void cairo_t;
 			typedef void PangoLayout;
 			typedef void* gpointer;
-			static const int PANGO_SCALE = 1024;
+			static const int PANGO_SCALE2 = 1024;
 			typedef void PangoFontDescription;
 			typedef enum{
-				PANGO_WEIGHT_THIN	= 100,
-				PANGO_WEIGHT_ULTRALIGHT = 200,
-				PANGO_WEIGHT_LIGHT = 300,
-				PANGO_WEIGHT_NORMAL = 400,
-				PANGO_WEIGHT_MEDIUM = 500,
-				PANGO_WEIGHT_SEMIBOLD = 600,
-				PANGO_WEIGHT_BOLD = 700,
-				PANGO_WEIGHT_ULTRABOLD = 800,
-				PANGO_WEIGHT_HEAVY = 900,
-				PANGO_WEIGHT_ULTRAHEAVY = 1000
+				PANGO_WEIGHT_THIN2	= 100,
+				PANGO_WEIGHT_ULTRALIGHT2 = 200,
+				PANGO_WEIGHT_LIGHT2 = 300,
+				PANGO_WEIGHT_NORMAL2 = 400,
+				PANGO_WEIGHT_MEDIUM2 = 500,
+				PANGO_WEIGHT_SEMIBOLD2 = 600,
+				PANGO_WEIGHT_BOLD2 = 700,
+				PANGO_WEIGHT_ULTRABOLD2 = 800,
+				PANGO_WEIGHT_HEAVY2 = 900,
+				PANGO_WEIGHT_ULTRAHEAVY2 = 1000
 			}PangoWeight;
 			typedef enum{
 				PANGO_STYLE_NORMAL,
@@ -607,7 +652,7 @@
 				int height;
 			}PangoRectangle;
 			typedef enum{
-				CAIRO_STATUS_SUCCESS = 0
+				CAIRO_STATUS_SUCCESS2 = 0
 			}cairo_status_t;
 			typedef enum{
 				CAIRO_PATH_MOVE_TO,
@@ -794,7 +839,7 @@
 	end
 
 	local ratio, frame_dur = 1, 41.708
-
+	
 	local function rotate2d( x, y, angle )
 		local ra = rad( angle )
 		return cos( ra ) * x - sin( ra ) * y, sin( ra ) * x + cos( ra ) * y
@@ -874,49 +919,100 @@
 			
 			ms_to_HMS = function( time_ms )
 				--convierte el tiempo de ms a formato HMS
-				local tms, time_H, time_M, time_S = tonumber( time_ms ), 0, 0, 0
-				time_H = floor( tms / 3600000 )
-				tms = tms - time_H * 3600000
-				time_M = floor( tms / 60000 )
-				tms = tms - time_M * 60000
-				time_S = floor( tms / 1000 )
-				tms = tms - time_S * 1000
-				if time_M < 10 then
-					time_M = "0" .. time_M
-				end
-				if time_S < 10 then
-					time_S = "0" .. time_S
-				end
-				if tostring( tms ):len( ) == 1 then
-					tms = "00" .. tms
-				elseif tostring( tms ):len( ) == 2 then
-					tms =  "0" .. tms
-				end
-				return format( "%s:%s:%s.%s", time_H, time_M, time_S, tms )
+				local time_to_HMS
+				if type( time_ms ) == "table" then
+					local rec_table = { }
+					for i = 1, #time_ms do
+						rec_table[ i ] = ke4.time.ms_to_HMS( time_ms[ i ] )
+					end
+					time_to_HMS = rec_table
+				else
+					local tms, time_H, time_M, time_S = ke4.math.round( tonumber( time_ms ) ), 0, 0, 0
+					time_H = floor( tms / 3600000 )
+					tms = tms - time_H * 3600000
+					time_M = floor( tms / 60000 )
+					tms = tms - time_M * 60000
+					time_S = floor( tms / 1000 )
+					tms = tms - time_S * 1000
+					if time_M < 10 then
+						time_M = "0" .. time_M
+					end
+					if time_S < 10 then
+						time_S = "0" .. time_S
+					end
+					if tostring( tms ):len( ) == 1 then
+						tms = "00" .. tms
+					elseif tostring( tms ):len( ) == 2 then
+						tms =  "0" .. tms
+					end
+					time_to_HMS = format( "%s:%s:%s.%s", time_H, time_M, time_S, tms )
+				end --!_G.ke4.time.ms_to_HMS( { 78656, 128716 } )!
+				return time_to_HMS
 			end, --!_G.ke4.time.ms_to_HMS( 128716 )!
 			
 			time_to_frame = function( Time )
 				--retorna la cantidad de frames que hay en un tiempo determinado
-				local Time = tostring( Time )
-				if Time:match( "%d+%:%d+%:%d+%.%d+" ) then
-					if type( ke4.time.HMS_to_ms( Time ) ) == "table" then
-						Time = ke4.time.HMS_to_ms( Time )[ 1 ]
-					else
-						Time = ke4.time.HMS_to_ms( Time )
+				local t_to_frame
+				if type( Time ) == "table" then
+					local rec_table = { }
+					for i = 1, #Time do
+						rec_table[ i ] = ke4.time.time_to_frame( Time[ i ] )
 					end
+					t_to_frame = rec_table
+				else
+					-- frame_dur ---------------------------
+					local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+					if msb then
+						frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+					end
+					----------------------------------------
+					local Time = tostring( Time )
+					if Time:match( "%d+%:%d+%:%d+%.%d+" ) then
+						if type( ke4.time.HMS_to_ms( Time ) ) == "table" then
+							Time = ke4.time.HMS_to_ms( Time )[ 1 ]
+						else
+							Time = ke4.time.HMS_to_ms( Time )
+						end
+					end
+					t_to_frame = ceil( Time / frame_dur )
 				end
-				return ceil( Time / frame_dur )
+				return t_to_frame
 			end, --!_G.ke4.time.time_to_frame( 128716 )!
 			
 			frame_to_ms = function( frames )
 				--convierte la cantidad de frames en un tiempo en formato ms
-				return ke4.math.round( frames * frame_dur, 2 )
+				local f_to_ms
+				if type( frames ) == "table" then
+					local rec_table = { }
+					for i = 1, #frames do
+						rec_table[ i ] = ke4.time.frame_to_ms( frames[ i ] )
+					end
+					f_to_ms = rec_table
+				else --recursividad: september 10th 2019
+					-- frame_dur ---------------------------
+					local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+					if msb then
+						frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+					end
+					----------------------------------------
+					f_to_ms =  ke4.math.round( frames * frame_dur, 2 )
+				end --!_G.ke4.time.frame_to_ms( { 2365, 128, 82351 } )!
+				return f_to_ms
 			end, --!_G.ke4.time.frame_to_ms( 871 )!
 			
 			frame_to_HMS = function( frames )
 				--convierte la cantidad de frames en un tiempo en formato HMS
-				local ms_ = ke4.time.frame_to_ms( frames )
-				return ke4.time.ms_to_HMS( ms_ )
+				local f_to_HMS
+				if type( frames ) == "table" then
+					local rec_table = { }
+					for i = 1, #frames do
+						rec_table[ i ] = ke4.time.frame_to_HMS( frames[ i ] )
+					end
+					f_to_HMS = rec_table
+				else
+					f_to_HMS = ke4.time.ms_to_HMS( ke4.time.frame_to_ms( frames ) )
+				end --!_G.ke4.time.frame_to_HMS( { 35, 240, { 4532, { 24, 276 }, 9574 } } )!
+				return f_to_HMS
 			end --!_G.ke4.time.frame_to_HMS( 871 )!
 		},
 		
@@ -1000,7 +1096,7 @@
 						ipols[ i ] = ke4.math.round( ipol_function( ipol_i, ipol_f, ke4.math.format( algorithm_ipol, pct_ip ) ), 3 )
 					end
 					ipols[ #ipols + 1 ] = Table_ipol[ #Table_ipol ]
-					--concatena los valores con los Tags_ipol, si lo hay
+					--concatena los valores con los Tags_ipol, si los hay
 					if Tags_ipol then
 						return ke4.table.concat2( ipols, Tags_ipol )
 					end
@@ -1062,7 +1158,7 @@
 			make = function( objet, size, limit_i, limit_f, ... )
 				--crea una tabla de diferentes objetos por valores predeterminados ordenados
 				local t_make, Tme_concat, Tm_n = { }, { [ 1 ] = "" }, 0.5
-				local i_c, i_a, _c, _a = interpolate_color, interpolate_alpha, ke4.color.vc_to_c, ke4.alpha.va_to_a
+				local i_c, i_a, _c, _a = ke4.color.ipolfx, ke4.alpha.ipolfx, ke4.color.vc_to_c, ke4.alpha.va_to_a
 				if ... then
 					Tme_concat = { ... }
 					if type( ... ) == "table" then
@@ -1092,11 +1188,11 @@
 						elseif objet == "alpha"
 							or objet == "alphaa"
 							or objet == "alphava" then
-							t_make[ i ] = ass_alpha( 255 * Tm_n )
+							t_make[ i ] = ke4.alpha.val2ass( 255 * Tm_n )
 							if type( limit_i ) == "string" then
 								t_make[ i ] = i_a( Tm_n, _a( limit_i ), _a( limit_f ))
 							elseif type( limit_i ) == "number" then
-								t_make[ i ] = ass_alpha( limit_i + Tm_n * (limit_f - limit_i) )
+								t_make[ i ] = ke4.alpha.val2ass( limit_i + Tm_n * (limit_f - limit_i) )
 							end
 						else
 							t_make[ i ] = objet .. size
@@ -1116,7 +1212,7 @@
 			rmake = function( objet, size, limit_i, limit_f, ... )
 				--crea una tabla de diferentes objetos por valores predeterminados aleatoreamente
 				local t_rmake, Trme_concat = { }, { [ 1 ] = "" }
-				local i_c, i_a, _c, _a = interpolate_color, interpolate_alpha, ke4.color.vc_to_c, ke4.alpha.va_to_a
+				local i_c, i_a, _c, _a = ke4.color.ipolfx, ke4.alpha.ipolfx, ke4.color.vc_to_c, ke4.alpha.va_to_a
 				if ... then
 					Trme_concat = { ... }
 					if type( ... ) == "table" then
@@ -1345,9 +1441,9 @@
 				end
 				local function addtocart( value, Table_name, indent, saved, field )
 					indent = indent or ""
-					saved  = saved or { }
-					field  = field or Table_name
-					cart   = cart .. indent .. field
+					saved = saved or { }
+					field = field or Table_name
+					cart = cart .. indent .. field
 					if type( value ) ~= "table" then
 						cart = cart .. " = " .. basicSerialize( value ) .. ";\n"
 					else
@@ -2015,7 +2111,7 @@
 					table_gradientV[ 1 ] = format( "(%s,%s,%s,%s)", Left, Left, Right, Right )
 				else
 					for i = 1, 2 * Size do
-						vectors[ i ] = ke4.tag.ipol( Left, Right, ke4.math.format( algorithm, (i - 1) / (2 * Size - 1) ) )
+						vectors[ i ] = ke4.tag.ipol( ke4.math.format( algorithm, (i - 1) / (2 * Size - 1) ), Left, Right )
 					end
 					for i = 1, Size do
 						table_gradientV[ i ] = format( "(%s,%s,%s,%s)",
@@ -2041,7 +2137,7 @@
 				local N
 				for i = 1, Size do
 					N = ceil( i / ((Size + 1) / n) )
-					vectors[ i ] = ke4.tag.ipol( toGradient[ N ], toGradient[ N + 1 ], (i - (N - 1) * (Size + 1) / n - 1)/((Size + 1) / n) )
+					vectors[ i ] = ke4.tag.ipol( (i - (N - 1) * (Size + 1) / n - 1)/((Size + 1) / n), toGradient[ N ], toGradient[ N + 1 ] )
 				end
 				return vectors
 			end, --\1c!_G.ke4.table.gradient2( syl.n, "&HFFFFFF&", "&H0000FF&", "&H00FFFF&" )[syl.i ]!
@@ -2063,7 +2159,7 @@
 					Siz = ke4.math.round( Size[ 1 ] )
 					for i = 1, Siz do
 						N = ceil( i / ((Siz + 1) / n) )
-						vectors[ i ] = ke4.tag.ipol( toGradient[ N ], toGradient[ N + 1 ], (i - (N - 1) * (Siz + 1) / n - 1)/((Siz + 1) / n) )
+						vectors[ i ] = ke4.tag.ipol( (i - (N - 1) * (Siz + 1) / n - 1)/((Siz + 1) / n), toGradient[ N ], toGradient[ N + 1 ] )
 					end
 					return vectors
 				else
@@ -2071,11 +2167,211 @@
 				end
 				for i = 1, Siz do
 					N = ceil( i / ((Siz + 1) / n) )
-					vectors[ i ] = ke4.tag.ipol( toGradient[ N ], toGradient[ N + 1 ], (i - (N - 1) * (Siz + 1) / n - 1)/((Siz + 1) / n) )
+					vectors[ i ] = ke4.tag.ipol( (i - (N - 1) * (Siz + 1) / n - 1)/((Siz + 1) / n), toGradient[ N ], toGradient[ N + 1 ] )
 				end
 				return vectors
 			end, --\1c!_G.ke4.table.gradient3( syl.n, "&H0000FF&", "&HFFFFFF&", "&H00FFFF&" )[syl.i]!
 			
+			type = function( Table )
+				if #Table > 0 then
+					::go_to_ini::
+					if type( Table[ 1 ] ) == "string" then
+						--color
+						if Table[ 1 ]:match( "%x%x%x%x%x%x" ) then
+							local is_color = 0
+							for i = 1, #Table do
+								if type( Table[ i ] ) == "string"
+									and Table[ i ]:match( "%x%x%x%x%x%x" ) then
+									is_color = is_color + 1
+								end
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "string" then
+									if Table[ i ]( ):match( "%x%x%x%x%x%x" ) then
+										is_color = is_color + 1
+									end
+								end
+							end
+							if is_color == #Table then
+								return "color"
+							end
+						end
+						--alpha
+						if Table[ 1 ]:match( "%x%x" ) then
+							local is_alpha = 0
+							for i = 1, #Table do
+								if type( Table[ i ] ) == "string"
+									and Table[ i ]:match( "%x%x" ) then
+									is_alpha = is_alpha + 1
+								end
+								if type( Table[ i ] ) == "function" then
+									if type( Table[ i ]( ) ) == "string"
+										and Table[ i ]( ):match( "%x%x" ) then
+										is_alpha = is_alpha + 1
+									elseif type( Table[ i ]( ) ) == "number" then
+										is_alpha = is_alpha + 1
+									end
+								end
+								if type( Table[ i ] ) == "number" then
+									is_alpha = is_alpha + 1
+								end
+							end
+							if is_alpha == #Table then
+								return "alpha"
+							end
+						end
+						--shape
+						if Table[ 1 ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+							local is_shape = 0
+							for i = 1, #Table do
+								if type( Table[ i ] ) == "string"
+									and Table[ i ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+									is_shape = is_shape + 1
+								end
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "string" then
+									if Table[ i ]( ):match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+										is_shape = is_shape + 1
+									end
+								end
+							end
+							if is_shape == #Table then
+								return "shape"
+							end
+						end
+						--clip
+						if Table[ 1 ]:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+							local is_clip = 0
+							for i = 1, #Table do
+								if type( Table[ i ] ) == "string"
+									and Table[ i ]:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+									is_clip = is_clip + 1
+								end
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "string" then
+									if Table[ i ]( ):match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+										is_clip = is_clip + 1
+									end
+								end
+							end
+							if is_clip == #Table then
+								return "clip"
+							end
+						end
+					end
+					if type( Table[ 1 ] ) == "string" then
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "string" then
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "string" then
+									goto is_string
+								end
+								return "mixed"
+							end
+							::is_string::
+						end
+						return "string"
+					elseif type( Table[ 1 ] ) == "number" then
+						--alpha
+						local its_alpha = 0
+						local min_alpha = 0
+						for i = 1, #Table do
+							if type( Table[ i ] ) == "string"
+								and Table[ i ]:match( "%x%x" ) then
+								its_alpha = its_alpha + 1
+								min_alpha = min_alpha + 1
+							end
+							if type( Table[ i ] ) == "function" then
+								if type( Table[ i ]( ) ) == "string"
+									and Table[ i ]( ):match( "%x%x" ) then
+									its_alpha = its_alpha + 1
+									min_alpha = min_alpha + 1
+								elseif type( Table[ i ]( ) ) == "number" then
+									its_alpha = its_alpha + 1
+								end
+							end
+							if type( Table[ i ] ) == "number" then
+								its_alpha = its_alpha + 1
+							end
+						end
+						if its_alpha == #Table
+							and min_alpha > 0 then
+							return "alpha"
+						end
+						--number
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "number" then
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "number" then
+									goto is_number
+								end
+								return "mixed"
+							end
+							::is_number::
+						end
+						return "number"
+					elseif type( Table[ 1 ] ) == "table" then
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "table" then
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "table" then
+									goto is_table
+								end
+								return "mixed"
+							end
+							::is_table::
+						end
+						return "table"
+					elseif type( Table[ 1 ] ) == "boolean" then
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "boolean" then
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "boolean" then
+									goto is_boolean
+								end
+								return "mixed"
+							end
+							::is_boolean::
+						end
+						return "boolean"
+					elseif type( Table[ 1 ] ) == "thread" then
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "thread" then
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "thread" then
+									goto is_thread
+								end
+								return "mixed"
+							end
+							::is_thread::
+						end
+						return "thread"
+					elseif type( Table[ 1 ] ) == "userdata" then
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "userdata" then
+								if type( Table[ i ] ) == "function"
+									and type( Table[ i ]( ) ) == "userdata" then
+									goto is_userdata
+								end
+								return "mixed"
+							end
+							::is_userdata::
+						end
+						return "userdata"
+					elseif type( Table[ 1 ] ) == "function" then
+						Table[ 1 ] = Table[ 1 ]( )
+						goto go_to_ini
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "function" then
+								return "mixed"
+							end
+						end
+						return "function"
+					end
+					return "nil"
+				end
+				return "empty"
+			end,
+
 		},
 		
 		-- UTF8 sublibrary
@@ -2295,6 +2591,164 @@
 			Rms = function( Rand_i, Rand_f, Step )
 				--math.random redondeados a milésimas con signo aleatorio
 				return ke4.math.Rm( Rand_i, Rand_f, Step ) * (-1) ^ ke4.math.R( 2 )
+			end,
+
+			Rr = function( Rand_i, Rand_f, Step )
+				--math random ratio
+				local rand_s = Step or 1
+				local rand_i, rand_f = Rand_i, Rand_f
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if rand_i == nil then
+					return ke4.math.R( )
+				end
+				if rand_f == nil then
+					return ke4.math.R( rand_i * ratio )
+				end
+				return ke4.math.R( rand_i * ratio, rand_f * ratio, rand_s )
+			end,
+
+			Rsr = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * ratio * (-1) ^ ke4.math.R( 2 )
+			end,
+			
+			Rdr = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if Rnd_i then
+					Rnd_i = Rnd_i * 10
+				end
+				if Rnd_f then
+					Rnd_f = Rnd_f * 10
+				end
+				if Rnd_s then
+					Rnd_s = Rnd_s * 10
+				end
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * ratio / 10
+			end,
+
+			Rcr = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if Rnd_i then
+					Rnd_i = Rnd_i * 100
+				end
+				if Rnd_f then
+					Rnd_f = Rnd_f * 100
+				end
+				if Rnd_s then
+					Rnd_s = Rnd_s * 100
+				end
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * ratio / 100
+			end,
+
+			Rmr = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if Rnd_i then
+					Rnd_i = Rnd_i * 1000
+				end
+				if Rnd_f then
+					Rnd_f = Rnd_f * 1000
+				end
+				if Rnd_s then
+					Rnd_s = Rnd_s * 1000
+				end
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * ratio / 1000
+			end,
+
+			Rdrs = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if Rnd_i then
+					Rnd_i = Rnd_i * 10
+				end
+				if Rnd_f then
+					Rnd_f = Rnd_f * 10
+				end
+				if Rnd_s then
+					Rnd_s = Rnd_s * 10
+				end
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * 0.1 * ratio * (-1) ^ ke4.math.R( 2 )
+			end,
+
+			Rcrs = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if Rnd_i then
+					Rnd_i = Rnd_i * 100
+				end
+				if Rnd_f then
+					Rnd_f = Rnd_f * 100
+				end
+				if Rnd_s then
+					Rnd_s = Rnd_s * 100
+				end
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * 0.01 * ratio * (-1) ^ ke4.math.R( 2 )
+			end,
+
+			Rmrs = function( Rand_i, Rand_f, Step )
+				local Rnd_i, Rnd_f, Rnd_s = Rand_i, Rand_f, Step
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				if Rnd_i then
+					Rnd_i = Rnd_i * 1000
+				end
+				if Rnd_f then
+					Rnd_f = Rnd_f * 1000
+				end
+				if Rnd_s then
+					Rnd_s = Rnd_s * 1000
+				end
+				return ke4.math.R( Rnd_i, Rnd_f, Rnd_s ) * 0.001 * ratio * (-1) ^ ke4.math.R( 2 )
 			end,
 
 			Re = function( Table )
@@ -2593,7 +3047,9 @@
 			end,
 			
 			polar = function( angle, radius, Return )
-				--retorna las coordenadas del punto ubicado en el ángulo y radio dado, respecto al origen
+				--retorna las coordenadas del punto ubicado con el ángulo y radio dados, respecto al origen
+				local angle = angle or 0
+				local radius = radius or 0
 				local Px = ke4.math.round(  radius * cos( rad( angle ) ), 3 )
 				local Py = ke4.math.round( -radius * sin( rad( angle ) ), 3 )
 				if Return == "x" then
@@ -2922,7 +3378,7 @@
 					[ 12 ] = (A / 2) * (1 - (-1) ^ ceil( idx / B ) ),						-->( AA,00 ) B-veces
 					[ 13 ] = A + ((B - A) / 2) * (1 + (-1) ^ idx ),							-->( A,B )
 					[ 14 ] = A + ((B - A) / 2) * (1 + (-1) ^ ceil( idx / C ) ),				-->( AA,BB ) C-veces
-					[ 15 ] = B * ceil( idx / A ),											-->( A,mB ) A-veces los múltiplos de B
+					[ 15 ] = B * ceil( idx / A ),											-->( A,mB )  A-veces los múltiplos de B
 					[ 16 ] = A * ceil( idx / A ) - idx + 1,									-->( A-->1 )
 					[ 17 ] = A - A * ceil( idx / A ) + idx,									-->( 1-->A )
 					[ 18 ] = (A - A * ceil( idx / A ) + idx) * (-1) ^ (ceil( idx / A ) + 1),-->( 1-->A,-1-->-A )
@@ -2934,11 +3390,23 @@
 						and B + D - ((D - 1 - (D - 1) * ceil( idx / (D - 1) ) + idx) * (-1) ^ (ceil( idx / (D - 1) ) + 1) + (D + 1) * (1 + (-1) ^ ceil( idx / (D - 1) )) / 2)
 						or  A + (E - 1 - (E - 1) * ceil( idx / (E - 1) ) + idx) * (-1) ^ (ceil( idx / (E - 1) ) + 1) + (E + 1) * (1 + (-1) ^ ceil( idx / (E - 1) )) / 2 - 1
 					),--[ 21 ]																-->( A-->B-->A )
-					[ 22 ] = floor( 1 / idx ),												-->( 1-->0-->0 )
-					[ 23 ] = floor( idx / A ),												-->( 0-->0-->1 )
-					[ 24 ] = ceil( (A - idx) / A ),											-->( 1-->1-->0 )
-					[ 25 ] = ceil( (idx - 1) / A ),											-->( 0-->1-->1 )
-					[ 26 ] = floor( (idx - 1) / A ) + 1,									-->( N,n ) los Naturales n-veces cada uno
+					[ 22 ] = 1 - floor( 1 / idx ),											-->( 0,11 ) primer 0 y el resto 1
+					[ 23 ] = floor( 1 / idx ),												-->( 1,00 ) primer 1 y el resto 0
+					[ 24 ] = A * (1 - floor( 1 / idx )),									-->( 0,AA ) primer 0 y el resto A
+					[ 25 ] = A * floor( 1 / idx ),											-->( A,00 ) primero A y el resto 0
+					[ 26 ] = A * floor( 1 / idx ) + B * (1 - floor( 1 / idx )),				-->( A,BB" ) primero A y el resto B
+					[ 27 ] = 1 - floor( (A * ceil( idx / A ) - idx + 1) / A ),				-->( 0<->11 ) primer 0 y (A-1)veces 1
+					[ 28 ] = floor( (A - A * ceil( idx / A ) + idx) / A ),					-->( 00<->1 ) (A-1)veces 0 el un 1
+					[ 29 ] = floor( (A * ceil( idx / A ) - idx + 1) / A ),					-->( 1<->00 ) primer 1 y (A-1)veces 0
+					[ 30 ] = 1 - floor( (A - A * ceil( idx / A ) + idx) / A ),				-->( 11<->0 ) (A-1)veces 1 el un 0
+					[ 31 ] = A * (1 - floor( (B * ceil( idx / B ) - idx + 1) / B )),		-->( 0<->AA ) primer 0 y (B-1)veces A
+					[ 32 ] = A * floor( (B - B * ceil( idx / B ) + idx) / B ),				-->( 00<->A ) (B-1)veces 0 y un A
+					[ 33 ] = A * floor( (B * ceil( idx / B ) - idx + 1) / B ),				-->( A<->00 ) primer A y (B-1)veces 0
+					[ 34 ] = A * (1 - floor( (B - B * ceil( idx / B ) + idx) / B )),		-->( AA<->0 ) (B-1)veces A y un 0
+					[ 35 ] = A * floor( (C * ceil( idx / C ) - idx + 1) / C ) + B * (1 - floor( (C * ceil( idx / C ) - idx + 1) / C )),	-->( A<->BB ) primer A y (C-1)veces B
+					[ 36 ] = A * (1 - floor( (C - C * ceil( idx / C ) + idx) / C )) + B * floor( (C - C * ceil( idx / C ) + idx) / C ),	-->( AA<->B ) (C-1)veces A y un B
+					[ 37 ] = floor( (idx - 1) / A ) + 1,									-->( N,n ) los Naturales n-veces cada uno
+					------------------------------------------------------------------------------------------
 					
 					[ "+,-" ]			= (-1) ^ (idx + 1),
 					[ "-,+" ]			= (-1) ^ idx,
@@ -2964,10 +3432,21 @@
 										and B + D - ((D - 1 - (D - 1) * ceil( idx / (D - 1) ) + idx) * (-1) ^ (ceil( idx / (D - 1) ) + 1) + (D + 1) * (1 + (-1) ^ ceil( idx / (D - 1) )) / 2)
 										or  A + (E - 1 - (E - 1) * ceil( idx / (E - 1) ) + idx) * (-1) ^ (ceil( idx / (E - 1) ) + 1) + (E + 1) * (1 + (-1) ^ ceil( idx / (E - 1) )) / 2 - 1
 										),
-					[ "1-->0-->0" ]		= floor( 1 / idx ),
-					[ "0-->0-->1" ]		= floor( idx / A ),
-					[ "1-->1-->0" ]		= ceil( (A - idx) / A ),
-					[ "0-->1-->1" ]		= ceil( (idx - 1) / A ),
+					[ "0,11" ]			= 1 - floor( 1 / idx ),
+					[ "1,00" ]			= floor( 1 / idx ),
+					[ "0,AA" ]			= A * (1 - floor( 1 / idx )),
+					[ "A,00" ]			= A * floor( 1 / idx ),
+					[ "A,BB" ]			= A * floor( 1 / idx ) + B * (1 - floor( 1 / idx )),		--math.i( j, 5, 7 )[ "A,BB" ]
+					[ "0<->11" ]		= 1 - floor( (A * ceil( idx / A ) - idx + 1) / A ),			--math.i( j, 5 )[ "0<->11" ]
+					[ "00<->1" ]		= floor( (A - A * ceil( idx / A ) + idx) / A ),				--math.i( j, 5 )[ "00<->1" ]
+					[ "1<->00" ]		= floor( (A * ceil( idx / A ) - idx + 1) / A ),				--math.i( j, 5 )[ "1<->00" ]
+					[ "11<->0" ]		= 1 - floor( (A - A * ceil( idx / A ) + idx) / A ),			--math.i( j, 5 )[ "11<->0" ]
+					[ "0<->AA" ]		= A * (1 - floor( (B * ceil( idx / B ) - idx + 1) / B )),	--math.i( j, 5, 7 )[ "0<->AA" ]
+					[ "00<->A" ]		= A * floor( (B - B * ceil( idx / B ) + idx) / B ),			--math.i( j, 5, 7 )[ "00<->A" ]
+					[ "A<->00" ]		= A * floor( (B * ceil( idx / B ) - idx + 1) / B ),			--math.i( j, 5, 7 )[ "A<->00" ]
+					[ "AA<->0" ]		= A * (1 - floor( (B - B * ceil( idx / B ) + idx) / B )),	--math.i( j, 5, 7 )[ "AA<->0" ]
+					[ "A<->BB" ]		= A * floor( (C * ceil( idx / C ) - idx + 1) / C ) + B * (1 - floor( (C * ceil( idx / C ) - idx + 1) / C )),--math.i( j, 5, 2, 7 )[ "A<->BB" ]
+					[ "AA<->B" ]		= A * (1 - floor( (C - C * ceil( idx / C ) + idx) / C )) + B * floor( (C - C * ceil( idx / C ) + idx) / C ),--math.i( j, 5, 2, 7 )[ "AA<->B" ]
 					[ "N,n" ]			= floor( (idx - 1) / A ) + 1,
 				}
 				return algorithms
@@ -3517,7 +3996,7 @@
 					local ret_x, ret_y, ret_z = 0, 0, 0
 					local n, bern, pt = pts_n - 1
 					for i = 0, n do
-						pt = pts[ 1 + i]
+						pt = pts[ 1 + i ]
 						bern = fac( n ) / (fac( i ) * fac( n - i )) * pct ^ i * pct_inv ^ (n - i)
 						ret_x = ret_x + pt[ 1 ] * bern
 						ret_y = ret_y + pt[ 2 ] * bern
@@ -3527,17 +4006,56 @@
 				end
 			end,
 			
+			to16 = function( Num )
+				--decimal to hexadecimal
+				local dec_to_hex = Num
+				if type( Num ) == "number" then
+					dec_to_hex = format( "%X", ke4.math.round( Num ) )
+				elseif type( Num ) == "table" then
+					dec_to_hex = { }
+					for k, v in pairs( Num ) do
+						if type( v ) == "number" then
+							dec_to_hex[ k ] = format( "%X", ke4.math.round( v ) )
+						else
+							dec_to_hex[ k ] = v
+						end
+					end
+				end
+				return dec_to_hex
+			end, --!_G.ke4.math.to16( 255 )!
+
+			clamp = function( Num, Min, Max )
+				--restringe un número entre un mínimo y un máximo
+				local c_min = math.min( Min, Max )
+				local c_max = math.max( Min, Max )
+				if type( Num ) == "number" then
+					if Num < c_min then
+						return c_min
+					elseif Num > c_max then
+						return c_max
+					end
+				end
+				return Num
+			end, --!_G.ke4.math.clamp( 3, 5, 10 )!
+			
+			clamp2 = function( Num, Min, Max )
+				local Num = ke4.math.round( Num * 10000 )
+				local Min = ke4.math.round( Min * 10000 )
+				local Max = ke4.math.round( Max * 10000 )
+				return ke4.math.round( ke4.math.i( Num, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
+			end,  --!_G.ke4.math.clamp2( 3*(j-1)/(maxj-1), 0, 1 )!
 		},
 		
 		-- Random sublibrary
 		random = {
 			color = function( H, S, V )
 				--retorna un color al azar o con parámetros especiíficos
+				--los parámetros van de {0, 360}, {0, 100}, {0, 100}
 				local Hrc, Src, Vrc = ke4.math.R( 360 ), 1, 1
 				if type( H ) == "table" then
-					Hrc = ke4.math.R( H[ 1 ] % 361, H[ 2 ] % 361 )
+					Hrc = ke4.math.R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
 				elseif type( H ) == "number" then
-					Hrc = H % 361
+					Hrc = (H - 1) % 360 + 1
 				end
 				if type( S ) == "table" then
 					Src = ke4.math.R( S[ 2 ] % 101, S[ 1 ] % 101 ) / 100
@@ -3549,9 +4067,31 @@
 				elseif type( V ) == "number" then
 					Vrc = ke4.math.i( V + 1, 0, 100 )[ "A-->B-->A" ] / 100
 				end
-				return ass_color( HSV_to_RGB( Hrc, Src, Vrc ) )
+				return ke4.color.val2ass( ke4.color.HSV_to_RGB( Hrc, Src, Vrc ) )
 			end, --{\c!_G.ke4.random.color( )!}
 			
+			color2 = function( H, S, V )
+				--retorna un color al azar o con parámetros especiíficos
+				--los parámetros van de {0, 360}, {0, 1}, {0, 1}
+				local Hrc, Src, Vrc = ke4.math.R( 360 ), 1, 1
+				if type( H ) == "table" then
+					Hrc = ke4.math.R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
+				elseif type( H ) == "number" then
+					Hrc = (H - 1) % 360 + 1
+				end
+				if type( S ) == "table" then
+					Src = ke4.math.R( (100 * S[ 2 ]) % 101, (100 * S[ 1 ]) % 101 ) / 100
+				elseif type( S ) == "number" then
+					Src = ke4.math.i( 100 * S + 1, 0, 100 )[ "A-->B-->A" ] / 100
+				end
+				if type( V ) == "table" then
+					Vrc = ke4.math.R( (100 * V[ 2 ]) % 101, (100 * V[ 1 ]) % 101 ) / 100
+				elseif type( V ) == "number" then
+					Vrc = ke4.math.i( 100 * V + 1, 0, 100 )[ "A-->B-->A" ] / 100
+				end
+				return ke4.color.val2ass( ke4.color.HSV_to_RGB( Hrc, Src, Vrc ) )
+			end, --{\c!_G.ke4.random.color2( )!}
+
 			colorvc = function( H, S, V )
 				--retorna un color (VC) al azar o con parámetros especiíficos
 				return format( "(%s,%s,%s,%s)",
@@ -3573,7 +4113,7 @@
 				elseif type( alpha_f ) == "number" then
 					ra_f = ke4.math.i( alpha_f + 1, 0, 255 )[ "A-->B-->A" ]
 				end
-				return ass_alpha( ke4.math.R( ra_f, ra_i ) )
+				return ke4.alpha.val2ass( ke4.math.R( ra_f, ra_i ) )
 			end,
 			
 			alphava = function( Ai, Af )
@@ -3663,23 +4203,44 @@
 		-- String complement sublibrary
 		string = {
 			count = function( String, Capture )
-				-- cantidad de veces que una captura o familia de capruras aparecen en un string
+				-- cantidad de veces que una captura o familia de capturas aparecen en un string
 				local String = String or "ke4.string.count"
 				local Capture = Capture or "KE"
 				local str_count = 0
 				if type( Capture ) == "string" then
+					if Capture == "number" then
+						Capture = "%-?%d+[%.%d]*"
+					elseif Capture == "color" then
+						Capture = "[%&%#Hh]^*%x%x%x%x%x%x[%&]*"
+					elseif Capture == "alpha" then
+						Capture = "%&[Hh]^*%x%x%&"
+					elseif Capture == "shape" then
+						Capture = "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*"
+					end
 					for cap in String:gmatch( Capture ) do
 						str_count = str_count + 1
 					end
 				elseif type( Capture ) == "table" then
 					for i = 1, #Capture do
-						for cap in String:gmatch( Capture[ i ] ) do
-							str_count = str_count + 1
+						if Capture[ i ] == "number" then
+							Capture[ i ] = "%-?%d+[%.%d]*"
+						elseif Capture[ i ] == "color" then
+							Capture[ i ] = "[%&%#Hh]^*%x%x%x%x%x%x[%&]*"
+						elseif Capture[ i ] == "alpha" then
+							Capture[ i ] = "%&[Hh]^*%x%x%&"
+						elseif Capture[ i ] == "shape" then
+							Capture[ i ] = "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*"
+						end
+						if type( Capture[ i ] ) == "string" then
+							for cap in String:gmatch( Capture[ i ] ) do
+								str_count = str_count + 1
+							end
 						end
 					end
 				end
 				return str_count
 			end, --!_G.ke4.string.count( "&HF58628&", "%x" )!
+			
 
 			toval = function( String )
 				--convierte un string en el valor real que representa
@@ -3956,34 +4517,42 @@
 		
 		-- Text sublibrary
 		text = {
-			to_shape = function( Text_Confi, Text, Scale )
+			to_shape = function( Text_Config, Text, Scale )
 				local Text = Text or "text.to_shape"
 				while Text:sub( -1, -1 ) == " " do
 					Text = Text:sub( 1, -2 )
 				end
 				local text_scale = Scale or 1
 				local shape_scale = ke4.math.round( log( text_scale, 2 ) + 1 )
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
 				local Text_Confix = {
-					[ 1 ] = Text_Confi.fontname,
-					[ 2 ] = Text_Confi.bold,
-					[ 3 ] = Text_Confi.italic,
-					[ 4 ] = Text_Confi.underline,
-					[ 5 ] = Text_Confi.strikeout,
-					[ 6 ] = Text_Confi.fontsize,
-					[ 7 ] = Text_Confi.scale_x * text_scale / 100,
-					[ 8 ] = Text_Confi.scale_y * text_scale / 100,
-					[ 9 ] = Text_Confi.spacing
+					[ 1 ] = Text_Config.fontname,
+					[ 2 ] = Text_Config.bold,
+					[ 3 ] = Text_Config.italic,
+					[ 4 ] = Text_Config.underline,
+					[ 5 ] = Text_Config.strikeout,
+					[ 6 ] = Text_Config.fontsize,
+					[ 7 ] = Text_Config.scale_x * text_scale / 100,
+					[ 8 ] = Text_Config.scale_y * text_scale / 100,
+					[ 9 ] = Text_Config.spacing
 				}
 				local text_font = ke4.decode.create_font( unpack( Text_Confix ) )
 				local text_shape = ke4.shape.ASSDraw3( text_font.text_to_shape( Text ) )
 				return text_shape
 			end, --{\p1}!_G.ke4.text.to_shape( line.styleref, line.text_stripped, 1 )!
 			
-			bord_to_shape = function( Text_Confi, Text, Scale, Bord )
+			bord_to_shape = function( Text_Config, Text, Scale, Bord )
 				local Text = Text or "text.bord_to_shape"
 				local text_scale = Scale or 1
-				local text_shape = ke4.text.to_shape( Text_Confi, Text, text_scale )
-				local bord_width = Bord or Text_Confi.outline
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
+				local text_shape = ke4.text.to_shape( Text_Config, Text, text_scale )
+				local bord_width = Bord or Text_Config.outline
 				local bord_shape = ke4.shape.to_outline2(
 					ke4.shape.flatten( text_shape, 2 ), bord_width * text_scale / 2, bord_width * text_scale / 2
 				)
@@ -3994,7 +4563,7 @@
 				return ""
 			end, --{\p1}!_G.ke4.text.bord_to_shape( line.styleref, line.text_stripped, 1, 3 )!
 
-			deformed = function( Text_Confi, Text, Deformed, Pixel, Axis )
+			deformed = function( Text_Config, Text, Deformed, Pixel, Axis )
 				local Axis  = Axis or "x"
 				local Pixel = Pixel or 20--l.height
 				local Deformed = Deformed or 4
@@ -4004,7 +4573,7 @@
 					PixeL = Axis[ 2 ]
 				end
 				local text_def  = Text or "text.deformed"
-				local text_shp1 = ke4.text.to_shape( Text_Confi, text_def, 1 )
+				local text_shp1 = ke4.text.to_shape( Text_Config, text_def, 1 )
 				if text_shp1 ~= "" then
 					local text_fltr = function( x, y )
 						local px, py = x, y
@@ -4024,9 +4593,9 @@
 				return ""
 			end, --{\p1}!_G.ke4.text.deformed( line.styleref, line.text_stripped, 8, 3, "x" )!
 			
-			deformed2 = function( Text_Confi, Text, Mode )
+			deformed2 = function( Text_Config, Text, Mode )
 				local Text = Text or "text.deformed2"
-				local text_shape = ke4.text.to_shape( Text_Confi, Text, 8, nil, true )
+				local text_shape = ke4.text.to_shape( Text_Config, Text, 8, nil, true )
 				if text_shape ~= "" then
 					ke4.shape.info( text_shape )
 					local center_dx = minx + w_shape / 2
@@ -4074,14 +4643,18 @@
 				return ""
 			end, --!_G.ke4.text.deformed2( line.styleref, syl.text_stripped, 3 )!
 			
-			to_clip = function( Text_Confi, Text, relative_pos, iclip, Scale )
+			to_clip = function( Text_Config, Text, relative_pos, iclip, Scale )
 				local Text = Text or val_text
 				local text_scale = Scale or 1
-				local text_clip = ke4.text.to_shape( Text_Confi, Text, text_scale )
+				local text_clip = ke4.text.to_shape( Text_Config, Text, text_scale )
 				local text_width, text_height
 				local text_mode = ""
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
 				if text_clip ~= "" then
-					text_width, text_height = aegisub.text_extents( Text_Confi, Text )
+					text_width, text_height = aegisub.text_extents( Text_Config, Text )
 					text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ] - text_scale * text_width / 2, relative_pos[ 2 ] - text_scale * text_height / 2 )
 					if iclip then
 						text_mode = "i"
@@ -4091,15 +4664,19 @@
 				return ""
 			end, --{!_G.ke4.text.to_clip( line.styleref, line.text_stripped, { line.center, line.middle } )!}
 			
-			to_pixels = function( Text_Confi, Text, Ratio )
+			to_pixels = function( Text_Config, Text, Ratio )
 				local text_2pixel = Text or "text.to_pixels"
 				local Ratio = Ratio or 1
 				local pixel, pixel_datas = { }, { }
-				if ke4.text.to_shape( Text_Confi, text_2pixel ) == "" then
+				if ke4.text.to_shape( Text_Config, text_2pixel ) == "" then
 					return ""
 				end
-				pixel_table = ke4.shape.to_pixels2( ke4.shape.ratio( ke4.text.to_shape( Text_Confi, text_2pixel, 1 ), Ratio ) )
-				local text_width, text_height = aegisub.text_extents( Text_Confi, text_2pixel )
+				pixel_table = ke4.shape.to_pixels2( ke4.shape.ratio( ke4.text.to_shape( Text_Config, text_2pixel, 1 ), Ratio ) )
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
+				local text_width, text_height = aegisub.text_extents( Text_Config, text_2pixel )
 				for i = 1, #pixel_table do
 					pixel_datas[ i ] = { }
 					for k, v in pairs( pixel_table[ i ] ) do
@@ -4110,19 +4687,19 @@
 					pixel[ i ] = { }
 					pixel[ i ].x = pixel_datas[ i ][ 2 ] - 0.5 * Ratio * text_width
 					pixel[ i ].y = pixel_datas[ i ][ 1 ] - 0.5 * Ratio * text_height
-					pixel[ i ].a = ass_alpha( 255 - pixel_datas[ i ][ 3 ] )
+					pixel[ i ].a = ke4.alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
 				end
 				return pixel
 				-- code line: pixels = _G.ke4.text.to_pixels( line.styleref, line.text_stripped )
 				-- template syl notext noblank
 			end, --!maxloop( #pixels )!{\an5\pos(!$x + pixels[ j ].x!,!$y + pixels[ j ].y!)\1a!pixels[ j ].a!\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
 			
-			bord_to_pixels = function( Text_Confi, Text, Pixel )
+			bord_to_pixels = function( Text_Config, Text, Pixel )
 				local text_2bord = Text or "text.bord_to_pixels"
 				local size_pixel = Pixel or 2
-				local text_shape = ke4.text.to_shape( Text_Confi, text_2bord, 1 )
+				local text_shape = ke4.text.to_shape( Text_Config, text_2bord, 1 )
 				local points = ke4.shape.point( text_shape, size_pixel )
-				local text_width, text_height = aegisub.text_extents( Text_Confi, text_2bord )
+				local text_width, text_height = aegisub.text_extents( Text_Config, text_2bord )
 				for i = 1, #points do
 					points[ i ].x = points[ i ].x - 0.5 * text_width
 					points[ i ].y = points[ i ].y - 0.5 * text_height
@@ -4132,38 +4709,46 @@
 				-- template syl notext noblank
 			end, --!maxloop( #points )!{\an5\pos(!$x + points[ j ].x!,!$y + points[ j ].y!)\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
 			
-			filter = function( Text_Confi, Text, Split, ... )
-				local txt_shape = ke4.text.to_shape( Text_Confi, Text )
+			filter = function( Text_Config, Text, Split, ... )
+				local txt_shape = ke4.text.to_shape( Text_Config, Text )
 				local Split = Split or 3
 				return ke4.shape.filter3( txt_shape, Split, ... )
 			end, --{\p1}!_G.ke4.text.filter( line.styleref, line.text_stripped, 3, function( x, y ) x = x + _G.ke4.math.Rcs( 2 ) y = y + _G.ke4.math.Rcs( 2 ) return x, y end )!
 
-			gradienth = function( Text_Confi, Text, Relative_pos, ... )
+			gradienth = function( Text_Config, Text, Relative_pos, ... )
 				local shp_w = 2
-				local Width, Height = aegisub.text_extents( Text_Confi, Text )
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
+				local Width, Height = aegisub.text_extents( Text_Config, Text )
 				local Shape, cn = "", ceil( Width / shp_w )
 				local gradh = ke4.table.gradient3( { cn }, ... )
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", gradh[ i ], ke4.shape.size( ke4.shape.rectangle, shp_w, ceil( Height ) ) )
 				end
-				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Confi, Text, Relative_pos ), Shape )
+				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
 			end, --!_G.ke4.text.gradienth( line.styleref, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
 			
-			gradientv = function( Text_Confi, Text, Relative_pos, ... )
+			gradientv = function( Text_Config, Text, Relative_pos, ... )
 				local shp_h = 2
-				local Width, Height = aegisub.text_extents( Text_Confi, Text )
+				local Width, Height = aegisub.text_extents( Text_Config, Text )
 				local Shape, cn = "", ceil( Height / shp_h )
 				local gradv = ke4.table.gradient3( { cn }, ... )
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s{\\p0}\\N", gradv[ i ], ke4.shape.size( ke4.shape.rectangle, ceil( Width ), shp_h ) )
 				end
-				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Confi, Text, Relative_pos ), Shape )
+				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
 			end, --!_G.ke4.text.gradientv( line.styleref, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
 			
-			gradientangle = function( Text_Confi, Text, Relative_pos, Angle, ... )
+			gradientangle = function( Text_Config, Text, Relative_pos, Angle, ... )
 				local shp_s = 2
 				local Angle = Angle or 0
-				local Width, Height = aegisub.text_extents( Text_Confi, Text )
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
+				local Width, Height = aegisub.text_extents( Text_Config, Text )
 				local shp_w = ke4.math.round( abs( Width * cos( rad( Angle ) ) + Height * sin( rad( Angle ) ) + 1 ) )
 				local shp_h = ke4.math.round( abs( Width * sin( rad( Angle ) ) + Height * cos( rad( Angle ) ) + 1 ) )
 				local Shape, cn = format( "{\\fr%s}", Angle % 361 ), ceil( shp_w / shp_s )
@@ -4171,10 +4756,10 @@
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", grada[ i ], ke4.shape.size( ke4.shape.rectangle, shp_s, shp_h ) )
 				end
-				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Confi, Text, Relative_pos ), Shape )
+				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
 			end, --!_G.ke4.text.gradientangle( line.styleref, line.text_stripped, { line.center, line.middle }, 45, "&H00FFFF&", "&H0000FF&" )!
 			
-			bezier = function( Text_Config, Shape, Char_x, Char_y, Mode, OffsetB )
+			bezier = function( Text_Config, Shape, Char_x, Char_y, Mode, Offset )
 				local pyointa = { }
 				function pyointa.tangential2P( Pnts, t_ )
 					local tanVec, XY, dpos = { }, { }, { }
@@ -4378,7 +4963,7 @@
 					return coord
 				end
 				
-				local line_info = ke4.ass.info( Text_Config )
+				local line_info = ke4.ass.linefx( Text_Config )
 				local l_width, l_left, l_descent = line_info.width, line_info.left, line_info.descent
 				if Shape == nil then
 					if line_info.text:match( "\\i?clip%b()" ) then
@@ -4393,15 +4978,22 @@
 						Blength = Blength + pyointa.getBezierLength( cont_point[ i ][ k ], 0 , 1.0, nN )
 					end
 				end
-				local offset = OffsetB or 0
+				local Offset = Offset or 0
 				if Mode == 2 then -- alinea el texto desde la izquierda
-					lineoffset = offset
+					lineoffset = Offset
 				elseif Mode == 3 then -- alinea el texto desde la derecha
-					lineoffset = Blength - l_width - offset
-				--elseif Mode == 4 then -- justifica el texto en toda la longitud de la shape, equidistantemente
-					--lineoffset = (Blength - l_width) * (val_i - 1) / (val_n - 1)
+					lineoffset = Blength - l_width - Offset
+				elseif Mode == 4 then
+					--si Offset = (ci - 1) / (cn - 1) justifica el texto en toda la longitud de la shape, equidistantemente
+					--Offset = (j - 1) / (maxj - 1) anima el texto de inicio a fin de la shape
+					--!maxloop( orgline.duration / frame_dur )!
+					--!retime( "preline", frame_dur * (j - 1), frame_dur * j )!
+					lineoffset = (Blength - l_width) * Offset
+				elseif Mode == 5 then -- anima el texto de fin a inicio de la shape
+					--!maxloop( orgline.duration / frame_dur )!!retime( "preline", frame_dur * (j - 1), frame_dur * j )!{\an5!_G.ke4.text.bezier( line, nil, $x, $y, 5, (j - 1) / (maxj - 1) )!}
+					lineoffset = (Blength - l_width) * (1 - Offset)
 				else --(Mode == 1) modo por default (centro de la shape)
-					lineoffset = (Blength - l_width) / 2 + offset
+					lineoffset = (Blength - l_width) / 2 + Offset
 				end
 				targetLength, rot_Bezier = 0, 0
 				PtNo, targetLength = pyointa.length2PtNo( cont_point, lineoffset + Char_x - l_left, nN )
@@ -4420,6 +5012,119 @@
 				bezier_angle = ke4.math.round( ke4.tag.only( rot_Bezier < -180, rot_Bezier + 360, rot_Bezier ), 3 )
 				return format( "\\pos(%s,%s)\\fr%s", ke4.math.round( pos_Bezier[ 1 ], 3 ), ke4.math.round( pos_Bezier[ 2 ], 3 ), bezier_angle )
 			end, --{\an5!_G.ke4.text.bezier( line, "\\clip(m 180 352 b 303 327 347 239 464 236 589 239 595 474 812 450 987 428 871 261 1144 308)", $x, $y, nil, 0 )!}
+			
+			rand = function( Text_Config, Text_ran, num_tran, dur_tran, extra_tags, table_rand, text_rand, text_all )
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
+				local Text_ran = Text_ran or "ke4.text.rand"
+				local dur_tran = abs( dur_tran or 2 * frame_dur )
+				local num_tran = abs( ke4.math.round( num_tran or 5 ) )
+				local del_tran = 0
+				local delay_tr = dur_tran * num_tran
+				----------------------------------------------
+				if dur_tran < frame_dur then
+					dur_tran = frame_dur
+				end
+				if delay_tr == 0 or
+					delay_tr > Text_Config.duration then
+					delay_tr = Text_Config.duration
+					num_tran = ceil( Text_Config.duration / dur_tran )
+				end
+				----------------------------------------------
+				local table_ch = { }
+				for i = 48, 57 do --dígitos
+					table.insert( table_ch, string.char( i ) )
+				end
+				for i = 65, 90 do --minúsculas y mayúsculas
+					table.insert( table_ch, string.char( i ) )
+					table.insert( table_ch, string.char( i + 32 ) )
+				end
+				local tbl_rand = table_rand or table_ch
+				----------------------------------------------
+				local extra_tg = extra_tags or ""
+				local time_ini = ke4.math.R( 0, Text_Config.duration - delay_tr, 5 * frame_dur )
+				---------------------------------------------------------
+				if text_rand == "intro"
+					or text_rand == "line" then
+					time_ini = 0
+				elseif text_rand == "outro" then
+					time_ini = Text_Config.duration - delay_tr
+				end
+				---------------------------------------------------------
+				local tbl_char = ke4.table.string( Text_ran )
+				local tbl_rtrn = { }
+				local time_line = Text_Config.duration - delay_tr
+				local l = Text_Config.styleref
+				---------------------------------------------------------
+				local Ad = format( "\\1a%s\\3a%s\\4a%s", ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color3 ), ke4.alpha.fromstyle( l.color4 ) )
+				local Ai = "\\1a&HFF&\\3a&HFF&\\4a&HFF&"
+				if l.outline == 0
+					and l.shadow == 0 then
+					Ad = format( "\\1a%s", ke4.alpha.fromstyle( l.color1 ) )
+					Ai = "\\1a&HFF&"
+				elseif l.shadow == 0 then
+					Ad = format( "\\1a%s\\3a%s", ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color3 ) )
+					Ai = "\\1a&HFF&\\3a&HFF&"
+				elseif l.outline == 0 then
+					Ad = format( "\\1a%s\\4a%s", ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color4 ) )
+					Ai = "\\1a&HFF&\\4a&HFF&"
+				end
+				for i = 1, #tbl_char do
+					if tbl_char[ i ] ~= " " then
+						if ke4.table.inside( ke4.text.char_special, tbl_char[ i ] ) then
+							tbl_rtrn[ i ] = format( "{\\fscx%s}%s", l.scale_x, tbl_char[ i ] )
+						else
+							if text_rand == "line" then
+								tbl_rtrn[ i ] = format( "{\\fscx%s%s\\t(%s,%s,\\fscx0%s)\\t(%s,%s,\\fscx%s%s)\\t(%s,%s,\\fscx0%s)}%s",
+									l.scale_x, Ad, time_ini, time_ini + del_tran, Ai, time_ini + delay_tr, time_ini + delay_tr + del_tran,
+									l.scale_x, Ad, time_line, time_line + del_tran, Ai, tbl_char[ i ]
+								)
+								for k = 1, num_tran do
+									tbl_rtrn[ i ] = tbl_rtrn[ i ] .. format( "{\\fscx0%s\\t(%s,%s,\\fscx%s%s%s)\\t(%s,%s,\\fscx0%s%s)\\t(%s,%s,\\fscx%s%s)\\t(%s,%s,\\fscx0%s)}%s",
+										Ai, time_ini + (k - 1) * dur_tran, time_ini + del_tran + (k - 1) * dur_tran, l.scale_x, Ad, extra_tg,
+										time_ini + (k - 0) * dur_tran, time_ini + del_tran + (k - 0) * dur_tran, Ai, ke4.tag.default( Text_Config, extra_tg ),
+										time_line + (k - 1) * dur_tran, time_line + del_tran + (k - 1) * dur_tran, l.scale_x, Ad,
+										time_line + (k - 0) * dur_tran, time_line + del_tran + (k - 0) * dur_tran, Ai, ke4.math.Re( tbl_rand )
+									)
+								end
+							else
+								tbl_rtrn[ i ] = format( "{\\fscx%s%s\\t(%s,%s,\\fscx0%s)\\t(%s,%s,\\fscx%s%s)}%s",
+									l.scale_x, Ad, time_ini, time_ini + del_tran, Ai, time_ini + delay_tr,
+									time_ini + delay_tr + del_tran, l.scale_x, Ad, tbl_char[ i ]
+								)
+								for k = 1, num_tran do
+									tbl_rtrn[ i ] = tbl_rtrn[ i ] .. format( "{\\fscx0%s\\t(%s,%s,\\fscx%s%s%s)\\t(%s,%s,\\fscx0%s%s)}%s",
+										Ai, time_ini + (k - 1) * dur_tran, time_ini + del_tran + (k - 1) * dur_tran, l.scale_x, Ad, extra_tg,
+										time_ini + (k - 0) * dur_tran, time_ini + del_tran + (k - 0) * dur_tran, Ai, ke4.tag.default( Text_Config, extra_tg ), ke4.math.Re( tbl_rand )
+									)
+								end
+							end
+						end
+					end
+				end
+				local Text_fx = ke4.tag.dark( Text_Config, table.concat( tbl_rtrn ) )
+				--------------------------------------------------------------
+				Text_fx = Text_fx:gsub( "\\t(%b())",
+					function( capture )
+						if capture:sub( 2, -2 ):sub( 1, 4 ) == "0,0," then
+							return capture:sub( 2, -2 ):match( "\\%S+[ %S]*" )
+							--captura todos los tags dentro de una \\t
+						end
+					end
+				) --si hay una \\t(0,0, solo retorna los tags que hay dentro
+				--------------------------------------------------------------
+				if text_all
+					or text_rand == "intro"
+					or text_rand == "line"
+					or text_rand == "outro" then
+					return Text_fx--table.concat( tbl_rtrn )
+				end --char.text:rand( 5, 2f, "\\1cR( )" )
+				return ke4.tag.only( ke4.math.R( ke4.math.R( 2, 4 ) ) == 1, Text_fx, Text_ran )
+			end, --{\an5\pos($x,$y)}!_G.ke4.text.rand( line, syl.text, 5, 82 )!
 			
 			upper = function( Text )
 				local Text = Text or "_G.ke4.text.upper"
@@ -4789,9 +5494,9 @@
 				return chars_in_text, chars_in_text_dur
 			end,
 			
-			text2part = function( Text_Confi, Text, Duration, Text_left, Parts )
-				local function text_width( Text_Confi, String )
-					local txt_width = aegisub.text_extents( Text_Confi, String )
+			text2part = function( Text_Config, Text, Duration, Text_left, Parts )
+				local function text_width( Text_Config, String )
+					local txt_width = aegisub.text_extents( Text_Config, String )
 					return txt_width
 				end
 				local Text = Text or "_G.ke4.trxt.text2part"
@@ -4812,15 +5517,15 @@
 						left_spc = left_spc .. parts_in_text[ i ]:sub( 1, 1 )
 						parts_in_text[ i ] = parts_in_text[ i ]:sub( 2, -1 )
 					end
-					parts_widths[ i ] = text_width( Text_Confi, parts_in_text[ i ] )
-					parts_lefts[ i ] = ke4.math.round( parts_lefts[ i - 1 ] + parts_widths[ i - 1 ] + text_width( Text_Confi, left_spc ), 3 )
+					parts_widths[ i ] = text_width( Text_Config, parts_in_text[ i ] )
+					parts_lefts[ i ] = ke4.math.round( parts_lefts[ i - 1 ] + parts_widths[ i - 1 ] + text_width( Text_Config, left_spc ), 3 )
 				end
 				for i = 1, #parts_in_text do
 					while parts_in_text[ i ]:sub( -1, -1 ) == " "
 						or parts_in_text[ i ]:sub( -1, -1 ) == "	" do
 						parts_in_text[ i ] = parts_in_text[ i ]:sub( 1, -2 )
 					end
-					parts_widths[ i ]  = ke4.math.round( text_width( Text_Confi, parts_in_text[ i ] ), 3 )
+					parts_widths[ i ]  = ke4.math.round( text_width( Text_Config, parts_in_text[ i ] ), 3 )
 					parts_rights[ i ]  = ke4.math.round( parts_lefts[ i ] + parts_widths[ i ], 3 )
 					parts_centers[ i ] = ke4.math.round( parts_lefts[ i ] + parts_widths[ i ] / 2, 3 )
 				end --!_G.ke4.table.view( _G.ke4.text.text2part( line.styleref, line.text_stripped, line.duration, line.left, { 2, 4 } ) )!
@@ -5029,74 +5734,88 @@
 			
 			ASSDraw3 = function( Shape, Round )
 				--le da formato a las shapes para usar en Auto-4
-				local Shape = Shape:gsub( "  ", " " ) -- elimina los espacios múltiples
 				local Round = Round or 2 --cifras decimales a redondear los números en la shape
-				Shape = Shape:gsub( "%S+",
-					function( num )
-						return format( "%s", ke4.math.round( tonumber( num ) or num, Round ) )
-					end
-				)
-				Shape = Shape:gsub( " c", "" ):gsub( "%b{}", "" )
-				local segments, coor2 = { }, { }
-				if Shape:match( "%i?clip%b()" ) then
-					if Shape:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d]*" ) then
-						local cx1, cy1, cx2, cy2 = Shape:match( "(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d]*)" )
-						Shape = format( "m %s %s l %s %s l %s %s l %s %s ", cx1, cy1, cx1, cy2, cx2, cy2, cx2, cy1 )
-					elseif Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" ) then
-						Shape = Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" )
-					end
-				end
-				for c in Shape:gmatch( "[mlb]^* %-?%d+[%.%d]* [%-%.%d ]*" ) do
-					table.insert( segments, c )
-				end
-				for k = 1, #segments do
-					coor2[ k ] = { }
-					for c6 in segments[ k ]:gmatch( "%S+" ) do
-						--captura: signos, números, letras y puntos
-						table.insert( coor2[ k ], format( "%s ", c6 ) )
-					end
-				end
-				for k = 1, #coor2 do
-					if coor2[ k ][ 1 ] == "b "
-						and #coor2[ k ] > 7 then
-						coor3 = { }
-						table.remove( coor2[ k ], 1 )
-						for i = 1, #coor2[ k ] / 6 do
-							coor3[ i ] = { }
-							for h = 1, 6 do
-								table.insert( coor3[ i ], coor2[ k ][ 6 * (i - 1) + h ] )
-							end
-							coor3[ i ] = format( "b %s", ke4.table.op( coor3[ i ], "concat" ) )
+				local Shape = Shape or "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
+				if type( Shape ) == "table" then
+					for i = 1, #Shape do
+						Shape[ i ] = ke4.shape.ASSDraw3( Shape[ i ], Round )
+					end --recursividad: september 08th 2019
+				else
+					Shape = Shape:gsub( "  ", " " ) -- elimina los espacios múltiples
+					Shape = Shape:gsub( "%S+",
+						function( num )
+							return format( "%s", ke4.math.round( tonumber( num ) or num, Round ) )
 						end
-						coor2[ k ] = ke4.table.op( coor3, "concat" )
-					elseif coor2[ k ][ 1 ] == "l "
-						and #coor2[ k ] > 3 then
-						coor4 = { }
-						table.remove( coor2[ k ], 1 )
-						for i = 1, #coor2[ k ] / 2 do
-							coor4[ i ] = { }
-							for h = 1, 2 do
-								table.insert( coor4[ i ], coor2[ k ][ 2 * (i - 1) + h ] )
-							end
-							coor4[ i ] = format( "l %s", ke4.table.op( coor4[ i ], "concat" ) )
+					)
+					Shape = Shape:gsub( " c", "" ):gsub( "%b{}", "" )
+					local segments, coor2 = { }, { }
+					if Shape:match( "%i?clip%b()" ) then
+						if Shape:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d]*" ) then
+							local cx1, cy1, cx2, cy2 = Shape:match( "(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d]*)" )
+							Shape = format( "m %s %s l %s %s l %s %s l %s %s ", cx1, cy1, cx1, cy2, cx2, cy2, cx2, cy1 )
+						elseif Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" ) then
+							Shape = Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" )
 						end
-						coor2[ k ] = ke4.table.op( coor4, "concat" )
-					else
-						coor2[ k ] = ke4.table.op( coor2[ k ], "concat" )
 					end
+					for c in Shape:gmatch( "[mlb]^* %-?%d+[%.%d]* [%-%.%d ]*" ) do
+						table.insert( segments, c )
+					end
+					for k = 1, #segments do
+						coor2[ k ] = { }
+						for c6 in segments[ k ]:gmatch( "%S+" ) do
+							--captura: signos, números, letras y puntos
+							table.insert( coor2[ k ], format( "%s ", c6 ) )
+						end
+					end
+					for k = 1, #coor2 do
+						if coor2[ k ][ 1 ] == "b "
+							and #coor2[ k ] > 7 then
+							coor3 = { }
+							table.remove( coor2[ k ], 1 )
+							for i = 1, #coor2[ k ] / 6 do
+								coor3[ i ] = { }
+								for h = 1, 6 do
+									table.insert( coor3[ i ], coor2[ k ][ 6 * (i - 1) + h ] )
+								end
+								coor3[ i ] = format( "b %s", ke4.table.op( coor3[ i ], "concat" ) )
+							end
+							coor2[ k ] = ke4.table.op( coor3, "concat" )
+						elseif coor2[ k ][ 1 ] == "l "
+							and #coor2[ k ] > 3 then
+							coor4 = { }
+							table.remove( coor2[ k ], 1 )
+							for i = 1, #coor2[ k ] / 2 do
+								coor4[ i ] = { }
+								for h = 1, 2 do
+									table.insert( coor4[ i ], coor2[ k ][ 2 * (i - 1) + h ] )
+								end
+								coor4[ i ] = format( "l %s", ke4.table.op( coor4[ i ], "concat" ) )
+							end
+							coor2[ k ] = ke4.table.op( coor4, "concat" )
+						else
+							coor2[ k ] = ke4.table.op( coor2[ k ], "concat" )
+						end
+					end
+					Shape = ke4.table.op( coor2, "concat" )
 				end
-				return ke4.table.op( coor2, "concat" )
+				return Shape
 			end,
 			
 			round = function( Shape, Round )
 				--redondea los valores de la Shape a las cifras decimales indicadas o al entero más cercano
 				local Shape = ke4.shape.ASSDraw3( Shape )
 				local Round = Round or 0
-				Shape = Shape:gsub( "%-?%d+[%.%d]*",
-					function( num )
-						return ke4.math.round( tonumber( num ), Round )
+				if type( Shape ) == "table" then
+					for i = 1, #Shape do
+						Shape[ i ] = ke4.shape.round( Shape[ i ], Round )
 					end
-				)
+				else
+					Shape = Shape:gsub( "%-?%d+[%.%d]*",
+						function( num )
+							return ke4.math.round( tonumber( num ), Round )
+						end
+					)
+				end
 				return Shape
 			end,
 			
@@ -5255,6 +5974,13 @@
 			end,
 			
 			filter2 = function( Shape, Filter, Split )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local Split = Split or 2 * ratio
 				local Filter = Filter or function( x, y )
 					return x, y
@@ -5941,6 +6667,13 @@
 			end,
 			
 			trajectory = function( Loop_t, distance_nim, distance_max )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local Loop_t = ceil( 3 * abs( Loop_t or 15 ) )--ceil( Loop_t or linefx[ ii ].duration / 720 )
 				local Dr_min = distance_nim or 10 * ratio
 				local Dr_max = distance_max or 20 * ratio
@@ -5976,8 +6709,15 @@
 			
 			Ltrajectory = function( length_total, length_curve, height_curve )
 				-- Curve in Line Trajectory
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local ratio_y = height_curve or 40 * ratio
-				local lengthC = length_curve or 320--xres / 4
+				local lengthC = length_curve or xres / 4
 				local lengthT = length_total or 400--xres - val_center
 				local Loop_Lt = ke4.math.round( lengthT / lengthC )
 				local loops, Rand, px, py = 3 * Loop_Lt, lengthT / ratio_y, { }, { }
@@ -6008,8 +6748,15 @@
 			
 			Ctrajectory = function( Loop_Ct, radius_min, radius_max )
 				-- Circle Trajectory
-				local R_max = radius_max or 50--xres / 25
-				local R_min = radius_min or 32--xres / 40
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				local R_max = radius_max or xres / 25
+				local R_min = radius_min or xres / 40
 				local loops = ceil( 3 * abs( Loop_Ct or 15 ) )--ceil( 3 * (Loop_Ct or linefx[ ii ].duration / 720) )
 				local px, py = { }, { }
 				local Ang, Rad
@@ -6043,8 +6790,15 @@
 			
 			Rtrajectory = function( Loop_Rt, radius_min, radius_max )
 				-- Random Trajectory
-				local R_max = radius_max or 50--xres / 25
-				local R_min = radius_min or 32--xres / 40
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				local R_max = radius_max or xres / 25
+				local R_min = radius_min or xres / 40
 				local loops = ceil( 3 * abs( Loop_Rt or 15 ) )--ceil( 3 * (Loop_Rt or linefx[ ii ].duration / 720) )
 				local px, py = { }, { }
 				local Ang, Rad
@@ -6093,6 +6847,13 @@
 			end, --!_G.ke4.shape.Strajectory( )!
 			
 			multi1 = function( Size_shape, Px )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local Shape = recall.shape_multi1
 				--if j == 1 then
 					local i = 1
@@ -6134,6 +6895,13 @@
 			end, --retorna shapes cuadradas concéntricas
 			
 			multi2 = function( Width, Height, Pixel )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local Shape = recall.shape_multi2
 				--if j == 1 then	
 					local Pixel = Pixel or 6 * ratio
@@ -6203,6 +6971,13 @@
 			end, --crea shapes diagonales dentro de un rectángulo con medidas dadas
 			
 			multi3 = function( Size, Bord, Shape )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local Shape3 = recall.shape_multi3
 				--if j == 1 then
 					local Shape = Shape or shape.circle
@@ -6614,7 +7389,7 @@
 					pixel[ i ] = { }
 					pixel[ i ].x = -w_shape / 2 + pixel_datas[ i ][ 2 ]
 					pixel[ i ].y = -h_shape / 2 + pixel_datas[ i ][ 1 ]
-					pixel[ i ].a = ass_alpha( 255 - pixel_datas[ i ][ 3 ] )
+					pixel[ i ].a = ke4.alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
 				end
 				return pixel
 				--code once:	px = _G.ke4.shape.to_pixels( "m 0 0 l 0 50 l 50 50 l 50 0 " )
@@ -7047,6 +7822,13 @@
 			
 			deformed2 = function( Shape, Defor_x, Defor_y )
 				--deforma los puntos internos de un conjunto de shapes matriz
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local Shape = Shape or shape.rectangle
 				local coors = { }
 				local deforx = Defor_x or 6 * ratio
@@ -8499,7 +9281,13 @@
 				return table.concat( tbl_chars )					--reagrupa nuevamente el texto con los tags agregados
 			end, --!_G.ke4.ass.gradient_line( line.text_stripped, { "\\1c", "&H00FF00&", "&HFFFF00&" } )!
 			
-			linefx = function( Table_Line, Parts, meta )
+			linefx = function( Table_Line, Parts, Complete, Real )
+				-- xres, yres --------------------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				----------------------------------------
 				local linefx_tbl = {
 					[ "start_time" ]	= Table_Line.start_time,
 					[ "end_time" ]		= Table_Line.end_time,
@@ -8519,8 +9307,9 @@
 					[ "middle" ]		= Table_Line.middle,
 					[ "descent" ]		= ke4.math.round( Table_Line.descent, 3 ),
 					[ "i" ]				= Table_Line.i,
+					[ "xres" ]			= xres,
+					[ "yres" ]			= yres,
 					[ "styleref" ]		= Table_Line.styleref,
-					-- Extra Info --------------------------------
 					[ "margin_t" ]		= Table_Line.eff_margin_t,
 					[ "margin_l" ]		= Table_Line.eff_margin_l,
 					[ "margin_b" ]		= Table_Line.eff_margin_b,
@@ -8542,178 +9331,181 @@
 				}
 				
 				--------------------------------------------------------------------------------------
-				local function real_bt( String, Top )
-					local txt_shape = ke4.text.to_shape( linefx_tbl.styleref, String )
-					ke4.shape.info( txt_shape )
-					local min_y, max_y = miny, maxy
-					return Top + min_y, Top + max_y
-				end
-				local syl_text, syl_dur = ke4.text.text2syl( linefx_tbl.text, linefx_tbl.duration )
-				local char_text, char_dur = ke4.text.text2char( linefx_tbl.text, linefx_tbl.duration )
-				local word_text, word_dur = ke4.text.text2word( linefx_tbl.text, linefx_tbl.duration )
-				--------------------------------------------------------------------------------------
-				
-				------------▼ syl
-				if #syl_text > 0 then
-					linefx_tbl[ "syl" ] = { }
-					linefx_tbl.syl.text = ""
-					local syl_left_pos = linefx_tbl.left
-					local syl_start_time = 0
-					local syl_real_top, syl_real_bottom
-					for i = 1, #syl_text do
-						linefx_tbl.syl[ i ] = { }
-						linefx_tbl.syl[ i ].text			= ke4.text.karaoke_true( syl_text )
-															and syl_text[ i ]:gsub( "KEclip", " " )
-															or format( "{\\k%s}%s", ke4.math.round( syl_dur[ i ] / 10 ), syl_text[ i ] ):gsub( "KEclip", " " )
-						linefx_tbl.syl[ i ].text_stripped	= ke4.text.text2stripped( syl_text[ i ] )
-						linefx_tbl.syl[ i ].text_raw		= linefx_tbl.syl[ i ].text:gsub( "KEclip", " " )
-						linefx_tbl.syl[ i ].tags			= linefx_tbl.syl[ i ].text:match( "%b{}" ) or ""
-						linefx_tbl.syl[ i ].text1			= ke4.text.remove_tags( syl_text[ i ] ):gsub( "KEfx", "" )
-						linefx_tbl.syl[ i ].text2			= linefx_tbl.syl[ i ].text_stripped:gsub( "KEfx", "" )
-						linefx_tbl.syl[ i ].width_t			= aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.syl[ i ].text1 )
-						linefx_tbl.syl[ i ].width			= ke4.math.round( aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.syl[ i ].text2 ), 3 )
-						linefx_tbl.syl[ i ].left			= ke4.math.round( syl_left_pos, 3 )
-						linefx_tbl.syl[ i ].center			= ke4.math.round( syl_left_pos + linefx_tbl.syl[ i ].width / 2, 3 )
-						linefx_tbl.syl[ i ].right			= ke4.math.round( syl_left_pos + linefx_tbl.syl[ i ].width, 3 )
-						linefx_tbl.syl[ i ].top				= linefx_tbl.top
-						linefx_tbl.syl[ i ].middle			= linefx_tbl.middle
-						linefx_tbl.syl[ i ].bottom			= linefx_tbl.bottom
-						linefx_tbl.syl[ i ].height			= linefx_tbl.height
-						linefx_tbl.syl[ i ].dur				= syl_dur[ i ]
-						linefx_tbl.syl[ i ].duration		= syl_dur[ i ]
-						linefx_tbl.syl[ i ].start_time		= syl_start_time
-						linefx_tbl.syl[ i ].end_time		= linefx_tbl.syl[ i ].start_time + linefx_tbl.syl[ i ].dur
-						linefx_tbl.syl[ i ].mid_time		= linefx_tbl.syl[ i ].start_time + linefx_tbl.syl[ i ].dur / 2
-						linefx_tbl.syl.text					= linefx_tbl.syl.text .. linefx_tbl.syl[ i ].text:gsub( "KEfx", "" )
-						syl_left_pos 						= syl_left_pos + linefx_tbl.syl[ i ].width_t
-						syl_start_time						= syl_start_time + linefx_tbl.syl[ i ].dur
-						syl_real_top, syl_real_bottom		= real_bt( linefx_tbl.syl[ i ].text_stripped, linefx_tbl.top )
-						linefx_tbl.syl[ i ].rtop			= syl_real_top
-						linefx_tbl.syl[ i ].rbottom			= syl_real_bottom
+				if Complete then
+					local function real_bt( String, Top )
+						if Real then
+							local txt_shape = ke4.text.to_shape( linefx_tbl.styleref, String )
+							ke4.shape.info( txt_shape )
+							local min_y, max_y = miny, maxy
+							return Top + min_y, Top + max_y
+						end
+						return 0, 0
 					end
-				end
-				
-				------------▼ char
-				if #char_text > 0 then
-					linefx_tbl[ "char" ] = { }
-					linefx_tbl.char.text = ""
-					local char_left_pos = linefx_tbl.left
-					local char_start_time = 0
-					local char_real_top, char_real_bottom
-					for i = 1, #char_text do
-						linefx_tbl.char[ i ] = { }
-						linefx_tbl.char[ i ].text			= format( "{\\k%s}%s", ke4.math.round( char_dur[ i ] / 10 ), char_text[ i ] ):gsub( "KEclip", " " )
-						linefx_tbl.char[ i ].text_stripped	= ke4.text.text2stripped( char_text[ i ] )
-						linefx_tbl.char[ i ].text_raw		= linefx_tbl.char[ i ].text:gsub( "KEclip", " " )
-						linefx_tbl.char[ i ].tags			= linefx_tbl.char[ i ].text:match( "%b{}" ) or ""
-						linefx_tbl.char[ i ].text1			= ke4.text.remove_tags( char_text[ i ] ):gsub( "KEfx", "" )
-						linefx_tbl.char[ i ].text2			= linefx_tbl.char[ i ].text_stripped:gsub( "KEfx", "" )
-						linefx_tbl.char[ i ].width_t		= aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.char[ i ].text1 )
-						linefx_tbl.char[ i ].width			= ke4.math.round( aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.char[ i ].text2 ), 3 )
-						linefx_tbl.char[ i ].left			= ke4.math.round( char_left_pos, 3 )
-						linefx_tbl.char[ i ].center			= ke4.math.round( char_left_pos + linefx_tbl.char[ i ].width / 2, 3 )
-						linefx_tbl.char[ i ].right			= ke4.math.round( char_left_pos + linefx_tbl.char[ i ].width, 3 )
-						linefx_tbl.char[ i ].top			= linefx_tbl.top
-						linefx_tbl.char[ i ].middle			= linefx_tbl.middle
-						linefx_tbl.char[ i ].bottom			= linefx_tbl.bottom
-						linefx_tbl.char[ i ].height			= linefx_tbl.height
-						linefx_tbl.char[ i ].dur			= char_dur[ i ]
-						linefx_tbl.char[ i ].duration		= char_dur[ i ]
-						linefx_tbl.char[ i ].start_time		= char_start_time
-						linefx_tbl.char[ i ].end_time		= linefx_tbl.char[ i ].start_time + linefx_tbl.char[ i ].dur
-						linefx_tbl.char[ i ].mid_time		= linefx_tbl.char[ i ].start_time + linefx_tbl.char[ i ].dur / 2
-						linefx_tbl.char.text				= linefx_tbl.char.text .. linefx_tbl.char[ i ].text:gsub( "KEfx", "" )
-						char_left_pos 						= char_left_pos + linefx_tbl.char[ i ].width_t
-						char_start_time						= char_start_time + linefx_tbl.char[ i ].dur
-						char_real_top, char_real_bottom		= real_bt( linefx_tbl.char[ i ].text_stripped, linefx_tbl.top )
-						linefx_tbl.char[ i ].rtop			= char_real_top
-						linefx_tbl.char[ i ].rbottom		= char_real_bottom
-					end
-					------------▼ char noblank
-					linefx_tbl[ "char2" ] = { }
-					for i = 1, #char_text do
-						if linefx_tbl.char[ i ].text_stripped ~= " " then
-							linefx_tbl.char2[ #linefx_tbl.char2 + 1 ] = linefx_tbl.char[ i ]
+					local syl_text, syl_dur = ke4.text.text2syl( linefx_tbl.text, linefx_tbl.duration )
+					local char_text, char_dur = ke4.text.text2char( linefx_tbl.text, linefx_tbl.duration )
+					local word_text, word_dur = ke4.text.text2word( linefx_tbl.text, linefx_tbl.duration )
+					--------------------------------------------------------------------------------------
+					
+					------------▼ syl
+					if #syl_text > 0 then
+						linefx_tbl[ "syl" ] = { }
+						linefx_tbl.syl.text = ""
+						local syl_left_pos = linefx_tbl.left
+						local syl_start_time = 0
+						local syl_real_top, syl_real_bottom
+						for i = 1, #syl_text do
+							linefx_tbl.syl[ i ] = { }
+							linefx_tbl.syl[ i ].text			= ke4.text.karaoke_true( syl_text )
+																and syl_text[ i ]:gsub( "KEclip", " " )
+																or format( "{\\k%s}%s", ke4.math.round( syl_dur[ i ] / 10 ), syl_text[ i ] ):gsub( "KEclip", " " )
+							linefx_tbl.syl[ i ].text_stripped	= ke4.text.text2stripped( syl_text[ i ] )
+							linefx_tbl.syl[ i ].text_raw		= linefx_tbl.syl[ i ].text:gsub( "KEclip", " " )
+							linefx_tbl.syl[ i ].tags			= linefx_tbl.syl[ i ].text:match( "%b{}" ) or ""
+							linefx_tbl.syl[ i ].text1			= ke4.text.remove_tags( syl_text[ i ] ):gsub( "KEfx", "" )
+							linefx_tbl.syl[ i ].text2			= linefx_tbl.syl[ i ].text_stripped:gsub( "KEfx", "" )
+							linefx_tbl.syl[ i ].width_t			= aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.syl[ i ].text1 )
+							linefx_tbl.syl[ i ].width			= ke4.math.round( aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.syl[ i ].text2 ), 3 )
+							linefx_tbl.syl[ i ].left			= ke4.math.round( syl_left_pos, 3 )
+							linefx_tbl.syl[ i ].center			= ke4.math.round( syl_left_pos + linefx_tbl.syl[ i ].width / 2, 3 )
+							linefx_tbl.syl[ i ].right			= ke4.math.round( syl_left_pos + linefx_tbl.syl[ i ].width, 3 )
+							linefx_tbl.syl[ i ].top				= linefx_tbl.top
+							linefx_tbl.syl[ i ].middle			= linefx_tbl.middle
+							linefx_tbl.syl[ i ].bottom			= linefx_tbl.bottom
+							linefx_tbl.syl[ i ].height			= linefx_tbl.height
+							linefx_tbl.syl[ i ].dur				= syl_dur[ i ]
+							linefx_tbl.syl[ i ].duration		= syl_dur[ i ]
+							linefx_tbl.syl[ i ].start_time		= syl_start_time
+							linefx_tbl.syl[ i ].end_time		= linefx_tbl.syl[ i ].start_time + linefx_tbl.syl[ i ].dur
+							linefx_tbl.syl[ i ].mid_time		= linefx_tbl.syl[ i ].start_time + linefx_tbl.syl[ i ].dur / 2
+							linefx_tbl.syl.text					= linefx_tbl.syl.text .. linefx_tbl.syl[ i ].text:gsub( "KEfx", "" )
+							syl_left_pos 						= syl_left_pos + linefx_tbl.syl[ i ].width_t
+							syl_start_time						= syl_start_time + linefx_tbl.syl[ i ].dur
+							syl_real_top, syl_real_bottom		= real_bt( linefx_tbl.syl[ i ].text_stripped, linefx_tbl.top )
+							linefx_tbl.syl[ i ].rtop			= syl_real_top
+							linefx_tbl.syl[ i ].rbottom			= syl_real_bottom
 						end
 					end
-					linefx_tbl.char2.text = linefx_tbl.char.text
-				end
-				
-				------------▼ word
-				if #word_text > 0 then
-					linefx_tbl[ "word" ] = { }
-					linefx_tbl.word.text = ""
-					local word_left_pos = linefx_tbl.left
-					local word_start_time = 0
-					local word_real_top, word_real_bottom
-					for i = 1, #word_text do
-						linefx_tbl.word[ i ] = { }
-						linefx_tbl.word[ i ].text			= ke4.text.karaoke_true( word_text )
-															and word_text[ i ]:gsub( "KEclip", " " )
-															or format( "{\\k%s}%s", ke4.math.round( word_dur[ i ] / 10 ), word_text[ i ] ):gsub( "KEclip", " " )
-						linefx_tbl.word[ i ].text_stripped	= ke4.text.text2stripped( word_text[ i ] )
-						linefx_tbl.word[ i ].text_raw		= linefx_tbl.word[ i ].text:gsub( "KEclip", " " )
-						linefx_tbl.word[ i ].tags			= linefx_tbl.word[ i ].text:match( "%b{}" ) or ""
-						linefx_tbl.word[ i ].text1			= ke4.text.remove_tags( word_text[ i ] ):gsub( "KEfx", "" )
-						linefx_tbl.word[ i ].text2			= linefx_tbl.word[ i ].text_stripped:gsub( "KEfx", "" )
-						linefx_tbl.word[ i ].width_t		= aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.word[ i ].text1 )
-						linefx_tbl.word[ i ].width			= ke4.math.round( aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.word[ i ].text2 ), 3 )
-						linefx_tbl.word[ i ].left			= ke4.math.round( word_left_pos, 3 )
-						linefx_tbl.word[ i ].center			= ke4.math.round( word_left_pos + linefx_tbl.word[ i ].width / 2, 3 )
-						linefx_tbl.word[ i ].right			= ke4.math.round( word_left_pos + linefx_tbl.word[ i ].width, 3 )
-						linefx_tbl.word[ i ].top			= linefx_tbl.top
-						linefx_tbl.word[ i ].middle			= linefx_tbl.middle
-						linefx_tbl.word[ i ].bottom			= linefx_tbl.bottom
-						linefx_tbl.word[ i ].height			= linefx_tbl.height
-						linefx_tbl.word[ i ].dur			= word_dur[ i ]
-						linefx_tbl.word[ i ].duration		= word_dur[ i ]
-						linefx_tbl.word[ i ].start_time		= word_start_time
-						linefx_tbl.word[ i ].end_time		= linefx_tbl.word[ i ].start_time + linefx_tbl.word[ i ].dur
-						linefx_tbl.word[ i ].mid_time		= linefx_tbl.word[ i ].start_time + linefx_tbl.word[ i ].dur / 2
-						linefx_tbl.word.text				= linefx_tbl.word.text .. linefx_tbl.word[ i ].text:gsub( "KEfx", "" )
-						word_left_pos 						= word_left_pos + linefx_tbl.word[ i ].width_t
-						word_start_time						= word_start_time + linefx_tbl.word[ i ].dur
-						word_real_top, word_real_bottom		= real_bt( linefx_tbl.word[ i ].text_stripped, linefx_tbl.top )
-						linefx_tbl.word[ i ].rtop			= word_real_top
-						linefx_tbl.word[ i ].rbottom		= word_real_bottom
+					
+					------------▼ char
+					if #char_text > 0 then
+						linefx_tbl[ "char" ] = { }
+						linefx_tbl.char.text = ""
+						local char_left_pos = linefx_tbl.left
+						local char_start_time = 0
+						local char_real_top, char_real_bottom
+						for i = 1, #char_text do
+							linefx_tbl.char[ i ] = { }
+							linefx_tbl.char[ i ].text			= format( "{\\k%s}%s", ke4.math.round( char_dur[ i ] / 10 ), char_text[ i ] ):gsub( "KEclip", " " )
+							linefx_tbl.char[ i ].text_stripped	= ke4.text.text2stripped( char_text[ i ] )
+							linefx_tbl.char[ i ].text_raw		= linefx_tbl.char[ i ].text:gsub( "KEclip", " " )
+							linefx_tbl.char[ i ].tags			= linefx_tbl.char[ i ].text:match( "%b{}" ) or ""
+							linefx_tbl.char[ i ].text1			= ke4.text.remove_tags( char_text[ i ] ):gsub( "KEfx", "" )
+							linefx_tbl.char[ i ].text2			= linefx_tbl.char[ i ].text_stripped:gsub( "KEfx", "" )
+							linefx_tbl.char[ i ].width_t		= aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.char[ i ].text1 )
+							linefx_tbl.char[ i ].width			= ke4.math.round( aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.char[ i ].text2 ), 3 )
+							linefx_tbl.char[ i ].left			= ke4.math.round( char_left_pos, 3 )
+							linefx_tbl.char[ i ].center			= ke4.math.round( char_left_pos + linefx_tbl.char[ i ].width / 2, 3 )
+							linefx_tbl.char[ i ].right			= ke4.math.round( char_left_pos + linefx_tbl.char[ i ].width, 3 )
+							linefx_tbl.char[ i ].top			= linefx_tbl.top
+							linefx_tbl.char[ i ].middle			= linefx_tbl.middle
+							linefx_tbl.char[ i ].bottom			= linefx_tbl.bottom
+							linefx_tbl.char[ i ].height			= linefx_tbl.height
+							linefx_tbl.char[ i ].dur			= char_dur[ i ]
+							linefx_tbl.char[ i ].duration		= char_dur[ i ]
+							linefx_tbl.char[ i ].start_time		= char_start_time
+							linefx_tbl.char[ i ].end_time		= linefx_tbl.char[ i ].start_time + linefx_tbl.char[ i ].dur
+							linefx_tbl.char[ i ].mid_time		= linefx_tbl.char[ i ].start_time + linefx_tbl.char[ i ].dur / 2
+							linefx_tbl.char.text				= linefx_tbl.char.text .. linefx_tbl.char[ i ].text:gsub( "KEfx", "" )
+							char_left_pos 						= char_left_pos + linefx_tbl.char[ i ].width_t
+							char_start_time						= char_start_time + linefx_tbl.char[ i ].dur
+							char_real_top, char_real_bottom		= real_bt( linefx_tbl.char[ i ].text_stripped, linefx_tbl.top )
+							linefx_tbl.char[ i ].rtop			= char_real_top
+							linefx_tbl.char[ i ].rbottom		= char_real_bottom
+						end
+						------------▼ char noblank
+						linefx_tbl[ "char2" ] = { }
+						for i = 1, #char_text do
+							if linefx_tbl.char[ i ].text_stripped ~= " " then
+								linefx_tbl.char2[ #linefx_tbl.char2 + 1 ] = linefx_tbl.char[ i ]
+							end
+						end
+						linefx_tbl.char2.text = linefx_tbl.char.text
 					end
-				end
-				
-				------------▼ part
-				local Parts = Parts or 3
-				local p_txt, p_dur, p_cen, p_wid, p_lef, p_rig = ke4.text.text2part( linefx_tbl.styleref, linefx_tbl.text_stripped, linefx_tbl.duration, linefx_tbl.left, Parts )
-				if #p_txt > 0 then
-					linefx_tbl[ "part" ] = { }
-					linefx_tbl.part.text = ""
-					local part_start_time = 0
-					local part_real_top, part_real_bottom
-					for i = 1, #p_txt do
-						linefx_tbl.part[ i ] = { }
-						linefx_tbl.part[ i ].text			= format( "{\\k%s}%s", ke4.math.round( p_dur[ i ] / 10 ), p_txt[ i ] )
-						linefx_tbl.part[ i ].text_stripped	= p_txt[ i ]
-						linefx_tbl.part[ i ].tags			= format( "{\\k%s}", ke4.math.round( p_dur[ i ] / 10 ) )
-						linefx_tbl.part[ i ].width			= p_wid[ i ]
-						linefx_tbl.part[ i ].left			= p_lef[ i ]
-						linefx_tbl.part[ i ].center			= p_cen[ i ]
-						linefx_tbl.part[ i ].right			= p_rig[ i ]
-						linefx_tbl.part[ i ].top			= linefx_tbl.top
-						linefx_tbl.part[ i ].middle			= linefx_tbl.middle
-						linefx_tbl.part[ i ].bottom			= linefx_tbl.bottom
-						linefx_tbl.part[ i ].height			= linefx_tbl.height
-						linefx_tbl.part[ i ].dur			= p_dur[ i ]
-						linefx_tbl.part[ i ].duration		= p_dur[ i ]
-						linefx_tbl.part[ i ].start_time		= part_start_time
-						linefx_tbl.part[ i ].end_time		= linefx_tbl.part[ i ].start_time + linefx_tbl.part[ i ].dur
-						linefx_tbl.part[ i ].mid_time		= linefx_tbl.part[ i ].start_time + linefx_tbl.part[ i ].dur / 2
-						linefx_tbl.part.text				= linefx_tbl.part.text .. linefx_tbl.part[ i ].text:gsub( "KEfx", "" )
-						part_start_time						= part_start_time + linefx_tbl.part[ i ].dur
-						part_real_top, part_real_bottom		= real_bt( linefx_tbl.part[ i ].text_stripped, linefx_tbl.top )
-						linefx_tbl.part[ i ].rtop			= part_real_top
-						linefx_tbl.part[ i ].rbottom		= part_real_bottom
+					
+					------------▼ word
+					if #word_text > 0 then
+						linefx_tbl[ "word" ] = { }
+						linefx_tbl.word.text = ""
+						local word_left_pos = linefx_tbl.left
+						local word_start_time = 0
+						local word_real_top, word_real_bottom
+						for i = 1, #word_text do
+							linefx_tbl.word[ i ] = { }
+							linefx_tbl.word[ i ].text			= ke4.text.karaoke_true( word_text )
+																and word_text[ i ]:gsub( "KEclip", " " )
+																or format( "{\\k%s}%s", ke4.math.round( word_dur[ i ] / 10 ), word_text[ i ] ):gsub( "KEclip", " " )
+							linefx_tbl.word[ i ].text_stripped	= ke4.text.text2stripped( word_text[ i ] )
+							linefx_tbl.word[ i ].text_raw		= linefx_tbl.word[ i ].text:gsub( "KEclip", " " )
+							linefx_tbl.word[ i ].tags			= linefx_tbl.word[ i ].text:match( "%b{}" ) or ""
+							linefx_tbl.word[ i ].text1			= ke4.text.remove_tags( word_text[ i ] ):gsub( "KEfx", "" )
+							linefx_tbl.word[ i ].text2			= linefx_tbl.word[ i ].text_stripped:gsub( "KEfx", "" )
+							linefx_tbl.word[ i ].width_t		= aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.word[ i ].text1 )
+							linefx_tbl.word[ i ].width			= ke4.math.round( aegisub.text_extents( linefx_tbl.styleref, linefx_tbl.word[ i ].text2 ), 3 )
+							linefx_tbl.word[ i ].left			= ke4.math.round( word_left_pos, 3 )
+							linefx_tbl.word[ i ].center			= ke4.math.round( word_left_pos + linefx_tbl.word[ i ].width / 2, 3 )
+							linefx_tbl.word[ i ].right			= ke4.math.round( word_left_pos + linefx_tbl.word[ i ].width, 3 )
+							linefx_tbl.word[ i ].top			= linefx_tbl.top
+							linefx_tbl.word[ i ].middle			= linefx_tbl.middle
+							linefx_tbl.word[ i ].bottom			= linefx_tbl.bottom
+							linefx_tbl.word[ i ].height			= linefx_tbl.height
+							linefx_tbl.word[ i ].dur			= word_dur[ i ]
+							linefx_tbl.word[ i ].duration		= word_dur[ i ]
+							linefx_tbl.word[ i ].start_time		= word_start_time
+							linefx_tbl.word[ i ].end_time		= linefx_tbl.word[ i ].start_time + linefx_tbl.word[ i ].dur
+							linefx_tbl.word[ i ].mid_time		= linefx_tbl.word[ i ].start_time + linefx_tbl.word[ i ].dur / 2
+							linefx_tbl.word.text				= linefx_tbl.word.text .. linefx_tbl.word[ i ].text:gsub( "KEfx", "" )
+							word_left_pos 						= word_left_pos + linefx_tbl.word[ i ].width_t
+							word_start_time						= word_start_time + linefx_tbl.word[ i ].dur
+							word_real_top, word_real_bottom		= real_bt( linefx_tbl.word[ i ].text_stripped, linefx_tbl.top )
+							linefx_tbl.word[ i ].rtop			= word_real_top
+							linefx_tbl.word[ i ].rbottom		= word_real_bottom
+						end
 					end
-				end
-				
-				if meta then
+					
+					------------▼ part
+					local Parts = Parts or 3
+					local p_txt, p_dur, p_cen, p_wid, p_lef, p_rig = ke4.text.text2part( linefx_tbl.styleref, linefx_tbl.text_stripped, linefx_tbl.duration, linefx_tbl.left, Parts )
+					if #p_txt > 0 then
+						linefx_tbl[ "part" ] = { }
+						linefx_tbl.part.text = ""
+						local part_start_time = 0
+						local part_real_top, part_real_bottom
+						for i = 1, #p_txt do
+							linefx_tbl.part[ i ] = { }
+							linefx_tbl.part[ i ].text			= format( "{\\k%s}%s", ke4.math.round( p_dur[ i ] / 10 ), p_txt[ i ] )
+							linefx_tbl.part[ i ].text_stripped	= p_txt[ i ]
+							linefx_tbl.part[ i ].tags			= format( "{\\k%s}", ke4.math.round( p_dur[ i ] / 10 ) )
+							linefx_tbl.part[ i ].width			= p_wid[ i ]
+							linefx_tbl.part[ i ].left			= p_lef[ i ]
+							linefx_tbl.part[ i ].center			= p_cen[ i ]
+							linefx_tbl.part[ i ].right			= p_rig[ i ]
+							linefx_tbl.part[ i ].top			= linefx_tbl.top
+							linefx_tbl.part[ i ].middle			= linefx_tbl.middle
+							linefx_tbl.part[ i ].bottom			= linefx_tbl.bottom
+							linefx_tbl.part[ i ].height			= linefx_tbl.height
+							linefx_tbl.part[ i ].dur			= p_dur[ i ]
+							linefx_tbl.part[ i ].duration		= p_dur[ i ]
+							linefx_tbl.part[ i ].start_time		= part_start_time
+							linefx_tbl.part[ i ].end_time		= linefx_tbl.part[ i ].start_time + linefx_tbl.part[ i ].dur
+							linefx_tbl.part[ i ].mid_time		= linefx_tbl.part[ i ].start_time + linefx_tbl.part[ i ].dur / 2
+							linefx_tbl.part.text				= linefx_tbl.part.text .. linefx_tbl.part[ i ].text:gsub( "KEfx", "" )
+							part_start_time						= part_start_time + linefx_tbl.part[ i ].dur
+							part_real_top, part_real_bottom		= real_bt( linefx_tbl.part[ i ].text_stripped, linefx_tbl.top )
+							linefx_tbl.part[ i ].rtop			= part_real_top
+							linefx_tbl.part[ i ].rbottom		= part_real_bottom
+						end
+					end
+					
 					------------▼ romaji
 					linefx_tbl[ "roma" ] = { }
 					linefx_tbl.roma.text = ""
@@ -8739,8 +9531,8 @@
 					end
 					local options_lft_roma = {
 						[ 1 ] = linefx_tbl.styleref.margin_l,
-						[ 2 ] = (meta.res_x + linefx_tbl.styleref.margin_l - linefx_tbl.styleref.margin_r) / 2 - linefx_roma_wdth / 2,
-						[ 3 ] = meta.res_x - linefx_tbl.styleref.margin_r - linefx_roma_wdth
+						[ 2 ] = (xres + linefx_tbl.styleref.margin_l - linefx_tbl.styleref.margin_r) / 2 - linefx_roma_wdth / 2,
+						[ 3 ] = xres - linefx_tbl.styleref.margin_r - linefx_roma_wdth
 					}
 					local roma_left = options_lft_roma[ (linefx_tbl.styleref.align - 1) % 3 + 1 ]
 					for i = 1, #syl_text do
@@ -8754,10 +9546,10 @@
 						linefx_tbl.roma[ i ].duration		= syl_dur[ i ]
 						linefx_tbl.roma[ i ].dur			= syl_dur[ i ]
 						linefx_tbl.roma[ i ].start_time		= roma_start
-						linefx_tbl.roma[ i ].end_time		= linefx_tbl.roma[ i ].start_time + linefx_tbl.roma[ i ].duration
-						linefx_tbl.roma[ i ].mid_time		= linefx_tbl.roma[ i ].start_time + linefx_tbl.roma[ i ].duration / 2
+						linefx_tbl.roma[ i ].end_time		= linefx_tbl.roma[ i ].start_time + linefx_tbl.roma[ i ].dur
+						linefx_tbl.roma[ i ].mid_time		= linefx_tbl.roma[ i ].start_time + linefx_tbl.roma[ i ].dur / 2
 						roma_left 							= roma_left + linefx_tbl.roma[ i ].width_t
-						roma_start							= roma_start + linefx_tbl.roma[ i ].duration
+						roma_start							= roma_start + linefx_tbl.roma[ i ].dur
 					end
 					
 					------------▼ katakana
@@ -8785,8 +9577,8 @@
 					end
 					local options_lft_kata = {
 						[ 1 ] = linefx_tbl.styleref.margin_l,
-						[ 2 ] = (meta.res_x + linefx_tbl.styleref.margin_l - linefx_tbl.styleref.margin_r) / 2 - linefx_kata_wdth / 2,
-						[ 3 ] = meta.res_x - linefx_tbl.styleref.margin_r - linefx_kata_wdth
+						[ 2 ] = (xres + linefx_tbl.styleref.margin_l - linefx_tbl.styleref.margin_r) / 2 - linefx_kata_wdth / 2,
+						[ 3 ] = xres - linefx_tbl.styleref.margin_r - linefx_kata_wdth
 					}
 					local kata_left = options_lft_kata[ (linefx_tbl.styleref.align - 1) % 3 + 1 ]
 					for i = 1, #syl_text do
@@ -8800,10 +9592,10 @@
 						linefx_tbl.kata[ i ].duration		= syl_dur[ i ]
 						linefx_tbl.kata[ i ].dur			= syl_dur[ i ]
 						linefx_tbl.kata[ i ].start_time		= kata_start
-						linefx_tbl.kata[ i ].end_time		= linefx_tbl.kata[ i ].start_time + linefx_tbl.kata[ i ].duration
-						linefx_tbl.kata[ i ].mid_time		= linefx_tbl.kata[ i ].start_time + linefx_tbl.kata[ i ].duration / 2
+						linefx_tbl.kata[ i ].end_time		= linefx_tbl.kata[ i ].start_time + linefx_tbl.kata[ i ].dur
+						linefx_tbl.kata[ i ].mid_time		= linefx_tbl.kata[ i ].start_time + linefx_tbl.kata[ i ].dur / 2
 						kata_left 							= kata_left + linefx_tbl.kata[ i ].width_t
-						kata_start							= kata_start + linefx_tbl.kata[ i ].duration
+						kata_start							= kata_start + linefx_tbl.kata[ i ].dur
 					end
 					
 					------------▼ hiragana
@@ -8831,8 +9623,8 @@
 					end
 					local options_lft_hira = {
 						[ 1 ] = linefx_tbl.styleref.margin_l,
-						[ 2 ] = (meta.res_x + linefx_tbl.styleref.margin_l - linefx_tbl.styleref.margin_r) / 2 - linefx_hira_wdth / 2,
-						[ 3 ] = meta.res_x - linefx_tbl.styleref.margin_r - linefx_hira_wdth
+						[ 2 ] = (xres + linefx_tbl.styleref.margin_l - linefx_tbl.styleref.margin_r) / 2 - linefx_hira_wdth / 2,
+						[ 3 ] = xres - linefx_tbl.styleref.margin_r - linefx_hira_wdth
 					}
 					local hira_left = options_lft_hira[ (linefx_tbl.styleref.align - 1) % 3 + 1 ]
 					for i = 1, #syl_text do
@@ -8846,14 +9638,14 @@
 						linefx_tbl.hira[ i ].duration		= syl_dur[ i ]
 						linefx_tbl.hira[ i ].dur			= syl_dur[ i ]
 						linefx_tbl.hira[ i ].start_time		= hira_start
-						linefx_tbl.hira[ i ].end_time		= linefx_tbl.hira[ i ].start_time + linefx_tbl.hira[ i ].duration
-						linefx_tbl.hira[ i ].mid_time		= linefx_tbl.hira[ i ].start_time + linefx_tbl.hira[ i ].duration / 2
+						linefx_tbl.hira[ i ].end_time		= linefx_tbl.hira[ i ].start_time + linefx_tbl.hira[ i ].dur
+						linefx_tbl.hira[ i ].mid_time		= linefx_tbl.hira[ i ].start_time + linefx_tbl.hira[ i ].dur / 2
 						hira_left 							= hira_left + linefx_tbl.hira[ i ].width_t
-						hira_start							= hira_start + linefx_tbl.hira[ i ].duration
+						hira_start							= hira_start + linefx_tbl.hira[ i ].dur
 					end
 				end
 				return linefx_tbl
-			end, --!_G.ke4.table.view( _G.ke4.ass.linefx( line, nil, meta ) )!
+			end, --!_G.ke4.table.view( _G.ke4.ass.linefx( line, nil ) )!
 			
 		},
 		
@@ -8971,10 +9763,398 @@
 				)
 				tags_fx = tags_fx:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 				tags_fx = ke4.string.i( tags_fx )
-				return tags_fx
+				return ke4.tag.oscill_dark( tags_fx )
+			end,
+			
+			oscill_dark = function( String )
+				local function redefinex( String )
+					local String = String or ""
+					--▼--------------------------------------------------------
+					-- corvierte algunas convenciones en número
+					local function tonumberx( String )
+						-- xres, yres and ratio ----------------
+						local xres, yres = aegisub.video_size( )
+						if not xres then
+							xres, yres = 1280, 720
+						end
+						ratio = xres / 1280
+						-- frame_dur ---------------------------
+						local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+						if msb then
+							frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+						end
+						----------------------------------------
+						local String = String or ""
+						local String_out = {
+							[ 1 ] = "math%.bezier2move%b()",
+							[ 2 ] = "text%.kana2romaji%b()",
+							[ 3 ] = "%-?%d+[%.%d]*rnd[xyz]*",
+							[ 4 ] = "%-?%d+[%.%d]*fr[sxyz]*",
+							[ 5 ] = "%-?%d+[%.%d]*fs[cpvxy]*",
+							[ 6 ] = "%-?%d+[%.%d]*f[ae]^*[xy]*",
+						}
+						local String_out_tbl = { }
+						for i = 1, #String_out do
+							-- protege segmentos del String de remplazos
+							String = String:gsub( String_out[ i ],
+								function( capture )
+									table.insert( String_out_tbl, capture )
+									return "▲"
+								end
+							)
+						end
+						-- multiplica una constante por el ratio o por frame_dur
+						String = String:gsub( "(%-?%d+[%.%d]*)([rf]^*)",
+							function( capture, variable )
+								local varx = ratio
+								if variable == "f" then
+									varx = frame_dur
+								end
+								return tonumber( capture ) * varx
+							end
+						)
+						for i = 1, #String_out_tbl do
+							String = String:gsub( "▲", String_out_tbl[ i ], 1 )
+						end
+						-------------------------------------------------------------------------
+						String = String:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
+						-------------------------------------------------------------------------
+						-- abreviatura de la función math.polar
+						local polar_tag = {
+							[ 1 ] = "(p[xy]^*)(%-?%d+[%.%d]*)d(%-?%d+[%.%d]*)",
+							[ 2 ] = "(p[xy]^*)(%-?%d+[%.%d]*)d(%b())",
+							[ 3 ] = "(p[xy]^*)(%b())d(%-?%d+[%.%d]*)",
+							[ 4 ] = "(p[xy]^*)(%b())d(%b())",
+						}
+						for i = 1, #polar_tag do
+							String = String:gsub( polar_tag[ i ],
+								function( Pxy, Angle, Distance )
+									local Return = "x"
+									if Pxy:match( "py" ) then
+										Return = "y"
+									end
+									local topolar = format( "ke4.math.polar( %s, %s, \"%s\" )", Angle, Distance, Return )
+									local line = linefx[ ii ]
+									if pcall( loadstring( format( "return function( meta, line, x, y ) return %s end", topolar ) ) ) then
+										local fun_polar = loadstring( format( "return function( meta, line, x, y ) return %s end", topolar ) )( )
+										if pcall( fun_polar ) then
+											return fun_polar( meta, line, x, y )
+										end
+									end
+									return Pxy .. Angle .. "d" .. Distance
+								end
+							)
+						end --px45d100 = math.polar( 45, 100, "x" )
+						-------------------------------------------------------------------------
+						String = String:gsub( "\"(&H%x+&)\"", "%1" )
+						-------------------------------------------------------------------------
+						return String
+					end
+					String = tonumberx( String )
+					--▼--------------------------------------------------------
+					-- encierra la funcción R dentro de paréntesis
+					String = String:gsub( "R[%w]*%b()", "(%1)" )
+					--▼--------------------------------------------------------
+					local function multi_alphas( String )
+						local alphas = {
+							[ 1 ] = "\\(%d%d+)a(%b())([%-%~]*)",
+							[ 2 ] = "\\(%d%d+)a(&H%x+&)([%-%~]*)",
+							[ 3 ] = "\\(%d%d+)a(%d+[%.%d]*)([%-%~]*)",
+							------------------------------------------
+							[ 4 ] = "\\(%d%d+)a(%b())([%-%~]^*%d+[%.%d]*)",
+							[ 5 ] = "\\(%d%d+)a(&H%x+&)([%-%~]^*%d+[%.%d]*)",
+							[ 6 ] = "\\(%d%d+)a(%d+[%.%d]*)([%-%~]^*%d+[%.%d]*)",
+							------------------------------------------
+							[ 7 ] = "\\(%d%d+)a(%b())([%-%~]^*%b())",
+							[ 8 ] = "\\(%d%d+)a(&H%x+&)([%-%~]^*%b())",
+							[ 9 ] = "\\(%d%d+)a(%d+[%.%d]*)([%-%~]^*%b())",
+						}
+						for i = 1, #alphas do
+							String = String:gsub( alphas[ i ],
+								function( nums, val, sign_val )
+									local str_alp = ""
+									local tbl_num = ke4.table.string( tostring( nums ) )
+									for k = 1, #tbl_num do
+										str_alp = str_alp .. format( "\\%sa%s", tbl_num[ k ], val .. sign_val )
+									end
+									return "@" .. str_alp .. "@"
+								end		
+							)
+						end
+						return String
+					end --"\\34a200"
+					--▼--------------------------------------------------------
+					local function multi_colors( String )
+						local String = String:gsub( "\\(%d+)([ac]^*[^\\]*)",
+							function( numbers, values )
+								if numbers:len( ) > 1 then
+									local coloralpha = ""
+									for i = 1, numbers:len( ) do
+										coloralpha = coloralpha .. "\\" .. numbers:sub( i, i ) .. values
+									end
+									return coloralpha
+								end
+							end
+						) --"\\134amrR( 100, 200 )"
+						local colors = {
+							[ 1 ] = "\\(%d%d+)c(%b())([%-%~]*)",
+							[ 2 ] = "\\(%d%d+)c(&H%x+&)([%-%~]*)",
+							[ 3 ] = "\\(%d%d+)c(R%b())([%-%~]*)",
+							------------------------------------------
+							[ 4 ] = "\\(%d%d+)c(%b())([%-%~]^*%d+[%.%d]*)",
+							[ 5 ] = "\\(%d%d+)c(&H%x+&)([%-%~]^*%d+[%.%d]*)",
+							[ 6 ] = "\\(%d%d+)c(R%b())([%-%~]^*%d+[%.%d]*)",
+							------------------------------------------
+							[ 7 ] = "\\(%d%d+)c(%b())([%-%~]^*%b())",
+							[ 8 ] = "\\(%d%d+)c(&H%x+&)([%-%~]^*%b())",
+							[ 9 ] = "\\(%d%d+)c(R%b())([%-%~]^*%b())",
+						}
+						for i = 1, #colors do
+							String = String:gsub( colors[ i ],
+								function( nums, val, sign_val )
+									local str_col = ""
+									local tbl_num = ke4.table.string( tostring( nums ) )
+									for k = 1, #tbl_num do
+										str_col = str_col .. format( "\\%sc%s", tbl_num[ k ], val .. sign_val )
+									end
+									return "@" .. str_col .. "@"
+								end		
+							)
+						end
+						return String
+					end --"\\34cR( )"
+					--▼--------------------------------------------------------
+					String = multi_colors( String )
+					String = multi_alphas( String )
+					--▼--------------------------------------------------------
+					String = String:gsub( "(\\[%dv]*c)(%([ ]*R%b()[ ]*%))",
+						function( Tag, Random_funct )
+							local Random_funct = Random_funct:match( "R%b()" ):sub( 2, -1 )
+							return format( "%s( ke4.random.color2%s )", Tag, Random_funct )
+						end
+					) --"\\1cR( ** )" --> "\\1c .. ke4.random.color2( ** )"
+					--▼--------------------------------------------------------
+					String = String:gsub( "\\bs(%d[fr%.%d]*)", "\\bord%1\\shad%1" )
+					--▼--------------------------------------------------------
+					local tag_fun = {
+						-- tags funciones: todos aquellos que están seguidos de paréntesis
+						[ 001 ] = "\\1vc",		[ 002 ] = "\\2vc",		[ 003 ] = "\\3vc",		[ 004 ] = "\\4vc",
+						[ 005 ] = "\\1va",		[ 006 ] = "\\2va",		[ 007 ] = "\\3va",		[ 008 ] = "\\4va",
+						[ 009 ] = "\\1img",		[ 010 ] = "\\2img",		[ 011 ] = "\\3img",		[ 012 ] = "\\4img",
+						[ 013 ] = "\\pos",		[ 014 ] = "\\move",		[ 015 ] = "\\moves3",	[ 016 ] = "\\moves4",
+						[ 017 ] = "\\mover",	[ 018 ] = "\\movevc",	[ 019 ] = "\\org",		[ 020 ] = "\\distort",
+						[ 021 ] = "\\fad",		[ 022 ] = "\\fade",		[ 023 ] = "\\jitter",	[ 024 ] = "\\clip",
+						[ 025 ] = "\\iclip",	[ 026 ] = "\\t",
+					}
+					local tags_out = {
+						-- los tags que quedan excluidos de ser remplazados en esta función, ya que de otro
+						-- modo,  el valor random sería el mismo para cada uno de los tags que los componen
+						[ 001 ] = "\\fscxy(R",	[ 002 ] = "\\frxy(R",	[ 003 ] = "\\frxz(R",	[ 004 ] = "\\fryz(R",
+						[ 005 ] = "\\frxyz(R",	[ 006 ] = "\\faxy(R",	[ 007 ] = "\\fscxyr(R",	[ 008 ] = "\\frxyo(R",
+						[ 009 ] = "\\frxzo(R",	[ 010 ] = "\\fryzo(R",	[ 011 ] = "\\frxyzo(R",	[ 012 ] = "\\xybord(R",
+						[ 013 ] = "\\xyshad(R",
+					}
+					--▼--------------------------------------------------------
+					String = String:gsub( "\\%w+%b()", -- tags seguidos de paréntesis :)
+						function( capture )
+							-------------------------------------------------------------------
+							local tag_capture = ke4.tag.operation( capture:match( "(\\%w+)%b()" ) )
+							local val_capture = capture:match( "\\%w+(%b())" ):sub( 2, -2 )
+							-------------------------------------------------------------------
+							if ke4.table.inside( tags_out, capture:match( "\\%w+%(R" ) ) == false then
+								if type( ke4.table.index( tag_fun, tag_capture ) ) == "number" then
+									--[ 1 ] tag \\t
+									if ke4.table.index( tag_fun, tag_capture ) == 26 then
+										val_capture = val_capture:gsub( "\\%w+%b()",
+											function( time_capture )
+												--------------------------------------------------------------------------
+												local t_tag_capture = ke4.tag.operation( time_capture:match( "(\\%w+)%b()" ) )
+												local t_val_capture = time_capture:match( "\\%w+(%b())" ):sub( 2, -2 )
+												--------------------------------------------------------------------------
+												if ke4.table.inside( tags_out, time_capture:match( "\\%w+%(R" ) ) == false then
+													--[ 2 ]: tags funciones dentro de una transformación
+													if type( ke4.table.index( tag_fun, t_tag_capture ) ) == "number" then
+														if ke4.table.index( tag_fun, t_tag_capture ) >= 13
+															and ke4.table.index( tag_fun, t_tag_capture ) <= 25 then
+															if type( ke4.string.toval( "{" .. t_val_capture .. "}" ) ) == "table" then
+																return format( "%s(%s)",
+																	t_tag_capture,
+																	ke4.table.op( ke4.string.toval( "{" .. t_val_capture .. "}" ), "concat", "," )
+																)
+															end --"\\t(\\clip( line.left, line.top, line.right, line.bottom ))"
+															return format( "%s(%s)", t_tag_capture, t_val_capture )
+														end
+													end
+													--[ 3 ]: tags funciones del 1 al 12 dentro de una transformación
+													if ke4.table.inside( tag_fun, t_tag_capture ) then -- tags del MOD
+														return time_capture
+													end
+													--[ 4 ]: tags dentro de una transformación
+													return t_tag_capture .. ke4.string.toval( t_val_capture )
+													--"\\t(\\blur( 3 + demo ))"
+												end
+												return time_capture
+											end
+										)
+										return format( "%s(%s)", tag_capture, val_capture )
+									end --"\\t(0,1000,\\blurR( 8 ))"
+									--[ 5 ]: tags de posición, \\org y otros tags funciones
+									if ke4.table.index( tag_fun, tag_capture ) >= 13 then
+										if type( ke4.string.toval( "{" .. val_capture .. "}" ) ) == "table" then
+											return format( "%s(%s)", tag_capture, ke4.table.op( ke4.string.toval( "{" .. val_capture .. "}" ), "concat", "," ) )
+										end --"\\org( line.left, line.middle )"
+										return capture
+									end
+									return capture
+								end
+								--[ 6 ]: tags que no son funciones
+								return tag_capture .. ke4.string.toval( val_capture )
+								--"\\blur( 3 + 5i )"
+							end
+							return capture
+						end
+					)
+					--▼--------------------------------------------------------
+					return String
+				end
+				------------------------------------------------------------------------------------------
+				String = redefinex( String )
+				------------------------------------------------------------------------------------------
+				local tags_i = {
+					[ 01 ] = "(\\fscxy)",			[ 02 ] = "(\\frxy)",		[ 03 ] = "(\\frxz)",
+					[ 04 ] = "(\\fryz)",			[ 05 ] = "(\\frxyz)",		[ 06 ] = "(\\faxy)",
+					[ 07 ] = "(\\fscxr)",			[ 08 ] = "(\\fscyr)",		[ 09 ] = "(\\fscxyi)",
+					[ 10 ] = "(\\fscxy[i]*r)",		[ 11 ] = "(\\xybord)",		[ 12 ] = "(\\xyshad)",
+				}
+				------------------------------------------------------------------------------------------
+				local tags_r = {
+					[ 01 ] = "\\fscx%s\\fscy%s",			[ 02 ] = "\\frx%s\\fry%s",
+					[ 03 ] = "\\frx%s\\frz%s",				[ 04 ] = "\\fry%s\\frz%s",
+					[ 05 ] = "\\frx%s\\fry%s\\frz%s",		[ 06 ] = "\\fax%s\\fay%s",
+					[ 07 ] = "\\fscxr%s",					[ 08 ] = "\\fscyr%s",
+					[ 09 ] = "\\fscx%s\\fscy%s",			[ 10 ] = "\\fscxr%s\\fscyr%s",
+					[ 11 ] = "\\xbord%s\\ybord%s",			[ 12 ] = "\\xshad%s\\yshad%s",
+				}
+				------------------------------------------------------------------------------------------
+				local tags_v = {
+					[ 01 ] = "(%-?%d+[%.%d]*)",
+					[ 02 ] = "(R[cdemrs]*%b())",
+					[ 03 ] = "(%b())",
+				}
+				------------------------------------------------------------------------------------------
+				String = String:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
+				------------------------------------------------------------------------------------------
+				for i = 1, #tags_i do
+					for k = 1, 3 do
+						String = String:gsub( tags_i[ i ] .. tags_v[ k ],
+							function( tagdark, capture )
+								if pcall( loadstring( format( "return function( meta, line, x, y ) return %s end", capture ) ) ) then
+									local fun_dark = loadstring( format( "return function( meta, line, x, y ) return %s end", capture ) )( )
+									if pcall( fun_dark ) then
+										if tags_i[ i ]:match( "\\fscxyi" )
+											and fun_dark( meta, line, x, y ) then
+											local size_xy = fun_dark( meta, line, x, y )
+											if size_xy then
+												return format( tags_r[ i ], size_xy, size_xy )
+											end
+										end --"\\fscxyiRm( 100, 200 )"
+										if fun_dark( meta, line, x, y ) then
+											return format( tags_r[ i ],
+												fun_dark( meta, line, x, y ),
+												fun_dark( meta, line, x, y ),
+												fun_dark( meta, line, x, y )
+											) --"\\frxyzRds( 360 )"
+										end
+									end
+								end
+								return tagdark .. capture
+							end
+						)
+					end
+				end
+				--------------------------------------------------------------------------
+				String = String:gsub( "\"(&H%x+&)\"", "%1" )
+				String = String:gsub( "(\\%w+%-?[%d&#]^*[%.%dH&%x]*) [	 ]*(\\)", "%1%2" )
+				--------------------------------------------------------------------------
+				-- extrae el tag \\org que esté dentro de una transformación
+				String = String:gsub( "\\t%b()",
+					function( time_cap )
+						if time_cap:match( "\\org%b()" ) then
+							local org_tag = time_cap:match( "\\org%b()" )
+							time_cap = org_tag .. time_cap:gsub( "\\org%b()", "" )
+						end
+						return time_cap
+					end
+				)
+				------------------------------------------------
+				local function do_alphax( String )
+					local tag_alpha = {
+						[ 1 ] = "\\alpha(%d+[%.%d]*)",
+						[ 2 ] = "\\1a(%d+[%.%d]*)",
+						[ 3 ] = "\\2a(%d+[%.%d]*)",
+						[ 4 ] = "\\3a(%d+[%.%d]*)",
+						[ 5 ] = "\\4a(%d+[%.%d]*)",
+						[ 6 ] = "\\1va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+						[ 7 ] = "\\2va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+						[ 8 ] = "\\3va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+						[ 9 ] = "\\4va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+					}
+					local tag_replace = {
+						[ 1 ] = "\\alpha%s",
+						[ 2 ] = "\\1a%s",
+						[ 3 ] = "\\2a%s",
+						[ 4 ] = "\\3a%s",
+						[ 5 ] = "\\4a%s",
+						[ 6 ] = "\\1va(%s,%s,%s,%s)",
+						[ 7 ] = "\\2va(%s,%s,%s,%s)",
+						[ 8 ] = "\\3va(%s,%s,%s,%s)",
+						[ 9 ] = "\\4va(%s,%s,%s,%s)",
+					}
+					for i = 1, 5 do
+						String = String:gsub( tag_alpha[ i ],
+							function( num )
+								return format( tag_replace[ i ], ke4.alpha.val2ass( num ) )
+							end
+						)
+					end
+					for i = 6, 9 do
+						String = String:gsub( tag_alpha[ i ],
+							function( num1, num2, num3, num4 )
+								return format( tag_replace[ i ],
+									ke4.alpha.val2ass( num1 ), ke4.alpha.val2ass( num2 ),
+									ke4.alpha.val2ass( num3 ), ke4.alpha.val2ass( num4 )
+								)
+							end
+						)
+					end
+					return String
+				end
+				String = redefinex( String )
+				String = do_alphax( String )
+				------------------------------------------------
+				String = String:gsub( "'(&H%x+&)'", "%1" )
+				------------------------------------------------
+				local function tag_round( TagString )
+					-- redondea los valores numéricos de los tags
+					local dec_round = 3
+					TagString = TagString:gsub( "(%-?%d+%.%d+)",
+						function( number )
+							return ke4.math.round( tonumber( number ), dec_round )
+						end
+					)
+					return TagString
+				end
+				------------------------------------------------
+				return tag_round( ke4.string.change( String, "\\org%b()", 1 ) )
 			end,
 			
 			set = function( times_set, events_set, Line_start_time, Line_end_time )
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				if type( times_set ) == "table" then
 					times_set = times_set
 				else
@@ -9054,6 +10234,12 @@
 			end,
 
 			glitter = function( DurTotal, ExtraTags_i, ExtraTags_f )
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local time_ini, t, t1, t2, t3, t4, Tag_fx = 0, 0, 0, 0, 0, 0, "\\shad0"
 				local GT_i = ExtraTags_i or ""
 				local GT_f = ExtraTags_f or ""
@@ -9108,57 +10294,90 @@
 				return Shp_tbl
 			end, --{\clip(!_G.ke4.tag.clip_shape( _G.ke4.shape.circle, $x, $y )[ 1 ]!)}
 
-			ipol = function( Ipol_1, Ipol_2, Ipol_i )
-				local Val_1, Val_2, v1, v2 = { }, { }, "", ""
-				if Ipol_i == nil then
-					Ipol_i = 0.5
-				elseif Ipol_i <= 0 then
-					Ipol_i = 0
-				elseif Ipol_i >= 1 then
-					Ipol_i = 1
+			ipol = function( Ipol_i, ... )
+				local valors = { ... }
+				if type( ... ) == "table" then
+					valors = ...
 				end
-				if type( Ipol_1 ) == "number"
-					and type( Ipol_2 ) == "number" then
-					return Ipol_1 + Ipol_i * (Ipol_2 - Ipol_1)
-				elseif type( Ipol_1 ) == "string"
-					and type( Ipol_2 ) == "string" then
-					Ipol_1 = ke4.color.from_error( Ipol_1 )
-					Ipol_2 = ke4.color.from_error( Ipol_2 )
-					for c in Ipol_1:gmatch( "&.-&" ) do
-						table.insert( Val_1, c )
-					end
-					for c in Ipol_2:gmatch( "&.-&" ) do
-						table.insert( Val_2, c )
-					end
-					if #Val_1 == 0 or #Val_2 == 0 then
-						return Ipol_1, Ipol_2
-					end
-					v1, v2 = Val_1[ 1 ], Val_2[ 1 ]
-					if #Val_1 == 4 then
-						v1 = format( "(%s,%s,%s,%s)", Val_1[ 1 ], Val_1[ 2 ], Val_1[ 3 ], Val_1[ 4 ] )
-					end
-					if #Val_2 == 4 then
-						v2 = format( "(%s,%s,%s,%s)", Val_2[ 1 ], Val_2[ 2 ], Val_2[ 3 ], Val_2[ 4 ] )
-					end
-					if v1:len( ) > 25 then
-						v1 = ke4.color.vc_to_c( v1 )
-					end
-					if v2:len( ) > 25 then
-						v2 = ke4.color.vc_to_c( v2 )
-					end
-					if v1:len( ) == 25 then
-						v1 = ke4.alpha.va_to_a( v1 )
-					end
-					if v2:len( ) == 25 then
-						v2 = ke4.alpha.va_to_a( v2 )
-					end
-					if v1:len( ) == 5
-						and v2:len( ) == 5 then
-						return interpolate_alpha( Ipol_i, v1, v2 )
-					end
-					return interpolate_color( Ipol_i, v1, v2 )			
+				---------------------------------------------
+				-- interpola el valor de dos números
+				local function ipol_number( val_1, val_2, pct_ipol )
+					return val_1 + (val_2 - val_1) * pct_ipol
 				end
-				return Ipol_1, Ipol_2
+				---------------------------------------------
+				-- interpola el valor de dos shapes o dos clips
+				local function ipol_shpclip( val_1, val_2, pct_ipol )
+					local tbl_1, tbl_2, k = { }, { }, 1
+					for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
+						table.insert( tbl_1, tonumber( c ) )
+					end
+					for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
+						table.insert( tbl_2, tonumber( c ) )
+					end
+					local val_ipol = val_1:gsub( "%-?%d+[%.%d]*", 
+						function( val )
+							local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+							k = k + 1
+							return ke4.math.round( val, 3 )
+						end
+					)
+					return val_ipol
+				end
+				---------------------------------------------
+				-- busca un string dentro de la tabla
+				local function string_in_tbl( str_in_tbl )
+					for i = 1, #str_in_tbl do
+						if type( str_in_tbl[ i ] ) == "string" then
+							return true, str_in_tbl[ i ]
+						end
+					end
+					return false
+				end
+				---------------------------------------------
+				-- determina si los elementos son clip's o shapes
+				local function type_table( Table )
+					if type( Table[ 1 ] ) == "string" then
+						if Table[ 1 ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%)" ) then
+							for i = 1, #Table do
+								if type( Table[ i ] ) ~= "string"
+									or not Table[ i ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%)" ) then
+									return nil
+								end
+							end
+							return true
+						elseif Table[ 1 ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+							for i = 1, #Table do
+								if type( Table[ i ] ) ~= "string"
+									or not Table[ i ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+									return nil
+								end
+							end
+							return true
+						end
+					end
+					return nil
+				end
+				-------------------------------------------------------------
+				-- decide cuál de las 4 interpolaciones se usará
+				local ipol_function = ipol_number
+				local Shp_or_Clip = type_table( valors )
+				if Shp_or_Clip then
+					ipol_function = ipol_shpclip
+				end
+				if string_in_tbl( valors ) then
+					local True, Val_str = string_in_tbl( valors )
+					if Val_str:match( "[&Hh%#]^*%x%x%x%x%x%x[&]*" ) then
+						ipol_function = ke4.color.interpolate
+					elseif Val_str:match( "[&Hh%#]^*%x%x[&]*" ) then
+						ipol_function = ke4.alpha.interpolate
+					end
+				end
+				---------------------------------------------
+				local Ipol_i = Ipol_i or 0.5
+				Ipol_i = ke4.math.clamp( Ipol_i, 0, 1 ) * (#valors - 1)
+				local valor_i = valors[ floor( Ipol_i ) + 1 ]
+				local valor_f = valors[ floor( Ipol_i ) + 2 ] or valors[ floor( Ipol_i ) + 1 ]
+				return ipol_function( valor_i, valor_f, Ipol_i - floor( Ipol_i ) )
 			end,
 			
 			clip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
@@ -9232,6 +10451,77 @@
 				return iclip2_tag
 			end,
 			
+			rclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
+				local offset = 3--l.outline + l.shadow
+				local mode = Mode or 79
+				local left_x = left_cx - offset
+				local top_y = top_cy - offset
+				local clip_W, clip_H = width_clip + 2 * offset, height_clip + 2 * offset
+				local loop_W, loop_H = loop_x, loop_y
+				local pixelW, pixelH = recall.pixx, recall.pixy
+				if j == 1 then
+					pixelW = remember( "pixx", { } )
+					pixelH = remember( "pixy", { } )
+					pixelW[ -1 ] = 0
+					pixelH[ -1 ] = 0
+					for i = 0, loop_W - 1 do
+						pixelW[ i ] = pixelW[ i - 1 ] + clip_W / loop_W + ke4.math.R( -clip_W / (2 * loop_W), clip_W / (2 * loop_W) )
+					end
+					for i = 0, loop_H - 1 do
+						pixelH[ i ] = pixelH[ i - 1 ] + clip_H / loop_H + ke4.math.R( -clip_H / (2 * loop_H), clip_H / (2 * loop_H) )
+					end
+					pixelW[ loop_W - 1 ] = clip_W
+					pixelH[ loop_H - 1 ] = clip_H
+				end
+				local cx1, cx2, cy1, cy2
+				if ke4.table.inside( { 13, 17, 31, 39, 71, 79, 93, 97 }, mode ) == false then
+					mode = 79
+				end
+				if mode == 17
+					or mode == 71 then
+					cx1 = left_x + pixelW[ ceil( j / loop_H ) - 2 ]
+					cx2 = left_x + pixelW[ ceil( j / loop_H ) - 1 ]
+				elseif mode == 13
+					or mode == 79 then
+					cx1 = left_x + pixelW[ (j - 1) % loop_W - 1 ]
+					cx2 = left_x + pixelW[ (j - 1) % loop_W - 0 ]
+				elseif mode == 39
+					or mode == 93 then
+					cx1 = left_x + clip_W - pixelW[ ceil( j / loop_H ) - 1 ]
+					cx2 = left_x + clip_W - pixelW[ ceil( j / loop_H ) - 2 ]
+				elseif mode == 31
+					or mode == 97 then
+					cx1 = left_x + clip_W - pixelW[ (j - 1) % loop_W - 0 ]
+					cx2 = left_x + clip_W - pixelW[ (j - 1) % loop_W - 1 ]
+				end
+				if mode == 79
+					or mode == 97 then
+					cy1 = top_y + pixelH[ ceil( j / loop_W ) - 2 ]
+					cy2 = top_y + pixelH[ ceil( j / loop_W ) - 1 ]
+				elseif mode == 71
+					or mode == 93 then
+					cy1 = top_y + pixelH[ (j - 1) % loop_H - 1 ]
+					cy2 = top_y + pixelH[ (j - 1) % loop_H - 0 ]
+				elseif mode == 13
+					or mode == 31 then
+					cy1 = top_y + clip_H - pixelH[ ceil( j / loop_W ) - 1 ]
+					cy2 = top_y + clip_H - pixelH[ ceil( j / loop_W ) - 2 ]
+				elseif mode == 17
+					or mode == 39 then
+					cy1 = top_y + clip_H - pixelH[ (j - 1) % loop_H - 0 ]
+					cy2 = top_y + clip_H - pixelH[ (j - 1) % loop_H - 1 ]
+				end
+				return format( "\\clip(%s,%s,%s,%s)",
+					ke4.math.round( cx1, 2 ), ke4.math.round( cy1, 2 ), ke4.math.round( cx2, 2 ), ke4.math.round( cy2, 2 )
+				)
+				--code once: loop_x = 5 loop_y = 3
+			end, --!maxloop( loop_x * loop_y )!{\an5\pos($x,$y)!_G.ke4.tag.rclip( j, loop_x, loop_y, line.left, line.top, line.width, line.height )!}
+
+			riclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
+				local riclip_tag = ke4.tag.rclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode ):gsub( "clip", "iclip" )
+				return riclip_tag
+			end,
+			
 			moveclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
 				local left_x, top_y = left_cx, top_cy
 				local Move_x = Move_x or 0
@@ -9268,6 +10558,24 @@
 				return moveiclip2_tag
 			end,
 			
+			moverclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
+				local left_x, top_y = left_cx, top_cy
+				local Move_x = Move_x or 0
+				local Move_y = Move_y or 0
+				local clip_i = ke4.tag.rclip( j, loop_x, loop_y, left_x, top_y, width_clip, height_clip, Mode )
+				local clip_f = ke4.tag.rclip( j, loop_x, loop_y, left_x + Move_x, top_y + Move_y, width_clip, height_clip, Mode )
+				if Time_i == nil
+					or Time_f == nil then
+					return format( "%s\\t(%s)", clip_i, clip_f )
+				end
+				return format( "%s\\t(%s,%s,%s)", clip_i, Time_i, Time_f, clip_f )
+			end,
+			
+			movericlip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
+				local movericlip_tag = ke4.tag.moverclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
+				return movericlip_tag
+			end,
+
 			operation = function( String )
 				local String = String
 				:gsub( "%%","%%%%" ):gsub( "%*", "%%*" ):gsub( "%+", "%%+" ):gsub( "%-", "%%-" )
@@ -9349,6 +10657,12 @@
 			end, --!_G.ke4.tag.lmove( Configs, { $x - line.right, $y, $x, $y, $x + meta.res_x - line.left, $y }, { 0, 200, line.duration - 200, line.duration } )!
 			
 			pmove = function( Configs, F_x, F_y, domainF, t1, t2, Accel, offset_t ) -- Parametric Move
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local l_descent = Configs[ 1 ].descent
 				local pos_x, pos_y = Configs[ 2 ], Configs[ 3 ]
 				local val_width, val_height = Configs[ 4 ], Configs[ 5 ]
@@ -9418,6 +10732,13 @@
 			end, --!_G.ke4.tag.pmove( Configs, "100 * math.cos( %s )", "100 * math.sin( %s )", { 0, 2 * math.pi }, 0, line.duration )!{\1c&HFF00FF&\fad(100,100)}!line.text_stripped!
 
 			smove = function( Configs, Shape, t1, t2, Relative ) -- Shape Move
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
 				local l_descent = Configs[ 1 ].descent
 				local pos_x, pos_y = Configs[ 2 ], Configs[ 3 ]
 				local val_width, val_height = Configs[ 4 ], Configs[ 5 ]
@@ -9516,13 +10837,19 @@
 			end, --!_G.ke4.tag.smove( Configs, _G.ke4.shape.trebol, 0, line.duration )!{\1c&HFF00FF&\fad(100,100)}!line.text_stripped!
 			
 			rmove = function( Configs, Rx, Ry, t1, t2, Accel, offset_t, Counter2 ) -- Random Move
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local l_descent = Configs[ 1 ].descent
 				local pos_x, pos_y = Configs[ 2 ], Configs[ 3 ]
 				local val_width, val_height = Configs[ 4 ], Configs[ 5 ]
 				local offset_t = offset_t or 0
 				local accel = Accel or 1
-				local time2 = t2 or fx.movet_f
-				local time1 = t1 or fx.movet_i
+				local time2 = t2 or Configs[ 1 ].duration
+				local time1 = t1 or 0
 				local Rx = Rx or 0.4 * val_height
 				local Ry = Ry or Rx
 				local tgdur
@@ -9673,6 +11000,12 @@
 			
 			rmove2 = function( Configs, Rx, Ry, t, Accel ) -- Random Move
 				--similar a rmove, pero con "shakes" a intervalos determinados
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local time_ini, time_fin
 				local time_tag = ke4.math.round( 2.8 * frame_dur, 2 )			--Duración de cada transformación
 				local time_shk = ke4.math.R( 3, 6 ) * time_tag					--Duración de cada "Shake"
@@ -9743,6 +11076,19 @@
 			end, --!_G.ke4.tag.rmove3( Configs, 12, 12, { 0, 500, line.duration - 500, line.duration }, 1, { 84 } )!{\1c&HFF00FF&\fad(100,100)}!line.text_stripped!
 			
 			rmove4 = function( Configs, Rx, Ry, t1, t2, Accel, offset_t, move4 )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				----------------------------------------
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local time1 = t1 or 0--fx.movet_i
 				local time2 = t2 or 5000--fx.movet_f
 				local dur_t = time2 - time1
@@ -9793,6 +11139,12 @@
 			end, --!_G.ke4.tag.rmove4( Configs, 20, 20, 0, line.duration, 1, { 460 }, { 126, { 20, 40 } } )!{\1c&HFF00FF&\fad(100,100)}!line.text_stripped!
 			
 			omove = function( Configs, P, t1, t2, Dur, Accel ) -- Oscill Move
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local l_descent = Configs[ 1 ].descent
 				local pos_x, pos_y = Configs[ 2 ], Configs[ 3 ]
 				local val_width, val_height = Configs[ 4 ], Configs[ 5 ]
@@ -9869,10 +11221,10 @@
 			default = function( Text_Config, String )
 				local l = ke4.table.duplicate( Text_Config.styleref )
 				l.duration, l.center, l.middle = Text_Config.duration, Text_Config.center, Text_Config.middle
-				local text_color1, text_color2 = color_from_style( l.color1 ), color_from_style( l.color2 )
-				local text_color3, text_color4 = color_from_style( l.color3 ), color_from_style( l.color4 )
-				local text_alpha1, text_alpha2 = alpha_from_style( l.color1 ), alpha_from_style( l.color2 )
-				local text_alpha3, text_alpha4 = alpha_from_style( l.color3 ), alpha_from_style( l.color4 )
+				local text_color1, text_color2 = ke4.color.fromstyle( l.color1 ), ke4.color.fromstyle( l.color2 )
+				local text_color3, text_color4 = ke4.color.fromstyle( l.color3 ), ke4.color.fromstyle( l.color4 )
+				local text_alpha1, text_alpha2 = ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color2 )
+				local text_alpha3, text_alpha4 = ke4.alpha.fromstyle( l.color3 ), ke4.alpha.fromstyle( l.color4 )
 				local tags_default = ""
 				local Str_def = String or ""
 				local tags_default_tags = {
@@ -9974,10 +11326,10 @@
 			default2 = function( Text_Config, String )
 				local l = ke4.table.duplicate( Text_Config.styleref )
 				l.duration, l.center, l.middle = Text_Config.duration, Text_Config.center, Text_Config.middle
-				local text_color1, text_color2 = color_from_style( l.color1 ), color_from_style( l.color2 )
-				local text_color3, text_color4 = color_from_style( l.color3 ), color_from_style( l.color4 )
-				local text_alpha1, text_alpha2 = alpha_from_style( l.color1 ), alpha_from_style( l.color2 )
-				local text_alpha3, text_alpha4 = alpha_from_style( l.color3 ), alpha_from_style( l.color4 )
+				local text_color1, text_color2 = ke4.color.fromstyle( l.color1 ), ke4.color.fromstyle( l.color2 )
+				local text_color3, text_color4 = ke4.color.fromstyle( l.color3 ), ke4.color.fromstyle( l.color4 )
+				local text_alpha1, text_alpha2 = ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color2 )
+				local text_alpha3, text_alpha4 = ke4.alpha.fromstyle( l.color3 ), ke4.alpha.fromstyle( l.color4 )
 				local String = String or ""
 				local tags_default_tags = {
 					[ 01 ] = "\\1v?c[tcfswmd]*%~",			[ 02 ] = "\\2v?c[tcfswmd]*%~",			[ 03 ] = "\\3v?c[tcfswmd]*%~",
@@ -10039,10 +11391,10 @@
 			inverse = function( Text_Config, String )
 				local l = ke4.table.duplicate( Text_Config.styleref )
 				l.duration, l.center, l.middle = Text_Config.duration, Text_Config.center, Text_Config.middle
-				local text_color1, text_color2 = color_from_style( l.color1 ), color_from_style( l.color2 )
-				local text_color3, text_color4 = color_from_style( l.color3 ), color_from_style( l.color4 )
-				local text_alpha1, text_alpha2 = alpha_from_style( l.color1 ), alpha_from_style( l.color2 )
-				local text_alpha3, text_alpha4 = alpha_from_style( l.color3 ), alpha_from_style( l.color4 )
+				local text_color1, text_color2 = ke4.color.fromstyle( l.color1 ), ke4.color.fromstyle( l.color2 )
+				local text_color3, text_color4 = ke4.color.fromstyle( l.color3 ), ke4.color.fromstyle( l.color4 )
+				local text_alpha1, text_alpha2 = ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color2 )
+				local text_alpha3, text_alpha4 = ke4.alpha.fromstyle( l.color3 ), ke4.alpha.fromstyle( l.color4 )
 				local String = String or ""
 				local table_inverse = { }
 				local tags_inverses = {
@@ -10063,7 +11415,7 @@
 							if tag_inv:match( "\\[%d]*c&H%x+&" ) then
 								local r_nor, g_nor, b_nor = tag_inv:match( "(%x%x)(%x%x)(%x%x)" )
 								local r_inv, g_inv, b_inv = 255 - tonumber( r_nor, 16 ), 255 - tonumber( g_nor, 16 ), 255 - tonumber( b_nor, 16 )
-								return "<" .. tag_rev .. ass_color( b_inv, g_inv, r_inv ) .. ">"
+								return "<" .. tag_rev .. ke4.color.val2ass( b_inv, g_inv, r_inv ) .. ">"
 							elseif tag_inv:match( "\\%da&H%x+&" )
 								or tag_inv:match( "\\%da%d+[%.%d]*" ) then
 								local num_alpha = tag_inv:match( "\\(%d)" )
@@ -10185,6 +11537,7 @@
 						) --"\\tr(set,0:01:00.018,0:01:07.032,\\tags)"
 						if capture:match( "\\t[%w%~%-]*%([ ]*\\" ) then
 							return capture
+						--[[
 						elseif capture:match( "\\t[%w%~%-]*%(([^\\]*)" ) then
 							timest_tbl = "{" .. capture:match( "\\t[%w%~%-]*%(([^\\]*)" ):sub( 1, -2 ) .. "}"
 							timest_tbl = ke4.string.toval( timest_tbl )
@@ -10208,9 +11561,60 @@
 								)
 								return capture
 							end --"\\t(0.8,\\tags\\otros)"
+							--]]
 						end
+						return capture
 					end --"\\t( R( 100, 300, 10 ), 500 + line.n,\\xshadR( 4 ) )"
 				)
+				--▼--------------------------------------------------------
+				-- saca algunos tags al inicio del \\t a una transfo instantánea
+				String = String:gsub( "\\t[%w%~%-]*%b()",
+					function( capture )
+						local capture = ke4.string.coupling( capture, "(\\[%d]*%a+)(__)(:)(__)" )
+						if capture:match( "\\[%d]*%a+%b()%:%b()" ) then
+							local time_ini, time_fin = 0, 0
+							if capture:match( "\\t[%w%~%-]*%([ ]*%-?%d+[%.%d ]*,[ ]*%-?%d+[%.%d ]*," ) then
+								time_ini, time_fin = capture:match( "\\t[%w%~%-]*%([ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*)," )
+							end
+							if capture:match( "\\te" ) then
+								local time_dur = l.duration
+								--[[
+								if capture:match( "\\t[%w%~%-]*" ):match( "s" ) then
+									time_dur = syl.end_time
+								elseif capture:match( "\\t[%w%~%-]*" ):match( "c" ) then
+									time_dur = char.end_time
+								elseif capture:match( "\\t[%w%~%-]*" ):match( "f" ) then
+									time_dur = furi.end_time
+								elseif capture:match( "\\t[%w%~%-]*" ):match( "w" ) then
+									time_dur = word.end_time
+								end
+								--]]
+								time_ini = time_dur - time_fin
+							end
+							local tags_ini_tbl = { }
+							for cap in capture:gmatch( "\\[%d]*%a+%b()%:%b()" ) do
+								table.insert( tags_ini_tbl, cap:match( "(\\[%d]*%a+%b())%:%b()" ) )
+							end
+							---------------------------------------------------
+							capture = capture:gsub( "\\[%d]*%a+(%b())%:(%b())",
+								function( val_ini, val_fin )
+									if ke4.string.toval( val_ini ) == ke4.string.toval( val_fin ) then
+										return ""
+									end
+								end
+							)
+							---------------------------------------------------
+							capture = capture:gsub( "(\\[%d]*%a+)%b()%:(%b())", "%1%2" )
+							---------------------------------------------------
+							if capture:match( "\\t[%w%~%-]*%(%-?%d[%.%d]*,%-?%d[%.%d]*,%-?%d[%.%d]*,\\%)" )
+								or capture:match( "\\t[%w%~%-]*%(%-?%d[%.%d]*,%-?%d[%.%d]*,\\%)" ) then
+								capture = "" -- para transfos vacías :)
+							end
+							---------------------------------------------------
+							return format( "\\t(%s,%s,%s)%s", time_ini, time_ini, ke4.table.op( tags_ini_tbl, "concat" ), capture )
+						end --"\\tes(0,100,\\frR( 45 ):0)"
+					end --"\\tr(syl,\\fscxyr1.5:1\\1cR( ):TC1)"
+				) --"\\t(300,900,0.8,\\1cR( ):&HFFFFFF&\\bs0\\blur1:3)"
 				--▼--------------------------------------------------------
 				-- convierte un \\t normal en una por default \\t --> \\td
 				String = String:gsub( "\\t(%b()%b())", "\\td%1" )
@@ -10222,6 +11626,69 @@
 						return cap1 .. "(" .. cap2 ..")" .. cap3 .. cap4:sub( 2, -2 )
 					end
 				) --"\\1ct300dR( )"
+				--▼--------------------------------------------------------
+				local function default_time( Stringt )
+					-- pasa a un tag dentro de una transformación, luego
+					-- en otra transformación le da su valor por default
+					--▼ modifica momentáneamente algunos tags del VSFilterMod ---
+					Stringt = Stringt:gsub( "(\\distort)(%b())", "\\disTorT%2" )	-- "\\distort(1,1,1,1)"
+					:gsub( "(\\distort)(t[cdefimsw]*%b())", "\\disTorT%2" )
+					:gsub( "(\\jitter)(%b())", "\\jiTTer%2" )
+					:gsub( "(\\jitter)(t[cdefimsw]*%b())", "\\jiTTer%2" )
+					--▼ encierra en paréntesis el valor numérico del tag \\t ----
+					Stringt = Stringt:gsub( "(\\%w+)(t[cfsw]*)(%d+[f%.%d]*)(d)", "%1%2(%3)%4" )
+					--▼ encierra en paréntesis el valor que se añadirá al tag ---
+					Stringt = Stringt:gsub( "(\\%w+)(t[cfsw]*)(%b())(d)(&H%x+&)", "%1%2(%3)%4(%5)" )	-- ass colors and alphas
+					:gsub( "(\\%w+)(t[cfsw]*)(%b())(d)([ACST]*%-?%d+[%.%d]*)", "%1%2(%3)%4(%5)" )		-- números y/o referencias de alpha/colores
+					:gsub( "(\\%w+)(t[cfsw]*)(%b())(d)(R[cdemrst]*%b())", "%1%2(%3)%4(%5)" )			-- valores randoms, función random
+					--▼ genera los remplazos, ingresa el tag dentro del \\t -----
+					Stringt = Stringt:gsub( "(\\%w+)(t[cfsw]*)(%b())d(%b())",
+						function( tag_in_time, tag_time, duration, valors )
+							local duration = tostring( duration ):sub( 2, -2 )
+							local time_dur = l.duration
+							--[[
+							if tag_time == "ts" then
+								time_dur = syl.dur
+							elseif tag_time == "tc" then
+								time_dur = char.dur
+							elseif tag_time == "tf" then
+								time_dur = furi.dur
+							elseif tag_time == "tw" then
+								time_dur = word.dur
+							end
+							--]]
+							if type( ke4.string.toval( duration ) ) == "number" then
+								duration = ke4.string.toval( duration )
+								return format( "\\%s(0,%s,%s)(0,%s)", tag_time, duration, tag_in_time .. valors, time_dur - duration )
+								:gsub( "\\t%(", "\\td%(" )
+							end
+							return tag_in_time .. "(" .. duration .. ")d" .. valors
+						end --"\\frxyt300dRs( 10 )"
+					) --"\\frxyzt( 7f )dRs( 60, 90 )"
+					--▼ opción cuando el tag \\t no lleva tiempos ---------------
+					--▼ encierra en paréntesis el valor que se añadirá al tag ---
+					Stringt = Stringt:gsub( "(\\%w+t[cdefimsw]*)([ACST]*%-?%d+[f%.%d]*)", "%1(%2)" )
+					:gsub( "(\\%w+t[cdefimsw]*)(R[cdemrst]*%b())", "%1(%2)" )
+					:gsub( "(\\%w+t[cdefimsw]*)(&H%x+&)", "%1(%2)" )
+					--▼ genera los remplazos, ingresa el tag dentro del \\t -----
+					Stringt = Stringt:gsub( "(\\%w+)(t[cdefimsw]*)(%b())",
+						function( tag_in, tag_t, valors )
+							return format( "\\%s(%s%s)", tag_t, tag_in, valors )
+						end
+					) --"\\1ctR( )" -->\\t(\\1cR( ))
+					--▼ tm, tmd = time mid, time mid default --------------------
+					Stringt = Stringt:gsub( "(\\tm[d]*)(%b())",
+						function( tag_time, tags_in_time )
+							tags_in_time = tags_in_time:sub( 2, -2 )
+							tags_in_time = format( "(0,%s,%s)", l.duration / 2, tags_in_time )
+							if tag_time:match( "d" ) then
+								return format( "\\td%s(0,%s)", tags_in_time, l.duration / 2 )
+							end
+							return "\\t" .. tags_in_time
+						end --"\\fscytm180" -->\\t(0,line.duration/2,\\fscy180)
+					) --"\\fscytmd200" -->\\t(0,line.duration/2,\\fscy200)\\t(line.duration/2,line.duration,\\fscy100)
+					return Stringt
+				end
 				--▼--------------------------------------------------------
 				-- ke4.tag.oscill
 				String = String:gsub( "(\\[%d]*%a+)(%-?[%d&]^*[%.%d&H%x]*)(o)(%d+[%.%d]*)", "%1(%2)%3(%4)" )
@@ -10320,6 +11787,8 @@
 				String = String:gsub( "(\\%d%d+[ac]^*)(%-?[%d&#]^*[%.%dH&%x]*)([km]^*[dr]*)", "%1%3%2" )
 				String = String:gsub( "(\\%d%d+[ac]^*)(%b())([km]^*[dr]*)", "%1%3%2" )
 				--▼--------------------------------------------------------
+				String = default_time( String )
+				--▼--------------------------------------------------------
 				String = multi_colors( String )
 				--▼--------------------------------------------------------
 				String = multi_alphas( String )
@@ -10338,6 +11807,73 @@
 				) --"\\1cR( ** )" --> "\\1c .. ke4.random.color( ** )"
 				--▼--------------------------------------------------------
 				String = String:gsub( "\\bs(%d[fr%.%d]*)", "\\bord%1\\shad%1" )
+				:gsub( "\\bss", format( "\\bord%s\\shad%s", l.outline, l.shadow ) )
+				--▼--------------------------------------------------------
+				-- transformación con tiempos de "ratio" o proporción (p) de cierta duración
+				String = String:gsub( "\\tp([cdefisw%d%~%-]*)%((%d+[%.%d]*),(%d+[%.%d]*),",
+					function( tag_mod, time_ini, time_fin )
+						local time_dur = l.duration
+						--[[
+						if tag_mod:match( "s" ) then
+							time_dur = syl.dur
+						elseif tag_mod:match( "c" ) then
+							time_dur = char.dur
+						elseif tag_mod:match( "f" ) then
+							time_dur = furi.dur
+						elseif tag_mod:match( "w" ) then
+							time_dur = word.dur
+						end
+						--]]
+						local time_ini = tonumber( time_ini ) * time_dur
+						local time_fin = tonumber( time_fin ) * time_dur
+						return format( "\\t%s(%s,%s,", tag_mod, time_ini, time_fin )
+					end
+				)
+				--▼--------------------------------------------------------
+				-- adapta una transformación para que se ejecute desde el tiempo final
+				String = String:gsub( "\\te([cfsw%~%-%d]*)(%b())",
+					function( time_sign, time_tags )
+						local new_tag = "\\t" .. time_sign .. time_tags
+						local time_ini, time_fin, time_acc, time_mark = 0, l.duration, "", ""
+						if new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*%-?%d+[%.%d ]*,[ ]*%-?%d+[%.%d ]*," ) then
+							time_ini = tonumber( new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*(%-?%d+[%.%d ]*),[ ]*%-?%d+[%.%d ]*," ) )
+							time_fin = tonumber( new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*%-?%d+[%.%d ]*,[ ]*(%-?%d+[%.%d ]*)," ) )
+						end
+						if new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*%-?%d+[%.%d ]*,[ ]*%-?%d+[%.%d ]*,[ ]*%-?%d+[%.%d ]*," ) then
+							time_acc = new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*%-?%d+[%.%d ]*,[ ]*%-?%d+[%.%d ]*,[ ]*(%-?%d+[%.%d ]*,)" )
+						elseif new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*%-?%d+[%.%d ]*,[ ]*\\" ) then
+							time_acc = new_tag:match( "\\t[cfsw%~%-%d]*%([ ]*(%-?%d+[%.%d ]*,)[ ]*\\" )
+						end
+						local tags_inside = time_tags:sub( 2, -2 ):match( "\\%S+[ %S]*" )
+						---------------------------------------
+						local time_dur = l.duration
+						--[[
+						if time_sign:match( "s" ) then
+							time_dur = syl.dur
+						elseif time_sign:match( "c" ) then
+							time_dur = char.dur
+						elseif time_sign:match( "f" ) then
+							time_dur = furi.dur
+						elseif time_sign:match( "w" ) then
+							time_dur = word.dur
+						end
+						--]]
+						---------------------------------------
+						local time_end_ini = time_dur - time_fin
+						local time_end_fin = time_dur - time_ini
+						--[[
+						local transfo_esp = {
+							[ 01 ] = "1",	[ 02 ] = "2",	[ 03 ] = "3",	[ 04 ] = "4",
+							[ 05 ] = "5",	[ 06 ] = "6",	[ 07 ] = "7",	[ 08 ] = "8",
+							[ 09 ] = "9",	[ 10 ] = "0",	[ 11 ] = "~",	[ 12 ] = "-",
+						}
+						if table.inside( transfo_esp, time_sign ) then
+							time_mark = "M"
+						end --no recuerdo para qué es esta marca :P
+						--]]
+						return format( "\\t%s(%s,%s,%s)%s", time_sign, time_end_ini, time_end_fin, time_acc .. tags_inside, time_mark )
+					end --"\\te(0,300,\\frR( 45 ))" = \\t(fx.dur-300,fx.dur,\\frR( 45 ))
+				) --"\\te(0,100,\\frR( 45 ):0)"
 				--▼--------------------------------------------------------
 				local tag_fun = {
 					-- tags funciones: todos aquellos que están seguidos de paréntesis
@@ -10469,14 +12005,14 @@
 				return String
 			end,
 
-			dark = function( Text_Config, Text )
+			dark = function( Text_Config, String )
 				local l = ke4.table.duplicate( Text_Config.styleref )
 				l.duration, l.center, l.middle = Text_Config.duration, Text_Config.center, Text_Config.middle
-				local text_color1, text_color2 = color_from_style( l.color1 ), color_from_style( l.color2 )
-				local text_color3, text_color4 = color_from_style( l.color3 ), color_from_style( l.color4 )
-				local text_alpha1, text_alpha2 = alpha_from_style( l.color1 ), alpha_from_style( l.color2 )
-				local text_alpha3, text_alpha4 = alpha_from_style( l.color3 ), alpha_from_style( l.color4 )
-				Text = ke4.tag.redefine( Text_Config, Text )
+				local text_color1, text_color2 = ke4.color.fromstyle( l.color1 ), ke4.color.fromstyle( l.color2 )
+				local text_color3, text_color4 = ke4.color.fromstyle( l.color3 ), ke4.color.fromstyle( l.color4 )
+				local text_alpha1, text_alpha2 = ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color2 )
+				local text_alpha3, text_alpha4 = ke4.alpha.fromstyle( l.color3 ), ke4.alpha.fromstyle( l.color4 )
+				String = ke4.tag.redefine( Text_Config, String )
 				------------------------------------------------------------------------------------------
 				local tags_i = {
 					[ 01 ] = "(\\fscxy)",			[ 02 ] = "(\\frxy)",			[ 03 ] = "(\\frxz)",
@@ -10508,7 +12044,7 @@
 					[ 19 ] = "\\xshad%s\\yshad%s",
 				}
 				------------------------------------------------------------------------------------------
-				Text = Text:gsub( "%.line", ".LINE" ) --> var.line.val
+				String = String:gsub( "%.line", ".LINE" ) --> var.line.val
 				:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
 				:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
 				:gsub( "line%.", "linefx[  ii  ]." )
@@ -10520,17 +12056,17 @@
 				for i = 1, #tags_i do
 					for k = 1, 3 do
 						----------------------------------------------------------------------------------------------
-						if Text:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%d+[%.%d]*)" ) then
+						if String:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%d+[%.%d]*)" ) then
 							ext_funct_b = true
-							v01, v02, ext_funct_v = Text:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%d+[%.%d]*)" )
-							Text = Text:gsub( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%d+[%.%d]*)", "%1%2" )
-						elseif Text:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%b())" ) then
+							v01, v02, ext_funct_v = String:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%d+[%.%d]*)" )
+							String = String:gsub( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%d+[%.%d]*)", "%1%2" )
+						elseif String:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%b())" ) then
 							ext_funct_b = true
-							v01, v02, ext_funct_v = Text:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%b())" )
-							Text = Text:gsub( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%b())", "%1%2" )
+							v01, v02, ext_funct_v = String:match( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%b())" )
+							String = String:gsub( tags_i[ i ] .. tags_v[ k ] .. "([%~%-]^*%b())", "%1%2" )
 						end --"\\xyshad-6r~300"
 						----------------------------------------------------------------------------------------------
-						Text = Text:gsub( tags_i[ i ] .. tags_v[ k ] .. tags_v[ 4 ],
+						String = String:gsub( tags_i[ i ] .. tags_v[ k ] .. tags_v[ 4 ],
 							function( tagdark, capture, add_function )
 								local extra_function = add_function
 								if ext_funct_b then
@@ -10575,13 +12111,13 @@
 					end
 				end
 				---------------------------------------------------------------------
-				Text = Text:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
+				String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
 				:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n")
 				:gsub( "linefx%[  ii  %]%.", "line." )
 				:gsub( "\"(&H%x+&)\"", "%1" )
 				--"\\t(100,800,\\frxyoR( 10 * line.i, 77 ))"
 				-- convierte los tags de escala, de ratio a porcentaje
-				Text = Text:gsub( "(\\fsc[xy]^*)r(%-?%d+[%.%d]*)",
+				String = String:gsub( "(\\fsc[xy]^*)r(%-?%d+[%.%d]*)",
 					function( tag_fsc, ratioxy )
 						local Scale = l.scale_x
 						if tag_fsc:match( "y" ) then
@@ -10591,20 +12127,20 @@
 					end --"\\fscxyr1.4"
 				)
 				--convierte el tag \\fs de ratio a pixeles
-				Text = Text:gsub( "\\fsr(%-?%d+[%.%d]*)",
+				String = String:gsub( "\\fsr(%-?%d+[%.%d]*)",
 					function( ratiofs )
 						return "\\fs" .. l.fontsize * tonumber( ratiofs )
 					end
 				)
 				-- tiempo de la transformación por default o del valor inverso
-				Text = Text:gsub( "([%~%-]^*)(%b())",
+				String = String:gsub( "([%~%-]^*)(%b())",
 					function( tag_sig, tag_val )
 						return tag_sig .. ke4.string.toval( tag_val )
 					end -- "\\xshad-8r~300" = "\\xshad-8r\\t(0,300,\\xshad( l.shadow ))"
 				) -- "\\yshad10r-(fx.dur - 200)" = "\\yshad10r\\t(0,fx.dur - 200,\\yshad-10r)"
 				-----------------------------------------------------------------------------------------
 				-- le da el valor por default o inverso a un tag y lo pone dentro de una transformación
-				Text = Text:gsub( "(\\[%d]*%a+%-?[%d&]^*[%d%.&H%x]*)([%-%~]^*)(%-?%d+[%.%d]*)",
+				String = String:gsub( "(\\[%d]*%a+%-?[%d&]^*[%d%.&H%x]*)([%-%~]^*)(%-?%d+[%.%d]*)",
 					function( tag_cap, mark_sign, time_transfo )
 						local def_or_inv = ke4.tag.default
 						if mark_sign == "-" then
@@ -10613,7 +12149,7 @@
 						return format( "%s\\t(0,%s,%s)", tag_cap, time_transfo, def_or_inv( Text_Config, tag_cap ) )
 					end --"\\xshad( -9 )-440"
 				) --tag.oscill( fx.dur, 1000, "\\fr( 5i )\\frx( 3 - i )" )
-				Text = Text:gsub( "(\\[%d]*%a+%-?[%d&]^*[%d%.&H%x]*)([%-%~]^*)",
+				String = String:gsub( "(\\[%d]*%a+%-?[%d&]^*[%d%.&H%x]*)([%-%~]^*)",
 					function( tag_cap, mark_sign )
 						local def_or_inv = ke4.tag.default
 						if mark_sign == "-" then
@@ -10624,7 +12160,7 @@
 				) --"\\yshad10r-200"
 				--------------------------------------------------------------------------
 				-- reune transformaciones creadas por un tag dark, en una sola
-				Text = Text:gsub( "%b@@",	
+				String = String:gsub( "%b@@",	
 					function( capture )
 						local time_capture_def = { }
 						local time_capture_val = { }
@@ -10667,7 +12203,7 @@
 				)
 				--------------------------------------------------------------------------
 				-- le da el valor por default o inverso a un grupo de tags y los pone dentro de una transformación
-				Text = Text:gsub( "(%b())([%-%~]^*)(%-?%d+[%.%d]*)",
+				String = String:gsub( "(%b())([%-%~]^*)(%-?%d+[%.%d]*)",
 					function( tag_cap, mark_sign, time_transfo )
 						local tag_cap = tag_cap:sub( 2, -2 )
 						local def_or_inv = ke4.tag.default
@@ -10679,7 +12215,7 @@
 						end
 					end --"\\bord5r(\\xyshad-4\\fr45)-360"
 				)
-				Text = Text:gsub( "(%b())([%-%~]^*)",
+				String = String:gsub( "(%b())([%-%~]^*)",
 					function( tag_cap, mark_sign )
 						local tag_cap = tag_cap:sub( 2, -2 )
 						local def_or_inv = ke4.tag.default
@@ -10691,11 +12227,11 @@
 						end --"(\\xyshad-5)~"
 					end --"(\\frx300\\blur4\\3c&HFFFFFF&)~"
 				)
-				Text = Text:gsub( "(\\%w+%-?[%d&#]^*[%.%dH&%x]*) [	 ]*(\\)", "%1%2" )
+				String = String:gsub( "(\\%w+%-?[%d&#]^*[%.%dH&%x]*) [	 ]*(\\)", "%1%2" )
 				-----------------------------------------------------------------------------------------
 				-- genera dos o tres transformaciones con duración promedia
 				-- del efecto con valores inversos o por default, de un tag
-				Text = Text:gsub( "(\\[%d]*%a+)(%-?[%d&]^*[%.%dH%x&]*)([km]^*[dr]*)",
+				String = String:gsub( "(\\[%d]*%a+)(%-?[%d&]^*[%.%dH%x&]*)([km]^*[dr]*)",
 					function( tag_num, time_val, time_dec )
 						local l = Text_Config
 						local val_nor = tag_num .. time_val
@@ -10782,9 +12318,9 @@
 					end --"\\frxymrRs( 86 )\\xyshadmrRrs( 2, 10 )"
 					return String
 				end
-				Text = time_cap_uni( Text )
+				String = time_cap_uni( String )
 				-- nuevas transformaciones con valores inversos y/o por defaults
-				Text = Text:gsub( "(\\t[cfsw]*)([%-%~%d]^*)(%b())",
+				String = String:gsub( "(\\t[cfsw]*)([%-%~%d]^*)(%b())",
 					function( tag_transfo, indicator, time_valors )
 						local l = Text_Config
 						local new_tag = tag_transfo .. indicator .. time_valors
@@ -10909,16 +12445,16 @@
 					end
 				)
 				-------------------------------------
-				Text = ke4.tag.timefx( Text_Config, Text )
+				String = ke4.tag.timefx( Text_Config, String )
 				-------------------------------------
-				Text = Text:gsub( "\\org%([ ]*%)",
+				String = String:gsub( "\\org%([ ]*%)",
 					function( org_cap )
 						return format( "\\org(%s,%s)", l.center, l.middle )
 					end
 				)
 				-------------------------------------
 				-- extrae el tag \\org que esté dentro de una transformación
-				Text = Text:gsub( "\\t[cdefiswx%d%~%-]*%b()",
+				String = String:gsub( "\\t[cdefiswx%d%~%-]*%b()",
 					function( time_cap )
 						if time_cap:match( "\\org%b()" ) then
 							local org_tag = time_cap:match( "\\org%b()" )
@@ -10930,14 +12466,14 @@
 				)
 				-------------------------------------
 				-- interpola, en el caso de "recorte", los tags dentro de las transfos
-				Text = Text:gsub( "(\\t[%w%~%-]*)(%b())",
+				String = String:gsub( "(\\t[%w%~%-]*)(%b())",
 					function( tag_time, capture )
 						local l = Text_Config.styleref
 						l.duration, l.center, l.middle = Text_Config.duration, Text_Config.center, Text_Config.middle
-						local text_color1, text_color2 = color_from_style( l.color1 ), color_from_style( l.color2 )
-						local text_color3, text_color4 = color_from_style( l.color3 ), color_from_style( l.color4 )
-						local text_alpha1, text_alpha2 = alpha_from_style( l.color1 ), alpha_from_style( l.color2 )
-						local text_alpha3, text_alpha4 = alpha_from_style( l.color3 ), alpha_from_style( l.color4 )
+						local text_color1, text_color2 = ke4.color.fromstyle( l.color1 ), ke4.color.fromstyle( l.color2 )
+						local text_color3, text_color4 = ke4.color.fromstyle( l.color3 ), ke4.color.fromstyle( l.color4 )
+						local text_alpha1, text_alpha2 = ke4.alpha.fromstyle( l.color1 ), ke4.alpha.fromstyle( l.color2 )
+						local text_alpha3, text_alpha4 = ke4.alpha.fromstyle( l.color3 ), ke4.alpha.fromstyle( l.color4 )
 						local tcapture = tag_time .. capture
 						local time_ini, time_fin, time_acc, time_dur, ipol_ini, ipol_fin
 						local tags_in_t, tags_table = "", { }
@@ -10995,8 +12531,8 @@
 										end
 									end
 									if tag_idx > 0 then
-										tags_ipol_ini = tags_ipol_ini .. tag_nam .. tostring( ke4.tag.ipol( tags_deafult_vals[ tag_idx ], tag_val, ipol_ini ) )
-										tags_ipol_fin = tags_ipol_fin .. tag_nam .. tostring( ke4.tag.ipol( tags_deafult_vals[ tag_idx ], tag_val, ipol_fin ) )
+										tags_ipol_ini = tags_ipol_ini .. tag_nam .. tostring( ke4.tag.ipol( ipol_ini, tags_deafult_vals[ tag_idx ], tag_val ) )
+										tags_ipol_fin = tags_ipol_fin .. tag_nam .. tostring( ke4.tag.ipol( ipol_fin, tags_deafult_vals[ tag_idx ], tag_val ) )
 									end
 								end
 								if time_fin <= 0 then
@@ -11022,7 +12558,7 @@
 					end
 				)
 				-------------------------------------
-				Text = Text:gsub( "(\\t[cdefirswx%~%-%d]*)(%b())",
+				String = String:gsub( "(\\t[cdefirswx%~%-%d]*)(%b())",
 					function( Tag, Capture )
 						if Capture:sub( 2, -2 ):sub( 1, 4 ) == "0,0," then
 							return Capture:sub( 2, -2 ):match( "\\%S+[ %S]*" )
@@ -11032,10 +12568,10 @@
 					end --:sub( 2, -2 ):match( "\\%S+[ %S]*" ) <- captura todos los tags dentro de una \\t
 				) --si hay una \\t(0,0, solo retorna los tags que hay dentro
 				-------------------------------------
-				Text = Text:gsub( "(\\t[cdefirswx%~%-%d]*%()[ ]*1[ ]*,[ ]*(\\)", "%1%2" )
-				-- elimina la aceleración de las transfos \\t(1,\\tags) september 18th 2017
+				String = String:gsub( "(\\t[cdefirswx%~%-%d]*%()[ ]*1[ ]*,[ ]*(\\)", "%1%2" )
+				-- elimina la aceleración de las transfos \\t(1,\\tags)
 				-------------------------------------
-				Text = Text:gsub( "\\(i?clip)%([ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*)",
+				String = String:gsub( "\\(i?clip)%([ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*),[ ]*(%-?%d+[%.%d ]*)",
 					function( clip_tag, clip_x1, clip_y1, clip_x2, clip_y2 )
 						local clip_x1, clip_y1 = tonumber( clip_x1 ), tonumber( clip_y1 )
 						local clip_x2, clip_y2 = tonumber( clip_x2 ), tonumber( clip_y2 )
@@ -11045,14 +12581,14 @@
 					end --organiza de menor a mayor los valores de un i?clip rectangular "\\clip(200,300,1000,100)"
 				)
 				-------------------------------------
-				Text = ke4.tag.redefine( Text_Config, Text )
-				Text = ke4.tag.do_alpha( Text )
-				--Text = tag.modify( Text )
+				String = ke4.tag.redefine( Text_Config, String )
+				String = ke4.tag.do_alpha( String )
+				String = ke4.tag.modify( Text_Config, String )
 				-------------------------------------
-				Text = Text:gsub( "'(&H%x+&)'", "%1" )
+				String = String:gsub( "'(&H%x+&)'", "%1" )
 				-------------------------------------
 				-- elimina transformaciones vacías
-				Text = Text:gsub( "\\t[cdefirswx]*%(%d+[%.%d ]*,%d+[%.%d ]*,[%.%d%, ]*%)", "" )
+				String = String:gsub( "\\t[cdefirswx]*%(%d+[%.%d ]*,%d+[%.%d ]*,[%.%d%, ]*%)", "" )
 				:gsub( "\\t[cdefirswx]*%(%d+[%.%d ]*,%)", "" )
 				:gsub( "\\t[cdefirswx%d%~%-]*%([ ]*%)", "" )
 				:gsub( "(\\t[cdefirswx%d%~%-]*%(%d+[%.%d ]*,%d+[%.%d ]*,)1.0[ ]*,", "%1" )
@@ -11074,51 +12610,8 @@
 				end
 				-------------------------------------
 				-- gsub( "\\[^\\{}]*" ) captura los tags, todos
-				return tag_round( ke4.string.change( Text, "\\org%b()", 1 ) )
+				return tag_round( ke4.string.change( String, "\\org%b()", 1 ) )
 			end, --tag.dark
-			
-			do_alpha = function( String )
-				local tag_alpha = {
-					[ 1 ] = "\\alpha(%d+[%.%d]*)",
-					[ 2 ] = "\\1a(%d+[%.%d]*)",
-					[ 3 ] = "\\2a(%d+[%.%d]*)",
-					[ 4 ] = "\\3a(%d+[%.%d]*)",
-					[ 5 ] = "\\4a(%d+[%.%d]*)",
-					[ 6 ] = "\\1va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
-					[ 7 ] = "\\2va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
-					[ 8 ] = "\\3va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
-					[ 9 ] = "\\4va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
-				}
-				local tag_replace = {
-					[ 1 ] = "\\alpha%s",
-					[ 2 ] = "\\1a%s",
-					[ 3 ] = "\\2a%s",
-					[ 4 ] = "\\3a%s",
-					[ 5 ] = "\\4a%s",
-					[ 6 ] = "\\1va(%s,%s,%s,%s)",
-					[ 7 ] = "\\2va(%s,%s,%s,%s)",
-					[ 8 ] = "\\3va(%s,%s,%s,%s)",
-					[ 9 ] = "\\4va(%s,%s,%s,%s)",
-				}
-				for i = 1, 5 do
-					String = String:gsub( tag_alpha[ i ],
-						function( num )
-							return format( tag_replace[ i ], ass_alpha( num ) )
-						end
-					)
-				end
-				for i = 6, 9 do
-					String = String:gsub( tag_alpha[ i ],
-						function( num1, num2, num3, num4 )
-							return format( tag_replace[ i ],
-								ass_alpha( num1 ), ass_alpha( num2 ),
-								ass_alpha( num3 ), ass_alpha( num4 )
-							)
-						end
-					)
-				end
-				return String
-			end,
 			
 			HTML_to_ass = function( Text_Config, String )
 				local String = String or ""
@@ -11140,82 +12633,6 @@
 				---------------------------------------------------------------------------
 				String = ke4.tag.do_alpha( String )	-- identifica los alphas con base decimal
 				return String --se aplica al texto antes de ejecutar cualquier otra función
-			end,
-			
-			tonumber = function( String )
-				local String = String or ""
-				local String_out = {
-					[ 1 ] = "math%.bezier2move%b()",
-					[ 2 ] = "text%.kana2romaji%b()",
-					[ 3 ] = "%-?%d+[%.%d]*rnd[xyz]*",
-					[ 4 ] = "%-?%d+[%.%d]*fr[sxyz]*",
-					[ 5 ] = "%-?%d+[%.%d]*fs[cpvxy]*",
-					[ 6 ] = "%-?%d+[%.%d]*f[ae]^*[xy]*",
-				}
-				local String_out_tbl = { }
-				for i = 1, #String_out do
-					-- protege segmentos del String de remplazos
-					String = String:gsub( String_out[ i ],
-						function( capture )
-							table.insert( String_out_tbl, capture )
-							return "▲"
-						end
-					)
-				end
-				-- multiplica una constante por el ratio o por frame_dur
-				String = String:gsub( "(%-?%d+[%.%d]*)([rf]^*)",
-					function( capture, variable )
-						local varx = ratio
-						if variable == "f" then
-							varx = frame_dur
-						end
-						return tonumber( capture ) * varx
-					end
-				)
-				for i = 1, #String_out_tbl do
-					String = String:gsub( "▲", String_out_tbl[ i ], 1 )
-				end
-				-------------------------------------------------------------------------
-				String = String:gsub( "%.line", ".LINE" ) --> var.line.val
-				:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-				:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
-				:gsub( "line%.", "linefx[  ii  ]." )
-				:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
-				:gsub( "%.LINE", ".line" )
-				-------------------------------------------------------------------------
-				-- abreviatura de la función math.polar
-				local polar_tag = {
-					[ 1 ] = "(p[xy]^*)(%-?%d+[%.%d]*)d(%-?%d+[%.%d]*)",
-					[ 2 ] = "(p[xy]^*)(%-?%d+[%.%d]*)d(%b())",
-					[ 3 ] = "(p[xy]^*)(%b())d(%-?%d+[%.%d]*)",
-					[ 4 ] = "(p[xy]^*)(%b())d(%b())",
-				}
-				for i = 1, #polar_tag do
-					String = String:gsub( polar_tag[ i ],
-						function( Pxy, Angle, Distance )
-							local Return = "x"
-							if Pxy:match( "py" ) then
-								Return = "y"
-							end
-							local topolar = format( "ke4.math.polar( %s, %s, \"%s\" )", Angle, Distance, Return )
-							local line = linefx[ ii ]
-							if pcall( loadstring( format( "return function( meta, line, x, y ) return %s end", topolar ) ) ) then
-								local fun_polar = loadstring( format( "return function( meta, line, x, y ) return %s end", topolar ) )( )
-								if pcall( fun_polar ) then
-									return fun_polar( meta, line, x, y )
-								end
-							end
-							return Pxy .. Angle .. "d" .. Distance
-						end
-					)
-				end --px45d100 = math.polar( 45, 100, "x" )
-				-------------------------------------------------------------------------
-				String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-				:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
-				:gsub( "linefx%[  ii  %]%.", "line." )
-				:gsub( "\"(&H%x+&)\"", "%1" )
-				-------------------------------------------------------------------------
-				return String
 			end,
 			
 			timefx = function( Text_Config, String )
@@ -11473,6 +12890,304 @@
 				return String
 			end,
 			
+			modify = function( Text_Config, String )
+				local l = Text_Config
+				local String = String or ""
+				String = String:gsub( "(\\i?clip)(%b())",
+					function( Tag, capture )
+						if capture:match( "m %-?%d+[%.%d]* %-?%d+[%.%d]*" )
+							and capture:match( "%," ) then
+							--▼ captura la shape que esté dentro del i?clip
+							local shape_modify = capture:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" )
+							if capture:match( "pos" ) then
+								--"\\clip(shape.circle, 'pos')"
+								shape_modify = ke4.shape.centerpos( shape_modify, l.center, l.middle )
+							elseif capture:match( "%,[%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+								--"\\clip(shape.circle, 1, 120, -86)" relativo a la posición x, y
+								local pos_clip_x, pos_clip_y = capture:match( "%,[%d ]*%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)" )
+								shape_modify = ke4.shape.centerpos(
+									shape_modify,
+									l.center + tonumber( pos_clip_x ),
+									l.middle + tonumber( pos_clip_y )
+								)
+							elseif capture:match( "%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+								--"\\clip(shape.circle, 120, -86)" relativo al 0, 0
+								local pos_clip_x, pos_clip_y = capture:match( "%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)" )
+								shape_modify = ke4.shape.centerpos( shape_modify, tonumber( pos_clip_x ), tonumber( pos_clip_y ) )
+							else
+								--"\\clip(shape.circle, true)"
+								shape_modify = ke4.shape.centerpos( shape_modify, l.center, l.middle )
+							end
+							return format( "%s(%s)", Tag, shape_modify )
+						elseif type( ke4.string.toval( "{" .. capture:sub( 2, -2 ) .. "}" ) ) == "table" then
+							--para i?clips rectangulares y dos valores extras para moverlos
+							local Coor = ke4.string.toval( "{" .. capture:sub( 2, -2 ) .. "}" )
+							if #Coor > 4 then
+								local Px1, Py1, Px2, Py2, Mx, My = Coor[ 1 ], Coor[ 2 ], Coor[ 3 ], Coor[ 4 ], Coor[ 5 ], Coor[ 6 ] or 0
+								capture = format( "(%s,%s,%s,%s)", Px1 + Mx, Py1 + My, Px2 + Mx, Py2 + My )
+							end
+						end
+						return Tag .. capture
+					end
+				)
+				return String
+			end, --"\\clip(shape.circle, 1)"
+			
+			do_alpha = function( String )
+				local tag_alpha = {
+					[ 1 ] = "\\alpha(%d+[%.%d]*)",
+					[ 2 ] = "\\1a(%d+[%.%d]*)",
+					[ 3 ] = "\\2a(%d+[%.%d]*)",
+					[ 4 ] = "\\3a(%d+[%.%d]*)",
+					[ 5 ] = "\\4a(%d+[%.%d]*)",
+					[ 6 ] = "\\1va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+					[ 7 ] = "\\2va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+					[ 8 ] = "\\3va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+					[ 9 ] = "\\4va%([ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)%,[ ]*(%d+[%.%d ]*)[ ]*%)",
+				}
+				local tag_replace = {
+					[ 1 ] = "\\alpha%s",
+					[ 2 ] = "\\1a%s",
+					[ 3 ] = "\\2a%s",
+					[ 4 ] = "\\3a%s",
+					[ 5 ] = "\\4a%s",
+					[ 6 ] = "\\1va(%s,%s,%s,%s)",
+					[ 7 ] = "\\2va(%s,%s,%s,%s)",
+					[ 8 ] = "\\3va(%s,%s,%s,%s)",
+					[ 9 ] = "\\4va(%s,%s,%s,%s)",
+				}
+				for i = 1, 5 do
+					String = String:gsub( tag_alpha[ i ],
+						function( num )
+							return format( tag_replace[ i ], ke4.alpha.val2ass( num ) )
+						end
+					)
+				end
+				for i = 6, 9 do
+					String = String:gsub( tag_alpha[ i ],
+						function( num1, num2, num3, num4 )
+							return format( tag_replace[ i ],
+								ke4.alpha.val2ass( num1 ), ke4.alpha.val2ass( num2 ),
+								ke4.alpha.val2ass( num3 ), ke4.alpha.val2ass( num4 )
+							)
+						end
+					)
+				end
+				return String
+			end,
+			
+			tonumber = function( String )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
+				local String = String or ""
+				local String_out = {
+					[ 1 ] = "math%.bezier2move%b()",
+					[ 2 ] = "text%.kana2romaji%b()",
+					[ 3 ] = "%-?%d+[%.%d]*rnd[xyz]*",
+					[ 4 ] = "%-?%d+[%.%d]*fr[sxyz]*",
+					[ 5 ] = "%-?%d+[%.%d]*fs[cpvxy]*",
+					[ 6 ] = "%-?%d+[%.%d]*f[ae]^*[xy]*",
+				}
+				local String_out_tbl = { }
+				for i = 1, #String_out do
+					-- protege segmentos del String de remplazos
+					String = String:gsub( String_out[ i ],
+						function( capture )
+							table.insert( String_out_tbl, capture )
+							return "▲"
+						end
+					)
+				end
+				-- multiplica una constante por el ratio o por frame_dur
+				String = String:gsub( "(%-?%d+[%.%d]*)([rf]^*)",
+					function( capture, variable )
+						local varx = ratio
+						if variable == "f" then
+							varx = frame_dur
+						end
+						return tonumber( capture ) * varx
+					end
+				)
+				for i = 1, #String_out_tbl do
+					String = String:gsub( "▲", String_out_tbl[ i ], 1 )
+				end
+				-------------------------------------------------------------------------
+				String = String:gsub( "%.line", ".LINE" ) --> var.line.val
+				:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
+				:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+				:gsub( "line%.", "linefx[  ii  ]." )
+				:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
+				:gsub( "%.LINE", ".line" )
+				-------------------------------------------------------------------------
+				-- abreviatura de la función math.polar
+				local polar_tag = {
+					[ 1 ] = "(p[xy]^*)(%-?%d+[%.%d]*)d(%-?%d+[%.%d]*)",
+					[ 2 ] = "(p[xy]^*)(%-?%d+[%.%d]*)d(%b())",
+					[ 3 ] = "(p[xy]^*)(%b())d(%-?%d+[%.%d]*)",
+					[ 4 ] = "(p[xy]^*)(%b())d(%b())",
+				}
+				for i = 1, #polar_tag do
+					String = String:gsub( polar_tag[ i ],
+						function( Pxy, Angle, Distance )
+							local Return = "x"
+							if Pxy:match( "py" ) then
+								Return = "y"
+							end
+							local topolar = format( "ke4.math.polar( %s, %s, \"%s\" )", Angle, Distance, Return )
+							local line = linefx[ ii ]
+							if pcall( loadstring( format( "return function( meta, line, x, y ) return %s end", topolar ) ) ) then
+								local fun_polar = loadstring( format( "return function( meta, line, x, y ) return %s end", topolar ) )( )
+								if pcall( fun_polar ) then
+									return fun_polar( meta, line, x, y )
+								end
+							end
+							return Pxy .. Angle .. "d" .. Distance
+						end
+					)
+				end --px45d100 = math.polar( 45, 100, "x" )
+				-------------------------------------------------------------------------
+				String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
+				:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+				:gsub( "linefx%[  ii  %]%.", "line." )
+				:gsub( "\"(&H%x+&)\"", "%1" )
+				-------------------------------------------------------------------------
+				return String
+			end,
+			
+			cyclic = function( j, maxj, Dur, Dur_tr, Delay, Fad_i, Fad_f, tags_ini, tags_fin )
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
+				local tag_dur = Dur or 5000--fx.dur
+				local dur_tra = Dur_tr or 2 * frame_dur
+				local tra_del = Delay or 0
+				local fad_ini = Fad_i or 1
+				local fad_fin = Fad_f or dur_tra / 2
+				local ext_ini = tags_ini or ""
+				local ext_fin = tags_fin or ""
+				local tag_ini = 0
+				local tag_fin = tag_dur
+				local tag_acc = 1
+				if type( tag_dur ) == "table" then
+					tag_ini = tag_dur[ 1 ]
+					tag_fin = tag_dur[ 2 ]
+				end
+				tag_dur = tag_fin - tag_ini
+				if type( dur_tra ) == "table" then
+					tag_acc = dur_tra[ 2 ]
+					dur_tra = dur_tra[ 1 ]
+				end
+				local times_tra = { }
+				local durat_ini = tag_dur
+				local k, i = 0, 0
+				while durat_ini > 0 do
+					times_tra[ k + 1 ] = {
+						[ 1 ] = tag_ini + k * dur_tra,
+						[ 2 ] = tag_ini + k * dur_tra + fad_ini,
+						[ 3 ] = tag_ini + (k + 1) * dur_tra + tra_del - fad_fin,
+						[ 4 ] = tag_ini + (k + 1) * dur_tra + tra_del
+					}
+					durat_ini = durat_ini - dur_tra
+					k = k + 1
+				end
+				local tag_cyclic = "\\alpha&HFF&"
+				while times_tra[ j + i * maxj ] do
+					if type( ext_ini ) == "function" then
+						ext_ini = ext_ini( i )
+					end
+					if type( ext_fin ) == "function" then
+						ext_fin = ext_fin( i )
+					end
+					tag_cyclic = tag_cyclic .. format( "\\t(%s,%s,%s,%s\\alpha&H00&)\\t(%s,%s,%s,%s\\alpha&HFF&)",
+						times_tra[ j + i * maxj ][ 1 ], times_tra[ j + i * maxj ][ 2 ], tag_acc, ext_ini,
+						times_tra[ j + i * maxj ][ 3 ], times_tra[ j + i * maxj ][ 4 ], tag_acc, ext_fin
+					)
+					i = i + 1
+				end
+				return tag_cyclic
+			end, --!_G.ke4.tag.cyclic( j, maxj, line.duration, 60, 240, 60, 60 )!
+			
+			sec = function( j, maxj, Dur, Dur_tr, tags_ini, tags_fin )
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
+				local tag_dur = Dur or 5000--fx.dur
+				local dur_tra = Dur_tr or 4 * frame_dur
+				local ext_ini = tags_ini or ""
+				local ext_fin = tags_fin or ""
+				local tag_ini = 0
+				local tag_fin = tag_dur
+				if type( tag_dur ) == "table" then
+					tag_ini = tag_dur[ 1 ]
+					tag_fin = tag_dur[ 2 ]
+				end
+				tag_dur = tag_fin - tag_ini
+				local dur_off = dur_tra
+				local dur_int = 0
+				if type( dur_tra ) == "table" then
+					dur_int = dur_tra[ 3 ] or 0
+					dur_off = dur_tra[ 2 ] or 0
+					dur_tra = dur_tra[ 1 ]
+				end
+				local times_tra = { }
+				local durat_ini = tag_dur
+				local dur_tra_i, dur_tra_f = dur_tra, dur_tra
+				if type( dur_tra ) == "table" then
+					dur_tra_i = dur_tra[ 1 ]
+					dur_tra_f = dur_tra[ 2 ]
+				end
+				local k, i = 0, 0
+				while durat_ini > 0 do
+					times_tra[ k + 1 ] = {
+						[ 1 ] = tag_ini + k * dur_off,
+						[ 2 ] = tag_ini + k * dur_off + dur_tra_i,
+						[ 3 ] = tag_ini + k * dur_off + dur_tra_i + dur_int,
+						[ 4 ] = tag_ini + k * dur_off + dur_tra_i + dur_int + dur_tra_f
+					}
+					durat_ini = durat_ini - dur_off
+					k = k + 1
+				end
+				local tag_cyclic = ""
+				local tags_tr_ini, tags_tr_fin
+				while times_tra[ j + i * maxj ] do
+					if type( ext_ini ) == "function" then
+						ext_ini = ext_ini( i )
+					end
+					if type( ext_fin ) == "function" then
+						ext_fin = ext_fin( i )
+					end
+					tags_tr_ini, tags_tr_fin = ext_ini, ext_fin
+					if type( ext_ini ) == "table" then
+						tags_tr_ini = ext_ini[ i % #ext_ini + 1 ]
+					end
+					if type( ext_fin ) == "table" then
+						tags_tr_fin = ext_fin[ i % #ext_fin + 1 ]
+					end
+					tag_cyclic = tag_cyclic .. format( "\\t(%s,%s,%s)\\t(%s,%s,%s)",
+						times_tra[ j + i * maxj ][ 1 ], times_tra[ j + i * maxj ][ 2 ], tags_tr_ini,
+						times_tra[ j + i * maxj ][ 3 ], times_tra[ j + i * maxj ][ 4 ], tags_tr_fin
+					)
+					i = i + 1
+				end
+				return tag_cyclic
+			end, --tag.sec( j, maxj, line.duration, { { 100, 200 }, 40 }, "\\1c&H0000FF&", "\\1c&HFFFFFF&" )
+			
 		},
 		
 		-- Color sublibrary
@@ -11480,7 +13195,7 @@
 			ass = function( html_color )
 				local html_color = html_color or "#FFFFFF"
 				local r_ass, g_ass, b_ass = html_color:match( "(%x%x)(%x%x)(%x%x)" )
-				return ass_color( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
+				return ke4.color.val2ass( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
 			end,
 			
 			ass2 = function( Rnum, Gnum, Bnum )
@@ -11495,7 +13210,7 @@
 				Rnum = ke4.math.i( Rnum + 1, 0, 255 )[ "A-->B-->A" ]
 				Gnum = ke4.math.i( Gnum + 1, 0, 255 )[ "A-->B-->A" ]
 				Bnum = ke4.math.i( Bnum + 1, 0, 255 )[ "A-->B-->A" ]
-				return ass_color( Rnum, Gnum, Bnum )
+				return ke4.color.val2ass( Rnum, Gnum, Bnum )
 			end, -- \1c!_G.ke4.color.ass2( 255, 0, 0 )!
 			
 			ass3 = function( Hnum, Snum, Vnum )
@@ -11510,7 +13225,7 @@
 				Hnum = Hnum % 361
 				Snum = (100 * Snum) % 101
 				Vnum = (100 * Vnum) % 101
-				return ass_color( HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 ) )
+				return ke4.color.val2ass( ke4.color.HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 ) )
 			end, -- \1c!_G.ke4.color.ass3( 15 * syl.i, 1, 1 )!
 			
 			rgb = function( Color_or_table, Matrix13, Multi )
@@ -11656,12 +13371,12 @@
 			end,
 			
 			r = function( )
-				return ass_color( HSV_to_RGB( ke4.math.Rc( 360 ), ke4.math.Rc( 0, 1 ), ke4.math.Rc( 0, 1 ) ) )
+				return ke4.color.val2ass( ke4.color.HSV_to_RGB( ke4.math.Rc( 360 ), ke4.math.Rc( 0, 1 ), ke4.math.Rc( 0, 1 ) ) )
 			end, --!_G.ke4.color.r( )!
 
 			rc = function( colorRC, ... )
 				local colorRC = ke4.color.from_error( colorRC )
-				local RCtable, i_c, _c = { }, interpolate_color, ke4.color.vc_to_c
+				local RCtable, i_c, _c = { }, ke4.color.ipolfx, ke4.color.vc_to_c
 				local RCcolor = { colorRC }
 				local RCmask = ke4.color.from_error( ... or { "&H6E6E6E&", "&H000000&" } )
 				if type( colorRC ) == "table" then
@@ -11732,7 +13447,7 @@
 				local Al = algorithm or "%s"
 				local ColorRight_or_table = ke4.color.from_error( ColorRight_or_table )
 				local ColorLeft_or_table = ke4.color.from_error( ColorLeft_or_table )
-				local Ch_table, _c, i_c = { }, ke4.color.vc_to_c, interpolate_color
+				local Ch_table, _c, i_c = { }, ke4.color.vc_to_c, ke4.color.ipolfx
 				local CL, CR = { ColorLeft_or_table }, { ColorRight_or_table }
 				local v1 = ke4.math.format( Al, 2 * (val_i - 1) / (2 * val_n - 1) )
 				local v2 = ke4.math.format( Al, (2 * val_i - 1) / (2 * val_n - 1) )
@@ -11757,7 +13472,7 @@
 			
 			vc_to_c = function( colorvc_or_table )
 				local colorvc_or_table = ke4.color.from_error( colorvc_or_table )
-				local colorvc, VC2Ccolors, i_c = { colorvc_or_table }, { }, interpolate_color
+				local colorvc, VC2Ccolors, i_c = { colorvc_or_table }, { }, ke4.color.ipolfx
 				if type( colorvc_or_table ) == "table" then
 					colorvc = colorvc_or_table
 				end
@@ -11787,7 +13502,7 @@
 				local II = Index_Ipol or 0.5
 				local color2_or_table = ke4.color.from_error( color2_or_table )
 				local color1_or_table = ke4.color.from_error( color1_or_table )
-				local Ci_table, _c, i_c = { }, ke4.color.vc_to_c, interpolate_color
+				local Ci_table, _c, i_c = { }, ke4.color.vc_to_c, ke4.color.ipolfx
 				local C1, C2 = { color1_or_table }, { color2_or_table }
 				if type( color1_or_table ) == "table" then
 					C1 = color1_or_table
@@ -11795,9 +13510,29 @@
 				if type( color2_or_table ) == "table" then
 					C2 = color2_or_table
 				end
+				local color1_vc, color2_vc
 				for i = 1, #C1 do
 					for k = 1, #C2 do
-						table.insert( Ci_table, i_c( II, _c( C1[ i ] ), _c( C2[ k ] ) ) )
+						color1_vc, color2_vc = { }, { }
+						for c in C1[ i ]:gmatch( "%x%x%x%x%x%x" ) do
+							table.insert( color1_vc, c )
+						end
+						for c in C2[ k ]:gmatch( "%x%x%x%x%x%x" ) do
+							table.insert( color2_vc, c )
+						end
+						if #color1_vc == 1
+							or #color2_vc == 1 then
+							table.insert( Ci_table, i_c( II, _c( C1[ i ] ), _c( C2[ k ] ) ) )
+						elseif #color1_vc == 4
+							and #color2_vc == 4 then
+							table.insert( Ci_table, format( "(%s,%s,%s,%s)",
+									i_c( II, color1_vc[ 1 ], color2_vc[ 1 ] ),
+									i_c( II, color1_vc[ 2 ], color2_vc[ 2 ] ),
+									i_c( II, color1_vc[ 3 ], color2_vc[ 3 ] ),
+									i_c( II, color1_vc[ 4 ], color2_vc[ 4 ] )
+								)
+							) --add: august 03rd 2019
+						end
 					end
 				end
 				if #Ci_table == 1 then
@@ -11951,6 +13686,12 @@
 
 			set = function( Times, Colors, Line_start_time, Line_end_time, ... )
 				-- ... = \\1vc, \\3vc, \\4vc, \\1c, \\3c or \\4c
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
 				local e_concat = { ... }
 				local Cset_colors = ke4.color.from_error( Colors )
 				local Cset_times = Times
@@ -12103,9 +13844,6 @@
 				if val_n == 1 then
 					return colors_tbl[ 1 ]
 				end
-				if fx.filter == "mod" then
-					max_ipol = val_n
-				end
 				if val_i == 1 then
 					color_ipol = remember( "c_ipol", { } )
 					for i = 1, max_ipol do
@@ -12232,6 +13970,111 @@
 				local Mtx_multi = ke4.math.matrix_mul2( unpack( Matrixes ) )
 				return ke4.color.ass2( ke4.math.matrix_mul( RGB_table, Mtx_multi ) )
 			end,
+			
+			colorchange = function( Color_or_Table, dur )
+				local colors = { Color_or_Table }
+				if type( Color_or_Table ) == "table" then
+					colors = Color_or_Table
+				end
+				colors = ke4.color.from_error( colors )
+				local t1, tc = 0, "\\1c"
+				local t2 = dur or 5000
+				if type( dur ) == "table" then
+					t1 = dur[ 1 ]
+					t2 = dur[ 2 ]
+				end
+				local i, tagfx, durt = 1, "", ke4.math.round( (t2 - t1) / #colors, 2 )
+				while i <= #colors do
+					tagfx = tagfx .. format( "\\t(%s,%s,%s)",
+						t1 + durt * (i - 1), t1 + durt * i, tc .. ke4.color.assF( colors[ i ] )
+					)
+					i = i + 1
+				end
+				return tagfx
+			end,
+			
+			fromstyle = function( ColorAlpha )
+				--color from style
+				local toColor = ""
+				if ColorAlpha:match( "%x%x%x%x%x%x%x%x" ) then
+					toColor = "&H" .. ColorAlpha:match( "%x%x(%x%x%x%x%x%x)" ) .. "&"
+				elseif ColorAlpha:match( "%x%x%x%x%x%x" ) then
+					toColor = ColorAlpha
+				end
+				return toColor
+			end,
+			
+			val2ass = function( val_R, val_G, val_B )
+				local col_R = ke4.math.to16( ke4.math.round( val_R ) )
+				local col_G = ke4.math.to16( ke4.math.round( val_G ) )
+				local col_B = ke4.math.to16( ke4.math.round( val_B ) )
+				if col_R:len( ) == 1 then
+					col_R = "0" .. col_R
+				end
+				if col_G:len( ) == 1 then
+					col_G = "0" .. col_G
+				end
+				if col_B:len( ) == 1 then
+					col_B = "0" .. col_B
+				end
+				return "&H" .. col_B .. col_G .. col_R .. "&"
+			end, --!_G.ke4.color.val2ass( 255, 0, 0 )!
+
+			ipolfx = function( Ipol, Color1, Color2 )
+				---------------------------------------------------------------
+				if Color1:match( "%x%x%x%x%x%x%x%x" ) then
+					Color1 = Color1:match( "%x%x(%x%x%x%x%x%x)" )
+				end
+				local col_R1 = tonumber( Color1:match( "%x%x%x%x(%x%x)" ), 16 )
+				local col_G1 = tonumber( Color1:match( "%x%x(%x%x)%x%x" ), 16 )
+				local col_B1 = tonumber( Color1:match( "(%x%x)%x%x%x%x" ), 16 )
+				---------------------------------------------------------------
+				if Color2:match( "%x%x%x%x%x%x%x%x" ) then
+					Color2 = Color2:match( "%x%x(%x%x%x%x%x%x)" )
+				end
+				local col_R2 = tonumber( Color2:match( "%x%x%x%x(%x%x)" ), 16 )
+				local col_G2 = tonumber( Color2:match( "%x%x(%x%x)%x%x" ), 16 )
+				local col_B2 = tonumber( Color2:match( "(%x%x)%x%x%x%x" ), 16 )
+				---------------------------------------------------------------
+				local Ipol = Ipol or 0.5
+				Ipol = ke4.math.clamp( Ipol, 0, 1 )
+				local ipol_R = ke4.math.round( col_R1 + (col_R2 - col_R1) * Ipol )
+				local ipol_G = ke4.math.round( col_G1 + (col_G2 - col_G1) * Ipol )
+				local ipol_B = ke4.math.round( col_B1 + (col_B2 - col_B1) * Ipol )
+				return ke4.color.val2ass( ipol_R, ipol_G, ipol_B )
+			end, --!_G.ke4.color.ipolfx( 0.5, "&HFFFFFF&", "&H0000FF&" )!
+			
+			HSV_to_RGB = function( Hue, Saturation, Value )
+				--HSV to ass color format :D HSV2ass
+				local H = ((Hue - 1) % 360 + 1) / 360 * 6
+				local S = ke4.math.clamp( Saturation, 0, 1 )
+				local V = ke4.math.clamp( Value, 0, 1 )
+				if S == 0 then
+					return "&HFFFFFF&"
+				end
+				if V == 0 then
+					return "&H000000&"
+				end
+				local C = V * S
+				local M = V - C
+				local X = C * (1 - abs( (H % 2) - 1 ))
+				local Rx, Gx ,Bx = 0, 0, 0
+				if H < 1 then
+					Rx, Gx ,Bx  = C, X, 0
+				elseif H < 2 then
+					Rx, Gx ,Bx  = X, C, 0
+				elseif H < 3 then
+					Rx, Gx ,Bx  = 0, C, X
+				elseif H < 4 then
+					Rx, Gx ,Bx  = 0, X, C
+				elseif H < 5 then
+					Rx, Gx ,Bx  = X, 0, C
+				else
+					Rx, Gx ,Bx  = C, 0, X
+				end
+				return ke4.color.val2ass( 255 * (Rx + M), 255 * (Gx + M), 255 * (Bx + M) )
+			end, --!_G.ke4.color.HSV_to_RGB( 0, 1, 1 )!
+
 		},
 		
 		-- Alpha sublibrary
@@ -12266,7 +14109,7 @@
 				for i = 1, #aF do
 					taF = { }
 					if type( aF[ i ] ) == "number" then
-						aF[ i ] = ass_alpha( aF[ i ] % 256 )
+						aF[ i ] = ke4.alpha.val2ass( aF[ i ] % 256 )
 					else
 						if aF[ i ]:len( ) < 7 then
 							aF[ i ] = aF[ i ]:match( "%x+" )
@@ -12308,13 +14151,13 @@
 			end,
 
 			r = function( )
-				return ass_alpha( ke4.math.R( 0, 255 ) )
+				return ke4.alpha.val2ass( ke4.math.R( 0, 255 ) )
 			end,
 			
 			ra = function( ArA_alpha, ... )
 				local ArA_alpha = ke4.alpha.from_error( ArA_alpha or "&H00&" )
 				local ArAmsk = ke4.alpha.from_error( ... or { "&HFF&", "&H00&" } )
-				local ArAalp, ArAtbl, i_a, _a = { ArA_alpha }, { }, interpolate_alpha, ke4.alpha.va_to_a
+				local ArAalp, ArAtbl, i_a, _a = { ArA_alpha }, { }, ke4.alpha.ipolfx, ke4.alpha.va_to_a
 				if type( ArA_alpha ) == "table" then
 					ArAalp = ArA_alpha
 				end
@@ -12381,7 +14224,7 @@
 				local AlphaLeft_or_table = ke4.alpha.from_error( AlphaLeft_or_table or "&H00&" )
 				local AlphaRight_or_table = ke4.alpha.from_error( AlphaRight_or_table or "&HFF&" )
 				local algorithm = algorithm or "%s"
-				local Ah_table, _a, i_a = { }, ke4.alpha.va_to_a, interpolate_alpha
+				local Ah_table, _a, i_a = { }, ke4.alpha.va_to_a, ke4.alpha.ipolfx
 				local AL, AR = { AlphaLeft_or_table }, { AlphaRight_or_table }
 				local v1 = ke4.math.format( algorithm, 2 * (val_i - 1) / (2 * val_n - 1) )
 				local v2 = ke4.math.format( algorithm, (2 * val_i - 1) / (2 * val_n - 1) )
@@ -12406,7 +14249,7 @@
 			
 			va_to_a = function( alphava_or_table )
 				local alphava_or_table = ke4.alpha.from_error( alphava_or_table or "&H00&" )
-				local alphava, alphas, i_a = alphava_or_table, { }, interpolate_alpha
+				local alphava, alphas, i_a = alphava_or_table, { }, ke4.alpha.ipolfx
 				if type( alphava_or_table ) ~= "table" then
 					alphava = { alphava_or_table }
 				end
@@ -12434,10 +14277,10 @@
 			end,
 			
 			interpolate = function( alpha1_or_table, alpha2_or_table, Index_Ipol )
+				local II = Index_Ipol or 0.5
 				local alpha1_or_table = ke4.alpha.from_error( alpha1_or_table or "&HFF&" )
 				local alpha2_or_table = ke4.alpha.from_error( alpha2_or_table or "&H00&" )
-				local II = Index_Ipol or 0.5
-				local Ai_table, _a = { }, ke4.alpha.va_to_a
+				local Ai_table, _a, i_a = { }, ke4.alpha.va_to_a, ke4.alpha.ipolfx
 				local A1, A2 = { alpha1_or_table }, { alpha2_or_table }
 				if type( alpha1_or_table ) == "table" then
 					A1 = alpha1_or_table
@@ -12445,17 +14288,43 @@
 				if type( alpha2_or_table ) == "table" then
 					A2 = alpha2_or_table
 				end
+				local alpha1_va, alpha2_va
 				for i = 1, #A1 do
 					for k = 1, #A2 do
-						table.insert( Ai_table, interpolate_alpha( II, _a( A1[ i ] ), _a( A2[ k ] ) ) )
+						alpha1_va, alpha2_va = { }, { }
+						if type( A1[ i ] ) == "number" then
+							A1[ i ] = ke4.alpha.val2ass( A1[ i ] )
+						end
+						if type( A2[ k ] ) == "number" then
+							A2[ k ] = ke4.alpha.val2ass( A2[ k ] )
+						end
+						for c in A1[ i ]:gmatch( "%x%x" ) do
+							table.insert( alpha1_va, c )
+						end
+						for c in A2[ k ]:gmatch( "%x%x" ) do
+							table.insert( alpha2_va, c )
+						end
+						if #alpha1_va == 1
+							or #alpha2_va == 1 then
+							table.insert( Ai_table, i_a( II, _a( A1[ i ] ), _a( A2[ k ] ) ) )
+						elseif #alpha1_va == 4
+							and #alpha2_va == 4 then
+							table.insert( Ai_table, format( "(%s,%s,%s,%s)",
+									i_a( II, alpha1_va[ 1 ], alpha2_va[ 1 ] ),
+									i_a( II, alpha1_va[ 2 ], alpha2_va[ 2 ] ),
+									i_a( II, alpha1_va[ 3 ], alpha2_va[ 3 ] ),
+									i_a( II, alpha1_va[ 4 ], alpha2_va[ 4 ] )
+								)
+							)--add: august 03rd 2019
+						end
 					end
 				end
 				if #Ai_table == 1 then
 					return Ai_table[ 1 ]
 				end
 				return Ai_table
-			end,
-			
+			end, --!_G.ke4.alpha.interpolate( "&HFF&", "&H00&", 0.75 )!
+
 			delay = function( time_i, delay, alpha_i, alpha_f, ... )
 				local time_i = time_i or 0
 				local delay = delay or 640
@@ -12582,35 +14451,69 @@
 				return bigrad[ (val_i - 1) % #bigrad + 1 ]
 			end,
 			
-			colorchange = function( Color_or_Table, dur )
-				local colors = { Color_or_Table }
-				if type( Color_or_Table ) == "table" then
-					colors = Color_or_Table
+			fromstyle = function( ColorAlpha )
+				--alpha from style
+				local toAlpha = ""
+				if ColorAlpha:match( "%x%x%x%x%x%x%x%x" ) then
+					toAlpha = "&H" .. ColorAlpha:match( "(%x%x)%x%x%x%x%x%x" ) .. "&"
+				elseif ColorAlpha:match( "%x%x" ) then
+					toAlpha = ColorAlpha
 				end
-				colors = ke4.color.from_error( colors )
-				local t1, tc = 0, "\\1c"
-				local t2 = dur or 5000
-				if type( dur ) == "table" then
-					t1 = dur[ 1 ]
-					t2 = dur[ 2 ]
-				end
-				local i, tagfx, durt = 1, "", ke4.math.round( (t2 - t1) / #colors, 2 )
-				while i <= #colors do
-					tagfx = tagfx .. format( "\\t(%s,%s,%s)",
-						t1 + durt * (i - 1), t1 + durt * i, tc .. ke4.color.assF( colors[ i ] )
-					)
-					i = i + 1
-				end
-				return tagfx
+				return toAlpha
 			end,
 			
+			val2ass = function( val_A )
+				--number to alpha
+				local val_A = ke4.math.clamp( val_A, 0, 255 )
+				local alpha_A = ke4.math.to16( ke4.math.round( val_A ) )
+				if alpha_A:len( ) == 1 then
+					alpha_A = "0" .. alpha_A
+				end
+				return "&H" .. alpha_A .. "&"
+			end, --!_G.ke4.alpha.val2ass( 86 )!
+			
+			ipolfx = function( Ipol, Alpha1, Alpha2 )
+				local alpha_i, alpha_f = 0, 255
+				if tonumber( Alpha1 ) then
+					Alpha1 = tonumber( Alpha1 )
+				end
+				if tonumber( Alpha2 ) then
+					Alpha2 = tonumber( Alpha2 )
+				end
+				-------------------------------------------------------
+				if type( Alpha1 ) == "string"
+					and Alpha1:match( "%x%x%x%x%x%x%x%x" ) then
+					Alpha1 = Alpha1:match( "(%x%x)%x%x%x%x%x%x" )
+				end
+				if type( Alpha1 ) == "string" then
+					alpha_i = tonumber( Alpha1:match( "(%x%x)" ), 16 )
+				end
+				if type( Alpha1 ) == "number" then
+					alpha_i = ke4.math.clamp( Alpha1, 0, 255 )
+				end
+				-------------------------------------------------------
+				if type( Alpha2 ) == "string"
+					and Alpha2:match( "%x%x%x%x%x%x%x%x" ) then
+					Alpha2 = Alpha2:match( "(%x%x)%x%x%x%x%x%x" )
+				end
+				if type( Alpha2 ) == "string" then
+					alpha_f = tonumber( Alpha2:match( "(%x%x)" ), 16 )
+				end
+				if type( Alpha2 ) == "number" then
+					alpha_f = ke4.math.clamp( Alpha2, 0, 255 )
+				end
+				-------------------------------------------------------
+				local Ipol = Ipol or 0.5
+				Ipol = ke4.math.clamp( Ipol, 0, 1 )
+				return ke4.alpha.val2ass( ke4.math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
+			end, --!_G.ke4.alpha.ipolfx( 0.5, "&HFF&", 55 )!
+
 		},
 
 		-- Decoder sublibrary
 		decode = {
 			create_bmp_reader = function( filename )
 				-- Creates BMP file reader
-				-- ke4.decode.create_bmp_reader( img )
 				if type( filename ) ~= "string" then
 					error( "bitmap filename expected", 2 )
 				end
@@ -13138,7 +15041,7 @@
 						0,												-- nOrientation
 						bold and ffix.C.FW_BOLD2 or ffix.C.FW_NORMAL2,	-- fnWeight
 						italic and 1 or 0,								-- fdwItalic
-						underline and 1 or 0,							--fdwUnderline
+						underline and 1 or 0,							-- fdwUnderline
 						strikeout and 1 or 0,							-- fdwStrikeOut
 						ffix.C.DEFAULT_CHARSET2,						-- fdwCharSet
 						ffix.C.OUT_TT_PRECIS2,							-- fdwOutputPrecision
@@ -13172,14 +15075,14 @@
 							text = utf8_to_utf16( text )
 							local text_len = ffix.C.wcslen( text )
 							local size = ffix.new( "SIZE[1]" )
-							ffix.C.GetTextExtentPoint32W(dc, text, text_len, size)
+							ffix.C.GetTextExtentPoint32W( dc, text, text_len, size )
 							return {
 								width = (size[ 0 ].cx * downscale + hspace * text_len) * xscale,
 								height = size[ 0 ].cy * downscale * yscale
 							}
 						end,
 						
-						text_to_shape = function(text)
+						text_to_shape = function( text )
 							-- Converts text to ASS shape
 							if type( text ) ~= "string" then
 								error( "text expected", 2 )
@@ -13260,7 +15163,7 @@
 					if not pangocairo then
 						error( "pangocairo library couldn't be loaded", 2 )
 					end
-					local surface = pangocairo.cairo_image_surface_create( ffix.C.CAIRO_FORMAT_A8, 1, 1 )
+					local surface = pangocairo.cairo_image_surface_create( ffix.C.CAIRO_FORMAT_A8X, 1, 1 )
 					local context = pangocairo.cairo_create( surface )
 					local layout
 					layout = ffix.gc( pangocairo.pango_cairo_create_layout( context ), function( )
@@ -13270,33 +15173,33 @@
 					end )
 					local font_desc = ffix.gc( pangocairo.pango_font_description_new( ), pangocairo.pango_font_description_free )
 					pangocairo.pango_font_description_set_family( font_desc, family )
-					pangocairo.pango_font_description_set_weight( font_desc, bold and ffix.C.PANGO_WEIGHT_BOLD or ffix.C.PANGO_WEIGHT_NORMAL )
+					pangocairo.pango_font_description_set_weight( font_desc, bold and ffix.C.PANGO_WEIGHT_BOLD2 or ffix.C.PANGO_WEIGHT_NORMAL2 )
 					pangocairo.pango_font_description_set_style( font_desc, italic and ffix.C.PANGO_STYLE_ITALIC or ffix.C.PANGO_STYLE_NORMAL )
-					pangocairo.pango_font_description_set_absolute_size( font_desc, size * ffix.C.PANGO_SCALE * upscale )
+					pangocairo.pango_font_description_set_absolute_size( font_desc, size * ffix.C.PANGO_SCALE2 * upscale )
 					pangocairo.pango_layout_set_font_description( layout, font_desc )
 					local attr = ffix.gc( pangocairo.pango_attr_list_new( ), pangocairo.pango_attr_list_unref )
 					pangocairo.pango_attr_list_insert( attr, pangocairo.pango_attr_underline_new( underline and ffix.C.PANGO_UNDERLINE_SINGLE or ffix.C.PANGO_UNDERLINE_NONE ) )
 					pangocairo.pango_attr_list_insert( attr, pangocairo.pango_attr_strikethrough_new( strikeout ) )
-					pangocairo.pango_attr_list_insert( attr, pangocairo.pango_attr_letter_spacing_new( hspace * ffix.C.PANGO_SCALE * upscale ) )
+					pangocairo.pango_attr_list_insert( attr, pangocairo.pango_attr_letter_spacing_new( hspace * ffix.C.PANGO_SCALE2 * upscale ) )
 					pangocairo.pango_layout_set_attributes( layout, attr )
 					local fonthack_scale
 					if LIBASS_FONTHACK then
 						local metrics = ffix.gc( pangocairo.pango_context_get_metrics( pangocairo.pango_layout_get_context( layout ), pangocairo.pango_layout_get_font_description( layout ), nil ), pangocairo.pango_font_metrics_unref )
-						fonthack_scale = size / ((pangocairo.pango_font_metrics_get_ascent( metrics ) + pangocairo.pango_font_metrics_get_descent( metrics )) / ffix.C.PANGO_SCALE * downscale)
+						fonthack_scale = size / ((pangocairo.pango_font_metrics_get_ascent( metrics ) + pangocairo.pango_font_metrics_get_descent( metrics )) / ffix.C.PANGO_SCALE2 * downscale)
 					else
 						fonthack_scale = 1
 					end
 					return {
 						metrics = function( )
 							local metrics = ffix.gc( pangocairo.pango_context_get_metrics( pangocairo.pango_layout_get_context( layout ), pangocairo.pango_layout_get_font_description( layout ), nil ), pangocairo.pango_font_metrics_unref )
-							local ascent, descent = pangocairo.pango_font_metrics_get_ascent( metrics ) / ffix.C.PANGO_SCALE * downscale,
-													pangocairo.pango_font_metrics_get_descent( metrics ) / ffix.C.PANGO_SCALE * downscale
+							local ascent, descent = pangocairo.pango_font_metrics_get_ascent( metrics ) / ffix.C.PANGO_SCALE2 * downscale,
+													pangocairo.pango_font_metrics_get_descent( metrics ) / ffix.C.PANGO_SCALE2 * downscale
 							return {
 								height = (ascent + descent) * yscale * fonthack_scale,
 								ascent = ascent * yscale * fonthack_scale,
 								descent = descent * yscale * fonthack_scale,
 								internal_leading = 0,
-								external_leading = pangocairo.pango_layout_get_spacing( layout ) / ffix.C.PANGO_SCALE * downscale * yscale * fonthack_scale
+								external_leading = pangocairo.pango_layout_get_spacing( layout ) / ffix.C.PANGO_SCALE2 * downscale * yscale * fonthack_scale
 							}
 						end,
 						text_extents = function( text )
@@ -13323,7 +15226,7 @@
 							pangocairo.cairo_restore( context )
 							local shape, shape_n = { }, 0
 							local path = ffix.gc( pangocairo.cairo_copy_path( context ), pangocairo.cairo_path_destroy )
-							if(path[ 0 ].status == ffix.C.CAIRO_STATUS_SUCCESS) then
+							if(path[ 0 ].status == ffix.C.CAIRO_STATUS_SUCCESS2) then
 								local i, cur_type, last_type = 0
 								while(i < path[ 0 ].num_data) do
 									cur_type = path[ 0 ].data[ i ].header.type
