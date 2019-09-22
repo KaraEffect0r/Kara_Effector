@@ -41,7 +41,17 @@
 	Rcs =	ke4.math.Rcs
 	Rsc =	ke4.math.Rcs
 	Rms =	ke4.math.Rms
-	Rsc =	ke4.math.Rms
+	Rsm =	ke4.math.Rms
+	Rr =	ke4.math.Rr
+	Rsr =	ke4.math.Rsr
+	Rrs =	ke4.math.Rsr
+	Rdr =	ke4.math.Rdr
+	Rcr =	ke4.math.Rcr
+	Rmr =	ke4.math.Rmr
+	Rdrs =	ke4.math.Rdrs
+	Rcrs =	ke4.math.Rcrs
+	Rmrs =	ke4.math.Rmrs
+	Re =	ke4.math.Re
 	----------------------
 	
 	table.copy = util.copy
@@ -56,9 +66,9 @@
 	HSV_to_RGB = util.HSV_to_RGB
 	HSL_to_RGB = util.HSL_to_RGB
 	clamp = util.clamp
-	interpolate = util.interpolate
-	interpolate_color = util.interpolate_color
-	interpolate_alpha = util.interpolate_alpha
+	interpolate = ke4.tag.ipol
+	interpolate_alpha = ke4.tag.ipol
+	interpolate_color = ke4.tag.ipol
 	string.headtail = util.headtail
 	string.trim = util.trim
 	string.words = util.words
