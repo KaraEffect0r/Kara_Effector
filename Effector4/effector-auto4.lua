@@ -1,16 +1,16 @@
 	--[[  La Librería effector-auto4.lua está diseñada con el fin de poder ampliar la gama de efectos
 	hechos con Automation-auto4 del aegisub. Posee diversas funciones que ampliarán las posibilidades
 	a la hora de desarrollar efectos karaokes o de edición.
-	Un gran porcentaje de las funciones del Kara Effector 3.5 se podrán usar en los templates auto-4,
+	Un gran porcentaje de las funciones del Kara Effector 3.6 se podrán usar en los templates auto-4,
 	con unas ligeras modificaciones en la forma de usarlas, ya que éstas han tenido que ser adaptadas
 	para que funcionen en Automation.
 	
-	--> Kara Effector 3.5 aratani
+	--> Kara Effector 3.6 legacy
 	--> Contáctanos:
 	
 	--> [WhatsApp] Kara Effector: +57 320 863 14 72
 	--> [Discord]  Kara Effector: discord.gg/YFP2zeY
-	-->	http://www.facebook.com/karaeffector
+	--> http://www.facebook.com/karaeffector
 	--> http://www.karaeffector.blogspot.com
 	--]]
 	
