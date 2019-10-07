@@ -16,10 +16,11 @@
 	
 	-- effector-auto4.lua ---------------------------------------------------------------------------
 	ke4_script_name		   = "effector-auto4.lua"
-	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
+	ke4_script_description     = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "september 22nd 2019; 18:33 (GMT + 5)"
+	ke4_script_modified	   = "october 07th 2019; 17:24 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
+	--include( "karaskel.lua" )
 	
 	--[[
 	ke4 = {
@@ -67,9 +68,7 @@
 			unique( Table )
 			copy( t, depth )
 			tostring( t )
-			gradient( Left, Right, algorithm, Size )
-			gradient2( Size, ... )
-			gradient3( Size, ... )
+			gradient( Size, ... )
 			type( Table )
 		}
 		utf8 = {
@@ -147,6 +146,7 @@
 			bezier2( pct, pts )
 			to16( Num )
 			clamp( Num, Min, Max )
+			clamp2( Num, Min, Max )
 		}
 		random = {
 			color( H, S, V )
@@ -183,14 +183,14 @@
 			gradientv( Text_Config, Text, Relative_pos, ... )
 			gradientangle( Text_Config, Text, Relative_pos, Angle, ... )
 			bezier( Text_Config, Shape, Char_x, Char_y, Mode, Offset )
-			rand( Text_Config, Text_ran, num_tran, dur_tran, extra_tags, table_rand, text_rand, text_all )
+			rand( Text_Config, Text, num_tran, dur_tran, Tags, Table, Rand, All )
 			upper( Text )
 			lower( Text )
 			karaoke_true( Table )
 			remove_tags( Text )
 			remove_space_in_tags( Text )
 			remove_extra_space( Text )
-			remove_syls_nil( Text, Duration )	
+			remove_syls_nil( Text, Duration )
 			to_word( Text, Duration )
 			text2word( Text, Duration )
 			text2syl( Text, Duration )
@@ -295,24 +295,25 @@
 			set( times_set, events_set, Line_start_time, Line_end_time )
 			only( condition, s_true, s_false )
 			only2( Conditions, ... )
-			movevc( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
+			movevc( Shape, posx, posy, Dx, Dy, Time_i, Time_f )
+			movevci( Shape, posx, posy, Dx, Dy, Time_i, Time_f )
 			glitter( DurTotal, ExtraTags_i, ExtraTags_f )
 			glitterx( DurTotal, ExtraTags_i, ExtraTags_f )
 			glittery( DurTotal, ExtraTags_i, ExtraTags_f )
 			clip_shape( Shapes, Center_x, Center_y )
 			ipol( Ipol_i, ... )
-			clip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
-			iclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
-			clip2( left_cx, top_cy, width_clip, height_clip )
-			iclip2( left_cx, top_cy, width_clip, height_clip )
-			rclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
-			riclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
-			moveclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-			moveiclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-			moveclip2( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f )
-			moveiclip2( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f )
-			moverclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-			movericlip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
+			clip( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
+			iclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
+			clip2( Left, Top, Width, Height )
+			iclip2( Left, Top, Width, Height )
+			rclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
+			riclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
+			moveclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+			moveiclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+			moveclip2( Left, Top, Width, Height, Move_x, Move_y, Time_i, Time_f )
+			moveiclip2( Left, Top, Width, Height, Move_x, Move_y, Time_i, Time_f )
+			moverclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+			movericlip( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
 			operation( String )
 			lmove( Configs, Coor, Times, Times2 )
 			pmove( Configs, F_x, F_y, domainF, t1, t2, Accel, offset_t )
@@ -803,7 +804,7 @@
 		png_bytep* png_get_rows(png_const_structp, png_const_infop);
 		]] )
 	end )
-
+	
 	-- Helper and short functions
 	local pi = math.pi						-- el valor de la constante pi
 	local ln = math.log						-- logaritmo (base e por default)
@@ -1094,8 +1095,13 @@
 						ipol_f = Table_ipol[ floor( (i - 1) / (max_loop / (#Table_ipol - 1)) ) + 2 ]
 						pct_ip = floor( (i - 1) % (max_loop / (#Table_ipol - 1)) ) / (max_loop / (#Table_ipol - 1))
 						ipols[ i ] = ke4.math.round( ipol_function( ipol_i, ipol_f, ke4.math.format( algorithm_ipol, pct_ip ) ), 3 )
-					end
-					ipols[ #ipols + 1 ] = Table_ipol[ #Table_ipol ]
+					end --!_G.ke4.table.view( _G.ke4.table.ipol( { 12, 31 }, 11, "\\fscy", "math.sin( math.pi * %s )" ) )!
+					--fixed: october 07th 2019
+					pct_ip = ke4.math.clamp( ke4.math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
+					ipol_i = Table_ipol[ floor( pct_ip ) + 1 ]
+					ipol_f = Table_ipol[ floor( pct_ip ) + 2 ] or Table_ipol[ floor( pct_ip ) + 1 ]
+					ipols[ #ipols + 1 ] = ke4.math.round( ipol_function( ipol_i, ipol_f, pct_ip - floor( pct_ip ) ), 3 )
+					--ipols[ #ipols + 1 ] = Table_ipol[ #Table_ipol ]
 					--concatena los valores con los Tags_ipol, si los hay
 					if Tags_ipol then
 						return ke4.table.concat2( ipols, Tags_ipol )
@@ -1155,6 +1161,54 @@
 				return tbl_ipol_funct( Table, Size, Tags, algorithm )
 			end,
 
+			ipol2 = function( Table, Size, Tags, algorithm )
+				--retorna una tabla con la interpolación de los valores de la tabla ingresada
+				--interpola números, shapes, clips vectoriales, clips rectangulares, colores y transparencias
+				local Table = Table or { 0, 1 }
+				local Size = ceil( abs( Size or 10 ) )
+				if #Table == 1 then
+					Table[ 2 ] = Table[ 1 ]
+				end
+				if Size < #Table then
+					Size = #Table
+				end
+				local algorithm = algorithm or "%s" -- algorithm example: "%s ^ 0.5"
+				local function tbl_ipol_funct( Table_ipol, Size_ipol, Tags_ipol, algorithm_ipol )
+					local ipols = { }
+					for i = 1, Size_ipol do
+						ipols[ i ] = ke4.math.round( ke4.tag.ipol( ke4.math.format( algorithm_ipol, (i - 1) / (Size_ipol - 1) ), Table_ipol ), 3 )
+					end
+					if Tags_ipol then --concatena los valores con los Tags_ipol, si los hay
+						return ke4.table.concat2( ipols, Tags_ipol )
+					end
+					return ipols
+				end
+				-- determina si los elementos son tablas, clip's o shapes
+				local function type_table( Table )
+					if type( Table[ 1 ] ) == "table" then
+						for i = 1, #Table do
+							if type( Table[ i ] ) ~= "table" then
+								return "mixed"
+							end
+						end
+						return "table"
+					end
+					return "others"
+				end
+				-------------------------------------------------------------
+				if type_table( Table ) == "table" then
+					local tbls_ipol, Tags_tbl = { }, Tags
+					for i = 1, #Table do
+						if type( Tags ) == "table" then
+							Tags_tbl = Tags[ i ] or ""
+						end
+						itbls_ipol[ i ] = tbl_ipol_funct( Table[ i ], Size, Tags_tbl, algorithm )
+					end
+					return ke4.table.concat4( tbls_ipol )
+				end
+				return tbl_ipol_funct( Table, Size, Tags, algorithm )
+			end, --!_G.ke4.table.view( _G.ke4.table.ipol2( { 12, 31, 20, 13, 47 }, 21, "\\fscy" ) )!
+
 			make = function( objet, size, limit_i, limit_f, ... )
 				--crea una tabla de diferentes objetos por valores predeterminados ordenados
 				local t_make, Tme_concat, Tm_n = { }, { [ 1 ] = "" }, 0.5
@@ -1203,7 +1257,7 @@
 					end
 				else
 					Tme_concat = limit_f
-					t_make = ke4.table.gradient3( size, limit_i )
+					t_make = ke4.table.gradient( size, limit_i )
 				end
 				t_make = ke4.table.concat2( t_make, Tme_concat or "" )
 				return t_make
@@ -1256,7 +1310,7 @@
 					end
 				else
 					Trme_concat = limit_f
-					t_rmake = ke4.table.concat2( ke4.table.disorder( ke4.table.gradient3( size, limit_i ) ), Trme_concat or "" )
+					t_rmake = ke4.table.concat2( ke4.table.disorder( ke4.table.gradient( size, limit_i ) ), Trme_concat or "" )
 				end
 				return t_rmake
 			end,
@@ -2100,78 +2154,38 @@
 				return table.concat( result, "\n" )
 			end,
 			
-			gradient = function( Left, Right, algorithm, Size )
-				--[[ example algorithm: "sin( pi * %s )" ]]
-				local Size = ke4.math.round( Size )
-				local algorithm = algorithm or "%s"
-				local Right = ke4.color.from_error( Right )
-				local Left = ke4.color.from_error( Left )
-				local table_gradientV, vectors = { }, { }
-				if Size == 1 then
-					table_gradientV[ 1 ] = format( "(%s,%s,%s,%s)", Left, Left, Right, Right )
-				else
-					for i = 1, 2 * Size do
-						vectors[ i ] = ke4.tag.ipol( ke4.math.format( algorithm, (i - 1) / (2 * Size - 1) ), Left, Right )
-					end
-					for i = 1, Size do
-						table_gradientV[ i ] = format( "(%s,%s,%s,%s)",
-							vectors[ 2 * i - 1 ], vectors[ 2 * i - 1 ], vectors[ 2 * i ], vectors[ 2 * i ]
-						)
-					end
-				end
-				return table_gradientV
-			end, --\1c!_G.ke4.table.gradient( "&H0000FF&", "&H00FFFF&" )[ syl.i ]!
-			
-			gradient2 = function( Size, ... )
+			gradient = function( Size, ... )
+				-- example algorithm: "sin( pi * %s )"
 				local toGradient = { ... }
-				if ... == nil then
-					toGradient = { "&H0000FF&" }
-				elseif type( ... ) == "table" then
+				if type( ... ) == "table" then
 					toGradient = ...
 				end
 				if #toGradient == 1 then
-					table.insert( toGradient, 1, "&HFFFFFF&" )
+					toGradient[ 2 ] = "&HFFFFFF&"
 				end
 				toGradient = ke4.color.from_error( toGradient )
-				local n, vectors = #toGradient - 1, { }
-				local N
-				for i = 1, Size do
-					N = ceil( i / ((Size + 1) / n) )
-					vectors[ i ] = ke4.tag.ipol( (i - (N - 1) * (Size + 1) / n - 1)/((Size + 1) / n), toGradient[ N ], toGradient[ N + 1 ] )
-				end
-				return vectors
-			end, --\1c!_G.ke4.table.gradient2( syl.n, "&HFFFFFF&", "&H0000FF&", "&H00FFFF&" )[syl.i ]!
-			
-			gradient3 = function( Size, ... )
-				local toGradient = { ... }
-				if ... == nil then
-					toGradient = { "&H0000FF&" }
-				elseif type( ... ) == "table" then
-					toGradient = ...
-				end
-				if #toGradient == 1 then
-					table.insert( toGradient, 1, "&HFFFFFF&" )
-				end
-				toGradient = ke4.color.from_error( toGradient )
-				local n, vectors = #toGradient - 1, { }
-				local Siz, N
-				if type( Size ) == "table" then
+				local Size = Size or 12
+				local Grad, Gradient_H, Gradient_V = { }, { }, { }
+				local algorithm, Siz = "%s", ke4.math.round( Size )
+				if type( Size ) == "table"
+					and Size[ 2 ] then
 					Siz = ke4.math.round( Size[ 1 ] )
+					algorithm = Size[ 2 ]
+				end
+				if type( Size ) == "table"
+					and type( Size[ 1 ] ) == "table" then
+					Siz = ke4.math.round( Size[ 1 ][ 1 ] )
 					for i = 1, Siz do
-						N = ceil( i / ((Siz + 1) / n) )
-						vectors[ i ] = ke4.tag.ipol( (i - (N - 1) * (Siz + 1) / n - 1)/((Siz + 1) / n), toGradient[ N ], toGradient[ N + 1 ] )
+						Grad[ i ] = ke4.tag.ipol( ke4.math.format( algorithm, (i - 1) / (Siz - 1) ), toGradient )
 					end
-					return vectors
-				else
-					Siz = ke4.math.round( Size )
+					return Grad
 				end
 				for i = 1, Siz do
-					N = ceil( i / ((Siz + 1) / n) )
-					vectors[ i ] = ke4.tag.ipol( (i - (N - 1) * (Siz + 1) / n - 1)/((Siz + 1) / n), toGradient[ N ], toGradient[ N + 1 ] )
+					Grad[ i ] = ke4.tag.ipol( ke4.math.format( algorithm, (i - 1) / (Siz - 1) ), toGradient )
 				end
-				return vectors
-			end, --\1c!_G.ke4.table.gradient3( syl.n, "&H0000FF&", "&HFFFFFF&", "&H00FFFF&" )[syl.i]!
-			
+				return Grad
+			end, --\1c!_G.ke4.table.gradient( $syln, "&H0000FF&", "&HFFFFFF&", "&H00FFFF&" )[syl.i]!
+
 			type = function( Table )
 				if #Table > 0 then
 					::go_to_ini::
@@ -2427,41 +2441,80 @@
 			format = function( String, ... )
 				--le da valores a un string de formato
 				local Values = { ... }
-				if type( ... ) == "table" then
+				if ...
+					and type( ... ) == "table" then
 					Values = ...
 				end
-				--local line = linefx[ ii ]
+				if #Values == 0 then
+					Values = { 1 }
+				end --!_G.ke4.math.format( "frame_dur" )!
 				local max_index = ke4.string.count( String, "%%[aAcdeEfgGioqsuxX]^*" ) --modos del string.format
 				local str_mathf = format( String, unpack( ke4.table.replay( ceil( max_index / #Values ), Values ) ) )
-				------------------------------------------------------------------
-				--convierte los strings de variables a sus valores reales :D
+				-----------------------------------------------------------------------------------------------------
 				local str_mathformat
-				str_mathf = str_mathf:gsub( "%.line", ".LINE" ) -->save the var.line.val
-				:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-				:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
-				:gsub( "line%.", "linefx[  ii  ]." )
+				str_mathf = str_mathf:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
 				:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
-				:gsub( "%.LINE", ".line" )
-				if pcall( loadstring( format( "return function( meta, line, x, y ) return %s end", str_mathf ) ) ) then
-					local math_format_funct = loadstring( format( "return function( meta, line, x, y ) return %s end", str_mathf ) )( )
+				if pcall( loadstring( format( [[
+						return function( )
+							local xres, yres = aegisub.video_size( )
+							if not xres then
+								xres, yres = 1280, 720
+							end
+							local ratio = xres / 1280
+							local msa = aegisub.ms_from_frame( 1 )
+							local msb = aegisub.ms_from_frame( 101 )
+							local frame_dur = 41.708
+							if msb then
+								frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+							end
+							local pi, ln, log = math.pi, math.log, math.log10
+							local sin, cos, tan = math.sin, math.cos, math.tan
+							local abs, deg, rad = math.abs, math.deg, math.rad
+							local asin, acos, atan = math.asin, math.acos, math.atan
+							local sinh, cosh, tanh = math.sinh, math.cosh, math.tanh
+							local rand, ceil, floor = math.random, math.ceil, math.floor
+							local atan2, format = math.atan2, string.format
+							local unpack = table.unpack or unpack
+							return %s end
+						]], str_mathf )
+					) ) then
+					local math_format_funct = loadstring( format( [[
+						return function( )
+							local xres, yres = aegisub.video_size( )
+							if not xres then
+								xres, yres = 1280, 720
+							end
+							local ratio = xres / 1280
+							local msa = aegisub.ms_from_frame( 1 )
+							local msb = aegisub.ms_from_frame( 101 )
+							local frame_dur = 41.708
+							if msb then
+								frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+							end
+							local pi, ln, log = math.pi, math.log, math.log10
+							local sin, cos, tan = math.sin, math.cos, math.tan
+							local abs, deg, rad = math.abs, math.deg, math.rad
+							local asin, acos, atan = math.asin, math.acos, math.atan
+							local sinh, cosh, tanh = math.sinh, math.cosh, math.tanh
+							local rand, ceil, floor = math.random, math.ceil, math.floor
+							local atan2, format = math.atan2, string.format
+							local unpack = table.unpack or unpack
+							return %s end
+						]], str_mathf )
+					)( )
 					if pcall( math_format_funct ) then
-						str_mathformat = math_format_funct( meta, line, x, y )
+						str_mathformat = math_format_funct( )
 						if str_mathformat then
 							return str_mathformat
 						end
 						str_mathf = str_mathf:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-						:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
-						:gsub( "linefx%[  ii  %]%.", "line." )
 						:gsub( "\"(&H%x+&)\"", "%1" )
 						return str_mathf
-					end --math.format( "%s + %s * line.i + 2", 5, 7 )
+					end --!_G.ke4.math.format( "%s + %s / 20", 5, 7 )!
 				end
 				str_mathf = str_mathf:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-				:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
-				:gsub( "linefx%[  ii  %]%.", "line." )
 				:gsub( "\"(&H%x+&)\"", "%1" )
-				--rewrite: january 17th 2019
-				------------------------------------------------------------------
+				-----------------------------------------------------------------------------------------------------
 				return str_mathf
 			end,
 
@@ -4026,6 +4079,8 @@
 
 			clamp = function( Num, Min, Max )
 				--restringe un número entre un mínimo y un máximo
+				local Min = Min or 0
+				local Max = Max or 1
 				local c_min = math.min( Min, Max )
 				local c_max = math.max( Min, Max )
 				if type( Num ) == "number" then
@@ -4039,11 +4094,15 @@
 			end, --!_G.ke4.math.clamp( 3, 5, 10 )!
 			
 			clamp2 = function( Num, Min, Max )
+				--restringe un número entre un mínimo y un máximo,
+				--pero en caso de excederse, se empieza a devolver
+				local Min = Min or 0
+				local Max = Max or 1
 				local Num = ke4.math.round( Num * 10000 )
-				local Min = ke4.math.round( Min * 10000 )
-				local Max = ke4.math.round( Max * 10000 )
+				Min = ke4.math.round( Min * 10000 )
+				Max = ke4.math.round( Max * 10000 )
 				return ke4.math.round( ke4.math.i( Num, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
-			end,  --!_G.ke4.math.clamp2( 3*(j-1)/(maxj-1), 0, 1 )!
+			end,  --!_G.ke4.math.clamp2( 3 * (j - 1) / (maxj - 1) )!
 		},
 		
 		-- Random sublibrary
@@ -4308,10 +4367,19 @@
 				local Change = Change or ""
 				local nocapture_tbl = { }
 				if NoCapture then
-					for nocap in String:gmatch( NoCapture ) do
-						table.insert( nocapture_tbl, nocap )
+					if type( NoCapture ) == "table" then
+						for i = 1, #NoCapture do
+							for nocap in String:gmatch( NoCapture[ i ] ) do
+								table.insert( nocapture_tbl, nocap )
+							end
+							String = String:gsub( NoCapture[ i ], "<nocap>" )
+						end
+					else
+						for nocap in String:gmatch( NoCapture ) do
+							table.insert( nocapture_tbl, nocap )
+						end
+						String = String:gsub( NoCapture, "<nocap>" )
 					end
-					String = String:gsub( NoCapture, "<nocap>" )
 				end
 				if NoChange then
 					if type( NoChange ) == "number" then
@@ -4723,7 +4791,7 @@
 				end
 				local Width, Height = aegisub.text_extents( Text_Config, Text )
 				local Shape, cn = "", ceil( Width / shp_w )
-				local gradh = ke4.table.gradient3( { cn }, ... )
+				local gradh = ke4.table.gradient( { { cn } }, ... )
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", gradh[ i ], ke4.shape.size( ke4.shape.rectangle, shp_w, ceil( Height ) ) )
 				end
@@ -4734,7 +4802,7 @@
 				local shp_h = 2
 				local Width, Height = aegisub.text_extents( Text_Config, Text )
 				local Shape, cn = "", ceil( Height / shp_h )
-				local gradv = ke4.table.gradient3( { cn }, ... )
+				local gradv = ke4.table.gradient( { { cn } }, ... )
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s{\\p0}\\N", gradv[ i ], ke4.shape.size( ke4.shape.rectangle, ceil( Width ), shp_h ) )
 				end
@@ -4752,7 +4820,7 @@
 				local shp_w = ke4.math.round( abs( Width * cos( rad( Angle ) ) + Height * sin( rad( Angle ) ) + 1 ) )
 				local shp_h = ke4.math.round( abs( Width * sin( rad( Angle ) ) + Height * cos( rad( Angle ) ) + 1 ) )
 				local Shape, cn = format( "{\\fr%s}", Angle % 361 ), ceil( shp_w / shp_s )
-				local grada = ke4.table.gradient3( { cn }, ... )
+				local grada = ke4.table.gradient( { { cn } }, ... )
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", grada[ i ], ke4.shape.size( ke4.shape.rectangle, shp_s, shp_h ) )
 				end
@@ -5013,14 +5081,14 @@
 				return format( "\\pos(%s,%s)\\fr%s", ke4.math.round( pos_Bezier[ 1 ], 3 ), ke4.math.round( pos_Bezier[ 2 ], 3 ), bezier_angle )
 			end, --{\an5!_G.ke4.text.bezier( line, "\\clip(m 180 352 b 303 327 347 239 464 236 589 239 595 474 812 450 987 428 871 261 1144 308)", $x, $y, nil, 0 )!}
 			
-			rand = function( Text_Config, Text_ran, num_tran, dur_tran, extra_tags, table_rand, text_rand, text_all )
+			rand = function( Text_Config, Text, num_tran, dur_tran, Tags, Table, Rand, All )
 				-- frame_dur ---------------------------
 				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
 				if msb then
 					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
 				end
 				----------------------------------------
-				local Text_ran = Text_ran or "ke4.text.rand"
+				local Text = Text or "ke4.text.rand"
 				local dur_tran = abs( dur_tran or 2 * frame_dur )
 				local num_tran = abs( ke4.math.round( num_tran or 5 ) )
 				local del_tran = 0
@@ -5043,19 +5111,19 @@
 					table.insert( table_ch, string.char( i ) )
 					table.insert( table_ch, string.char( i + 32 ) )
 				end
-				local tbl_rand = table_rand or table_ch
+				local tbl_rand = Table or table_ch
 				----------------------------------------------
-				local extra_tg = extra_tags or ""
+				local extra_tg = Tags or ""
 				local time_ini = ke4.math.R( 0, Text_Config.duration - delay_tr, 5 * frame_dur )
 				---------------------------------------------------------
-				if text_rand == "intro"
-					or text_rand == "line" then
+				if Rand == "intro"
+					or Rand == "line" then
 					time_ini = 0
-				elseif text_rand == "outro" then
+				elseif Rand == "outro" then
 					time_ini = Text_Config.duration - delay_tr
 				end
 				---------------------------------------------------------
-				local tbl_char = ke4.table.string( Text_ran )
+				local tbl_char = ke4.table.string( Text )
 				local tbl_rtrn = { }
 				local time_line = Text_Config.duration - delay_tr
 				local l = Text_Config.styleref
@@ -5078,7 +5146,7 @@
 						if ke4.table.inside( ke4.text.char_special, tbl_char[ i ] ) then
 							tbl_rtrn[ i ] = format( "{\\fscx%s}%s", l.scale_x, tbl_char[ i ] )
 						else
-							if text_rand == "line" then
+							if Rand == "line" then
 								tbl_rtrn[ i ] = format( "{\\fscx%s%s\\t(%s,%s,\\fscx0%s)\\t(%s,%s,\\fscx%s%s)\\t(%s,%s,\\fscx0%s)}%s",
 									l.scale_x, Ad, time_ini, time_ini + del_tran, Ai, time_ini + delay_tr, time_ini + delay_tr + del_tran,
 									l.scale_x, Ad, time_line, time_line + del_tran, Ai, tbl_char[ i ]
@@ -5117,13 +5185,13 @@
 					end
 				) --si hay una \\t(0,0, solo retorna los tags que hay dentro
 				--------------------------------------------------------------
-				if text_all
-					or text_rand == "intro"
-					or text_rand == "line"
-					or text_rand == "outro" then
+				if All
+					or Rand == "intro"
+					or Rand == "line"
+					or Rand == "outro" then
 					return Text_fx--table.concat( tbl_rtrn )
 				end --char.text:rand( 5, 2f, "\\1cR( )" )
-				return ke4.tag.only( ke4.math.R( ke4.math.R( 2, 4 ) ) == 1, Text_fx, Text_ran )
+				return ke4.tag.only( ke4.math.R( ke4.math.R( 2, 4 ) ) == 1, Text_fx, Text )
 			end, --{\an5\pos($x,$y)}!_G.ke4.text.rand( line, syl.text, 5, 82 )!
 			
 			upper = function( Text )
@@ -10214,8 +10282,8 @@
 				return ( type( TrueExits[ #TrueExits ] ) == "number" ) and 0 or ""
 			end,
 
-			movevc = function( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
-				local ti, tf = time_vci, time_vcf
+			movevc = function( Shape, posx, posy, Dx, Dy, Time_i, Time_f )
+				local ti, tf = Time_i, Time_f
 				local DX, DY = Dx, Dy
 				local PX, PY = posx, posy
 				local Shape = ke4.shape.origin( ke4.shape.ASSDraw3( Shape ) )
@@ -10228,8 +10296,8 @@
 				return Tag_fx
 			end,
 			
-			movevci = function( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
-				local  Tag_movevci = ke4.tag.movevc( Shape, posx, posy, Dx, Dy, time_vci, time_vcf ):gsub( "clip", "iclip" )
+			movevci = function( Shape, posx, posy, Dx, Dy, Time_i, Time_f )
+				local  Tag_movevci = ke4.tag.movevc( Shape, posx, posy, Dx, Dy, Time_i, Time_f ):gsub( "clip", "iclip" )
 				return Tag_movevci
 			end,
 
@@ -10374,17 +10442,17 @@
 				end
 				---------------------------------------------
 				local Ipol_i = Ipol_i or 0.5
-				Ipol_i = ke4.math.clamp( Ipol_i, 0, 1 ) * (#valors - 1)
+				Ipol_i = ke4.math.clamp( Ipol_i ) * (#valors - 1)
 				local valor_i = valors[ floor( Ipol_i ) + 1 ]
 				local valor_f = valors[ floor( Ipol_i ) + 2 ] or valors[ floor( Ipol_i ) + 1 ]
 				return ipol_function( valor_i, valor_f, Ipol_i - floor( Ipol_i ) )
 			end,
 			
-			clip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
+			clip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
 				local loop_W, loop_H = loop_x, loop_y
 				local offset = 3--l.outline + l.shadow
-				local left_x, top_y = left_cx - offset, top_cy - offset
-				local clip_W, clip_H = width_clip + 2 * offset, height_clip + 2 * offset
+				local left_x, top_y = Left - offset, Top - offset
+				local clip_W, clip_H = Width + 2 * offset, Height + 2 * offset
 				local mode = Mode or 79
 				local size_W, size_H = clip_W / loop_W, clip_H / loop_H
 				local cx1, cx2, cy1, cy2
@@ -10430,33 +10498,33 @@
 				--code once: loop_x = 5 loop_y = 3
 			end, --!maxloop( loop_x * loop_y )!{\an5\pos($x,$y)!_G.ke4.tag.clip( j, loop_x, loop_y, line.left, line.top, line.width, line.height, nil )!}
 			
-			iclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
-				local iclip_tag = ke4.tag.clip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode ):gsub( "clip", "iclip" )
+			iclip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
+				local iclip_tag = ke4.tag.clip( j, loop_x, loop_y, Left, Top, Width, Height, Mode ):gsub( "clip", "iclip" )
 				return iclip_tag
 			end,
 
-			clip2 = function( left_cx, top_cy, width_clip, height_clip )
+			clip2 = function( Left, Top, Width, Height )
 				local offset = 3--l.outline + l.shadow
-				local left_x = left_cx - offset
-				local top_y  = top_cy - offset
-				local clip_W = width_clip + 2 * offset
-				local clip_H = height_clip + 2 * offset
+				local left_x = Left - offset
+				local top_y  = Top - offset
+				local clip_W = Width + 2 * offset
+				local clip_H = Height + 2 * offset
 				local cx1, cx2 = ke4.math.round( left_x, 3 ), ke4.math.round( left_x + clip_W, 3 )
 				local cy1, cy2 = ke4.math.round( top_y, 3 ), ke4.math.round( top_y + clip_H, 3 )
 				return format( "\\clip(%s,%s,%s,%s)", cx1, cy1, cx2, cy2 )
 			end, --{\an5\pos($x,$y)!_G.ke4.tag.clip2( line.left + syl.left, line.top, syl.width, syl.height )!}
 
-			iclip2 = function( left_cx, top_cy, width_clip, height_clip )
-				local iclip2_tag = ke4.tag.clip2( left_cx, top_cy, width_clip, height_clip ):gsub( "clip", "iclip" )
+			iclip2 = function( Left, Top, Width, Height )
+				local iclip2_tag = ke4.tag.clip2( Left, Top, Width, Height ):gsub( "clip", "iclip" )
 				return iclip2_tag
 			end,
 			
-			rclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
+			rclip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
 				local offset = 3--l.outline + l.shadow
 				local mode = Mode or 79
-				local left_x = left_cx - offset
-				local top_y = top_cy - offset
-				local clip_W, clip_H = width_clip + 2 * offset, height_clip + 2 * offset
+				local left_x = Left - offset
+				local top_y = Top - offset
+				local clip_W, clip_H = Width + 2 * offset, Height + 2 * offset
 				local loop_W, loop_H = loop_x, loop_y
 				local pixelW, pixelH = recall.pixx, recall.pixy
 				if j == 1 then
@@ -10517,17 +10585,17 @@
 				--code once: loop_x = 5 loop_y = 3
 			end, --!maxloop( loop_x * loop_y )!{\an5\pos($x,$y)!_G.ke4.tag.rclip( j, loop_x, loop_y, line.left, line.top, line.width, line.height )!}
 
-			riclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode )
-				local riclip_tag = ke4.tag.rclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode ):gsub( "clip", "iclip" )
+			riclip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode )
+				local riclip_tag = ke4.tag.rclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode ):gsub( "clip", "iclip" )
 				return riclip_tag
 			end,
 			
-			moveclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-				local left_x, top_y = left_cx, top_cy
+			moveclip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+				local left_x, top_y = Left, Top
 				local Move_x = Move_x or 0
 				local Move_y = Move_y or 0
-				local clip_i = ke4.tag.clip( j, loop_x, loop_y, left_x, top_y, width_clip, height_clip, Mode )
-				local clip_f = ke4.tag.clip( j, loop_x, loop_y, left_x + Move_x, top_y + Move_y, width_clip, height_clip, Mode )
+				local clip_i = ke4.tag.clip( j, loop_x, loop_y, left_x, top_y, Width, Height, Mode )
+				local clip_f = ke4.tag.clip( j, loop_x, loop_y, left_x + Move_x, top_y + Move_y, Width, Height, Mode )
 				if Time_i == nil
 					or Time_f == nil then
 					return format( "%s\\t(%s)", clip_i, clip_f )
@@ -10536,16 +10604,16 @@
 				--code once: loop_x = 5 loop_y = 3
 			end, --!maxloop( loop_x * loop_y )!{\an5\pos($x,$y)!_G.ke4.tag.moveclip( j, loop_x, loop_y, line.left + syl.left, line.top, syl.width, syl.height, nil, 200, 200 )!}
 			
-			moveiclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-				local moveiclip_tag = ke4.tag.moveclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
+			moveiclip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+				local moveiclip_tag = ke4.tag.moveclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
 				return moveiclip_tag
 			end,
 			
-			moveclip2 = function( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f )
+			moveclip2 = function( Left, Top, Width, Height, Move_x, Move_y, Time_i, Time_f )
 				local Move_x = Move_x or 0
 				local Move_y = Move_y or 0
-				local moveclip2_i = ke4.tag.clip2( left_cx, top_cy, width_clip, height_clip )
-				local moveclip2_f = ke4.tag.clip2( left_cx + Move_x, top_cy + Move_y, width_clip, height_clip )
+				local moveclip2_i = ke4.tag.clip2( Left, Top, Width, Height )
+				local moveclip2_f = ke4.tag.clip2( Left + Move_x, Top + Move_y, Width, Height )
 				if Time_i == nil
 					or Time_f == nil then
 					return format( "%s\\t(%s)", moveclip2_i, moveclip2_f )
@@ -10553,17 +10621,17 @@
 				return format( "%s\\t(%s,%s,%s)", moveclip2_i, Time_i, Time_f, moveclip2_f )
 			end, --{\an5\pos($x,$y)!_G.ke4.tag.moveclip2( line.left + syl.left, line.top, syl.width, syl.height, 200, 200 )!}
 
-			moveiclip2 = function( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f )
-				local moveiclip2_tag = ke4.tag.moveclip2( left_cx, top_cy, width_clip, height_clip, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
+			moveiclip2 = function( Left, Top, Width, Height, Move_x, Move_y, Time_i, Time_f )
+				local moveiclip2_tag = ke4.tag.moveclip2( Left, Top, Width, Height, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
 				return moveiclip2_tag
 			end,
 			
-			moverclip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-				local left_x, top_y = left_cx, top_cy
+			moverclip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+				local left_x, top_y = Left, Top
 				local Move_x = Move_x or 0
 				local Move_y = Move_y or 0
-				local clip_i = ke4.tag.rclip( j, loop_x, loop_y, left_x, top_y, width_clip, height_clip, Mode )
-				local clip_f = ke4.tag.rclip( j, loop_x, loop_y, left_x + Move_x, top_y + Move_y, width_clip, height_clip, Mode )
+				local clip_i = ke4.tag.rclip( j, loop_x, loop_y, left_x, top_y, Width, Height, Mode )
+				local clip_f = ke4.tag.rclip( j, loop_x, loop_y, left_x + Move_x, top_y + Move_y, Width, Height, Mode )
 				if Time_i == nil
 					or Time_f == nil then
 					return format( "%s\\t(%s)", clip_i, clip_f )
@@ -10571,8 +10639,8 @@
 				return format( "%s\\t(%s,%s,%s)", clip_i, Time_i, Time_f, clip_f )
 			end,
 			
-			movericlip = function( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f )
-				local movericlip_tag = ke4.tag.moverclip( j, loop_x, loop_y, left_cx, top_cy, width_clip, height_clip, Mode, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
+			movericlip = function( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f )
+				local movericlip_tag = ke4.tag.moverclip( j, loop_x, loop_y, Left, Top, Width, Height, Mode, Move_x, Move_y, Time_i, Time_f ):gsub( "clip", "iclip" )
 				return movericlip_tag
 			end,
 
@@ -14037,7 +14105,7 @@
 				local col_B2 = tonumber( Color2:match( "(%x%x)%x%x%x%x" ), 16 )
 				---------------------------------------------------------------
 				local Ipol = Ipol or 0.5
-				Ipol = ke4.math.clamp( Ipol, 0, 1 )
+				Ipol = ke4.math.clamp( Ipol )
 				local ipol_R = ke4.math.round( col_R1 + (col_R2 - col_R1) * Ipol )
 				local ipol_G = ke4.math.round( col_G1 + (col_G2 - col_G1) * Ipol )
 				local ipol_B = ke4.math.round( col_B1 + (col_B2 - col_B1) * Ipol )
@@ -14047,8 +14115,8 @@
 			HSV_to_RGB = function( Hue, Saturation, Value )
 				--HSV to ass color format :D HSV2ass
 				local H = ((Hue - 1) % 360 + 1) / 360 * 6
-				local S = ke4.math.clamp( Saturation, 0, 1 )
-				local V = ke4.math.clamp( Value, 0, 1 )
+				local S = ke4.math.clamp( Saturation )
+				local V = ke4.math.clamp( Value )
 				if S == 0 then
 					return "&HFFFFFF&"
 				end
@@ -14504,7 +14572,7 @@
 				end
 				-------------------------------------------------------
 				local Ipol = Ipol or 0.5
-				Ipol = ke4.math.clamp( Ipol, 0, 1 )
+				Ipol = ke4.math.clamp( Ipol )
 				return ke4.alpha.val2ass( ke4.math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
 			end, --!_G.ke4.alpha.ipolfx( 0.5, "&HFF&", 55 )!
 
