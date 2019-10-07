@@ -119,6 +119,7 @@ local SUPERSAMPLING = 8	-- Anti-aliasing precision for shape to pixels conversio
 local FONT_PRECISION = 64	-- Font scale for better precision output from native font system
 local LIBASS_FONTHACK = true	-- Scale font data to fontsize? (no effect on windows)
 local LIBPNG_PATH = "libpng"	-- libpng dynamic library location or shortcut (for system library loading function)
+--local LIBPNG_PATH = "C:\\Users\\DM4\\Desktop\\Vídeos\\lpng1632\\libpng"
 
 -- Load FFI interface
 local ffi = require("ffi")
@@ -749,9 +750,9 @@ Yutils = {
 		create_matrix = function()
 			-- Matrix data
 			local matrix = {1, 0, 0, 0,
-								0, 1, 0, 0,
-								0, 0, 1, 0,
-								0, 0, 0, 1}
+							0, 1, 0, 0,
+							0, 0, 1, 0,
+							0, 0, 0, 1}
 			-- Matrix object
 			local obj
 			obj = {
@@ -810,9 +811,9 @@ Yutils = {
 					end
 					-- Multipy matrices to create new one
 					local new_matrix = {0, 0, 0, 0,
-												0, 0, 0, 0,
-												0, 0, 0, 0,
-												0, 0, 0, 0}
+										0, 0, 0, 0,
+										0, 0, 0, 0,
+										0, 0, 0, 0}
 					for i=1, 16 do
 						for j=0, 3 do
 							new_matrix[i] = new_matrix[i] + matrix[1 + (i-1) % 4 + j * 4] * matrix2[1 + math.floor((i-1) / 4) * 4 + j]
@@ -831,9 +832,9 @@ Yutils = {
 					end
 					-- Add translation to matrix
 					obj.multiply({1, 0, 0, 0,
-									0, 1, 0, 0,
-									0, 0, 1, 0,
-									x, y, z, 1})
+								  0, 1, 0, 0,
+								  0, 0, 1, 0,
+								  x, y, z, 1})
 					-- Return this object
 					return obj
 				end,
@@ -845,9 +846,9 @@ Yutils = {
 					end
 					-- Add scale to matrix
 					obj.multiply({x, 0, 0, 0,
-									0, y, 0, 0,
-									0, 0, z, 0,
-									0, 0, 0, 1})
+								  0, y, 0, 0,
+								  0, 0, z, 0,
+								  0, 0, 0, 1})
 					-- Return this object
 					return obj
 				end,
@@ -2548,6 +2549,7 @@ Yutils = {
 		-- Creates BMP file reader
 		create_bmp_reader = function(filename)
 			-- Check argument
+			-- Yutils.decode.create_bmp_reader( img )
 			if type(filename) ~= "string" then
 				error("bitmap filename expected", 2)
 			end
@@ -2674,6 +2676,7 @@ Yutils = {
 						end
 					end
 				end
+				--return "not libpng :("
 			end
 			-- Try to decode file
 			local bottom_up
