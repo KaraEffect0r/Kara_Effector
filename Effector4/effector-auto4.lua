@@ -16,9 +16,9 @@
 	
 	-- effector-auto4.lua ---------------------------------------------------------------------------
 	ke4_script_name		   = "effector-auto4.lua"
-	ke4_script_description     = "Librería de funciones del Kara Effector para Automation-auto4"
+	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 07th 2019; 17:24 (GMT + 5)"
+	ke4_script_modified	   = "october 09th 2019; 16:29 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -275,6 +275,7 @@
 			to_pixels2( shape )
 			transform( shape, matrix )
 			to_clip( Shape, Pos_x, Pos_y, Ratio, Iclip )
+			intersect( Shape1, Shape2 )
 		}
 		ass = {
 			convert_time( ass_ms )
@@ -8752,6 +8753,72 @@
 				end
 				return format( "\\clip(%s)", Shape )
 			end, --{\an5\pos($x,$y)!_G.ke4.shape.to_clip( _G.ke4.shape.circle, $x, $y )!}
+			
+			intersect = function( Shape1, Shape2 )
+				--retorna una tabla con los puntos de intersección entre dos shapes
+				local Shape1 = ke4.shape.ASSDraw3( ke4.shape.flatten( Shape1, 4 ) )
+				local Shape2 = ke4.shape.ASSDraw3( ke4.shape.flatten( Shape2, 4 ) )
+				--------------------------------
+				local function line_shp( Shape )
+					--obtiene los segmentos de recta que posee una shape
+					local parts_shp, line = { }
+					for line in Shape:gmatch( "[mbl]^*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) do
+						parts_shp[ #parts_shp + 1 ] = line
+					end
+					local lines_tbl = { }
+					for i = 1, #parts_shp do
+						if parts_shp[ i ]:sub( 1, 1 ) == "l" then
+							lines_tbl[ #lines_tbl + 1 ] = parts_shp[ i - 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " " .. parts_shp[ i ]
+						end
+					end
+					return lines_tbl
+				end
+				------------------------------
+				local function minmax( Shape )
+					--retorna los valores mínimos y máximos en "x" y "y" de una shape
+					local minx, maxx = 1000000, -1000000
+					local miny, maxy = 1000000, -1000000
+					local Shape = Shape:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
+						function( val_x, val_y )
+							minx, miny = math.min( minx, val_x ), math.min( miny, val_y )
+							maxx, maxy = math.max( maxx, val_x ), math.max( maxy, val_y )
+						end
+					)
+					return minx, miny, maxx, maxy
+				end
+				-----------------------------------------
+				local Lines_shape1 = line_shp( Shape1 )
+				local Lines_shape2 = line_shp( Shape2 )
+				-----------------------------------------
+				local function intersectx( Line1, Line2 )
+					--retorna el punto de intersección (si lo hay) entre dos segmentos rectos de shape :D
+					local x1, y1, x2, y2 = Line1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+					local x3, y3, x4, y4 = Line2:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+					x1, y1, x2, y2 = tonumber( x1 ), tonumber( y1 ), tonumber( x2 ), tonumber( y2 )
+					x3, y3, x4, y4 = tonumber( x3 ), tonumber( y3 ), tonumber( x4 ), tonumber( y4 )
+					local x, y = ke4.math.intersect( x1, y1, x2, y2, x3, y3, x4, y4 )
+					local minx1, miny1, maxx1, maxy1 = minmax( Line1 )
+					local minx2, miny2, maxx2, maxy2 = minmax( Line2 )
+					local min_x, max_x = math.max( minx1, minx2 ), math.min( maxx1, maxx2 )
+					local min_y, max_y = math.max( miny1, miny2 ), math.min( maxy1, maxy2 )
+					if type( x ) == "number"
+						and (x >= min_x and x <= max_x)
+						and (y >= min_y and y <= max_y) then
+						return { x, y }
+					end
+					return "not x and y intersect"
+				end
+				-----------------------------------------
+				local intersect_tbl = { }
+				for i = 1, #Lines_shape1 do
+					for k = 1, #Lines_shape2 do
+						if type( intersectx( Lines_shape1[ i ], Lines_shape2[ k ] ) ) == "table" then
+							intersect_tbl[ #intersect_tbl + 1 ] = intersectx( Lines_shape1[ i ], Lines_shape2[ k ] )
+						end
+					end
+				end
+				return intersect_tbl
+			end, --!_G.ke4.table.view( _G.ke4.shape.intersect( "m 0 0 l 0 20 l 20 20 l 20 0 l 0 0 ", "m 15 -6 l 4 24 l 36 5 l 15 -6 " ) )!
 			
 		},
 		
