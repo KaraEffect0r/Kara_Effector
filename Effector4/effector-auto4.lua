@@ -7050,7 +7050,7 @@
 				----------------------------------------
 				local Shape3 = recall.shape_multi3
 				--if j == 1 then
-					local Shape = Shape or shape.circle
+					local Shape = Shape or ke4.shape.circle
 					local i, Shpfx1, Shpfx2 = 1, "", ""
 					local Bord = Bord or 4 * ratio
 					if type( Bord ) == "number" then
