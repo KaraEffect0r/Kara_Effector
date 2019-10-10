@@ -6790,7 +6790,7 @@
 				local lengthC = length_curve or xres / 4
 				local lengthT = length_total or 400--xres - val_center
 				local Loop_Lt = ke4.math.round( lengthT / lengthC )
-				local loops, Rand, px, py = 3 * Loop_Lt, lengthT / ratio_y, { }, { }
+				local loops, Rand, px, py = 3 * Loop_Lt, ratio_y, { }, { }
 				local Ang, Rad
 				for i = 0, loops, 3 do
 					px[ i ] = i * lengthC / 3
@@ -6855,7 +6855,7 @@
 					)
 					k = k + 1
 				end
-				return shape.ASSDraw3( tags )
+				return ke4.shape.ASSDraw3( tags )
 			end, --!_G.ke4.shape.Ctrajectory( )!
 			
 			Rtrajectory = function( Loop_Rt, radius_min, radius_max )
