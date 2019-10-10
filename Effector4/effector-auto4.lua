@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 09th 2019; 16:29 (GMT + 5)"
+	ke4_script_modified	   = "october 10th 2019; 11:48 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -6074,6 +6074,7 @@
 						My = (x - minx ) / w_shape				-- módulo de varianza respecto a "y", My = [0, 1]
 						Mp = (Pk - 1) / (Pn - 1)				-- módulo de varianza respecto a los puntos, Mp = [0, 1]
 						return Filter( x, y )
+						--las variables se deben llamar en los filtros usando el _G.
 					end
 				) --{\p1}!_G.ke4.shape.filter2( _G.ke4.text.to_shape( line.styleref, line.text_stripped ), function( x, y ) x = x + _G.ke4.math.Rcs( 2 ) y = y + _G.ke4.math.Rcs( 2 ) return x, y end, 3 )!
 				return ke4.shape.ASSDraw3( Shape )
@@ -7817,19 +7818,19 @@
 						return x, y
 					end
 				else
-					if Mode == 1 then		-- centrado
+					if Mode == 1 then		-- centrado [conserva la longitud de shape1]
 						Filter = function( x, y )
 							return (1 - Ratio) / 2 + Ratio * x, y
 						end
-					elseif Mode == 2 then	-- de inicio a fin
+					elseif Mode == 2 then	-- de inicio a fin [conserva la longitud de shape1]
 						Filter = function( x, y )
 							return Ratio * x, y
 						end
-					elseif Mode == 3 then	-- de fin a inicio
+					elseif Mode == 3 then	-- de fin a inicio [conserva la longitud de shape1]
 						Filter = function( x, y )
 							return 1 - Ratio + Ratio * x, y
 						end
-					elseif Mode == 4 then	-- justificado a lo largo
+					elseif Mode == 4 then	-- justificado a lo largo [modifica la longitud de Shape1 hasta igualar la de Shape2]
 						Filter = function( x, y )
 							return x, y
 						end
