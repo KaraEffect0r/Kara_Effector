@@ -6709,7 +6709,7 @@
 						shape_rectangular[ i ] = ""
 						for k = 1, loop1 do
 							shape_rectangular[ i ] = shape_rectangular[ i ] .. ke4.shape.displace( Shapes[ idx ], 
-								(k - 1) * ke4.shape.width( Shapes[ idx ] ) + distance_x * ke4.math.i( k )[ "0-->1-->1" ]
+								(k - 1) * ke4.shape.width( Shapes[ idx ] ) + distance_x * ke4.math.i( k )[ "0,11" ]
 							)
 						end
 						shape_rectangular_widths[ i ] = ke4.shape.width( shape_rectangular[ i ] )
