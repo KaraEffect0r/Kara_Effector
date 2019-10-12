@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 10th 2019; 11:48 (GMT + 5)"
+	ke4_script_modified	   = "october 12th 2019; 18:03 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -119,7 +119,7 @@
 			confi_bezier( n, x, y, t, Return )
 			length_bezier( ... )
 			angle_bezier( points, t )
-			point( c_num, x_range, y_range, s_point_x, s_point_y, e_point_x, e_point_y )
+			point( n, x_range, y_range, start_x, start_y, end_x, end_y )
 			ortho( x1, y1, z1, x2, y2, z2 )
 			randomsteps( min, max, step )
 			round( number_or_table, decimal )
@@ -3336,16 +3336,16 @@
 				return ke4.math.round( Angle, 3 )
 			end,
 			
-			point = function( c_num, x_range, y_range, s_point_x, s_point_y, e_point_x, e_point_y )
+			point = function( n, x_range, y_range, start_x, start_y, end_x, end_y )
 				--genera puntos aleatorios con parámetros indicados (función Bezier)
 				local Points = { }
-				local Cn = c_num or 4
+				local Cn = n or 4
 				local Rx = x_range or 2.5 * 56 --l.fontsize
 				local Ry = y_range or 2.5 * 56 --l.fontsize
-				local Sx = s_point_x or ke4.math.Rs( Rx )
-				local Sy = s_point_y or ke4.math.Rs( Ry )
-				local Ex = e_point_x or 0
-				local Ey = e_point_y or 0
+				local Sx = start_x or ke4.math.Rs( Rx )
+				local Sy = start_y or ke4.math.Rs( Ry )
+				local Ex = end_x or 0
+				local Ey = end_y or 0
 				for i = 3, 2 * Cn - 2, 2 do
 					Points[ i + 0 ] = ke4.math.Rs( Rx )
 					Points[ i + 1 ] = ke4.math.Rs( Ry )
@@ -3410,13 +3410,14 @@
 				end
 			end,
 			
-			i = function( counter, A, B, C )
+			i = function( counter, A, B, C, F )
 				local idx = counter
 				local A = A or 1
 				local B = B or 1
 				local C = C or 1
 				local D = A - B + 1
 				local E = B - A + 1
+				local F = F or 1
 				local algorithms = {
 					[ 01 ] = (-1) ^ (idx + 1),												-->( +,- )
 					[ 02 ] = (-1) ^ idx,													-->( -,+ )
@@ -3433,8 +3434,8 @@
 					[ 13 ] = A + ((B - A) / 2) * (1 + (-1) ^ idx ),							-->( A,B )
 					[ 14 ] = A + ((B - A) / 2) * (1 + (-1) ^ ceil( idx / C ) ),				-->( AA,BB ) C-veces
 					[ 15 ] = B * ceil( idx / A ),											-->( A,mB )  A-veces los múltiplos de B
-					[ 16 ] = A * ceil( idx / A ) - idx + 1,									-->( A-->1 )
-					[ 17 ] = A - A * ceil( idx / A ) + idx,									-->( 1-->A )
+					[ 16 ] = A - A * ceil( idx / A ) + idx,									-->( 1-->A )
+					[ 17 ] = A * ceil( idx / A ) - idx + 1,									-->( A-->1 )
 					[ 18 ] = (A - A * ceil( idx / A ) + idx) * (-1) ^ (ceil( idx / A ) + 1),-->( 1-->A,-1-->-A )
 					[ 19 ] = (A - 1 - (A - 1) * ceil( idx / (A - 1) ) + idx) * (-1) ^ (ceil( idx / (A - 1) ) + 1) + (A + 1) * (1 + (-1) ^ ceil( idx / (A - 1) )) / 2,
 					--[ 19 ]																-->( 1-->A-->1 )
@@ -3477,8 +3478,8 @@
 					[ "A,B" ]			= A + ((B - A) / 2) * (1 + (-1) ^ idx ),
 					[ "AA,BB" ]			= A + ((B - A) / 2) * (1 + (-1) ^ ceil( idx / C ) ),
 					[ "A,mB" ]			= B * ceil( idx / A ),
-					[ "A-->1" ]			= A * ceil( idx / A ) - idx + 1,
 					[ "1-->A" ]			= A - A * ceil( idx / A ) + idx,
+					[ "A-->1" ]			= A * ceil( idx / A ) - idx + 1,
 					[ "1-->A,-1-->-A" ]	= (A - A * ceil( idx / A ) + idx) * (-1) ^ (ceil( idx / A ) + 1),
 					[ "1-->A-->1" ]		= (A - 1 - (A - 1) * ceil( idx / (A - 1) ) + idx) * (-1) ^ (ceil( idx / (A - 1) ) + 1) + (A + 1) * (1 + (-1) ^ ceil( idx / (A - 1) )) / 2,
 					[ "A-->1-->A" ]		= A + 1 - ((A - 1 - (A - 1) * ceil( idx / (A - 1) ) + idx) * (-1) ^ (ceil( idx / (A - 1) ) + 1) + (A + 1) * (1 + (-1) ^ ceil( idx / (A - 1) )) / 2),
@@ -3502,7 +3503,14 @@
 					[ "A<->BB" ]		= A * floor( (C * ceil( idx / C ) - idx + 1) / C ) + B * (1 - floor( (C * ceil( idx / C ) - idx + 1) / C )),--math.i( j, 5, 2, 7 )[ "A<->BB" ]
 					[ "AA<->B" ]		= A * (1 - floor( (C - C * ceil( idx / C ) + idx) / C )) + B * floor( (C - C * ceil( idx / C ) + idx) / C ),--math.i( j, 5, 2, 7 )[ "AA<->B" ]
 					[ "N,n" ]			= floor( (idx - 1) / A ) + 1,
+					--[ "Ac,Bd" ]			= A + ((B - A) / 2) * (1 + (-1) ^ ceil( idx / (C + ((F - C) / 2) * (1 + (-1) ^ idx )) ) ), --!_G.ke4.math.i( j, 9, 17, 3, 5 )[ "Ac,Bd" ]!
+					--[ "Ac,Bd" ]			= ceil( idx / (C + ((F - C) / 2) * (1 + (-1) ^ idx )) ), --!_G.ke4.math.i( j, 9, 17, 3, 5 )[ "Ac,Bd" ]!
 				}
+				for k, val in pairs( algorithms ) do
+					if tostring( val ) == "-0" then
+						algorithms[ k ] = 0
+					end
+				end
 				return algorithms
 			end,
 			
@@ -3537,17 +3545,17 @@
 				local coo_y = p[ 2 ] or 0
 				local coo_z = p[ 3 ] or 0
 				if axisr == "x" then
-					rot_p[ 1 ] = coo_x
-					rot_p[ 2 ] = cos( angle ) * coo_y - sin( angle ) * coo_z
-					rot_p[ 3 ] = sin( angle ) * coo_y + cos( angle ) * coo_z
+					rot_p[ 1 ] = ke4.math.round( coo_x, 3 )
+					rot_p[ 2 ] = ke4.math.round( cos( angle ) * coo_y - sin( angle ) * coo_z, 3 )
+					rot_p[ 3 ] = ke4.math.round( sin( angle ) * coo_y + cos( angle ) * coo_z, 3 )
 				elseif axisr == "y" then
-					rot_p[ 1 ] = cos( angle ) * coo_x + sin( angle ) * coo_z
-					rot_p[ 2 ] = coo_y
-					rot_p[ 3 ] = cos( angle ) * coo_z - sin( angle ) * coo_x
+					rot_p[ 1 ] = ke4.math.round( cos( angle ) * coo_x + sin( angle ) * coo_z, 3 )
+					rot_p[ 2 ] = ke4.math.round( coo_y, 3 )
+					rot_p[ 3 ] = ke4.math.round( cos( angle ) * coo_z - sin( angle ) * coo_x, 3 )
 				elseif axisr == "z" then
-					rot_p[ 1 ] = cos( angle ) * coo_x - sin( angle ) * coo_y
-					rot_p[ 2 ] = sin( angle ) * coo_x + cos( angle ) * coo_y
-					rot_p[ 3 ] = coo_z
+					rot_p[ 1 ] = ke4.math.round( cos( angle ) * coo_x - sin( angle ) * coo_y, 3 )
+					rot_p[ 2 ] = ke4.math.round( sin( angle ) * coo_x + cos( angle ) * coo_y, 3 )
+					rot_p[ 3 ] = ke4.math.round( coo_z, 3 )
 				end
 				return rot_p
 			end,
@@ -4102,7 +4110,7 @@
 				local Num = ke4.math.round( Num * 10000 )
 				Min = ke4.math.round( Min * 10000 )
 				Max = ke4.math.round( Max * 10000 )
-				return ke4.math.round( ke4.math.i( Num, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
+				return ke4.math.round( ke4.math.i( Num - Min, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
 			end,  --!_G.ke4.math.clamp2( 3 * (j - 1) / (maxj - 1) )!
 		},
 		
@@ -4768,6 +4776,10 @@
 				local size_pixel = Pixel or 2
 				local text_shape = ke4.text.to_shape( Text_Config, text_2bord, 1 )
 				local points = ke4.shape.point( text_shape, size_pixel )
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
 				local text_width, text_height = aegisub.text_extents( Text_Config, text_2bord )
 				for i = 1, #points do
 					points[ i ].x = points[ i ].x - 0.5 * text_width
@@ -4801,6 +4813,10 @@
 			
 			gradientv = function( Text_Config, Text, Relative_pos, ... )
 				local shp_h = 2
+				if Text_Config.styleref then
+					--permite que el primer parámetro sea simplemente <line>
+					Text_Config = Text_Config.styleref
+				end
 				local Width, Height = aegisub.text_extents( Text_Config, Text )
 				local Shape, cn = "", ceil( Height / shp_h )
 				local gradv = ke4.table.gradient( { { cn } }, ... )
@@ -6560,7 +6576,7 @@
 				if type( Shape ) == "table" then
 					Shapes = Shape
 				elseif Shape == "random" then
-					--!maxloop( 84 )!{\p1\an5\pos(!55 + 106 * (_G.ke4.math.i( j, 12 )["1-->A"] - 1)!, !52 + 102 * _G.ke4.math.i( j, 12 )["N,n"]!)}!_G.ke4.shape.array( "random" )!
+					--!maxloop( 84 )!{\p1\an5\pos(!55 + 106 * (_G.ke4.math.i( j, 12 )["1-->A"] - 1)!, !-50 + 102 * _G.ke4.math.i( j, 12 )["N,n"]!)}!_G.ke4.shape.array( "random" )!
 					local shp0 = {
 						[ 1 ] = format( "m 0 0 l %s %s l %s %s l %s %s l %s %s l 50 0 ", 
 							ke4.math.Rc( 10, 30 ), ke4.math.Rcs( 30 ), ke4.math.Rc( 25, 45 ), ke4.math.Rcs( 40 ), ke4.math.Rc( 0, 20 ),
@@ -6710,7 +6726,7 @@
 						shape_rectangular[ i ] = ""
 						for k = 1, loop1 do
 							shape_rectangular[ i ] = shape_rectangular[ i ] .. ke4.shape.displace( Shapes[ idx ], 
-								(k - 1) * ke4.shape.width( Shapes[ idx ] ) + distance_x * (k - 1)--ke4.math.i( k )[ "0,11" ]
+								(k - 1) * ke4.shape.width( Shapes[ idx ] ) + distance_x * (k - 1)--ke4.math.i( k )[ "0<->11" ]
 							)
 						end
 						shape_rectangular_widths[ i ] = ke4.shape.width( shape_rectangular[ i ] )
@@ -7323,8 +7339,8 @@
 						)
 					end;
 					Loop = math.ceil( (line.width + 160) / 4 );
-					tags = table.ipol( { 255, 80, 255 }, Loop, "\\1a" )
-					shape.multi9( my_filter, Loop, tags )
+					tags = table.ipol( { "&HFF&", "&H5A&", "&HFF&" }, Loop, "\\1a" )
+					!_G.ke4.shape.multi9( my_filter, Loop, tags )!
 					--]]
 				end
 				-- elimina el primer salto de línea \N de la shape
@@ -7482,7 +7498,7 @@
 					i = i + 1
 				end
 				return Points
-			end, -- !_G.ke4.table.view( _G.ke4.shape.point( _G.ke4.shape.circle ) )!
+			end, --!_G.ke4.table.view( _G.ke4.shape.point( _G.ke4.shape.circle ) )!
 			
 			bord_to_pixels = function( Shape, Pixel )
 				local Shape = ke4.shape.ASSDraw3( Shape )
