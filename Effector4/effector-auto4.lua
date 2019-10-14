@@ -2439,6 +2439,36 @@
 		
 		-- Math sublibrary
 		math = {
+			format2 = function( String )
+				local str_mathf = String
+				local str_mathformat
+				if pcall( loadstring( format( [[
+						return function( )
+							local x = 5
+							%s
+							return x
+						end
+						]], str_mathf )
+					) ) then
+					local math_format_funct = loadstring( format( [[
+						return function( )
+							local x = 5
+							%s
+							return x
+						end
+						]], str_mathf )
+					)( )
+					if pcall( math_format_funct ) then
+						str_mathformat = math_format_funct( )
+						if str_mathformat then
+							return str_mathformat
+						end
+						return str_mathf
+					end
+				end
+				return str_mathf
+			end, --!_G.ke4.math.format2( "x = x + 7" )!
+		
 			format = function( String, ... )
 				--le da valores a un string de formato
 				local Values = { ... }
@@ -2476,7 +2506,8 @@
 							local rand, ceil, floor = math.random, math.ceil, math.floor
 							local atan2, format = math.atan2, string.format
 							local unpack = table.unpack or unpack
-							return %s end
+							return %s
+						end
 						]], str_mathf )
 					) ) then
 					local math_format_funct = loadstring( format( [[
@@ -2500,7 +2531,8 @@
 							local rand, ceil, floor = math.random, math.ceil, math.floor
 							local atan2, format = math.atan2, string.format
 							local unpack = table.unpack or unpack
-							return %s end
+							return %s
+						end
 						]], str_mathf )
 					)( )
 					if pcall( math_format_funct ) then
@@ -4600,9 +4632,7 @@
 					Text = Text:sub( 1, -2 )
 				end
 				local text_scale = Scale or 1
-				local shape_scale = ke4.math.round( log( text_scale, 2 ) + 1 )
 				if Text_Config.styleref then
-					--permite que el primer parámetro sea simplemente <line>
 					Text_Config = Text_Config.styleref
 				end
 				local Text_Confix = {
@@ -4619,13 +4649,12 @@
 				local text_font = ke4.decode.create_font( unpack( Text_Confix ) )
 				local text_shape = ke4.shape.ASSDraw3( text_font.text_to_shape( Text ) )
 				return text_shape
-			end, --{\p1}!_G.ke4.text.to_shape( line.styleref, line.text_stripped, 1 )!
+			end, --{\p1}!_G.ke4.text.to_shape( line, syl.text_stripped )!
 			
 			bord_to_shape = function( Text_Config, Text, Scale, Bord )
 				local Text = Text or "text.bord_to_shape"
 				local text_scale = Scale or 1
 				if Text_Config.styleref then
-					--permite que el primer parámetro sea simplemente <line>
 					Text_Config = Text_Config.styleref
 				end
 				local text_shape = ke4.text.to_shape( Text_Config, Text, text_scale )
@@ -4786,7 +4815,7 @@
 					points[ i ].y = points[ i ].y - 0.5 * text_height
 				end
 				return points
-				-- code line: points = _G.ke4.text.bord_to_pixels( line.styleref, line.text_stripped )
+				-- code line: points = _G.ke4.text.bord_to_pixels( line, line.text_stripped )
 				-- template syl notext noblank
 			end, --!maxloop( #points )!{\an5\pos(!$x + points[ j ].x!,!$y + points[ j ].y!)\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
 			
@@ -4794,7 +4823,7 @@
 				local txt_shape = ke4.text.to_shape( Text_Config, Text )
 				local Split = Split or 3
 				return ke4.shape.filter3( txt_shape, Split, ... )
-			end, --{\p1}!_G.ke4.text.filter( line.styleref, line.text_stripped, 3, function( x, y ) x = x + _G.ke4.math.Rcs( 2 ) y = y + _G.ke4.math.Rcs( 2 ) return x, y end )!
+			end, --{\p1}!_G.ke4.text.filter( line, line.text_stripped, 3, function( x, y ) x = x + _G.ke4.math.Rcs( 2 ) y = y + _G.ke4.math.Rcs( 2 ) return x, y end )!
 
 			gradienth = function( Text_Config, Text, Relative_pos, ... )
 				local shp_w = 2
@@ -4809,7 +4838,7 @@
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", gradh[ i ], ke4.shape.size( ke4.shape.rectangle, shp_w, ceil( Height ) ) )
 				end
 				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
-			end, --!_G.ke4.text.gradienth( line.styleref, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
+			end, --!_G.ke4.text.gradienth( line, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
 			
 			gradientv = function( Text_Config, Text, Relative_pos, ... )
 				local shp_h = 2
@@ -4824,7 +4853,7 @@
 					Shape = Shape .. format( "{\\1c%s\\p1}%s{\\p0}\\N", gradv[ i ], ke4.shape.size( ke4.shape.rectangle, ceil( Width ), shp_h ) )
 				end
 				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
-			end, --!_G.ke4.text.gradientv( line.styleref, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
+			end, --!_G.ke4.text.gradientv( line, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
 			
 			gradientangle = function( Text_Config, Text, Relative_pos, Angle, ... )
 				local shp_s = 2
@@ -4842,7 +4871,7 @@
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", grada[ i ], ke4.shape.size( ke4.shape.rectangle, shp_s, shp_h ) )
 				end
 				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
-			end, --!_G.ke4.text.gradientangle( line.styleref, line.text_stripped, { line.center, line.middle }, 45, "&H00FFFF&", "&H0000FF&" )!
+			end, --!_G.ke4.text.gradientangle( line, line.text_stripped, { line.center, line.middle }, 45, "&H00FFFF&", "&H0000FF&" )!
 			
 			bezier = function( Text_Config, Shape, Char_x, Char_y, Mode, Offset )
 				local pyointa = { }
@@ -5192,6 +5221,7 @@
 					end
 				end
 				local Text_fx = ke4.tag.dark( Text_Config, table.concat( tbl_rtrn ) )
+				--local Text_fx = table.concat( tbl_rtrn )
 				--------------------------------------------------------------
 				Text_fx = Text_fx:gsub( "\\t(%b())",
 					function( capture )
@@ -6030,6 +6060,52 @@
 				return ke4.shape.ASSDraw3( Shape )
 			end, --{\p1}!_G.ke4.shape.modify( _G.ke4.shape.redraw( "m 0 0 l 0 50 l 50 50 l 50 0 l 0 0 ", 1 ), function( x, y ) x = x + _G.ke4.math.Rcs( 4 ) y = y + _G.ke4.math.Rcs( 4 ) return x, y end )!
 			
+			filter7 = function( Shape, Filter )
+				--le aplica un "filtro" (función) a los valores numéricos de la Shape
+				local Shape = ke4.shape.ASSDraw3( Shape )
+				Pk = 0
+				ke4.shape.info( Shape )
+				Shape = ke4.shape.filtery( Shape,
+					function( x, y )
+						x, y = tonumber( x ), tonumber( y )		-- coordenadas "x" y "y" de cada punto
+						Cx = c_shape							-- coordenada "x" del centro de la shape
+						Cy = m_shape							-- coordenada "y" del centro de la shape
+						Do = ke4.math.distance( x, y )			-- distancia del punto al origen
+						Dc = ke4.math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
+						Ao = ke4.math.angle( x, y )				-- ángulo del origen al punto
+						Ac = ke4.math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
+						Pn = n_points							-- cantidad total de puntos en la shape
+						Pk = Pk + 1								-- contador de los puntos de la shape
+						Mx = (y - miny ) / h_shape				-- módulo de varianza respecto a "x", Mx = [0, 1]
+						My = (x - minx ) / w_shape				-- módulo de varianza respecto a "y", My = [0, 1]
+						Mp = (Pk - 1) / (Pn - 1)				-- módulo de varianza respecto a los puntos, Mp = [0, 1]
+						local toval
+						if pcall( loadstring(
+							format( [[
+								return function( x, y )
+									%s
+									return x, y
+								end
+								]], Filter )
+							) ) then
+							local tofunct = loadstring(
+							format( [[
+								return function( x, y )
+									%s
+									return x, y
+								end
+								]], Filter )
+							)( )
+							if pcall( tofunct ) then
+								x, y = tofunct( x, y )
+							end
+						end
+						return x, y
+					end
+				)
+				return ke4.shape.ASSDraw3( Shape )
+			end, --!_G.ke4.shape.filter7( _G.ke4.shape.rectangle, "x = 2 * x" )!
+
 			filter = function( Shape, Filter )
 				--le aplica un "filtro" (función) a los valores numéricos de la Shape
 				local Shape = ke4.shape.ASSDraw3( Shape )
@@ -10454,7 +10530,10 @@
 				---------------------------------------------
 				-- interpola el valor de dos números
 				local function ipol_number( val_1, val_2, pct_ipol )
-					return val_1 + (val_2 - val_1) * pct_ipol
+					if type( val_1 ) == "number" and type( val_2 ) == "number" then
+						return val_1 + (val_2 - val_1) * pct_ipol
+					end
+					return val_2
 				end
 				---------------------------------------------
 				-- interpola el valor de dos shapes o dos clips
@@ -12673,7 +12752,7 @@
 								local tags_ipol_ini, tags_ipol_fin = "", ""
 								local tag_idx, tag_nam, tag_val = 0
 								for i = 1, #tags_table do
-									tag_nam, tag_val = tags_table[ i ]:match( "(\\[%d]*%a+)(%-?[%d&]^*[%.%dHh&%#%x%(%)]*)" )
+									tag_nam, tag_val = tags_table[ i ]:match( "(\\[%d]*%a+)(%-?[%d&]^*[%.%dH&%#%x%(%)]*)" )
 									if type( tonumber( tag_val ) ) == "number" then -- %-?[%d&]^*[%.%dH&%#%x%(%)]*
 										tag_val = tonumber( tag_val )
 									end
