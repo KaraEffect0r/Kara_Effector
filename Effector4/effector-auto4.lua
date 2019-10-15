@@ -186,6 +186,13 @@
 			rand( Text_Config, Text, num_tran, dur_tran, Tags, Table, Rand, All )
 			upper( Text )
 			lower( Text )
+			kara( Text_Config )
+			to_kara( Text, Kmode )
+			inside( Text_Config, Count, Mark )
+			outside( Text_Config, Count, Mark )
+			tag( Text, ... )
+			inclip( Text_Config, Center, Middle )
+			outclip( Text_Config, Center, Middle )
 			karaoke_true( Table )
 			remove_tags( Text )
 			remove_space_in_tags( Text )
@@ -5274,7 +5281,250 @@
 				txt_2lw = txt_2lw:gsub( "KEfx", "" )
 				return txt_2lw
 			end, --!_G.ke4.text.upper( line.text_stripped )!
-
+			
+			kara = function( Text_Config )
+				local text_2kara = ""
+				for i = 1, Text_Config.kara.n do
+					if i < Text_Config.kara.n
+						or Text_Config.kara[ i ].text:gsub( " ", "" ) ~= "" then
+						text_2kara = text_2kara .. format( "{\\k%s}%s",
+							Text_Config.kara[ i ].kdur, Text_Config.kara[ i ].text
+						)
+					end
+				end
+				text_2kara = text_2kara:gsub( "\\k0", "" ):gsub( "{}", "" )
+				text_2kara = text_2kara:gsub( "(%b{})(%b{})",
+					function( capture1, capture2 )
+						local Times, Tag_k
+						if capture1:match( "\\[kK]^*[fo]*%d+" )
+							and capture2:match( "\\[kK]^*[fo]*%d+" ) then
+							Times = capture1:match( "\\[kK]^*[fo]*(%d+)" ) + capture2:match( "\\[kK]^*[fo]*(%d+)" )
+							Tag_k = capture2:match( "\\([kK]^*[fo]*)%d+" )
+							capture1 = capture1:sub( 2, -2 ):gsub( "\\[kK]^*[fo]*%d+", "" )
+							capture2 = capture2:sub( 2, -2 ):gsub( "\\[kK]^*[fo]*%d+", "" )
+							return format( "{%s%s\\%s%d}", capture1, capture2, Tag_k, Times )
+						end
+						return format( "{%s%s}", capture1:sub( 2, -2 ), capture2:sub( 2, -2 ) )
+					end
+				)
+				text_2kara = text_2kara:gsub( "%b{} ",
+					function( capture )
+						capture = capture:sub( 1, -2 )
+						return " " .. capture .. "|"
+					end
+				)
+				return text_2kara
+			end, --!_G.ke4.text.kara( line )!
+			
+			to_kara = function( Text, Kmode )
+				local Kmode = Kmode or "k"
+				local K_mode_tbl = { "k", "kf", "ko" }
+				if ke4.table.inside( K_mode_tbl, Kmode ) == false then
+					Kmode = "k"
+				end
+				local romajis = {
+					----------------------------------------------------------------------
+					"kya",	"kyu",	"kyo",	"sha",	"shu",	"sho",	"cha",	"chu",	"cho",
+					"nya",	"nyu",	"nyo",	"hya",	"hyu",	"hyo",	"mya",	"myu",	"myo",
+					"rya",	"ryu",	"ryo",	"gya",	"gyu",	"gyo",	"bya",	"byu",	"byo",
+					"pya",	"pyu",	"pyo",	"shi",	"chi",	"tsu",
+					"ya",	"yu",	"yo",	"ka",	"ki",	"ku",	"ke",	"ko",	"sa",
+					"su",	"se",	"so",	"ta",	"te",	"to",	"na",	"ni",	"nu",
+					"ne",	"no",	"ha",	"hi",	"fu",	"he",	"ho",	"ma",	"mi",
+					"mu",	"me",	"mo",	"ya",	"yu",	"yo",	"ra",	"ri",	"ru",
+					"re",	"ro",	"wa",	"wi",	"we",	"wo",	"ga",	"gi",	"gu",
+					"ge",	"go",	"za",	"ji",	"zu",	"ze",	"zo",	"ja",	"ju",
+					"jo",	"da",	"di",	"du",	"de",	"do",	"ba",	"bi",	"bu",
+					"be",	"bo",	"pa",	"pi",	"pu",	"pe",	"po",
+					"a",	"i",	"u",	"e",	"o",	"n",	"b",	"c",	"d",
+					"k",	"p",	"r",	"s",	"t",	"z"
+					----------------------------------------------------------------------
+				}
+				local Text = ke4.text.lower( Text )
+				Text = Text:gsub( "%b{}", "" )
+				local words, times = ke4.text.text2word( Text )
+				local num = 0
+				for i = 1, #words do
+					for k = 1, #romajis do
+						words[ i ] = words[ i ]:gsub( "[\128-\255]*" .. romajis[ k ], "[%1]" )
+					end
+					words[ i ] = words[ i ]:gsub( "%b[]",
+						function( capture )
+							capture = capture:gsub( "%[", "" ):gsub( "%]", "" )
+							return "[" .. capture .. "]"
+						end
+					)
+					words[ i ], num = words[ i ]:gsub( "%b[]", "%1" )
+					if num > 0 then
+						words[ i ] = words[ i ]:gsub( "%b[]",
+							function( capture )
+								capture = capture:gsub( "%[", "" ):gsub( "%]", "" )
+								return format( "{\\%s%d}%s", Kmode, times[ i ] / (num * 10), capture )
+							end
+						)
+					end
+				end
+				Text = ke4.table.op( words, "concat" )
+				return Text
+			end, --!_G.ke4.text.to_kara( line.text_stripped )!
+			
+			inside = function( Text_Config, Count, Mark )
+				--encuentra marcas en las syls y retorna true en el caso de que sí
+				local Mark = Mark or "fx"
+				local inmark = { }
+				for i = 1, Text_Config.kara.n do
+					if Text_Config.kara[ i ].text:match( "fx" ) then
+						table.insert( inmark, i )
+					end
+				end
+				if ke4.table.inside( inmark, Count ) == true then
+					return true
+				end
+				return false
+			end, --!_G.ke4.text.inside( line, syl.i, "fx" )!
+			
+			outside = function( Text_Config, Count, Mark )
+				--encuentra marcas en las syls y retorna false en el caso de que sí
+				local Mark = Mark or "fx"
+				local inmark = { }
+				for i = 1, Text_Config.kara.n do
+					if Text_Config.kara[ i ].text:match( "fx" ) then
+						table.insert( inmark, i )
+					end
+				end
+				if ke4.table.inside( inmark, Count ) == true then
+					return false
+				end
+				return true
+			end, --!_G.ke4.text.outside( line, syl.i, "fx" )!
+			
+			tag = function( Text, ... )
+				local tags_text = { ... }
+				local return_text, TextTag = "", Text
+				local char_text, tag_i_ipol, tag_n_ipol = { }, "", ""
+				if type( tags_text[ 1 ] ) == "string"
+					and tags_text[ 1 ]:gsub( "%b{}", "" ) ~= ""
+					and tags_text[ 1 ]:sub( 1, 1 ) ~= "\\" then
+					TextTag = tags_text[ 1 ]
+					table.remove( tags_text, 1 )
+				end
+				for c in unicode.chars( TextTag ) do
+					table.insert( char_text, c )
+				end
+				---------------------------------------------------------------
+				local function text_ipol( vals, count_i, count_n, without_tag )
+					if #vals == 1 then
+						vals[ 2 ] = vals[ 1 ]
+					end
+					local copy_tbl = ke4.table.duplicate( vals )
+					local tag_into = ""
+					if without_tag then
+						tag_into = vals[ 1 ]
+						copy_tbl = { }
+						if #vals == 2 then
+							vals[ 3 ] = vals[ 2 ]
+						end
+						for i = 2, #vals do
+							copy_tbl[ i - 1 ] = vals[ i ]
+						end
+					end
+					---------------------------------------------------
+					local tags_ipol, max_ipol = { }, count_n - 1
+					if max_ipol == 0 then
+						return copy_tbl[ 1 ]
+					end
+					local function ipol_number( val_1, val_2, pct_ipol )
+						return val_1 + (val_2 - val_1) * pct_ipol
+					end
+					local ipol_function = ipol_number
+					if tag_into:match( "\\c" )
+						or tag_into:match( "\\%d[%d]*v?c" ) then
+						ipol_function = ke4.color.interpolate
+					elseif tag_into:match( "\\alpha" )
+						or tag_into:match( "\\%d[%d]*v?a" ) then
+						ipol_function = ke4.alpha.interpolate
+					end
+					local ipol_i, ipol_f, pct_ip
+					for i = 1, max_ipol do
+						ipol_i = copy_tbl[ floor( (i - 1) / (max_ipol / (#copy_tbl - 1)) ) + 1 ]
+						ipol_f = copy_tbl[ floor( (i - 1) / (max_ipol / (#copy_tbl - 1)) ) + 2 ]
+						pct_ip = floor( (i - 1) % (max_ipol / (#copy_tbl - 1)) ) / (max_ipol / (#copy_tbl - 1))
+						tags_ipol[ i ] = ipol_function( ipol_i, ipol_f, pct_ip )
+					end --text.tag( { "\\fscy", 100, 200, 50 } ) = text.tag( "\\fscy{ 100, 200, 50 }" )
+					tags_ipol[ #tags_ipol + 1 ] = copy_tbl[ #copy_tbl ]
+					return tags_ipol[ count_i ]
+				end
+				---------------------------------------------------------------
+				local function str_to_table( String )
+					if type( String ) == "string"
+						and String:match( "\\%w+%b{}" ) then
+						local tags_capture = ke4.tag.operation( String:match( "(\\%w+)%b{}" ) )
+						local vals_capture = String:match( "\\%w+(%b{})" )
+						if pcall( loadstring( format( "return function( ) return %s end", vals_capture ) ) ) then
+							local string_func = loadstring( format( "return function( ) return %s end", vals_capture ) )( )
+							if pcall( string_func ) then
+								local vals_table = string_func( )
+								if vals_table then
+									table.insert( vals_table, 1, tags_capture )
+									return vals_table
+								end
+							end
+						end
+						return String
+					end
+					return String
+				end
+				---------------------------------------------------------------
+				for i = 1, #char_text do
+					tag_n_ipol = ""
+					for k = 1, #tags_text do
+						tags_text[ k ] = str_to_table( tags_text[ k ] )
+						if type( tags_text[ k ] ) == "table" then
+							tag_i_ipol = tags_text[ k ][ 1 ] .. text_ipol( tags_text[ k ], i, #char_text, true )
+						else
+							tag_i_ipol = tags_text[ k ]
+						end
+						tag_n_ipol = tag_n_ipol .. tag_i_ipol
+					end
+					if char_text[ i ] == " " then
+						return_text = return_text .. " "
+					else
+						return_text = return_text .. format( "{%s}%s", tag_n_ipol, char_text[ i ] )
+					end
+				end
+				return return_text
+			end, --!_G.ke4.text.tag( line.text_stripped, "\\fscy{ 100, 200, 50 }", { "\\1c", "&H00FFFF&", "&HFF00FF&", "&HFFFF00&" } )!
+			
+			inclip = function( Text_Config, Center, Middle )
+				-- aplica fx solo al texto que esté dentro de un \clip
+				if Text_Config.text:match( "\\x?clip%b()" ) then
+					local shp_tbls = ke4.shape.divide( Text_Config.text:match( "\\x?clip%b()" ) )
+					for i = 1, #shp_tbls do
+						ke4.shape.info( shp_tbls[ i ] )
+						if (Center >= minx and Center <= maxx)
+							and (Middle >= miny and Middle <= maxy) then
+							return true
+						end
+					end
+				end
+				return false
+			end, --code syl: fxgroup.inclip = _G.ke4.text.inclip( line, line.left + syl.center, line.middle )
+			
+			outclip = function( Text_Config, Center, Middle )
+				-- aplica fx solo al texto que esté dentro de un \clip
+				if Text_Config.text:match( "\\x?clip%b()" ) then
+					local shp_tbls = ke4.shape.divide( Text_Config.text:match( "\\x?clip%b()" ) )
+					for i = 1, #shp_tbls do
+						ke4.shape.info( shp_tbls[ i ] )
+						if (Center >= minx and Center <= maxx)
+							and (Middle >= miny and Middle <= maxy) then
+							return false
+						end
+					end
+				end
+				return true
+			end, --code syl: fxgroup.outclip = _G.ke4.text.outclip( line, line.left + syl.center, line.middle )
+			
 			romaji = {
 				"a",	"i",	"u",	"e",	"o",	"ya",	"yu",	"yo",
 				"ka",	"ki",	"ku",	"ke",	"ko",	"kya",	"kyu",	"kyo",
