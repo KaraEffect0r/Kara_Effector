@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 12th 2019; 18:03 (GMT + 5)"
+	ke4_script_modified	   = "october 15th 2019; 17:36 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
