@@ -23,3 +23,4 @@
 	--[[KEfx 00/00/00 00:00]] Typewriter_Char_I = effector.create_fx( "TLfx", "Typewriter_Char_I", "Translation Char", true, false, "#00FF23", "#848484", "#454545", "0", "0", "0", "time_i1", "tag.only( j == 1 or char.i == char.n, time_f1, time_f2 )", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x + tag.only( j > 1, char.width / 2 + Width /2 + 2r )", "fx.pos_y - tag.only( j > 1, l.descent / 5 )", "", "2", "", "tag.only( j == 1, char.text, shape.size( shape.rectangle, Width, 0.75 * char.height ) )", "tag.only( j > 1, \"\\\\bs0\", \"\\\\fad(0,200)\" ), tag.only( j > 1 and char.i == char.n, tag.oscill( fx.dur, { { 420, 50 } }, \"\\\\1a255\", \"\\\\1a0\" ) )", "Width = 20r;\ndelay = 1f;\ntime_i1 = l.start_time + delay * (char.i - char.n / 2 - 1);\ntime_f1 = l.end_time + delay * (char.i - char.n / 2 - 1);\ntime_f2 = time_i1 + delay", "Lua", false, false )
 
 	
+	
