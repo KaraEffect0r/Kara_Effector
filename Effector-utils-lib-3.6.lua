@@ -1,4 +1,4 @@
-	----------------------------------------------------------------------------------------------------------
+﻿	----------------------------------------------------------------------------------------------------------
 	--[[ ( c ) Copyright 2012 - 2019, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki				  		  ]]--
 	----------------------------------------------------------------------------------------------------------
 	-- Effector-utils-lib ------------------------------------------------------------------------------------
@@ -2088,22 +2088,81 @@
 			---------------------------------------------
 			-- interpola el valor de dos shapes o dos clips
 			local function ipol_shpclip( val_1, val_2, pct_ipol )
+				local function ipairx( Shape1, Shape2 )
+					local function parts( Shape )
+						--partes que posee una shape
+						local Parts = { }
+						for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
+							table.insert( Parts, p )
+						end
+						return Parts
+					end
+					local function count( Shape )
+						--cantidad de puntos que posee una shape
+						local n = 0
+						local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
+							function( point )
+								n = n + 1
+							end
+						)
+						return n
+					end
+					local Parts1 = parts( Shape1 )
+					local Parts2 = parts( Shape2 )
+					local Point1 = count( Shape1 )
+					local Point2 = count( Shape2 )
+					if Point1 >= Point2 then
+						return Shape1
+					end
+					local difere = Point2 - Point1
+					local addpoi = ceil( difere / 3 )
+					local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
+					local xpoint
+					for i = 1, addpoi do
+						xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
+						Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
+					end
+					return table.concat( Parts1 )
+				end
+				-----------------------------------
+				local val_1 = ipairx( val_1, val_2 )
 				local tbl_1, tbl_2, k = { }, { }, 1
-				for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
-					table.insert( tbl_1, tonumber( c ) )
+				for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+					tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
 				end
-				for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
-					table.insert( tbl_2, tonumber( c ) )
+				for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+					tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
 				end
-				local val_ipol = val_1:gsub( "%-?%d+[%.%d]*", 
-					function( val )
-						local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+				--------------
+				local function ipair_fx( num_min, num_max )
+					--genera una tabla de "emparejamiento"
+					local n_min = math.min( num_min, num_max )
+					local n_max = math.max( num_min, num_max )
+					local inter = floor( n_max / n_min )
+					local modul = n_max % n_min
+					local index = { }
+					for i = 1, inter * n_min do
+						index[ i ] = math.i( i, inter )[ "N,n" ]
+					end
+					for i = 1, modul do
+						table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
+					end
+					return index
+				end
+				--------------
+				local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
+				local val_ipol, idx
+				val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
+					function( val_x, val_y )
+						idx = tbl_ipar[ k ]
+						local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
+						local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
 						k = k + 1
-						return math.round( val, 3 )
+						return math.round( val_x, 3 ) .. " " .. math.round( val_y, 3 )
 					end
 				)
 				return val_ipol
-			end --add: december 12th 2018
+			end
 			---------------------------------------------
 			-- busca un string dentro de la tabla
 			local function string_in_tbl( str_in_tbl )
@@ -5145,8 +5204,8 @@
 			[ 13 ] = A + ((B - A) / 2) * (1 + (-1) ^ idx ),							-->( A,B )
 			[ 14 ] = A + ((B - A) / 2) * (1 + (-1) ^ ceil( idx / C ) ),				-->( AA,BB ) C-veces
 			[ 15 ] = B * ceil( idx / A ),											-->( A,mB )  A-veces los múltiplos de B
-			[ 16 ] = A * ceil( idx / A ) - idx + 1,									-->( A-->1 )
-			[ 17 ] = A - A * ceil( idx / A ) + idx,									-->( 1-->A )
+			[ 16 ] = A - A * ceil( idx / A ) + idx,									-->( 1-->A )
+			[ 17 ] = A * ceil( idx / A ) - idx + 1,									-->( A-->1 )
 			[ 18 ] = (A - A * ceil( idx / A ) + idx) * (-1) ^ (ceil( idx / A ) + 1),-->( 1-->A,-1-->-A )
 			[ 19 ] = (A - 1 - (A - 1) * ceil( idx / (A - 1) ) + idx) * (-1) ^ (ceil( idx / (A - 1) ) + 1) + (A + 1) * (1 + (-1) ^ ceil( idx / (A - 1) )) / 2,
 			--[ 19 ]																-->( 1-->A-->1 )
@@ -5189,8 +5248,8 @@
 			[ "A,B" ]			= A + ((B - A) / 2) * (1 + (-1) ^ idx ),
 			[ "AA,BB" ]			= A + ((B - A) / 2) * (1 + (-1) ^ ceil( idx / C ) ),
 			[ "A,mB" ]			= B * ceil( idx / A ),
-			[ "A-->1" ]			= A * ceil( idx / A ) - idx + 1,
 			[ "1-->A" ]			= A - A * ceil( idx / A ) + idx,
+			[ "A-->1" ]			= A * ceil( idx / A ) - idx + 1,
 			[ "1-->A,-1-->-A" ]	= (A - A * ceil( idx / A ) + idx) * (-1) ^ (ceil( idx / A ) + 1),
 			[ "1-->A-->1" ]		= (A - 1 - (A - 1) * ceil( idx / (A - 1) ) + idx) * (-1) ^ (ceil( idx / (A - 1) ) + 1) + (A + 1) * (1 + (-1) ^ ceil( idx / (A - 1) )) / 2,
 			[ "A-->1-->A" ]		= A + 1 - ((A - 1 - (A - 1) * ceil( idx / (A - 1) ) + idx) * (-1) ^ (ceil( idx / (A - 1) ) + 1) + (A + 1) * (1 + (-1) ^ ceil( idx / (A - 1) )) / 2),
@@ -5215,6 +5274,11 @@
 			[ "AA<->B" ]		= A * (1 - floor( (C - C * ceil( idx / C ) + idx) / C )) + B * floor( (C - C * ceil( idx / C ) + idx) / C ),	--math.i( j, 5, 2, 7 )[ "AA<->B" ]
 			[ "N,n" ]			= floor( (idx - 1) / A ) + 1,
 		}
+		for k, val in pairs( algorithms ) do
+			if tostring( val ) == "-0" then
+				algorithms[ k ] = 0
+			end
+		end --october 11th 2019
 		return algorithms
 	end
 	
@@ -5876,7 +5940,7 @@
 		local Num = math.round( Num * 10000 )
 		local Min = math.round( Min * 10000 )
 		local Max = math.round( Max * 10000 )
-		return math.round( math.i( Num, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
+		return math.round( math.i( Num - Min, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
 	end --math.clamp2( 3m, 0, 1 )
 
 	-------------------------------------------------------------------------------------------------
@@ -10102,18 +10166,77 @@
 		---------------------------------------------
 		-- interpola el valor de dos shapes o dos clips
 		local function ipol_shpclip( val_1, val_2, pct_ipol )
+			local function ipairx( Shape1, Shape2 )
+				local function parts( Shape )
+					--partes que posee una shape
+					local Parts = { }
+					for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
+						table.insert( Parts, p )
+					end
+					return Parts
+				end
+				local function count( Shape )
+					--cantidad de puntos que posee una shape
+					local n = 0
+					local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
+						function( point )
+							n = n + 1
+						end
+					)
+					return n
+				end
+				local Parts1 = parts( Shape1 )
+				local Parts2 = parts( Shape2 )
+				local Point1 = count( Shape1 )
+				local Point2 = count( Shape2 )
+				if Point1 >= Point2 then
+					return Shape1
+				end
+				local difere = Point2 - Point1
+				local addpoi = ceil( difere / 3 )
+				local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
+				local xpoint
+				for i = 1, addpoi do
+					xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
+					Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
+				end
+				return table.concat( Parts1 )
+			end
+			-----------------------------------
+			local val_1 = ipairx( val_1, val_2 )
 			local tbl_1, tbl_2, k = { }, { }, 1
-			for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
-				table.insert( tbl_1, tonumber( c ) )
+			for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+				tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
 			end
-			for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
-				table.insert( tbl_2, tonumber( c ) )
+			for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+				tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
 			end
-			local val_ipol = val_1:gsub( "%-?%d+[%.%d]*", 
-				function( val )
-					local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+			--------------
+			local function ipair_fx( num_min, num_max )
+				--genera una tabla de "emparejamiento"
+				local n_min = math.min( num_min, num_max )
+				local n_max = math.max( num_min, num_max )
+				local inter = floor( n_max / n_min )
+				local modul = n_max % n_min
+				local index = { }
+				for i = 1, inter * n_min do
+					index[ i ] = math.i( i, inter )[ "N,n" ]
+				end
+				for i = 1, modul do
+					table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
+				end
+				return index
+			end
+			--------------
+			local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
+			local val_ipol, idx
+			val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
+				function( val_x, val_y )
+					idx = tbl_ipar[ k ]
+					local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
+					local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
 					k = k + 1
-					return math.round( val, 3 )
+					return math.round( val_x, 3 ) .. " " .. math.round( val_y, 3 )
 				end
 			)
 			return val_ipol
@@ -15611,7 +15734,7 @@
 		effector.print_error( lengthC, "number", "shape.Ltrajectory", 2 )
 		effector.print_error( ratio_y, "number", "shape.Ltrajectory", 3 )
 		local Loop_Lt = math.round( lengthT / lengthC )
-		local loops, Rand, px, py = 3 * Loop_Lt, lengthT / ratio_y, { }, { }
+		local loops, Rand, px, py = 3 * Loop_Lt, ratio_y, { }, { }
 		local Ang, Rad
 		for i = 0, loops, 3 do
 			px[ i ] = i * lengthC / 3
@@ -17348,7 +17471,7 @@
 		--Filterx = function( shape_i ) if Si % 2 == 1 then return shape.displace( shape_i, 0, -10 ) end return shape.displace( shape_i, 0, 10 ) end
 		--shape.filtershape( Shp, Filterx )
 	end --january 04th 2019
-
+	
 	function shape.intersect( Shape1, Shape2 )
 		--retorna una tabla con los puntos de intersección entre dos shapes
 		if type( Shape1 ) == "function" then
@@ -17422,7 +17545,7 @@
 		end
 		return intersect_tbl --october 09th 2019
 	end --shape.intersect( shape.rectangle, shape.displace( shape.circle, 40, -20 ) )
-
+	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "text" -----------------------------------------------------------------
 	function text.upper( Text )
