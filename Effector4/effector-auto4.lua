@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 15th 2019; 17:36 (GMT + 5)"
+	ke4_script_modified	   = "october 20th 2019; 09:23 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -1053,18 +1053,77 @@
 					---------------------------------------------
 					-- interpola el valor de dos shapes o dos clips
 					local function ipol_shpclip( val_1, val_2, pct_ipol )
+						local function ipairx( Shape1, Shape2 )
+							local function parts( Shape )
+								--partes que posee una shape
+								local Parts = { }
+								for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
+									table.insert( Parts, p )
+								end
+								return Parts
+							end
+							local function count( Shape )
+								--cantidad de puntos que posee una shape
+								local n = 0
+								local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
+									function( point )
+										n = n + 1
+									end
+								)
+								return n
+							end
+							local Parts1 = parts( Shape1 )
+							local Parts2 = parts( Shape2 )
+							local Point1 = count( Shape1 )
+							local Point2 = count( Shape2 )
+							if Point1 >= Point2 then
+								return Shape1
+							end
+							local difere = Point2 - Point1
+							local addpoi = ceil( difere / 3 )
+							local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
+							local xpoint
+							for i = 1, addpoi do
+								xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
+								Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
+							end
+							return table.concat( Parts1 )
+						end
+						-----------------------------------
+						local val_1 = ipairx( val_1, val_2 )
 						local tbl_1, tbl_2, k = { }, { }, 1
-						for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
-							table.insert( tbl_1, tonumber( c ) )
+						for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+							tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
 						end
-						for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
-							table.insert( tbl_2, tonumber( c ) )
+						for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+							tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
 						end
-						local val_ipol = val_1:gsub( "%-?%d+[%.%d]*", 
-							function( val )
-								local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+						--------------
+						local function ipair_fx( num_min, num_max )
+							--genera una tabla de "emparejamiento"
+							local n_min = math.min( num_min, num_max )
+							local n_max = math.max( num_min, num_max )
+							local inter = floor( n_max / n_min )
+							local modul = n_max % n_min
+							local index = { }
+							for i = 1, inter * n_min do
+								index[ i ] = ke4.math.i( i, inter )[ "N,n" ]
+							end
+							for i = 1, modul do
+								table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
+							end
+							return index
+						end
+						--------------
+						local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
+						local val_ipol, idx
+						val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
+							function( val_x, val_y )
+								idx = tbl_ipar[ k ]
+								local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
+								local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
 								k = k + 1
-								return ke4.math.round( val, 3 )
+								return ke4.math.round( val_x, 3 ) .. " " .. ke4.math.round( val_y, 3 )
 							end
 						)
 						return val_ipol
@@ -5370,11 +5429,23 @@
 			
 			inside = function( Text_Config, Count, Mark )
 				--encuentra marcas en las syls y retorna true en el caso de que sí
-				local Mark = Mark or "fx"
+				local Mark = Mark or "my_mark"
 				local inmark = { }
 				for i = 1, Text_Config.kara.n do
-					if Text_Config.kara[ i ].text:match( "fx" ) then
+					if Text_Config.kara[ i ].text:match( Mark ) then
 						table.insert( inmark, i )
+						if Mark == "+fx" then
+							local k = 1
+							while Text_Config.kara[ i + k ]
+								and not Text_Config.kara[ i + k ].text:match( "-fx" ) do
+								table.insert( inmark, i + k )
+								k = k + 1
+							end
+							if Text_Config.kara[ i + k ]
+								and Text_Config.kara[ i + k ].text:match( "-fx" ) then
+								table.insert( inmark, i + k )
+							end
+						end
 					end
 				end
 				if ke4.table.inside( inmark, Count ) == true then
@@ -5385,11 +5456,23 @@
 			
 			outside = function( Text_Config, Count, Mark )
 				--encuentra marcas en las syls y retorna false en el caso de que sí
-				local Mark = Mark or "fx"
+				local Mark = Mark or "my_mark"
 				local inmark = { }
 				for i = 1, Text_Config.kara.n do
-					if Text_Config.kara[ i ].text:match( "fx" ) then
+					if Text_Config.kara[ i ].text:match( Mark ) then
 						table.insert( inmark, i )
+						if Mark == "+fx" then
+							local k = 1
+							while Text_Config.kara[ i + k ]
+								and not Text_Config.kara[ i + k ].text:match( "-fx" ) do
+								table.insert( inmark, i + k )
+								k = k + 1
+							end
+							if Text_Config.kara[ i + k ]
+								and Text_Config.kara[ i + k ].text:match( "-fx" ) then
+								table.insert( inmark, i + k )
+							end
+						end
 					end
 				end
 				if ke4.table.inside( inmark, Count ) == true then
@@ -10788,18 +10871,77 @@
 				---------------------------------------------
 				-- interpola el valor de dos shapes o dos clips
 				local function ipol_shpclip( val_1, val_2, pct_ipol )
+					local function ipairx( Shape1, Shape2 )
+						local function parts( Shape )
+							--partes que posee una shape
+							local Parts = { }
+							for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
+								table.insert( Parts, p )
+							end
+							return Parts
+						end
+						local function count( Shape )
+							--cantidad de puntos que posee una shape
+							local n = 0
+							local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
+								function( point )
+									n = n + 1
+								end
+							)
+							return n
+						end
+						local Parts1 = parts( Shape1 )
+						local Parts2 = parts( Shape2 )
+						local Point1 = count( Shape1 )
+						local Point2 = count( Shape2 )
+						if Point1 >= Point2 then
+							return Shape1
+						end
+						local difere = Point2 - Point1
+						local addpoi = ceil( difere / 3 )
+						local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
+						local xpoint
+						for i = 1, addpoi do
+							xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
+							Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
+						end
+						return table.concat( Parts1 )
+					end
+					-----------------------------------
+					local val_1 = ipairx( val_1, val_2 )
 					local tbl_1, tbl_2, k = { }, { }, 1
-					for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
-						table.insert( tbl_1, tonumber( c ) )
+					for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+						tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
 					end
-					for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
-						table.insert( tbl_2, tonumber( c ) )
+					for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
+						tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
 					end
-					local val_ipol = val_1:gsub( "%-?%d+[%.%d]*", 
-						function( val )
-							local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+					--------------
+					local function ipair_fx( num_min, num_max )
+						--genera una tabla de "emparejamiento"
+						local n_min = math.min( num_min, num_max )
+						local n_max = math.max( num_min, num_max )
+						local inter = floor( n_max / n_min )
+						local modul = n_max % n_min
+						local index = { }
+						for i = 1, inter * n_min do
+							index[ i ] = ke4.math.i( i, inter )[ "N,n" ]
+						end
+						for i = 1, modul do
+							table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
+						end
+						return index
+					end
+					--------------
+					local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
+					local val_ipol, idx
+					val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
+						function( val_x, val_y )
+							idx = tbl_ipar[ k ]
+							local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
+							local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
 							k = k + 1
-							return ke4.math.round( val, 3 )
+							return ke4.math.round( val_x, 3 ) .. " " .. ke4.math.round( val_y, 3 )
 						end
 					)
 					return val_ipol
