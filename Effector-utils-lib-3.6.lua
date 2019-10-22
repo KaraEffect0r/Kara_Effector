@@ -10161,6 +10161,8 @@
 		---------------------------------------------
 		-- interpola el valor de dos números
 		local function ipol_number( val_1, val_2, pct_ipol )
+			local val_1 = val_1 or 0
+			local val_2 = val_2 or val_1
 			return val_1 + (val_2 - val_1) * pct_ipol
 		end
 		---------------------------------------------
