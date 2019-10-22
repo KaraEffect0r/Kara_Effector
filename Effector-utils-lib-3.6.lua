@@ -7107,7 +7107,7 @@
 							[ 28 ] = l.scale_y,
 						}
 						local tags_ipol_ini, tags_ipol_fin = "", ""
-						local tag_idx, tag_nam, tag_val = 0
+						local tag_idx, tag_nam, tag_val = 0, nil, 0
 						for i = 1, #tags_table do
 							tag_nam, tag_val = tags_table[ i ]:match( "(\\[%d]*%a+)(%-?[%d&]^*[%.%dHh&%#%x%(%)]*)" )
 							if type( tonumber( tag_val ) ) == "number" then -- %-?[%d&]^*[%.%dH&%#%x%(%)]*
