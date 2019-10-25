@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 20th 2019; 09:23 (GMT + 5)"
+	ke4_script_modified	   = "october 23rd 2019; 16:48 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -401,6 +401,13 @@
 			fromstyle( ColorAlpha )
 			val2ass( val_A )
 			ipolfx( Ipol, Alpha1, Alpha2 )
+		}
+		file = {
+			get_lines( File_lua, Number_or_match )
+			gsub( File_lua, ... )
+			match( File_lua, Match_or_tbl )
+			gmatch( File_lua, Match_or_tbl )
+			count( File_lua, Match_or_tbl )
 		}
 		decode = {
 			create_bmp_reader( filename ) = {
@@ -1052,6 +1059,27 @@
 					end
 					---------------------------------------------
 					-- interpola el valor de dos shapes o dos clips
+					--[[
+					local function ipol_shpclip( val_1, val_2, pct_ipol )
+						local val_1, val_2 = ke4.shape.insert( val_1, val_2 )
+						local tbl_1, tbl_2, k = { }, { }, 1
+						for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
+							table.insert( tbl_1, tonumber( c ) )
+						end
+						for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
+							table.insert( tbl_2, tonumber( c ) )
+						end
+						local val_ipol = val_1:gsub( "%-?%d+[%.%d]*",
+							function( val )
+								local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+								k = k + 1
+								return ke4.math.round( val, 3 )
+							end
+						)
+						return val_ipol
+					end
+					--]]
+					---[[
 					local function ipol_shpclip( val_1, val_2, pct_ipol )
 						local function ipairx( Shape1, Shape2 )
 							local function parts( Shape )
@@ -1128,6 +1156,7 @@
 						)
 						return val_ipol
 					end
+					--]]
 					---------------------------------------------
 					-- busca un string dentro de la tabla
 					local function string_in_tbl( str_in_tbl )
@@ -4233,7 +4262,7 @@
 				elseif type( V ) == "number" then
 					Vrc = ke4.math.i( V + 1, 0, 100 )[ "A-->B-->A" ] / 100
 				end
-				return ke4.color.val2ass( ke4.color.HSV_to_RGB( Hrc, Src, Vrc ) )
+				return ke4.color.HSV_to_RGB( Hrc, Src, Vrc )
 			end, --{\c!_G.ke4.random.color( )!}
 			
 			color2 = function( H, S, V )
@@ -4255,7 +4284,7 @@
 				elseif type( V ) == "number" then
 					Vrc = ke4.math.i( 100 * V + 1, 0, 100 )[ "A-->B-->A" ] / 100
 				end
-				return ke4.color.val2ass( ke4.color.HSV_to_RGB( Hrc, Src, Vrc ) )
+				return ke4.color.HSV_to_RGB( Hrc, Src, Vrc )
 			end, --{\c!_G.ke4.random.color2( )!}
 
 			colorvc = function( H, S, V )
@@ -9246,6 +9275,111 @@
 				return intersect_tbl
 			end, --!_G.ke4.table.view( _G.ke4.shape.intersect( "m 0 0 l 0 20 l 20 20 l 20 0 l 0 0 ", "m 15 -6 l 4 24 l 36 5 l 15 -6 " ) )!
 			
+			insert = function( Shape1, Shape2 )
+				--inserta mutuamente el código de una shape en la otra
+				local Shape1 = Shape1 or ke4.shape.rectangle
+				local Shape2 = Shape2 or ke4.shape.circle
+				local function parts( Shape )
+					--partes que posee una shape
+					local Parts = { }
+					for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
+						table.insert( Parts, p )
+					end
+					return Parts
+				end
+				local function valxy( Part_1, Part_2, Rtn, Part_1_before )
+					local new_part = ""
+					local type_part_1 = Part_1:match( "[mlb]^*" )	--tipo de segmento de shape 1
+					local type_part_2 = Part_2:match( "[mlb]^*" )	--tipo de segmento de shape 2
+					if type_part_1 == type_part_2 then				--si son del mismo tipo, retorna el segmento 1
+						return Part_1
+					end
+					local xpoint	--punto de referencia del segmento 1
+					if type_part_1 == "m"
+						or type_part_1 == "l" then
+						xpoint = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " " --toma en cuenta las dos coordenadas del segmento
+					else	--toma en cuenta las dos últimas coordenadas del segmento
+						xpoint = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" ) .. " "
+					end
+					if Rtn == 1 then -- 1 --> 2
+						--retorna el segmento 1 concatenado con el segmento 2 "insertado"
+						if type_part_2 == "m"
+							or type_part_2 == "l" then
+							new_part = Part_1 .. type_part_2 .. " " .. xpoint
+						else
+							new_part = Part_1 .. type_part_2 .. " " .. xpoint .. xpoint .. xpoint
+						end
+					elseif Rtn == 2 then
+						--retorna el segmento 2 con las características del segmento 1
+						if type_part_2 == "m"
+							or type_part_2 == "l" then
+							new_part = type_part_2 .. " " .. xpoint
+						else
+							new_part = type_part_2 .. " " .. xpoint .. xpoint .. xpoint
+						end
+					elseif Rtn == 3 then
+						local Part_1_before = Part_1_before or ""
+						local type_part_1_before = Part_1_before:match( "[mlb]^*" )
+						if type_part_1_before == "m"
+							or type_part_1_before == "l" then
+							xpoint = Part_1_before:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " " --toma en cuenta las dos coordenadas del segmento
+						else	--toma en cuenta las dos últimas coordenadas del segmento
+							xpoint = Part_1_before:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" ) .. " "
+						end
+						if type_part_2 == "m"
+							or type_part_2 == "l" then
+							new_part = type_part_2 .. " " .. xpoint .. Part_1
+						else
+							new_part = type_part_2 .. " " .. xpoint .. xpoint .. xpoint .. Part_1
+						end
+					end
+					return new_part
+				end
+				local Parts_1 = parts( Shape1 )				--segmentos de la shape 1
+				local Parts_2 = parts( Shape2 )				--segmentos de la shape 2
+				-----------------------------------------------------------------------------------
+				local decide_1, decide_2 = floor( #Parts_1 / #Parts_2 ), floor( #Parts_2 / #Parts_1 )
+				if decide_2 > 1 then
+					local new_Shape1 = ""
+					for i = 1, decide_2 do
+						new_Shape1 = new_Shape1 .. Shape1
+					end
+					Shape1 = new_Shape1
+				end
+				if decide_1 > 1 then
+					local new_Shape2 = ""
+					for i = 1, decide_1 do
+						new_Shape2 = new_Shape2 .. Shape2
+					end
+					Shape2 = new_Shape2
+				end
+				Parts_1 = parts( Shape1 )
+				Parts_2 = parts( Shape2 )
+				-----------------------------------------------------------------------------------
+				local Shape_fx1, Shape_fx2 = { }, { }		--modificaciones de las shapes 1 y 2
+				local last_point_1 = Parts_1[ #Parts_1 ]	--último segmento de la shape 1
+				local last_point_2 = Parts_2[ #Parts_2 ]	--último segmento de la shape 2
+				for i = 2, #Parts_2 do
+					--modificación de la shape 1 con las características de la shape 2
+					if Parts_1[ i ] then --pregunta si el segmento existe en la shape 1
+						--añade las características del segmento 2 al segmento 1
+						Shape_fx1[ i ] = valxy( Parts_1[ i ], Parts_2[ i ], 1 )
+					else -- si el segemento no existe en la shape 1, añade el segmento 2
+						--con las características del último segmento de la shape 1
+						Shape_fx1[ i ] = valxy( last_point_1, Parts_2[ i ], 2 )
+					end
+				end
+				for i = 2, #Parts_1 do
+					if Parts_2[ i ] then
+						Shape_fx2[ i ] = valxy( Parts_2[ i ], Parts_1[ i ], 3, Parts_2[ i - 1 ] )
+					else
+						Shape_fx2[ i ] = valxy( last_point_2, Parts_1[ i ], 2 )
+					end
+				end
+				Shape_fx1[ 1 ], Shape_fx2[ 1 ] = Parts_1[ 1 ], Parts_2[ 1 ]
+				return table.concat( Shape_fx1 ), table.concat( Shape_fx2 )
+			end, --ke4.shape.insert( shape.rectangle, shape.circle )
+			
 		},
 		
 		-- Advanced substation alpha sublibrary
@@ -10761,7 +10895,7 @@
 				end
 				return s_false or ( (type( s_true ) == "number") and 0 or "" )
 			end,
-			
+
 			only2 = function( Conditions, ... )
 				local TrueExits = { ... }
 				if type( ... ) == "table" then
@@ -10788,7 +10922,7 @@
 				)
 				return Tag_fx
 			end,
-			
+
 			movevci = function( Shape, posx, posy, Dx, Dy, Time_i, Time_f )
 				local  Tag_movevci = ke4.tag.movevc( Shape, posx, posy, Dx, Dy, Time_i, Time_f ):gsub( "clip", "iclip" )
 				return Tag_movevci
@@ -13848,7 +13982,7 @@
 				Hnum = Hnum % 361
 				Snum = (100 * Snum) % 101
 				Vnum = (100 * Vnum) % 101
-				return ke4.color.val2ass( ke4.color.HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 ) )
+				return ke4.color.HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 )
 			end, -- \1c!_G.ke4.color.ass3( 15 * syl.i, 1, 1 )!
 			
 			rgb = function( Color_or_table, Matrix13, Multi )
@@ -13994,7 +14128,7 @@
 			end,
 			
 			r = function( )
-				return ke4.color.val2ass( ke4.color.HSV_to_RGB( ke4.math.Rc( 360 ), ke4.math.Rc( 0, 1 ), ke4.math.Rc( 0, 1 ) ) )
+				return ke4.color.HSV_to_RGB( ke4.math.Rc( 360 ), ke4.math.Rc( 0, 1 ), ke4.math.Rc( 0, 1 ) )
 			end, --!_G.ke4.color.r( )!
 
 			rc = function( colorRC, ... )
@@ -15131,6 +15265,143 @@
 				return ke4.alpha.val2ass( ke4.math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
 			end, --!_G.ke4.alpha.ipolfx( 0.5, "&HFF&", 55 )!
 
+		},
+		
+		-- File sublibrary
+		file = {
+			get_lines = function( File_lua, Number_or_match )
+				--retorna una tabla con las líneas seleccionadas de un archivo
+				local File_lua = File_lua or "my.lua"
+				local File = io.open( File_lua, "r" )
+				--Number_or_match = number, { ini, fin }, {{ n1, n2, n3 ... }}, match
+				local n = Number_or_match or 1
+				local Lines_tbl = { }
+				local count = 1
+				for line in File:lines( ) do
+					if n == "r" then
+						Lines_tbl[ #Lines_tbl + 1 ] = line
+					elseif type( n ) == "number" then --number
+						if count == n then
+							Lines_tbl[ #Lines_tbl + 1 ] = line
+						end
+						count = count + 1
+					elseif type( n ) == "table"
+						and type( n[ 1 ] ) == "table" then --lines
+						if ke4.table.inside( n[ 1 ], count ) then
+							Lines_tbl[ #Lines_tbl + 1 ] = line
+						end
+						count = count + 1
+					elseif type( n ) == "table" then --ini & fin
+						if type( n[ 2 ] ) == "number" then --number & number
+							if count >= n[ 1 ]
+								and count <= n[ 2 ] then
+								Lines_tbl[ #Lines_tbl + 1 ] = line
+							end
+						elseif type( n[ 2 ] ) == "string" then --number & match
+							if count >= n[ 1 ] then
+								Lines_tbl[ #Lines_tbl + 1 ] = line
+								if line:match( n[ 2 ] ) then
+									break
+								end
+							end
+						end
+						count = count + 1
+					elseif type( n ) == "string" then --match
+						if line:match( n ) then
+							Lines_tbl[ #Lines_tbl + 1 ] = line
+						end
+					end
+				end
+				File:close( )
+				return Lines_tbl
+			end,
+			
+			gsub = function( File_lua, ... )
+				--modifica un archivo seleccionado usando string.gsub en sus líneas :D
+				local File_lua = File_lua or "my.lua"
+				local File = io.open( File_lua, "r" )		-- abre el archivo
+				local Content_file = File:read( "*all" )	-- copia su contenido en una variable
+				File:close( )								-- cierra el archivo
+				local Modifx = { ... }						-- tabla de modificaciones
+				if type( Modifx[ 1 ][ 1 ] ) == "table" then
+					Modifx = ...
+				end -- ... = { match1, rep1 }, { match2, rep2 } or {{ match1, rep1 }, { match2, rep2 }}
+				-- modificacoines específicas del contenido del archivo ------------------
+				for i = 1, #Modifx do
+					Content_file = Content_file:gsub( Modifx[ i ][ 1 ], Modifx[ i ][ 2 ] )
+				end
+				--------------------------------------------------------------------------
+				File = io.open( File_lua, "w+" )			-- reabre el archivo y elimina su contenido
+				File:write( Content_file )					-- escribe las modificaciones en el archivo
+				File:close( )								-- cierra el archivo
+				return "" --{ "%-%-%[%[%w+[ %w%/%:]*%]%] ", "" }
+			end,
+			
+			match = function( File_lua, Match_or_tbl )
+				--busca coincidencias en un archivo y retorna true o false
+				local File_lua = File_lua or "my.lua"
+				local File = io.open( File_lua, "r" )		-- abre el archivo
+				local Content_file = File:read( "*all" )	-- copia su contenido en una variable
+				File:close( )								-- cierra el archivo
+				local Match_or_tbl = Match_or_tbl or "fxKE"	-- coincidencias
+				if type( Match_or_tbl ) == "table" then
+					for i = 1, #Match_or_tbl do
+						if Content_file:match( Match_or_tbl[ i ] ) then
+							return true
+						end
+					end
+					return false
+				end
+				if Content_file:match( Match_or_tbl ) then
+					return true
+				end
+				return false
+			end,
+			
+			gmatch = function( File_lua, Match_or_tbl )
+				--busca coincidencias en un archivo y retorna una tabla con ellas
+				local File_lua = File_lua or "my.lua"
+				local File = io.open( File_lua, "r" )		-- abre el archivo
+				local Content_file = File:read( "*all" )	-- copia su contenido en una variable
+				File:close( )								-- cierra el archivo
+				local Match_or_tbl = Match_or_tbl or "fxKE"	-- coincidencias
+				local Gmatch_tbl = { }
+				if type( Match_or_tbl ) == "table" then
+					for i = 1, #Match_or_tbl do
+						Gmatch_tbl[ i ] = { }
+						for cap in Content_file:gmatch( Match_or_tbl[ i ] ) do
+							Gmatch_tbl[ i ][ #Gmatch_tbl[ i ] + 1 ] = cap
+						end
+					end
+				else
+					for cap in Content_file:gmatch( Match_or_tbl ) do
+						Gmatch_tbl[ #Gmatch_tbl + 1 ] = cap
+					end
+				end
+				return Gmatch_tbl
+			end,
+			
+			count = function( File_lua, Match_or_tbl )
+				--retorna la cantidad de veces que una coincidencia está en un archivo
+				local File_lua = File_lua or "my.lua"
+				local File = io.open( File_lua, "r" )		-- abre el archivo
+				local Content_file = File:read( "*all" )	-- copia su contenido en una variable
+				File:close( )								-- cierra el archivo
+				local Match_or_tbl = Match_or_tbl or "fxKE"	-- coincidencias
+				local count_fl = 0
+				if type( Match_or_tbl ) == "table" then
+					for i = 1, #Match_or_tbl do
+						for cap in Content_file:gmatch( Match_or_tbl[ i ] ) do
+							count_fl = count_fl + 1
+						end
+					end
+				else
+					for cap in Content_file:gmatch( Match_or_tbl ) do
+						count_fl = count_fl + 1
+					end
+				end
+				return count_fl
+			end
 		},
 
 		-- Decoder sublibrary
