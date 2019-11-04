@@ -747,7 +747,7 @@
 			return Delay * (val_i - val_n - 1) - 200
 		end
 		return Delay * (-val_i + 0.5) - 200
-	end	
+	end
 	
 	function time_li( Delay, Mode )
 		if type( Delay ) == "function" then
@@ -2088,6 +2088,25 @@
 			---------------------------------------------
 			-- interpola el valor de dos shapes o dos clips
 			local function ipol_shpclip( val_1, val_2, pct_ipol )
+				local val_1, val_2 = shape.insert( val_1, val_2 )
+				local tbl_1, tbl_2, k = { }, { }, 1
+				for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
+					table.insert( tbl_1, tonumber( c ) )
+				end
+				for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
+					table.insert( tbl_2, tonumber( c ) )
+				end
+				local val_ipol = val_1:gsub( "%-?%d+[%.%d]*",
+					function( val )
+						local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+						k = k + 1
+						return math.round( val, 3 )
+					end
+				)
+				return val_ipol
+			end
+			--[[
+			local function ipol_shpclip( val_1, val_2, pct_ipol )
 				local function ipairx( Shape1, Shape2 )
 					local function parts( Shape )
 						--partes que posee una shape
@@ -2163,6 +2182,7 @@
 				)
 				return val_ipol
 			end
+			--]]
 			---------------------------------------------
 			-- busca un string dentro de la tabla
 			local function string_in_tbl( str_in_tbl )
@@ -10167,6 +10187,7 @@
 		end
 		---------------------------------------------
 		-- interpola el valor de dos shapes o dos clips
+		---[[
 		local function ipol_shpclip( val_1, val_2, pct_ipol )
 			local function ipairx( Shape1, Shape2 )
 				local function parts( Shape )
@@ -10243,6 +10264,7 @@
 			)
 			return val_ipol
 		end
+		--]]
 		---------------------------------------------
 		-- busca un string dentro de la tabla
 		local function string_in_tbl( str_in_tbl )
@@ -19403,26 +19425,53 @@
 		local n = Number_or_match or 1
 		local Lines_tbl = { }
 		local count = 1
+		local is_match = false
 		for line in File:lines( ) do
-			if type( n ) == "number" then --number
+			if n == "r" then
+				Lines_tbl[ #Lines_tbl + 1 ] = line
+			elseif type( n ) == "number" then --number
 				if count == n then
 					Lines_tbl[ #Lines_tbl + 1 ] = line
 				end
 				count = count + 1
 			elseif type( n ) == "table"
-				and type( n[ 1 ] ) == "table" then --lines
+				and type( n[ 1 ] ) == "table" then --number lines
 				if table.inside( n[ 1 ], count ) then
 					Lines_tbl[ #Lines_tbl + 1 ] = line
 				end
 				count = count + 1
 			elseif type( n ) == "table" then --ini & fin
-				if type( n[ 2 ] ) == "number" then --number & number
+				if type( n[ 1 ] ) == "number"
+					and type( n[ 2 ] ) == "number" then --number & number
 					if count >= n[ 1 ]
 						and count <= n[ 2 ] then
 						Lines_tbl[ #Lines_tbl + 1 ] = line
 					end
-				elseif type( n[ 2 ] ) == "string" then --number & match
+				elseif type( n[ 1 ] ) == "number"
+					and type( n[ 2 ] ) == "string" then --number & match
 					if count >= n[ 1 ] then
+						Lines_tbl[ #Lines_tbl + 1 ] = line
+						if line:match( n[ 2 ] ) then
+							break
+						end
+					end
+				elseif type( n[ 1 ] ) == "string"
+					and type( n[ 2 ] ) == "number" then --match & number
+					if line:match( n[ 1 ] ) then
+						is_match = true
+					end
+					if is_match == true then
+						Lines_tbl[ #Lines_tbl + 1 ] = line
+						if count == n[ 2 ] then
+							break
+						end
+					end
+				elseif type( n[ 1 ] ) == "string"
+					and type( n[ 2 ] ) == "string" then --match & match
+					if line:match( n[ 1 ] ) then
+						is_match = true
+					end
+					if is_match == true then
 						Lines_tbl[ #Lines_tbl + 1 ] = line
 						if line:match( n[ 2 ] ) then
 							break
@@ -19439,7 +19488,7 @@
 		File:close( )
 		return Lines_tbl
 	end --august 25th 2018
-	
+			
 	function file.gsub( File_lua, ... )
 		--modifica un archivo seleccionado usando string.gsub en sus líneas :D
 		local File_lua = File_lua or "my.lua"
@@ -20803,6 +20852,7 @@
 	function effector.preprosses_macro( subtitles, sett, fx__, selected_lines )
 		local subs = { }
 		if sett.line_style == "Selected Lines" then
+			--líneas seleccionadas (no comentadas)
 			for _, i in ipairs( selected_lines ) do
 				if subtitles[ i ].class == "dialogue"
 					and not subtitles[ i ].comment
@@ -20813,6 +20863,7 @@
 			end
 		elseif sett.line_style == "All Lines" then
 			for i = 1, #subtitles do
+			--todas las líneas (no comentadas)
 				if subtitles[ i ].class == "dialogue"
 					and not subtitles[ i ].comment
 					and subtitles[ i ].effect ~= "Effector [fx]"
@@ -20822,11 +20873,12 @@
 			end
 		else
 			for i = 1, #subtitles do
-				if subtitles[ i ].class == "dialogue"
+			--estilo seleccionado (líneas no comentadas)
+				if sett.line_style == subtitles[ i ].style
+					and subtitles[ i ].class == "dialogue"
 					and not subtitles[ i ].comment
 					and subtitles[ i ].effect ~= "Effector [fx]"
-					and subtitles[ i ].effect ~= "fx"
-					and sett.line_style == subtitles[ i ].style then
+					and subtitles[ i ].effect ~= "fx" then
 					table.insert( subs, i )
 				end
 			end
@@ -20949,14 +21001,14 @@
 			linefx[ i ].margin_t		= l_style.margin_t
 			linefx[ i ].margin_v		= l_style.margin_t
 			linefx[ i ].margin_b		= l_style.margin_b
-			linefx[ i ].color1			= color_from_style( l_style.color1 )
-			linefx[ i ].color2			= color_from_style( l_style.color2 )
-			linefx[ i ].color3			= color_from_style( l_style.color3 )
-			linefx[ i ].color4			= color_from_style( l_style.color4 )
-			linefx[ i ].alpha1			= alpha_from_style( l_style.color1 )
-			linefx[ i ].alpha2			= alpha_from_style( l_style.color2 )
-			linefx[ i ].alpha3			= alpha_from_style( l_style.color3 )
-			linefx[ i ].alpha4			= alpha_from_style( l_style.color4 )
+			linefx[ i ].color1			= color.fromstyle( l_style.color1 )
+			linefx[ i ].color2			= color.fromstyle( l_style.color2 )
+			linefx[ i ].color3			= color.fromstyle( l_style.color3 )
+			linefx[ i ].color4			= color.fromstyle( l_style.color4 )
+			linefx[ i ].alpha1			= alpha.fromstyle( l_style.color1 )
+			linefx[ i ].alpha2			= alpha.fromstyle( l_style.color2 )
+			linefx[ i ].alpha3			= alpha.fromstyle( l_style.color3 )
+			linefx[ i ].alpha4			= alpha.fromstyle( l_style.color4 )
 			-- linefx[ i ].pretime
 			if i == 1 
 				or linefx[ i - 1 ].style ~= linefx[ i ].style then
@@ -21016,7 +21068,7 @@
 				linefx[ i ].word[ k ].start_time	= words_start
 				linefx[ i ].word[ k ].end_time		= linefx[ i ].word[ k ].start_time + linefx[ i ].word[ k ].duration
 				linefx[ i ].word[ k ].mid_time		= linefx[ i ].word[ k ].start_time + linefx[ i ].word[ k ].duration / 2
-				linefx[ i ].word.text				= linefx[ i ].word.text .. linefx[i].word[k].text:gsub( "KEfx", "" )
+				linefx[ i ].word.text				= linefx[ i ].word.text .. linefx[ i ].word[ k ].text:gsub( "KEfx", "" )
 				words_left 							= words_left  + linefx[ i ].word[ k ].width_t
 				words_start							= words_start + linefx[ i ].word[ k ].duration
 				table.insert( mmwth[ i ].wo, linefx[ i ].word[ k ].width )
@@ -21072,7 +21124,7 @@
 				linefx[ i ].syl[ k ].text			= text.karaoke_true( syls_line )
 													and syls_line[ k ]:gsub( "KEclip", " " )
 													or format( "{\\k%s}%s", math.round( syls_dur[ k ] / 10 ), syls_line[ k ] ):gsub( "KEclip", " " )
-				linefx[ i ].syl[ k ].tags			= linefx[ i ].syl[ k ].text:match( "%b{}" ) --febraury 20th 2017
+				linefx[ i ].syl[ k ].tags			= linefx[ i ].syl[ k ].text:match( "%b{}" )
 				linefx[ i ].syl[ k ].text_raw		= linefx[ i ].syl[ k ].text:gsub( "KEclip", " " )
 				linefx[ i ].syl[ k ].text_stripped	= text.text2stripped( syls_line[ k ] )
 				linefx[ i ].syl[ k ].text1			= text.remove_tags( syls_line[ k ] ):gsub( "KEfx", "" )

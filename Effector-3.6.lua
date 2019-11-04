@@ -1,4 +1,4 @@
-		-----------------------------------------------------------------------------------------------------------------------------------------
+﻿	-----------------------------------------------------------------------------------------------------------------------------------------
 	--[[ ( c ) Copyright 2012 - 2019, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki	   All rights reserved / October 07th 2019 Colombia. ]]--
 	-----------------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.6 legacy
@@ -33,6 +33,7 @@
 	--=====================================================================================================================================--
 	Path_Effector_newfx_lua = nil
 	--Path_Effector_newfx_lua = "C:\\Users\\HP4\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
+	Path_Effector_newfx_lua = "C:\\Users\\victo\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
 	--=====================================================================================================================================--
 	leadin_fx, hilight_fx, leadout_fx = { }, { }, { }
 	shape_fx, transla_fx, function_fx = { }, { }, { }
@@ -1169,7 +1170,6 @@
 													end
 													l.head = headboard or format( "%s %s: %s [line origin: %s - line fx: %s] ", script_name, script_version .. script_update, fx__.effect:gsub( "%S+[%-%S+]*%[fx%]: ", "" ), ii, count_fx + 1 )
 													l.text = fx.tm( format( "{%s%s%s%s%s%s%s}%s", l.head, fx.align, fx.pos, Ltags_style, fx.tag_size, effector.keeptags( fx__.t_type, fx__.keeptagsfx ) .. fx.add_tags, fx.Det, tag.delete_in_return( returnfx[ 1 ] ) ), istable )
-												--	l.text = fx.tm( format( "{%s%s%s%s%s%s%s}%s", l.head, fx.align, fx.pos, Ltags_style, fx.tag_size, effector.keeptags( fx__.t_type, fx__.keeptagsfx ) .. fx.add_tags, fx.Det, returnfx[ 1 ] ), istable )
 													l.effect = effectboard or "Effector [fx]"
 													l.layer = fx.layer
 													l.actor = actorboard or actor_fx
