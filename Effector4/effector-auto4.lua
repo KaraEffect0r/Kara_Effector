@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "october 23rd 2019; 16:48 (GMT + 5)"
+	ke4_script_modified	   = "november 03rd 2019; 16:29 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -30,6 +30,11 @@
 			time_to_frame( Time )
 			frame_to_ms( frames )
 			frame_to_HMS( frames )
+			mid1( val_i, val_n, Delay )
+			mid2( val_i, val_n, Delay )
+			li( val_i, val_n, Delay )
+			lo( val_i, val_n, Delay )
+			loop( j, maxj, Delay, Mode )
 		}
 		table = {
 			ipol( Table, Size, Tags, algorithm )
@@ -348,33 +353,33 @@
 			ass( html_color )
 			ass2( Rnum, Gnum, Bnum )
 			ass3( Hnum, Snum, Vnum )
-			rgb( Color_or_table, Matrix13, Multi )
-			hsv( Color_or_table, Matrix13, Multi )
-			assF( color_or_table )
-			to_RGB( color_or_table )
-			to_HSV( color_or_table )
-			vc( color_or_table )
+			rgb( Color_or_Table, Matrix13, Multi )
+			hsv( Color_or_Table, Matrix13, Multi )
+			assF( Color_or_Table )
+			to_RGB( Color_or_Table )
+			to_HSV( Color_or_Table )
+			vc( Color_or_Table )
 			r( )
 			rc( colorRC, ... )
 			rvc( colorRVC, ... )
-			gradientv( ColorTop_or_table, ColorBottom_or_table )
-			gradienth( ColorLeft_or_table, ColorRight_or_table, val_i, val_n, algorithm )
+			gradientv( ColorTop_or_Table, ColorBottom_or_Table )
+			gradienth( ColorLeft_or_Table, ColorRight_or_Table, val_i, val_n, algorithm )
 			vc_to_c( colorvc_or_table )
 			c_to_vc( colorc_or_table )
-			interpolate( color1_or_table, color2_or_table, Index_Ipol )
-			vector( color1, color2 )
+			interpolate( Color1_or_Table, Color2_or_Table, Index_Ipol )
+			vector( Color1, Color2 )
 			delay( time_i, delay, color_i, color_f, ... )
 			movedelay( dur, delay, mode, ... )
 			set( Times, Colors, Line_start_time, Line_end_time, ... )
 			mask( Mode, Color, Mask )
 			movemask( Dur, Delay, Mode, Color, Mask, val_i )
-			masktable( color_or_table, Size, val_i )
+			masktable( Color_or_Table, Size, val_i )
 			ipol( val_i, val_n, ... )
 			loop( j, maxj, ... )
-			bigradient( Color_or_Table1, Color_or_Table2, Size_Table, val_i )
-			from_error( color_or_table )
+			bigradient( Color1_or_Table, Color2_or_Table, Size_Table, val_i )
+			from_error( Color_or_Table )
 			to_HTML( ASScolor )
-			matrix( Color_or_table, ... )
+			matrix( Color_or_Table, ... )
 			colorchange( Color_or_Table, dur )
 			fromstyle( ColorAlpha )
 			val2ass( val_R, val_G, val_B )
@@ -382,22 +387,22 @@
 			HSV_to_RGB( Hue, Saturation, Value )
 		}
 		alpha = {
-			from_error( alpha_or_table )
-			assF( alpha_or_table )
-			va( alpha_or_table )
+			from_error( Alpha_or_Table )
+			assF( Alpha_or_Table )
+			va( Alpha_or_Table )
 			r( )
 			ra( ArA_alpha, ... )
 			rva( ArCA_alpha, ... )
 			gradientv( AlphaTop_or_table, AlphaBottom_or_table )
 			gradienth( AlphaLeft_or_table, AlphaRight_or_table, val_i, val_n, algorithm )
-			va_to_a( alphava_or_table )
-			a_to_va( alphaa )
-			interpolate( alpha1_or_table, alpha2_or_table, Index_Ipol )
+			va_to_a( Alphava_or_Table )
+			a_to_va( Alphaa_or_Table )
+			interpolate( Alpha1_or_Table, Alpha2_or_Table, Index_Ipol )
 			delay( time_i, delay, alpha_i, alpha_f, ... )
 			mask( Mode, Alpha, Mask )
 			ipol( Size, ... )
 			loop( j, maxj, ... )
-			bigradient( Alpha_or_Table1, Alpha_or_Table2, Size_Table, val_i )
+			bigradient( Alpha1_or_Table, Alpha2_or_Table, Size_Table, val_i )
 			fromstyle( ColorAlpha )
 			val2ass( val_A )
 			ipolfx( Ipol, Alpha1, Alpha2 )
@@ -1029,7 +1034,72 @@
 					f_to_HMS = ke4.time.ms_to_HMS( ke4.time.frame_to_ms( frames ) )
 				end --!_G.ke4.time.frame_to_HMS( { 35, 240, { 4532, { 24, 276 }, 9574 } } )!
 				return f_to_HMS
-			end --!_G.ke4.time.frame_to_HMS( 871 )!
+			end, --!_G.ke4.time.frame_to_HMS( 871 )!
+			
+			mid1 = function( val_i, val_n, Delay )
+				-- extremos --> centro
+				if type( Delay ) == "function" then
+					Delay = Delay( )
+				end
+				local Delay = Delay or 60
+				if val_i <= (val_n + 1) / 2 then
+					return Delay * (val_i - 1) - 200
+				end
+				return Delay * (val_n - val_i + 0.5) - 200
+			end, --!retime( "start2syl", _G.ke4.time.mid1( $si, $syln, 60 ), 0 )!
+
+			mid2 = function( val_i, val_n, Delay )
+				-- centro --> extremos
+				if type( Delay ) == "function" then
+					Delay = Delay( )
+				end
+				local Delay = Delay or 60
+				if val_i >= (val_n + 1) / 2 then
+					return Delay * (val_i - val_n - 1) - 200
+				end
+				return Delay * (-val_i + 0.5) - 200
+			end, --!retime( "start2syl", _G.ke4.time.mid2( $si, $syln, 60 ), 0 )!
+			
+			li = function( val_i, val_n, Delay )
+				if type( Delay ) == "function" then
+					Delay = Delay( )
+				end
+				local Delay = Delay or 40
+				return Delay * (val_i - 1) - 200
+			end,
+			
+			lo = function( val_i, val_n, Delay )
+				if type( Delay ) == "function" then
+					Delay = Delay( )
+				end
+				local Delay = Delay or 40
+				return Delay * (val_i - val_n - 1) + 200
+			end,
+			
+			loop = function( j, maxj, Delay, Mode )
+				if type( Delay ) == "function" then
+					Delay = Delay( )
+				end
+				local Mode = Mode or "li"
+				local Delay = Delay or 30
+				if Mode == "li" then
+					return Delay * (j - 1) - 200
+				elseif Mode == "lo" then
+					return Delay * (j - maxj - 1) + 200
+				elseif Mode == "mid1" then
+					if j <= (maxj + 1) / 2 then
+						return Delay * (j - 1) - 200
+					end
+					return Delay * (maxj - j + 0.5) - 200
+				elseif Mode == "mid2" then
+					if j >= (maxj + 1) / 2 then
+						return Delay * (j - maxj - 1) - 200
+					end
+					return Delay * (-j + 0.5) - 200
+				end
+				return Delay
+			end,
+			
 		},
 		
 		-- Table sublibrary
@@ -1336,7 +1406,7 @@
 								t_make[ i ] = ke4.random.color( limit_i + Tm_n * (limit_f - limit_i) )
 							end
 						elseif objet == "alpha"
-							or objet == "alphaa"
+							or objet == "Alphaa"
 							or objet == "alphava" then
 							t_make[ i ] = ke4.alpha.val2ass( 255 * Tm_n )
 							if type( limit_i ) == "string" then
@@ -1388,7 +1458,7 @@
 									t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. ke4.random.color( { limit_i, limit_f } )
 								end
 							elseif objet == "alpha"
-								or objet == "alphaa"
+								or objet == "Alphaa"
 								or objet == "alphava" then
 								t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. ke4.random.alpha( )
 								if type( limit_i ) == "string" then
@@ -13953,7 +14023,7 @@
 				local html_color = html_color or "#FFFFFF"
 				local r_ass, g_ass, b_ass = html_color:match( "(%x%x)(%x%x)(%x%x)" )
 				return ke4.color.val2ass( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
-			end,
+			end, --!_G.ke4.color.ass( "#FF0000" )!
 			
 			ass2 = function( Rnum, Gnum, Bnum )
 				local Rnum = Rnum or 255
@@ -13985,8 +14055,8 @@
 				return ke4.color.HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 )
 			end, -- \1c!_G.ke4.color.ass3( 15 * syl.i, 1, 1 )!
 			
-			rgb = function( Color_or_table, Matrix13, Multi )
-				local colorass = Color_or_table-- or text.color1
+			rgb = function( Color_or_Table, Matrix13, Multi )
+				local colorass = Color_or_Table-- or text.color1
 				local matrixsm = Matrix13 or { 0, 0, 0 }
 				if type( colorass ) == "table" then
 					local rgb_tables, rgb_colors = { }, { }
@@ -14010,8 +14080,8 @@
 				return ke4.color.ass2( unpack( ke4.math.matrix_sum( rgb_table, Matrix13 ) ) )
 			end, --\1c!_G.ke4.color.rgb( "&H0000FF&", { 0, 50 * syl.i, 23 * syl.i } )!
 			
-			hsv = function( Color_or_table, Matrix13, Multi )
-				local colorass = Color_or_table-- or text.color1
+			hsv = function( Color_or_Table, Matrix13, Multi )
+				local colorass = Color_or_Table-- or text.color1
 				local matrixsm = Matrix13 or { 0, 0, 0 }
 				if type( colorass ) == "table" then
 					local hsv_tables, hsv_colors = { }, { }
@@ -14035,11 +14105,11 @@
 				return ke4.color.ass3( unpack( ke4.math.matrix_sum( hsv_table, Matrix13 ) ) )
 			end, --\1c!_G.ke4.color.hsv( "&H0000FF&", { 17 * syl.i, 1, 0 } )!
 			
-			assF = function( color_or_table )
-				local color_or_table = color_or_table-- or text.color1
-				local cF, tcF = { color_or_table }, { }
-				if type( color_or_table ) == "table" then
-					cF = color_or_table
+			assF = function( Color_or_Table )
+				local Color_or_Table = Color_or_Table-- or text.color1
+				local cF, tcF = { Color_or_Table }, { }
+				if type( Color_or_Table ) == "table" then
+					cF = Color_or_Table
 				end
 				for i = 1, #cF do
 					if cF[ i ]:len( ) < 15 then
@@ -14060,11 +14130,11 @@
 				return cF
 			end,
 			
-			to_RGB = function( color_or_table )
-				local color_or_table = ke4.color.from_error( color_or_table )
-				local C_ass, RGB_table, _c = { color_or_table }, { }, ke4.color.vc_to_c
-				if type( color_or_table ) == "table" then
-					C_ass = color_or_table
+			to_RGB = function( Color_or_Table )
+				local Color_or_Table = ke4.color.from_error( Color_or_Table )
+				local C_ass, RGB_table, _c = { Color_or_Table }, { }, ke4.color.vc_to_c
+				if type( Color_or_Table ) == "table" then
+					C_ass = Color_or_Table
 				end
 				for i = 1, #C_ass do
 					local b_RGB, g_RGB, r_RGB = _c( C_ass[ i ] ):match( "(%x%x)(%x%x)(%x%x)" )
@@ -14076,11 +14146,11 @@
 				return RGB_table
 			end, --!_G.ke4.table.view( _G.ke4.color.to_RGB( "&HAA00FF&" ) )!
 			
-			to_HSV = function( color_or_table )
-				local color_or_table = ke4.color.from_error( color_or_table )
-				local c_ass, HSV_table, H, S, V, Cmin, Cmax, Dt = { color_or_table }, { }, 0, 0, 0, 0, 1, 1
-				if type( color_or_table ) == "table" then
-					c_ass = color_or_table
+			to_HSV = function( Color_or_Table )
+				local Color_or_Table = ke4.color.from_error( Color_or_Table )
+				local c_ass, HSV_table, H, S, V, Cmin, Cmax, Dt = { Color_or_Table }, { }, 0, 0, 0, 0, 1, 1
+				if type( Color_or_Table ) == "table" then
+					c_ass = Color_or_Table
 				end
 				for i = 1, #c_ass do
 					local Red, Green, Blue = unpack( ke4.color.to_RGB( c_ass[ i ] ) )
@@ -14104,15 +14174,15 @@
 				return HSV_table
 			end, --!_G.ke4.table.view( _G.ke4.color.to_HSV( "&HAA32FF&" ) )!
 			
-			vc = function( color_or_table )
-				if type( color_or_table ) == "function" then
-					color_or_table = color_or_table( )
+			vc = function( Color_or_Table )
+				if type( Color_or_Table ) == "function" then
+					Color_or_Table = Color_or_Table( )
 				end
-				local color_or_table = color.from_error( color_or_table or text.color1 )
-				effector.print_error( color_or_table, "color", "color.vc", 1 )
-				local vc, cvc_t = { color_or_table }, { }
-				if type( color_or_table ) == "table" then
-					vc = color_or_table
+				local Color_or_Table = color.from_error( Color_or_Table or text.color1 )
+				effector.print_error( Color_or_Table, "color", "color.vc", 1 )
+				local vc, cvc_t = { Color_or_Table }, { }
+				if type( Color_or_Table ) == "table" then
+					vc = Color_or_Table
 				end
 				for i = 1, #vc do
 					if vc[ i ]:len( ) < 15 then
@@ -14173,16 +14243,16 @@
 				return RVCtable
 			end,
 			
-			gradientv = function( ColorTop_or_table, ColorBottom_or_table )
-				local ColorBottom_or_table = ke4.color.from_error( ColorBottom_or_table )
-				local ColorTop_or_table = ke4.color.from_error( ColorTop_or_table )
+			gradientv = function( ColorTop_or_Table, ColorBottom_or_Table )
+				local ColorBottom_or_Table = ke4.color.from_error( ColorBottom_or_Table )
+				local ColorTop_or_Table = ke4.color.from_error( ColorTop_or_Table )
 				local Cv_table, _c = { }, ke4.color.vc_to_c
-				local CT, CB = { ColorTop_or_table }, { ColorBottom_or_table }
-				if type( ColorTop_or_table ) == "table" then
-					CT = ColorTop_or_table
+				local CT, CB = { ColorTop_or_Table }, { ColorBottom_or_Table }
+				if type( ColorTop_or_Table ) == "table" then
+					CT = ColorTop_or_Table
 				end
-				if type( ColorBottom_or_table ) == "table" then
-					CB = ColorBottom_or_table
+				if type( ColorBottom_or_Table ) == "table" then
+					CB = ColorBottom_or_Table
 				end
 				for i = 1, #CT do
 					for k = 1, #CB do
@@ -14199,20 +14269,20 @@
 				return Cv_table
 			end,
 			
-			gradienth = function( ColorLeft_or_table, ColorRight_or_table, val_i, val_n, algorithm )
+			gradienth = function( ColorLeft_or_Table, ColorRight_or_Table, val_i, val_n, algorithm )
 				--example algorithm: "1 - abs( 2 * %s - 1 )"
 				local Al = algorithm or "%s"
-				local ColorRight_or_table = ke4.color.from_error( ColorRight_or_table )
-				local ColorLeft_or_table = ke4.color.from_error( ColorLeft_or_table )
+				local ColorRight_or_Table = ke4.color.from_error( ColorRight_or_Table )
+				local ColorLeft_or_Table = ke4.color.from_error( ColorLeft_or_Table )
 				local Ch_table, _c, i_c = { }, ke4.color.vc_to_c, ke4.color.ipolfx
-				local CL, CR = { ColorLeft_or_table }, { ColorRight_or_table }
+				local CL, CR = { ColorLeft_or_Table }, { ColorRight_or_Table }
 				local v1 = ke4.math.format( Al, 2 * (val_i - 1) / (2 * val_n - 1) )
 				local v2 = ke4.math.format( Al, (2 * val_i - 1) / (2 * val_n - 1) )
-				if type( ColorLeft_or_table ) == "table" then
-					CL = ColorLeft_or_table
+				if type( ColorLeft_or_Table ) == "table" then
+					CL = ColorLeft_or_Table
 				end
-				if type( ColorRight_or_table ) == "table" then
-					CR = ColorRight_or_table
+				if type( ColorRight_or_Table ) == "table" then
+					CR = ColorRight_or_Table
 				end
 				for i = 1, #CL do
 					for k = 1, #CR do
@@ -14255,17 +14325,17 @@
 				return ke4.color.vc( colorc_or_table )
 			end,
 			
-			interpolate = function( color1_or_table, color2_or_table, Index_Ipol )
+			interpolate = function( Color1_or_Table, Color2_or_Table, Index_Ipol )
 				local II = Index_Ipol or 0.5
-				local color2_or_table = ke4.color.from_error( color2_or_table )
-				local color1_or_table = ke4.color.from_error( color1_or_table )
+				local Color2_or_Table = ke4.color.from_error( Color2_or_Table )
+				local Color1_or_Table = ke4.color.from_error( Color1_or_Table )
 				local Ci_table, _c, i_c = { }, ke4.color.vc_to_c, ke4.color.ipolfx
-				local C1, C2 = { color1_or_table }, { color2_or_table }
-				if type( color1_or_table ) == "table" then
-					C1 = color1_or_table
+				local C1, C2 = { Color1_or_Table }, { Color2_or_Table }
+				if type( Color1_or_Table ) == "table" then
+					C1 = Color1_or_Table
 				end
-				if type( color2_or_table ) == "table" then
-					C2 = color2_or_table
+				if type( Color2_or_Table ) == "table" then
+					C2 = Color2_or_Table
 				end
 				local color1_vc, color2_vc
 				for i = 1, #C1 do
@@ -14298,10 +14368,10 @@
 				return Ci_table
 			end, --!_G.ke4.color.interpolate( "&HFFFFFF&", "&H000000&", (j - 1) / (maxj - 1) )!
 			
-			vector = function( color1, color2 )
-				local color2 = ke4.color.from_error( color2 )
-				local color1 = ke4.color.from_error( color1 )
-				local cv_index, C1, C2 = ke4.table.disorder( 4 ), ke4.color.vc_to_c( color1 ), ke4.color.vc_to_c( color2 )
+			vector = function( Color1, Color2 )
+				local Color2 = ke4.color.from_error( Color2 )
+				local Color1 = ke4.color.from_error( Color1 )
+				local cv_index, C1, C2 = ke4.table.disorder( 4 ), ke4.color.vc_to_c( Color1 ), ke4.color.vc_to_c( Color2 )
 				local Cfx = {
 					[ 1 ] = { C1, C1, C2, C1 },
 					[ 2 ] = { C2, C1, C1, C1 },
@@ -14546,13 +14616,13 @@
 				return CmMtb[ val_i ] .. ke4.tag.oscill( Dur, Delay, CmMtb )
 			end, --color.movemask( fx.dur, 300, "\\1c", "&H0000FF&" )
 
-			masktable = function( color_or_table, Size, val_i )
-				local color_or_table = ke4.color.from_error( color_or_table )
+			masktable = function( Color_or_Table, Size, val_i )
+				local Color_or_Table = ke4.color.from_error( Color_or_Table )
 				local Ct, tone, TT_cmask
 				local T_cmask = recall.cmaskt
 				local Size = Size or val_n
 				if val_i == 1 then
-					Ct = color_or_table
+					Ct = Color_or_Table
 					T_cmask = remember( "cmaskt", { } )
 					tone, TT_cmask = { }, { }
 					if type( Ct ) ~= "table" then
@@ -14644,37 +14714,37 @@
 				return color_loop[ j ]
 			end, --color.loop( "&H00FF00&", "&HFF0000&", "&H0000FF&" )
 
-			bigradient = function( Color_or_Table1, Color_or_Table2, Size_Table, val_i )
-				local  CbGgt = ke4.table.bigradient( Color_or_Table1, Color_or_Table2, Size_Table )
+			bigradient = function( Color1_or_Table, Color2_or_Table, Size_Table, val_i )
+				local  CbGgt = ke4.table.bigradient( Color1_or_Table, Color2_or_Table, Size_Table )
 				return CbGgt[ (val_i - 1) % #CbGgt + 1 ]
 			end,
 			
-			from_error = function( color_or_table )
-				if type( color_or_table ) == "string" then
-					if color_or_table:match( "#%x%x%x%x%x%x" ) then
-						color_or_table = color_or_table:gsub( "#%x%x%x%x%x%x",
+			from_error = function( Color_or_Table )
+				if type( Color_or_Table ) == "string" then
+					if Color_or_Table:match( "#%x%x%x%x%x%x" ) then
+						Color_or_Table = Color_or_Table:gsub( "#%x%x%x%x%x%x",
 							function( HTML_color )
 								return ke4.color.ass( HTML_color )
 							end
 						)
 					else
-						color_or_table = color_or_table:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
+						Color_or_Table = Color_or_Table:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
 							function( ASS_color )
 								return format( "&H%s&", ASS_color )
 							end
 						)
 					end
-				elseif type( color_or_table ) == "table" then
-					for k, valor in pairs( color_or_table ) do
+				elseif type( Color_or_Table ) == "table" then
+					for k, valor in pairs( Color_or_Table ) do
 						if type( valor ) == "string" then
 							if valor:match( "#%x%x%x%x%x%x" ) then
-								color_or_table[ k ] = valor:gsub( "#%x%x%x%x%x%x",
+								Color_or_Table[ k ] = valor:gsub( "#%x%x%x%x%x%x",
 									function( HTML_color )
 										return ke4.color.ass( HTML_color )
 									end
 								)
 							else
-								color_or_table[ k ] = valor:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
+								Color_or_Table[ k ] = valor:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
 									function( ASS_color )
 										return format( "&H%s&", ASS_color )
 									end
@@ -14683,7 +14753,7 @@
 						end
 					end
 				end
-				return color_or_table
+				return Color_or_Table
 			end,
 			
 			to_HTML = function( ASScolor )
@@ -14695,8 +14765,8 @@
 				return format( "#%s%s%s", Rhtml, Ghtml, Bhtml )
 			end,
 
-			matrix = function( Color_or_table, ... )
-				local Colorx = Color_or_table
+			matrix = function( Color_or_Table, ... )
+				local Colorx = Color_or_Table
 				local Matrixes = { ... }
 				if #Matrixes == 0 then
 					Matrixes[ 1 ] = {
@@ -14836,17 +14906,17 @@
 		
 		-- Alpha sublibrary
 		alpha = {
-			from_error = function( alpha_or_table )
-				if type( alpha_or_table ) == "string" then
-					alpha_or_table = alpha_or_table:gsub( "[%#%&Hh]*(%x%x)[%&]*",
+			from_error = function( Alpha_or_Table )
+				if type( Alpha_or_Table ) == "string" then
+					Alpha_or_Table = Alpha_or_Table:gsub( "[%#%&Hh]*(%x%x)[%&]*",
 						function( ASS_alpha )
 							return format( "&H%s&", ASS_alpha )
 						end
 					)
-				elseif type( alpha_or_table ) == "table" then
-					for k, valor in pairs( alpha_or_table ) do
+				elseif type( Alpha_or_Table ) == "table" then
+					for k, valor in pairs( Alpha_or_Table ) do
 						if type( valor ) == "string" then
-							alpha_or_table[ k ] = valor:gsub( "[%#%&Hh]*(%x%x)[%&]*",
+							Alpha_or_Table[ k ] = valor:gsub( "[%#%&Hh]*(%x%x)[%&]*",
 								function( ASS_alpha )
 									return format( "&H%s&", ASS_alpha )
 								end
@@ -14854,14 +14924,14 @@
 						end
 					end
 				end
-				return alpha_or_table
+				return Alpha_or_Table
 			end,
 			
-			assF = function( alpha_or_table )
-				local alpha_or_table = ke4.alpha.from_error( alpha_or_table or "&H00&" )
-				local aF, taF = { alpha_or_table }, { }
-				if type( alpha_or_table ) == "table" then
-					aF = alpha_or_table
+			assF = function( Alpha_or_Table )
+				local Alpha_or_Table = ke4.alpha.from_error( Alpha_or_Table or "&H00&" )
+				local aF, taF = { Alpha_or_Table }, { }
+				if type( Alpha_or_Table ) == "table" then
+					aF = Alpha_or_Table
 				end
 				for i = 1, #aF do
 					taF = { }
@@ -14887,11 +14957,11 @@
 				return aF
 			end,
 			
-			va = function( alpha_or_table )
-				local alpha_or_table = ke4.alpha.from_error( alpha_or_table or "&H00&" )
-				local vA, ava_t = { alpha_or_table }, { }
-				if type( alpha_or_table ) == "table" then
-					vA = alpha_or_table
+			va = function( Alpha_or_Table )
+				local Alpha_or_Table = ke4.alpha.from_error( Alpha_or_Table or "&H00&" )
+				local vA, ava_t = { Alpha_or_Table }, { }
+				if type( Alpha_or_Table ) == "table" then
+					vA = Alpha_or_Table
 				end
 				for i = 1, #vA do
 					if type( vA[ i ] ) == "number"
@@ -15004,11 +15074,11 @@
 				return Ah_table
 			end,
 			
-			va_to_a = function( alphava_or_table )
-				local alphava_or_table = ke4.alpha.from_error( alphava_or_table or "&H00&" )
-				local alphava, alphas, i_a = alphava_or_table, { }, ke4.alpha.ipolfx
-				if type( alphava_or_table ) ~= "table" then
-					alphava = { alphava_or_table }
+			va_to_a = function( Alphava_or_Table )
+				local Alphava_or_Table = ke4.alpha.from_error( Alphava_or_Table or "&H00&" )
+				local alphava, alphas, i_a = Alphava_or_Table, { }, ke4.alpha.ipolfx
+				if type( Alphava_or_Table ) ~= "table" then
+					alphava = { Alphava_or_Table }
 				end
 				for k = 1, #alphava do
 					if type( alphava[ k ] ) == "string"
@@ -15028,22 +15098,22 @@
 				return alphava
 			end,
 			
-			a_to_va = function( alphaa )
-				local alphaa = ke4.alpha.from_error( alphaa or "&H00&" )
-				return ke4.alpha.va( alphaa )
+			a_to_va = function( Alphaa_or_Table )
+				local Alphaa_or_Table = ke4.alpha.from_error( Alphaa_or_Table or "&H00&" )
+				return ke4.alpha.va( Alphaa_or_Table )
 			end,
 			
-			interpolate = function( alpha1_or_table, alpha2_or_table, Index_Ipol )
+			interpolate = function( Alpha1_or_Table, Alpha2_or_Table, Index_Ipol )
 				local II = Index_Ipol or 0.5
-				local alpha1_or_table = ke4.alpha.from_error( alpha1_or_table or "&HFF&" )
-				local alpha2_or_table = ke4.alpha.from_error( alpha2_or_table or "&H00&" )
+				local Alpha1_or_Table = ke4.alpha.from_error( Alpha1_or_Table or "&HFF&" )
+				local Alpha2_or_Table = ke4.alpha.from_error( Alpha2_or_Table or "&H00&" )
 				local Ai_table, _a, i_a = { }, ke4.alpha.va_to_a, ke4.alpha.ipolfx
-				local A1, A2 = { alpha1_or_table }, { alpha2_or_table }
-				if type( alpha1_or_table ) == "table" then
-					A1 = alpha1_or_table
+				local A1, A2 = { Alpha1_or_Table }, { Alpha2_or_Table }
+				if type( Alpha1_or_Table ) == "table" then
+					A1 = Alpha1_or_Table
 				end
-				if type( alpha2_or_table ) == "table" then
-					A2 = alpha2_or_table
+				if type( Alpha2_or_Table ) == "table" then
+					A2 = Alpha2_or_Table
 				end
 				local alpha1_va, alpha2_va
 				for i = 1, #A1 do
@@ -15201,9 +15271,9 @@
 				return alpha_loop[ j ]
 			end,
 
-			bigradient = function( Alpha_or_Table1, Alpha_or_Table2, Size_Table, val_i )
-				local Alpha1 = ke4.alpha.from_error( Alpha_or_Table1 or "&H00&" )
-				local Alpha2 = ke4.alpha.from_error( Alpha_or_Table2 or "&HFF&" )
+			bigradient = function( Alpha1_or_Table, Alpha2_or_Table, Size_Table, val_i )
+				local Alpha1 = ke4.alpha.from_error( Alpha1_or_Table or "&H00&" )
+				local Alpha2 = ke4.alpha.from_error( Alpha2_or_Table or "&HFF&" )
 				local bigrad = ke4.table.bigradient( Alpha1, Alpha2, Size_Table )
 				return bigrad[ (val_i - 1) % #bigrad + 1 ]
 			end,
@@ -15269,6 +15339,210 @@
 		
 		-- File sublibrary
 		file = {
+			get_lines_ass = function( File_ass )
+				--_G.ke4.file.get_lines_ass( "Effector-3.6-test.ass" )
+				local ass_lines = ke4.file.get_lines( File_ass, "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+%b,,%S+[ %S]*" )
+				local ass_styles = ke4.file.get_lines( File_ass, "Style: %w+[%-%w ]*," )
+				local count_ini = 0
+				for i = 1, #ass_lines do
+					if ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+(%b,,)%S+[ %S]*" ):match( "template" ) == nil
+						and ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+(%b,,)%S+[ %S]*" ):match( "code" ) == nil then
+						count_ini = i
+						break
+					end
+				end
+				local ass_heads = ke4.file.get_lines( File_ass, { "%[Aegisub Project Garbage%]", count_ini } )
+				count_ini = #ass_heads
+				local linefx, stylefx = { }, { }
+				for i = 1, #ass_styles do
+					stylefx[ ass_styles[ i ]:match( "Style: (%w+[%-%w ]*)," ) ] = {
+						[ "raw" ] =			ass_styles[ i ],
+						[ "class" ] =		string.lower( ass_styles[ i ]:match( "(%w+): %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "name" ] =		ass_styles[ i ]:match( "%w+: (%w+[%-%w ]*),%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ),
+						[ "fontname" ] =	ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,(%w+[%-%w ]*),%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ),
+						[ "fontsize" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,(%d+),&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "color1" ] =		ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,(&H%x+),&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) .. "&",
+						[ "color2" ] =		ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,(&H%x+),&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) .. "&",
+						[ "color3" ] =		ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,(&H%x+),&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) .. "&",
+						[ "color4" ] =		ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,(&H%x+),%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) .. "&",
+						[ "bold" ] =		(ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,(%d+),%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) == "0") and false or true,
+						[ "italic" ] =		(ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,(%d+),%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) == "0") and false or true,
+						[ "underline" ] =	(ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,(%d+),%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) == "0") and false or true,
+						[ "strikeout" ] =	(ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,(%d+),%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) == "0") and false or true,
+						[ "scale_x" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,(%d+[%.%d]*),%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "scale_y" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,(%d+[%.%d]*),%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "spacing" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,(%d+[%.%d]*),%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "angle" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,(%d+[%.%d]*),%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "borderstyle" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,(%d+[%.%d]*),%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "outline" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,(%d+[%.%d]*),%d+[%.%d]*,%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "shadow" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,(%d+[%.%d]*),%d+,%d+,%d+,%d+,%d+" ) ),
+						[ "align" ] =		tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,(%d+),%d+,%d+,%d+,%d+" ) ),
+						[ "margin_l" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,(%d+),%d+,%d+,%d+" ) ),
+						[ "margin_r" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,(%d+),%d+,%d+" ) ),
+						[ "margin_v" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,(%d+),%d+" ) ),
+						[ "margin_b" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,(%d+),%d+" ) ),
+						[ "margin_t" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,(%d+),%d+" ) ),
+						[ "encoding" ] =	tonumber( ass_styles[ i ]:match( "%w+: %w+[%-%w ]*,%w+[%-%w ]*,%d+,&H%x+,&H%x+,&H%x+,&H%x+,%d+,%d+,%d+,%d+,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+[%.%d]*,%d+,%d+,%d+,%d+,(%d+)" ) )
+					}
+				end
+				local xres, yres = 1280, 720
+				for i = 1, #ass_lines do
+					if ass_lines[ i ]:match( "PlayResX: %d+" ) then
+						xres = tonumber( ass_lines[ i ]:match( "PlayResX: (%d+)" ) )
+					end
+					if ass_lines[ i ]:match( "PlayResY: %d+" ) then
+						yres = tonumber( ass_lines[ i ]:match( "PlayResY: (%d+)" ) )
+					end
+					if ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+(%b,,)%S+[ %S]*" ):match( "template" ) == nil
+						and ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+(%b,,)%S+[ %S]*" ):match( "code" ) == nil then
+						linefx[ #linefx + 1 ] = {
+							format =		ass_lines[ i ]:match( "(%w+): %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+%b,,%S+[ %S]*" ),
+							layer =			tonumber( ass_lines[ i ]:match( "%w+: (%d+),%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+%b,,%S+[ %S]*" ) ),
+							start_time =	ke4.time.HMS_to_ms( ass_lines[ i ]:match( "%w+: %d+,(%d:%d+:%d+%.%d+),%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+%b,,%S+[ %S]*" ) ),
+							end_time =		ke4.time.HMS_to_ms( ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,(%d:%d+:%d+%.%d+),%w+[%w ]*%b,,%d+,%d+,%d+%b,,%S+[ %S]*" ) ),
+							style =			ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,(%w+[%w ]*)%b,,%d+,%d+,%d+%b,,%S+[ %S]*" ),
+							actor =			ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*(%b,,)%d+,%d+,%d+%b,,%S+[ %S]*" ):sub( 2, -2 ),
+							marginl =		tonumber( ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,(%d+),%d+,%d+%b,,%S+[ %S]*" ) ),
+							marginr =		tonumber( ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,(%d+),%d+%b,,%S+[ %S]*" ) ),
+							marginv =		tonumber( ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,(%d+)%b,,%S+[ %S]*" ) ),
+							effect =		ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+(%b,,)%S+[ %S]*" ):sub( 2, -2 ),
+							text =			ass_lines[ i ]:match( "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+%b,,(%S+[ %S]*)" ),
+						}
+					end
+					for i = 1, #linefx do
+						linefx[ i ].duration		= linefx[ i ].end_time - linefx[ i ].start_time
+						linefx[ i ].styleref		= stylefx[ linefx[ i ].style ]
+						linefx[ i ].text_strpped	= ke4.text.remove_extra_space( ke4.text.remove_tags( linefx[ i ].text ) )
+						--------------------------
+						local width, height, descent, extlead = aegisub.text_extents( linefx[ i ].styleref, linefx[ i ].text:gsub( "\\N", " " ):gsub( "  ", " " ) )
+						--------------------------
+						linefx[ i ].width		= ke4.math.round( width, 3 )
+						linefx[ i ].height		= ke4.math.round( height, 3 )
+						linefx[ i ].descent		= ke4.math.round( descent, 3 )
+						linefx[ i ].extlead		= ke4.math.round( extlead, 3 )
+						--------------------------
+						local options_lft_line = {
+							[ 1 ] = linefx[ i ].styleref.margin_l,
+							[ 2 ] = (xres + linefx[ i ].styleref.margin_l - linefx[ i ].styleref.margin_r) / 2 - width / 2,
+							[ 3 ] = xres - linefx[ i ].styleref.margin_r - width
+						}
+						local options_top_line = {
+							[ 1 ] = yres - linefx[ i ].styleref.margin_b - height,
+							[ 2 ] = yres / 2 - height / 2,
+							[ 3 ] = linefx[ i ].styleref.margin_t
+						}
+						--------------------------
+						linefx[ i ].left		= ke4.math.round( options_lft_line[ (linefx[ i ].styleref.align - 1) % 3 + 1 ], 3 )
+						linefx[ i ].center		= ke4.math.round( linefx[ i ].left + width / 2, 3 )
+						linefx[ i ].right		= ke4.math.round( linefx[ i ].left + width, 3 )
+						linefx[ i ].top			= ke4.math.round( options_top_line[ ceil( linefx[ i ].styleref.align / 3 ) ], 3 )
+						linefx[ i ].middle		= ke4.math.round( linefx[ i ].top + height / 2, 3 )
+						linefx[ i ].bottom		= ke4.math.round( linefx[ i ].top + height, 3 )
+						-- linefx[ i ].pretime
+						if i == 1 
+							or linefx[ i - 1 ].style ~= linefx[ i ].style then
+							linefx[ i ].pretime = 0
+						else
+							linefx[ i ].pretime = linefx[ i ].start_time - linefx[ i - 1 ].end_time
+						end
+						-- linefx[ i ].posttime
+						if i == #linefx
+							or linefx[ i + 1 ].style ~= linefx[ i ].style then
+							linefx[ i ].posttime = 0
+						else
+							linefx[ i ].posttime = linefx[ i + 1 ].start_time - linefx[ i ].end_time
+						end
+						------------------------
+						local function tags_in_word( Word )
+							-- retorna los tags de cada word
+							local tags_word_tbl = { }
+							for cap in Word:gmatch( "%b{}" ) do
+								table.insert( tags_word_tbl, cap:sub( 2, -2 ) )
+							end
+							local word_tags_str = table.concat( tags_word_tbl )
+							return "{" .. word_tags_str .. "}"
+						end
+						------------------------
+						--▼ word subtable ------
+						local words_line, words_dur	= ke4.text.text2word( linefx[ i ].text, linefx[ i ].duration )
+						linefx[ i ].word		= { }
+						linefx[ i ].word.n		= #words_line
+						linefx[ i ].word.text	= ""
+						local words_left		= linefx[ i ].left
+						local words_start		= 0
+						for k = 1, #words_line do
+							linefx[ i ].word.i					= k
+							linefx[ i ].word[ k ]				= { }
+							linefx[ i ].word[ k ].text			= ke4.text.karaoke_true( words_line )
+																and words_line[ k ]:gsub( "KEclip", " " )
+																or format( "{\\k%s}%s", ke4.math.round( words_dur[ k ] / 10 ), words_line[ k ] ):gsub( "KEclip", " " )
+							linefx[ i ].word[ k ].tags			= tags_in_word( linefx[ i ].word[ k ].text )
+							linefx[ i ].word[ k ].text_raw		= linefx[ i ].word[ k ].text:gsub( "KEclip", " " )
+							linefx[ i ].word[ k ].text_stripped	= ke4.text.text2stripped( words_line[ k ] )
+							linefx[ i ].word[ k ].text1			= ke4.text.remove_tags( words_line[ k ] ):gsub( "KEfx", "" )
+							linefx[ i ].word[ k ].text2			= linefx[ i ].word[ k ].text_stripped:gsub( "KEfx", "" )
+							linefx[ i ].word[ k ].width_t		= aegisub.text_extents( linefx[ i ].styleref, linefx[ i ].word[ k ].text1 )
+							linefx[ i ].word[ k ].width			= aegisub.text_extents( linefx[ i ].styleref, linefx[ i ].word[ k ].text2 )
+							linefx[ i ].word[ k ].left			= words_left
+							linefx[ i ].word[ k ].center		= words_left + linefx[ i ].word[ k ].width / 2
+							linefx[ i ].word[ k ].right			= words_left + linefx[ i ].word[ k ].width
+							linefx[ i ].word[ k ].top			= linefx[ i ].top
+							linefx[ i ].word[ k ].middle		= linefx[ i ].middle
+							linefx[ i ].word[ k ].bottom		= linefx[ i ].bottom
+							linefx[ i ].word[ k ].height		= linefx[ i ].height
+							linefx[ i ].word[ k ].duration		= words_dur[ k ]
+							linefx[ i ].word[ k ].dur			= words_dur[ k ]
+							linefx[ i ].word[ k ].start_time	= words_start
+							linefx[ i ].word[ k ].end_time		= linefx[ i ].word[ k ].start_time + linefx[ i ].word[ k ].duration
+							linefx[ i ].word[ k ].mid_time		= linefx[ i ].word[ k ].start_time + linefx[ i ].word[ k ].duration / 2
+							linefx[ i ].word.text				= linefx[ i ].word.text .. linefx[ i ].word[ k ].text:gsub( "KEfx", "" )
+							words_left 							= words_left  + linefx[ i ].word[ k ].width_t
+							words_start							= words_start + linefx[ i ].word[ k ].duration
+						end
+						------------------------
+						--▼ syl subtable -------
+						local syls_line, syls_dur = ke4.text.text2syl( linefx[ i ].text, linefx[ i ].duration )
+						linefx[ i ].syl			= { }
+						linefx[ i ].syl.n		= #syls_line
+						linefx[ i ].syl.text	= ""
+						local syls_left			= linefx[ i ].left
+						local syls_start		= 0
+						for k = 1, #syls_line do
+							linefx[ i ].syl.i					= k
+							linefx[ i ].syl[ k ]				= { }
+							linefx[ i ].syl[ k ].text			= ke4.text.karaoke_true( syls_line )
+																and syls_line[ k ]:gsub( "KEclip", " " )
+																or format( "{\\k%s}%s", ke4.math.round( syls_dur[ k ] / 10 ), syls_line[ k ] ):gsub( "KEclip", " " )
+							linefx[ i ].syl[ k ].tags			= linefx[ i ].syl[ k ].text:match( "%b{}" )
+							linefx[ i ].syl[ k ].text_raw		= linefx[ i ].syl[ k ].text:gsub( "KEclip", " " )
+							linefx[ i ].syl[ k ].text_stripped	= ke4.text.text2stripped( syls_line[ k ] )
+							linefx[ i ].syl[ k ].text1			= ke4.text.remove_tags( syls_line[ k ] ):gsub( "KEfx", "" )
+							linefx[ i ].syl[ k ].text2			= linefx[ i ].syl[ k ].text_stripped:gsub( "KEfx", "" )
+							linefx[ i ].syl[ k ].width_t		= aegisub.text_extents( linefx[ i ].styleref, linefx[ i ].syl[ k ].text1 )
+							linefx[ i ].syl[ k ].width			= aegisub.text_extents( linefx[ i ].styleref, linefx[ i ].syl[ k ].text2 )
+							linefx[ i ].syl[ k ].left			= syls_left
+							linefx[ i ].syl[ k ].center			= syls_left + linefx[ i ].syl[ k ].width / 2
+							linefx[ i ].syl[ k ].right			= syls_left + linefx[ i ].syl[ k ].width
+							linefx[ i ].syl[ k ].top			= linefx[ i ].top
+							linefx[ i ].syl[ k ].middle			= linefx[ i ].middle
+							linefx[ i ].syl[ k ].bottom			= linefx[ i ].bottom
+							linefx[ i ].syl[ k ].height			= linefx[ i ].height
+							linefx[ i ].syl[ k ].duration		= syls_dur[ k ]
+							linefx[ i ].syl[ k ].dur			= syls_dur[ k ]
+							linefx[ i ].syl[ k ].start_time		= syls_start
+							linefx[ i ].syl[ k ].end_time		= linefx[ i ].syl[ k ].start_time + linefx[ i ].syl[ k ].duration
+							linefx[ i ].syl[ k ].mid_time		= linefx[ i ].syl[ k ].start_time + linefx[ i ].syl[ k ].duration / 2
+							linefx[ i ].syl.text				= linefx[ i ].syl.text .. linefx[ i ].syl[ k ].text:gsub( "KEfx", "" )
+							syls_left 							= syls_left  + linefx[ i ].syl[ k ].width_t
+							syls_start							= syls_start + linefx[ i ].syl[ k ].duration
+						end
+					end
+				end
+				--return Line_i - count_ini + 7
+				return ke4.table.view( linefx )
+				--return ke4.table.view( stylefx )
+			end,
+			
 			get_lines = function( File_lua, Number_or_match )
 				--retorna una tabla con las líneas seleccionadas de un archivo
 				local File_lua = File_lua or "my.lua"
@@ -15277,6 +15551,7 @@
 				local n = Number_or_match or 1
 				local Lines_tbl = { }
 				local count = 1
+				local is_match = false
 				for line in File:lines( ) do
 					if n == "r" then
 						Lines_tbl[ #Lines_tbl + 1 ] = line
@@ -15292,13 +15567,37 @@
 						end
 						count = count + 1
 					elseif type( n ) == "table" then --ini & fin
-						if type( n[ 2 ] ) == "number" then --number & number
+						if type( n[ 1 ] ) == "number"
+							and type( n[ 2 ] ) == "number" then --number & number
 							if count >= n[ 1 ]
 								and count <= n[ 2 ] then
 								Lines_tbl[ #Lines_tbl + 1 ] = line
 							end
-						elseif type( n[ 2 ] ) == "string" then --number & match
+						elseif type( n[ 1 ] ) == "number"
+							and type( n[ 2 ] ) == "string" then --number & match
 							if count >= n[ 1 ] then
+								Lines_tbl[ #Lines_tbl + 1 ] = line
+								if line:match( n[ 2 ] ) then
+									break
+								end
+							end
+						elseif type( n[ 1 ] ) == "string"
+							and type( n[ 2 ] ) == "number" then --match & number
+							if line:match( n[ 1 ] ) then
+								is_match = true
+							end --!_G.ke4.table.view( _G.ke4.file.get_lines( "unname.ass", { "%[Aegisub Project Garbage%]", 15 } ) )!
+							if is_match == true then
+								Lines_tbl[ #Lines_tbl + 1 ] = line
+								if count == n[ 2 ] then
+									break
+								end
+							end
+						elseif type( n[ 1 ] ) == "string"
+							and type( n[ 2 ] ) == "string" then --match & match
+							if line:match( n[ 1 ] ) then
+								is_match = true
+							end
+							if is_match == true then
 								Lines_tbl[ #Lines_tbl + 1 ] = line
 								if line:match( n[ 2 ] ) then
 									break
