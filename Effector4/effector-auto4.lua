@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "november 03rd 2019; 16:29 (GMT + 5)"
+	ke4_script_modified	   = "november 08th 2019; 18:18 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -208,7 +208,6 @@
 			text2syl( Text, Duration )
 			text2char( Text, Duration )
 			text2part( Text_Config, Text, Duration, Text_left, Parts )
-			to_kara( Text, K_mode )
 			syl2hiragana( Text )
 			syl2katakana( Text )
 			kana2romaji( Text )
@@ -4912,10 +4911,10 @@
 					return format( "{\\p4}%s", ke4.shape.ASSDraw3( text_shape ) )
 				end
 				return ""
-			end, --!_G.ke4.text.deformed2( line.styleref, syl.text_stripped, 3 )!
+			end, --!_G.ke4.text.deformed2( line, syl.text_stripped, 3 )!
 			
 			to_clip = function( Text_Config, Text, relative_pos, iclip, Scale )
-				local Text = Text or val_text
+				local Text = Text or "text.to_clip"
 				local text_scale = Scale or 1
 				local text_clip = ke4.text.to_shape( Text_Config, Text, text_scale )
 				local text_width, text_height
@@ -4926,14 +4925,15 @@
 				end
 				if text_clip ~= "" then
 					text_width, text_height = aegisub.text_extents( Text_Config, Text )
-					text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ] - text_scale * text_width / 2, relative_pos[ 2 ] - text_scale * text_height / 2 )
+					--text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ] - text_scale * text_width / 2, relative_pos[ 2 ] - text_scale * text_height / 2 )
+					text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ], relative_pos[ 2 ] )
 					if iclip then
 						text_mode = "i"
 					end
 					return format( "\\%sclip(%s)", text_mode, text_clip )
 				end
 				return ""
-			end, --{!_G.ke4.text.to_clip( line.styleref, line.text_stripped, { line.center, line.middle } )!}
+			end, --{!_G.ke4.text.to_clip( line, line.text_stripped, { line.left, line.top } )!}
 			
 			to_pixels = function( Text_Config, Text, Ratio )
 				local text_2pixel = Text or "text.to_pixels"
@@ -6080,60 +6080,6 @@
 				parts_lefts[ 0 ] = nil
 				return parts_in_text, parts_in_text_dur, parts_centers, parts_widths, parts_lefts, parts_rights
 			end, --local p_txt, p_dur, p_cen, p_wid, p_lef, p_rig
-			
-			to_kara = function( Text, K_mode )
-				local K_mode = K_mode or "k"
-				local K_mode_tbl = { "k", "kf", "ko" }
-				if ke4.table.inside( K_mode_tbl, K_mode ) == false then
-					K_mode = "k"
-				end
-				local romajis = {
-					----------------------------------------------------------------------
-					"kya",	"kyu",	"kyo",	"sha",	"shu",	"sho",	"cha",	"chu",	"cho",
-					"nya",	"nyu",	"nyo",	"hya",	"hyu",	"hyo",	"mya",	"myu",	"myo",
-					"rya",	"ryu",	"ryo",	"gya",	"gyu",	"gyo",	"bya",	"byu",	"byo",
-					"pya",	"pyu",	"pyo",	"shi",	"chi",	"tsu",
-					----------------------------------------------------------------------
-					"ya",	"yu",	"yo",	"ka",	"ki",	"ku",	"ke",	"ko",	"sa",
-					"su",	"se",	"so",	"ta",	"te",	"to",	"na",	"ni",	"nu",
-					"ne",	"no",	"ha",	"hi",	"fu",	"he",	"ho",	"ma",	"mi",
-					"mu",	"me",	"mo",	"ya",	"yu",	"yo",	"ra",	"ri",	"ru",
-					"re",	"ro",	"wa",	"wi",	"we",	"wo",	"ga",	"gi",	"gu",
-					"ge",	"go",	"za",	"ji",	"zu",	"ze",	"zo",	"ja",	"ju",
-					"jo",	"da",	"di",	"du",	"de",	"do",	"ba",	"bi",	"bu",
-					"be",	"bo",	"pa",	"pi",	"pu",	"pe",	"po",
-					----------------------------------------------------------------------
-					"a",	"i",	"u",	"e",	"o",	"n",	"b",	"c",	"d",
-					"k",	"p",	"r",	"s",	"t",	"z"
-					----------------------------------------------------------------------
-				}
-				local Text = ke4.text.lower( Text )
-				Text = Text:gsub( "%b{}", "" )
-				local words, times = ke4.text.text2word( Text )
-				local num = 0
-				for i = 1, #words do
-					for k = 1, #romajis do
-						words[ i ] = words[ i ]:gsub( "[\128-\255]*" .. romajis[ k ], "[%1]" )
-					end
-					words[ i ] = words[ i ]:gsub( "%b[]",
-						function( capture )
-							capture = capture:gsub( "%[", "" ):gsub( "%]", "" )
-							return "[" .. capture .. "]"
-						end
-					)
-					words[ i ], num = words[ i ]:gsub( "%b[]", "%1" )
-					if num > 0 then
-						words[ i ] = words[ i ]:gsub( "%b[]",
-							function( capture )
-								capture = capture:gsub( "%[", "" ):gsub( "%]", "" )
-								return format( "{\\%s%d}%s", K_mode, times[ i ] / (num * 10), capture )
-							end
-						)
-					end
-				end
-				Text = ke4.table.op( words, "concat" )
-				return Text
-			end, --_G.ke4.text.to_kara( line.text_stripped )
 			
 			syl2hiragana = function( Text )
 				local idx
