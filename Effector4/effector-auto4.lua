@@ -16,9 +16,9 @@
 	
 	-- effector-auto4.lua ---------------------------------------------------------------------------
 	ke4_script_name		   = "effector-auto4.lua"
-	ke4_script_description = "Librería de funciones del Kara Effector para Automation-auto4"
+	ke4_script_description = "Librería de funciones del Kara Effector adaptadas para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "november 08th 2019; 18:18 (GMT + 5)"
+	ke4_script_modified	   = "november 22nd 2019; 18:02 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	--include( "karaskel.lua" )
 	
@@ -287,6 +287,7 @@
 			transform( shape, matrix )
 			to_clip( Shape, Pos_x, Pos_y, Ratio, Iclip )
 			intersect( Shape1, Shape2 )
+			insert( Shape1, Shape2 )
 		}
 		ass = {
 			convert_time( ass_ms )
@@ -1128,7 +1129,6 @@
 					end
 					---------------------------------------------
 					-- interpola el valor de dos shapes o dos clips
-					--[[
 					local function ipol_shpclip( val_1, val_2, pct_ipol )
 						local val_1, val_2 = ke4.shape.insert( val_1, val_2 )
 						local tbl_1, tbl_2, k = { }, { }, 1
@@ -1140,92 +1140,13 @@
 						end
 						local val_ipol = val_1:gsub( "%-?%d+[%.%d]*",
 							function( val )
-								local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
+								local val = tbl_1[ k ] + (tbl_2[ k ] - tbl_1[ k ]) * pct_ipol
 								k = k + 1
 								return ke4.math.round( val, 3 )
 							end
 						)
 						return val_ipol
 					end
-					--]]
-					---[[
-					local function ipol_shpclip( val_1, val_2, pct_ipol )
-						local function ipairx( Shape1, Shape2 )
-							local function parts( Shape )
-								--partes que posee una shape
-								local Parts = { }
-								for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
-									table.insert( Parts, p )
-								end
-								return Parts
-							end
-							local function count( Shape )
-								--cantidad de puntos que posee una shape
-								local n = 0
-								local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
-									function( point )
-										n = n + 1
-									end
-								)
-								return n
-							end
-							local Parts1 = parts( Shape1 )
-							local Parts2 = parts( Shape2 )
-							local Point1 = count( Shape1 )
-							local Point2 = count( Shape2 )
-							if Point1 >= Point2 then
-								return Shape1
-							end
-							local difere = Point2 - Point1
-							local addpoi = ceil( difere / 3 )
-							local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
-							local xpoint
-							for i = 1, addpoi do
-								xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
-								Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
-							end
-							return table.concat( Parts1 )
-						end
-						-----------------------------------
-						local val_1 = ipairx( val_1, val_2 )
-						local tbl_1, tbl_2, k = { }, { }, 1
-						for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
-							tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
-						end
-						for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
-							tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
-						end
-						--------------
-						local function ipair_fx( num_min, num_max )
-							--genera una tabla de "emparejamiento"
-							local n_min = math.min( num_min, num_max )
-							local n_max = math.max( num_min, num_max )
-							local inter = floor( n_max / n_min )
-							local modul = n_max % n_min
-							local index = { }
-							for i = 1, inter * n_min do
-								index[ i ] = ke4.math.i( i, inter )[ "N,n" ]
-							end
-							for i = 1, modul do
-								table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
-							end
-							return index
-						end
-						--------------
-						local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
-						local val_ipol, idx
-						val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
-							function( val_x, val_y )
-								idx = tbl_ipar[ k ]
-								local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
-								local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
-								k = k + 1
-								return ke4.math.round( val_x, 3 ) .. " " .. ke4.math.round( val_y, 3 )
-							end
-						)
-						return val_ipol
-					end
-					--]]
 					---------------------------------------------
 					-- busca un string dentro de la tabla
 					local function string_in_tbl( str_in_tbl )
@@ -1259,14 +1180,13 @@
 						ipol_i = Table_ipol[ floor( (i - 1) / (max_loop / (#Table_ipol - 1)) ) + 1 ]
 						ipol_f = Table_ipol[ floor( (i - 1) / (max_loop / (#Table_ipol - 1)) ) + 2 ]
 						pct_ip = floor( (i - 1) % (max_loop / (#Table_ipol - 1)) ) / (max_loop / (#Table_ipol - 1))
-						ipols[ i ] = ke4.math.round( ipol_function( ipol_i, ipol_f, ke4.math.format( algorithm_ipol, pct_ip ) ), 3 )
+						--ipols[ i ] = ke4.math.round( ipol_function( ipol_i, ipol_f, ke4.math.format( algorithm_ipol, pct_ip ) ), 3 )
+						ipols[ i ] = ipol_function( ipol_i, ipol_f, ke4.math.format( algorithm_ipol, pct_ip ) )
 					end --!_G.ke4.table.view( _G.ke4.table.ipol( { 12, 31 }, 11, "\\fscy", "math.sin( math.pi * %s )" ) )!
-					--fixed: october 07th 2019
 					pct_ip = ke4.math.clamp( ke4.math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
-					ipol_i = Table_ipol[ floor( pct_ip ) + 1 ]
-					ipol_f = Table_ipol[ floor( pct_ip ) + 2 ] or Table_ipol[ floor( pct_ip ) + 1 ]
-					ipols[ #ipols + 1 ] = ke4.math.round( ipol_function( ipol_i, ipol_f, pct_ip - floor( pct_ip ) ), 3 )
-					--ipols[ #ipols + 1 ] = Table_ipol[ #Table_ipol ]
+					ipol_i = Table_ipol[ floor( pct_ip ) ]
+					ipol_f = Table_ipol[ floor( pct_ip ) + 1 ] or Table_ipol[ floor( pct_ip ) ]
+					ipols[ #ipols + 1 ] = ipol_function( ipol_i, ipol_f, ke4.math.clamp( ke4.math.format( algorithm_ipol, 1 ) ) )
 					--concatena los valores con los Tags_ipol, si los hay
 					if Tags_ipol then
 						return ke4.table.concat2( ipols, Tags_ipol )
@@ -4812,6 +4732,10 @@
 				}
 				local text_font = ke4.decode.create_font( unpack( Text_Confix ) )
 				local text_shape = ke4.shape.ASSDraw3( text_font.text_to_shape( Text ) )
+				local width, height = aegisub.text_extents( Text_Config, Text )
+				local text_off_x = 0.5 * (ke4.shape.width( text_shape ) - text_scale * width)
+				local text_off_y = 0.5 * (ke4.shape.height( text_shape ) - text_scale * height)
+				text_shape = ke4.shape.displace( text_shape, text_off_x, text_off_y )
 				return text_shape
 			end, --{\p1}!_G.ke4.text.to_shape( line, syl.text_stripped )!
 			
@@ -9295,107 +9219,81 @@
 				--inserta mutuamente el código de una shape en la otra
 				local Shape1 = Shape1 or ke4.shape.rectangle
 				local Shape2 = Shape2 or ke4.shape.circle
+				-------------------------------------
 				local function parts( Shape )
-					--partes que posee una shape
+					--segmentos de una shape
 					local Parts = { }
 					for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
 						table.insert( Parts, p )
 					end
 					return Parts
 				end
-				local function valxy( Part_1, Part_2, Rtn, Part_1_before )
-					local new_part = ""
+				-------------------------------------
+				local function valxy( Part_1, Part_2, Part_3 )
+					local new_part1, new_part2 = ""
+					local Part_3 = Part_3 or Part_2
 					local type_part_1 = Part_1:match( "[mlb]^*" )	--tipo de segmento de shape 1
 					local type_part_2 = Part_2:match( "[mlb]^*" )	--tipo de segmento de shape 2
-					if type_part_1 == type_part_2 then				--si son del mismo tipo, retorna el segmento 1
-						return Part_1
+					local type_part_3 = Part_3:match( "[mlb]^*" )	--tipo de segmento de shape 2
+					if type_part_1 == type_part_2 then
+						--si son del mismo tipo, retorna los mismos segmentos
+						return { Part_1, Part_2 }
 					end
-					local xpoint	--punto de referencia del segmento 1
+					local xpoint1, xpoint2 --punto de referencia del segmento 1
 					if type_part_1 == "m"
 						or type_part_1 == "l" then
-						xpoint = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " " --toma en cuenta las dos coordenadas del segmento
-					else	--toma en cuenta las dos últimas coordenadas del segmento
-						xpoint = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" ) .. " "
+						--toma en cuenta las dos coordenadas del segmento
+						xpoint1 = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+					else --toma en cuenta las dos últimas coordenadas del segmento
+						xpoint1 = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
 					end
-					if Rtn == 1 then -- 1 --> 2
-						--retorna el segmento 1 concatenado con el segmento 2 "insertado"
-						if type_part_2 == "m"
-							or type_part_2 == "l" then
-							new_part = Part_1 .. type_part_2 .. " " .. xpoint
-						else
-							new_part = Part_1 .. type_part_2 .. " " .. xpoint .. xpoint .. xpoint
-						end
-					elseif Rtn == 2 then
-						--retorna el segmento 2 con las características del segmento 1
-						if type_part_2 == "m"
-							or type_part_2 == "l" then
-							new_part = type_part_2 .. " " .. xpoint
-						else
-							new_part = type_part_2 .. " " .. xpoint .. xpoint .. xpoint
-						end
-					elseif Rtn == 3 then
-						local Part_1_before = Part_1_before or ""
-						local type_part_1_before = Part_1_before:match( "[mlb]^*" )
-						if type_part_1_before == "m"
-							or type_part_1_before == "l" then
-							xpoint = Part_1_before:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " " --toma en cuenta las dos coordenadas del segmento
-						else	--toma en cuenta las dos últimas coordenadas del segmento
-							xpoint = Part_1_before:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" ) .. " "
-						end
-						if type_part_2 == "m"
-							or type_part_2 == "l" then
-							new_part = type_part_2 .. " " .. xpoint .. Part_1
-						else
-							new_part = type_part_2 .. " " .. xpoint .. xpoint .. xpoint .. Part_1
-						end
+					if type_part_3 == "m"
+						or type_part_3 == "l" then
+						--toma en cuenta las dos coordenadas del segmento
+						xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+					else --toma en cuenta las dos primeras coordenadas del segmento
+						xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
 					end
-					return new_part
+					--segmento 2 insertado en el 1
+					if type_part_2 == "m"
+						or type_part_2 == "l" then
+						new_part1 = Part_1 .. type_part_2 .. " " .. xpoint1 .. " "
+					else
+						new_part1 = Part_1 .. type_part_2 .. " " .. xpoint1 .. " " .. xpoint1 .. " " .. xpoint1 .. " "
+					end
+					--segmento 1 insertado en el 2
+					if type_part_1 == "m"
+						or type_part_1 == "l" then
+						new_part2 = type_part_1 .. " " .. xpoint2 .. " " .. Part_2
+					else
+						new_part2 = type_part_1 .. " " .. xpoint2 .. " " .. xpoint2 .. " " .. xpoint2 .. " " .. Part_2
+					end
+					return { new_part1, new_part2 }
 				end
+				-------------------------------------
 				local Parts_1 = parts( Shape1 )				--segmentos de la shape 1
 				local Parts_2 = parts( Shape2 )				--segmentos de la shape 2
-				-----------------------------------------------------------------------------------
-				local decide_1, decide_2 = floor( #Parts_1 / #Parts_2 ), floor( #Parts_2 / #Parts_1 )
-				if decide_2 > 1 then
-					local new_Shape1 = ""
-					for i = 1, decide_2 do
-						new_Shape1 = new_Shape1 .. Shape1
-					end
-					Shape1 = new_Shape1
-				end
-				if decide_1 > 1 then
-					local new_Shape2 = ""
-					for i = 1, decide_1 do
-						new_Shape2 = new_Shape2 .. Shape2
-					end
-					Shape2 = new_Shape2
-				end
-				Parts_1 = parts( Shape1 )
-				Parts_2 = parts( Shape2 )
-				-----------------------------------------------------------------------------------
 				local Shape_fx1, Shape_fx2 = { }, { }		--modificaciones de las shapes 1 y 2
 				local last_point_1 = Parts_1[ #Parts_1 ]	--último segmento de la shape 1
 				local last_point_2 = Parts_2[ #Parts_2 ]	--último segmento de la shape 2
-				for i = 2, #Parts_2 do
-					--modificación de la shape 1 con las características de la shape 2
-					if Parts_1[ i ] then --pregunta si el segmento existe en la shape 1
-						--añade las características del segmento 2 al segmento 1
-						Shape_fx1[ i ] = valxy( Parts_1[ i ], Parts_2[ i ], 1 )
-					else -- si el segemento no existe en la shape 1, añade el segmento 2
-						--con las características del último segmento de la shape 1
-						Shape_fx1[ i ] = valxy( last_point_1, Parts_2[ i ], 2 )
-					end
-				end
-				for i = 2, #Parts_1 do
-					if Parts_2[ i ] then
-						Shape_fx2[ i ] = valxy( Parts_2[ i ], Parts_1[ i ], 3, Parts_2[ i - 1 ] )
+				local max_n = math.max( #Parts_1, #Parts_2 )
+				for i = 2, max_n do
+					if Parts_1[ i ]
+						and Parts_2[ i ] then
+						Shape_fx1[ i ] = valxy( Parts_1[ i ], Parts_2[ i ] )[ 1 ]
+						Shape_fx2[ i ] = valxy( Parts_1[ i ], Parts_2[ i ], Parts_2[ i - 1 ] )[ 2 ]
+					elseif Parts_1[ i ] then
+						Shape_fx1[ i ] = valxy( Parts_1[ i ], last_point_2 )[ 1 ]
+						Shape_fx2[ i ] = valxy( Parts_1[ i ], last_point_2 )[ 2 ]
 					else
-						Shape_fx2[ i ] = valxy( last_point_2, Parts_1[ i ], 2 )
+						Shape_fx1[ i ] = valxy( last_point_1, Parts_2[ i ] )[ 1 ]
+						Shape_fx2[ i ] = valxy( last_point_1, Parts_2[ i ], Parts_2[ i - 1 ] )[ 2 ]
 					end
 				end
 				Shape_fx1[ 1 ], Shape_fx2[ 1 ] = Parts_1[ 1 ], Parts_2[ 1 ]
-				return table.concat( Shape_fx1 ), table.concat( Shape_fx2 )
-			end, --ke4.shape.insert( shape.rectangle, shape.circle )
-			
+				return table.concat( Shape_fx1 ), table.concat( Shape_fx2 ) --november 22nd 2019
+			end, --ke4.shape.insert2( shape.rectangle, shape.circle )
+
 		},
 		
 		-- Advanced substation alpha sublibrary
@@ -15285,6 +15183,38 @@
 		
 		-- File sublibrary
 		file = {
+			to_auto4 = function( File_lua )
+				local File_lua = File_lua or "my.ass"
+				local Lines = ke4.file.get_lines( File_lua, 1 )
+				local auto4_tbl = Lines[ 1 ]:gsub( "	%S+ = effector%.create%_fx%(", "" ):sub( 1, -3 )
+				:gsub( "(%-?%d+[%.%d]*)f", "%1 * frame_dur" )
+				:gsub( "\\\\", "\\" ):gsub( "fx%.pos_x", "$x" ):gsub( "fx%.pos_y", "$y" ):gsub( "ceil", "math.ceil" ):gsub( "floor", "math.floor" )
+				:gsub( "syl%.middle", "line.middle" ):gsub( "syl%.center", "line.left + syl.center" ):gsub( "fx%.dur", "line.duration" )--:gsub(  )
+				:gsub( "(\\fsc[xy]*)r(%d+[%.%d]*)",
+					function( tag, val )
+						if tag:len( ) == 5 then
+							return tag .. tonumber( val ) * 100
+						end
+						return	"\\fscx" .. tonumber( val ) * 100 .. "\\\\fscy" .. tonumber( val ) * 100
+					end
+				)
+				local auto4_function = loadstring( format( "return function( ) return { %s } end", auto4_tbl ) )( )
+				auto4_tbl = auto4_function( )
+				for k, v in pairs( auto4_tbl ) do
+					if k <= 3 then
+						auto4_tbl[ k ] = nil
+					end
+					if v == "" or v == true or v == false or v == "Lua" then
+						auto4_tbl[ k ] = nil
+					end
+					if k >= 6 and k <= 11 then
+						auto4_tbl[ k ] = nil
+					end
+				end
+				return ke4.table.view( auto4_tbl )
+				--return auto4_tbl
+			end, --!_G.ke4.file.to_auto4( )!
+			
 			get_lines_ass = function( File_ass )
 				--_G.ke4.file.get_lines_ass( "Effector-3.6-test.ass" )
 				local ass_lines = ke4.file.get_lines( File_ass, "%w+: %d+,%d:%d+:%d+%.%d+,%d:%d+:%d+%.%d+,%w+[%w ]*%b,,%d+,%d+,%d+%b,,%S+[ %S]*" )
