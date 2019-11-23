@@ -374,6 +374,7 @@
 		-	shape.deformed2( Shape, Defor_x, Defor_y )
 		-	shape.filtershape( Shape, ... )
 			shape.intersect( Shape1, Shape2 )
+			shape.insert( Shape1, Shape2 )
 		
 		librería text
 		-	text.upper( Text )
@@ -2089,7 +2090,7 @@
 			-- interpola el valor de dos shapes o dos clips
 			local function ipol_shpclip( val_1, val_2, pct_ipol )
 				local val_1, val_2 = shape.insert( val_1, val_2 )
-				local tbl_1, tbl_2, k = { }, { }, 1
+				local tbl_1, tbl_2, k = { }, { }, 0
 				for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
 					table.insert( tbl_1, tonumber( c ) )
 				end
@@ -2098,91 +2099,13 @@
 				end
 				local val_ipol = val_1:gsub( "%-?%d+[%.%d]*",
 					function( val )
-						local val = tbl_1[ k ] + ( tbl_2[ (k - 1) % #tbl_2 + 1 ] - tbl_1[ k ]) * pct_ipol
 						k = k + 1
+						local val = tbl_1[ k ] + (tbl_2[ k ] - tbl_1[ k ]) * pct_ipol
 						return math.round( val, 3 )
 					end
 				)
 				return val_ipol
 			end
-			--[[
-			local function ipol_shpclip( val_1, val_2, pct_ipol )
-				local function ipairx( Shape1, Shape2 )
-					local function parts( Shape )
-						--partes que posee una shape
-						local Parts = { }
-						for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
-							table.insert( Parts, p )
-						end
-						return Parts
-					end
-					local function count( Shape )
-						--cantidad de puntos que posee una shape
-						local n = 0
-						local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
-							function( point )
-								n = n + 1
-							end
-						)
-						return n
-					end
-					local Parts1 = parts( Shape1 )
-					local Parts2 = parts( Shape2 )
-					local Point1 = count( Shape1 )
-					local Point2 = count( Shape2 )
-					if Point1 >= Point2 then
-						return Shape1
-					end
-					local difere = Point2 - Point1
-					local addpoi = ceil( difere / 3 )
-					local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
-					local xpoint
-					for i = 1, addpoi do
-						xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
-						Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
-					end
-					return table.concat( Parts1 )
-				end
-				-----------------------------------
-				local val_1 = ipairx( val_1, val_2 )
-				local tbl_1, tbl_2, k = { }, { }, 1
-				for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
-					tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
-				end
-				for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
-					tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
-				end
-				--------------
-				local function ipair_fx( num_min, num_max )
-					--genera una tabla de "emparejamiento"
-					local n_min = math.min( num_min, num_max )
-					local n_max = math.max( num_min, num_max )
-					local inter = floor( n_max / n_min )
-					local modul = n_max % n_min
-					local index = { }
-					for i = 1, inter * n_min do
-						index[ i ] = math.i( i, inter )[ "N,n" ]
-					end
-					for i = 1, modul do
-						table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
-					end
-					return index
-				end
-				--------------
-				local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
-				local val_ipol, idx
-				val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
-					function( val_x, val_y )
-						idx = tbl_ipar[ k ]
-						local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
-						local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
-						k = k + 1
-						return math.round( val_x, 3 ) .. " " .. math.round( val_y, 3 )
-					end
-				)
-				return val_ipol
-			end
-			--]]
 			---------------------------------------------
 			-- busca un string dentro de la tabla
 			local function string_in_tbl( str_in_tbl )
@@ -2224,9 +2147,9 @@
 			end --table.ipol( { 12, 31 }, 11, "\\fscy", "sin( pi * %s )" )
 			--fixed: october 07th 2019
 			pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
-			ipol_i = Table_ipol[ floor( pct_ip ) + 1 ]
-			ipol_f = Table_ipol[ floor( pct_ip ) + 2 ] or Table_ipol[ floor( pct_ip ) + 1 ]
-			ipols[ #ipols + 1 ] = math.round( ipol_function( ipol_i, ipol_f, pct_ip - floor( pct_ip ) ), 3 )
+			ipol_i = Table_ipol[ floor( pct_ip ) ]
+			ipol_f = Table_ipol[ floor( pct_ip ) + 1 ] or Table_ipol[ floor( pct_ip ) ]
+			ipols[ #ipols + 1 ] = ipol_function( ipol_i, ipol_f, math.clamp( math.format( algorithm_ipol, 1 ) ) )
 			--ipols[ #ipols + 1 ] = Table_ipol[ #Table_ipol ]
 			if fx.filter == "mod"
 				and ipol_coloralpha == "coloralpha" then
@@ -17570,6 +17493,85 @@
 		return intersect_tbl --october 09th 2019
 	end --shape.intersect( shape.rectangle, shape.displace( shape.circle, 40, -20 ) )
 	
+	function shape.insert( Shape1, Shape2 )
+		--inserta mutuamente el código de una shape en la otra
+		local Shape1 = Shape1 or shape.rectangle
+		local Shape2 = Shape2 or shape.circle
+		-------------------------------------
+		local function parts( Shape )
+			--segmentos de una shape
+			local Parts = { }
+			for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
+				table.insert( Parts, p )
+			end
+			return Parts
+		end
+		-------------------------------------
+		local function valxy( Part_1, Part_2, Part_3 )
+			local new_part1, new_part2 = ""
+			local Part_3 = Part_3 or Part_2
+			local type_part_1 = Part_1:match( "[mlb]^*" )	--tipo de segmento de shape 1
+			local type_part_2 = Part_2:match( "[mlb]^*" )	--tipo de segmento de shape 2
+			local type_part_3 = Part_3:match( "[mlb]^*" )	--tipo de segmento de shape 2
+			if type_part_1 == type_part_2 then
+				--si son del mismo tipo, retorna el segmento 1
+				return { Part_1, Part_2 }
+			end
+			local xpoint1, xpoint2 --punto de referencia del segmento 1
+			if type_part_1 == "m"
+				or type_part_1 == "l" then
+				--toma en cuenta las dos coordenadas del segmento
+				xpoint1 = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+			else --toma en cuenta las dos últimas coordenadas del segmento
+				xpoint1 = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
+			end
+			if type_part_3 == "m"
+				or type_part_3 == "l" then
+				--toma en cuenta las dos coordenadas del segmento
+				xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+			else --toma en cuenta las dos primeras coordenadas del segmento
+				xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
+			end
+			--segmento 2 insertado en el 1
+			if type_part_2 == "m"
+				or type_part_2 == "l" then
+				new_part1 = Part_1 .. type_part_2 .. " " .. xpoint1 .. " "
+			else
+				new_part1 = Part_1 .. type_part_2 .. " " .. xpoint1 .. " " .. xpoint1 .. " " .. xpoint1 .. " "
+			end
+			--segmento 1 insertado en el 2
+			if type_part_1 == "m"
+				or type_part_1 == "l" then
+				new_part2 = type_part_1 .. " " .. xpoint2 .. " " .. Part_2
+			else
+				new_part2 = type_part_1 .. " " .. xpoint2 .. " " .. xpoint2 .. " " .. xpoint2 .. " " .. Part_2
+			end
+			return { new_part1, new_part2 }
+		end
+		-------------------------------------
+		local Parts_1 = parts( Shape1 )				--segmentos de la shape 1
+		local Parts_2 = parts( Shape2 )				--segmentos de la shape 2
+		local Shape_fx1, Shape_fx2 = { }, { }		--modificaciones de las shapes 1 y 2
+		local last_point_1 = Parts_1[ #Parts_1 ]	--último segmento de la shape 1
+		local last_point_2 = Parts_2[ #Parts_2 ]	--último segmento de la shape 2
+		local max_n = math.max( #Parts_1, #Parts_2 )
+		for i = 2, max_n do
+			if Parts_1[ i ]
+				and Parts_2[ i ] then
+				Shape_fx1[ i ] = valxy( Parts_1[ i ], Parts_2[ i ] )[ 1 ]
+				Shape_fx2[ i ] = valxy( Parts_1[ i ], Parts_2[ i ], Parts_2[ i - 1 ] )[ 2 ]
+			elseif Parts_1[ i ] then
+				Shape_fx1[ i ] = valxy( Parts_1[ i ], last_point_2 )[ 1 ]
+				Shape_fx2[ i ] = valxy( Parts_1[ i ], last_point_2 )[ 2 ]
+			else
+				Shape_fx1[ i ] = valxy( last_point_1, Parts_2[ i ] )[ 1 ]
+				Shape_fx2[ i ] = valxy( last_point_1, Parts_2[ i ], Parts_2[ i - 1 ] )[ 2 ]
+			end
+		end
+		Shape_fx1[ 1 ], Shape_fx2[ 1 ] = Parts_1[ 1 ], Parts_2[ 1 ]
+		return table.concat( Shape_fx1 ), table.concat( Shape_fx2 ) --november 22nd 2019
+	end --shape.insert( shape.rectangle, shape.circle )
+
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "text" -----------------------------------------------------------------
 	function text.upper( Text )
@@ -19427,7 +19429,7 @@
 		local count = 1
 		local is_match = false
 		for line in File:lines( ) do
-			if n == "r" then
+			if n == "r" then --todas las líneas
 				Lines_tbl[ #Lines_tbl + 1 ] = line
 			elseif type( n ) == "number" then --number
 				if count == n then
