@@ -13970,6 +13970,7 @@
 		if type( CenterY ) == "function" then
 			CenterY = CenterY( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.centerpos", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
