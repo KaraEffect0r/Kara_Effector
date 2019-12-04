@@ -1,6 +1,6 @@
 	--[[  La Librería effector-auto4.lua está diseñada con el fin de poder ampliar la gama de efectos
 	hechos con Automation-auto4 del aegisub. Posee diversas funciones que ampliarán las posibilidades
-	a la hora de desarrollar efectos karaokes o de edición.
+	a la hora de desarrollar efectos karaokes, de traducción o de edición.
 	Un gran porcentaje de las funciones del Kara Effector 3.6 se podrán usar en los templates auto-4,
 	con unas ligeras modificaciones en la forma de usarlas, ya que éstas han tenido que ser adaptadas
 	para que funcionen en Automation.
@@ -18,9 +18,8 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector adaptadas para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "november 22nd 2019; 18:02 (GMT + 5)"
+	ke4_script_modified	   = "december 04th 2019; 13:34 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
-	--include( "karaskel.lua" )
 	
 	--[[
 	ke4 = {
@@ -1066,7 +1065,7 @@
 				end
 				local Delay = Delay or 40
 				return Delay * (val_i - 1) - 200
-			end,
+			end, --!_G.ke4.time.li( $si, $syln, 50 )!
 			
 			lo = function( val_i, val_n, Delay )
 				if type( Delay ) == "function" then
@@ -1074,7 +1073,7 @@
 				end
 				local Delay = Delay or 40
 				return Delay * (val_i - val_n - 1) + 200
-			end,
+			end, --!_G.ke4.time.lo( $si, $syln, 50 )!
 			
 			loop = function( j, maxj, Delay, Mode )
 				if type( Delay ) == "function" then
@@ -4710,7 +4709,7 @@
 		
 		-- Text sublibrary
 		text = {
-			to_shape = function( Text_Config, Text, Scale )
+			to_shape = function( Text_Config, Text, Scale, without )
 				local Text = Text or "text.to_shape"
 				while Text:sub( -1, -1 ) == " " do
 					Text = Text:sub( 1, -2 )
@@ -4732,6 +4731,9 @@
 				}
 				local text_font = ke4.decode.create_font( unpack( Text_Confix ) )
 				local text_shape = ke4.shape.ASSDraw3( text_font.text_to_shape( Text ) )
+				if without then
+					return text_shape
+				end
 				local width, height = aegisub.text_extents( Text_Config, Text )
 				local text_off_x = 0.5 * (ke4.shape.width( text_shape ) - text_scale * width)
 				local text_off_y = 0.5 * (ke4.shape.height( text_shape ) - text_scale * height)
@@ -4767,7 +4769,7 @@
 					PixeL = Axis[ 2 ]
 				end
 				local text_def  = Text or "text.deformed"
-				local text_shp1 = ke4.text.to_shape( Text_Config, text_def, 1 )
+				local text_shp1 = ke4.text.to_shape( Text_Config, text_def, 1, true )
 				if text_shp1 ~= "" then
 					local text_fltr = function( x, y )
 						local px, py = x, y
@@ -4789,7 +4791,7 @@
 			
 			deformed2 = function( Text_Config, Text, Mode )
 				local Text = Text or "text.deformed2"
-				local text_shape = ke4.text.to_shape( Text_Config, Text, 8, nil, true )
+				local text_shape = ke4.text.to_shape( Text_Config, Text, 8, true )
 				if text_shape ~= "" then
 					ke4.shape.info( text_shape )
 					local center_dx = minx + w_shape / 2
@@ -4840,7 +4842,7 @@
 			to_clip = function( Text_Config, Text, relative_pos, iclip, Scale )
 				local Text = Text or "text.to_clip"
 				local text_scale = Scale or 1
-				local text_clip = ke4.text.to_shape( Text_Config, Text, text_scale )
+				local text_clip = ke4.text.to_shape( Text_Config, Text, text_scale, true )
 				local text_width, text_height
 				local text_mode = ""
 				if Text_Config.styleref then
@@ -4848,9 +4850,9 @@
 					Text_Config = Text_Config.styleref
 				end
 				if text_clip ~= "" then
-					text_width, text_height = aegisub.text_extents( Text_Config, Text )
-					--text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ] - text_scale * text_width / 2, relative_pos[ 2 ] - text_scale * text_height / 2 )
-					text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ], relative_pos[ 2 ] )
+					text_width, text_height, descent = aegisub.text_extents( Text_Config, Text )
+					text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ] + 0.5 * text_width * (1 - text_scale), relative_pos[ 2 ] + 0.5 * text_height * (1 - text_scale) )
+					--text_clip = ke4.shape.displace( text_clip, relative_pos[ 1 ], relative_pos[ 2 ] )
 					if iclip then
 						text_mode = "i"
 					end
@@ -4866,7 +4868,7 @@
 				if ke4.text.to_shape( Text_Config, text_2pixel ) == "" then
 					return ""
 				end
-				pixel_table = ke4.shape.to_pixels2( ke4.shape.ratio( ke4.text.to_shape( Text_Config, text_2pixel, 1 ), Ratio ) )
+				pixel_table = ke4.shape.to_pixels2( ke4.shape.ratio( ke4.text.to_shape( Text_Config, text_2pixel, 1, true ), Ratio ) )
 				if Text_Config.styleref then
 					--permite que el primer parámetro sea simplemente <line>
 					Text_Config = Text_Config.styleref
@@ -4892,7 +4894,7 @@
 			bord_to_pixels = function( Text_Config, Text, Pixel )
 				local text_2bord = Text or "text.bord_to_pixels"
 				local size_pixel = Pixel or 2
-				local text_shape = ke4.text.to_shape( Text_Config, text_2bord, 1 )
+				local text_shape = ke4.text.to_shape( Text_Config, text_2bord, 1, true )
 				local points = ke4.shape.point( text_shape, size_pixel )
 				if Text_Config.styleref then
 					--permite que el primer parámetro sea simplemente <line>
@@ -4909,10 +4911,10 @@
 			end, --!maxloop( #points )!{\an5\pos(!$x + points[ j ].x!,!$y + points[ j ].y!)\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
 			
 			filter = function( Text_Config, Text, Split, ... )
-				local txt_shape = ke4.text.to_shape( Text_Config, Text )
+				local txt_shape = ke4.text.to_shape( Text_Config, Text, 1, true )
 				local Split = Split or 3
 				return ke4.shape.filter3( txt_shape, Split, ... )
-			end, --{\p1}!_G.ke4.text.filter( line, line.text_stripped, 3, function( x, y ) x = x + _G.ke4.math.Rcs( 2 ) y = y + _G.ke4.math.Rcs( 2 ) return x, y end )!
+			end, --{\p1}!_G.ke4.text.filter( line, line.text_stripped, 3, function( x, y ) x = x + _G.Rcs( 2 ) y = y + _G.Rcs( 2 ) return x, y end )!
 
 			gradienth = function( Text_Config, Text, Relative_pos, ... )
 				local shp_w = 2
@@ -4926,7 +4928,10 @@
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", gradh[ i ], ke4.shape.size( ke4.shape.rectangle, shp_w, ceil( Height ) ) )
 				end
-				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
+				local Rel_pos = Relative_pos
+				Rel_pos[ 1 ] = Rel_pos[ 1 ] - 0.5 * Width
+				Rel_pos[ 2 ] = Rel_pos[ 2 ] - 0.5 * Height
+				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Rel_pos ), Shape )
 			end, --!_G.ke4.text.gradienth( line, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
 			
 			gradientv = function( Text_Config, Text, Relative_pos, ... )
@@ -4941,7 +4946,10 @@
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s{\\p0}\\N", gradv[ i ], ke4.shape.size( ke4.shape.rectangle, ceil( Width ), shp_h ) )
 				end
-				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
+				local Rel_pos = Relative_pos
+				Rel_pos[ 1 ] = Rel_pos[ 1 ] - 0.5 * Width
+				Rel_pos[ 2 ] = Rel_pos[ 2 ] - 0.5 * Height
+				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Rel_pos ), Shape )
 			end, --!_G.ke4.text.gradientv( line, line.text_stripped, { line.center, line.middle }, "&H00FFFF&", "&H0000FF&" )!
 			
 			gradientangle = function( Text_Config, Text, Relative_pos, Angle, ... )
@@ -4959,7 +4967,10 @@
 				for i = 1, cn do
 					Shape = Shape .. format( "{\\1c%s\\p1}%s", grada[ i ], ke4.shape.size( ke4.shape.rectangle, shp_s, shp_h ) )
 				end
-				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Relative_pos ), Shape )
+				local Rel_pos = Relative_pos
+				Rel_pos[ 1 ] = Rel_pos[ 1 ] - 0.5 * Width
+				Rel_pos[ 2 ] = Rel_pos[ 2 ] - 0.5 * Height
+				return format( "{%s\\bord0\\shad0}%s", ke4.text.to_clip( Text_Config, Text, Rel_pos ), Shape )
 			end, --!_G.ke4.text.gradientangle( line, line.text_stripped, { line.center, line.middle }, 45, "&H00FFFF&", "&H0000FF&" )!
 			
 			bezier = function( Text_Config, Shape, Char_x, Char_y, Mode, Offset )
@@ -9236,7 +9247,7 @@
 					local type_part_2 = Part_2:match( "[mlb]^*" )	--tipo de segmento de shape 2
 					local type_part_3 = Part_3:match( "[mlb]^*" )	--tipo de segmento de shape 2
 					if type_part_1 == type_part_2 then
-						--si son del mismo tipo, retorna los mismos segmentos
+						--si son del mismo tipo, retorna ambos segmentos
 						return { Part_1, Part_2 }
 					end
 					local xpoint1, xpoint2 --punto de referencia del segmento 1
@@ -9251,7 +9262,7 @@
 						or type_part_3 == "l" then
 						--toma en cuenta las dos coordenadas del segmento
 						xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-					else --toma en cuenta las dos primeras coordenadas del segmento
+					else --toma en cuenta las dos últimas coordenadas del segmento
 						xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
 					end
 					--segmento 2 insertado en el 1
