@@ -18,7 +18,7 @@
 	ke4_script_name		   = "effector-auto4.lua"
 	ke4_script_description = "Librería de funciones del Kara Effector adaptadas para Automation-auto4"
 	ke4_script_author	   = "Itachi Akatsuki"
-	ke4_script_modified	   = "december 04th 2019; 13:34 (GMT + 5)"
+	ke4_script_modified	   = "december 06th 2019; 13:34 (GMT + 5)"
 	-------------------------------------------------------------------------------------------------
 	
 	--[[
@@ -146,11 +146,12 @@
 			matrix_rat( Ratx, Raty, Orgx, Orgy )
 			matrix_ref( Mode )
 			matrix_fil( Filxy, Axis )
-			bezier( j, maxj, Pos_x, Pos_y, Return, ... )
+			bezier( j, maxj, Return, ... )
 			bezier2( pct, pts )
 			to16( Num )
 			clamp( Num, Min, Max )
 			clamp2( Num, Min, Max )
+			audio( Audio, Time, Start, Loops, Scale, Offset_time, Values )
 		}
 		random = {
 			color( H, S, V )
@@ -274,6 +275,7 @@
 			deformed2( Shape, Defor_x, Defor_y )
 			fusion( Shapes, Tags )
 			filtershape( Shape, ... )
+			from_audio( Audio, Time, Start, Width, Height, Thickness )
 			bounding( shape )
 			detect( width, height, data, compare_func )
 			filtery( shape, filter )
@@ -412,6 +414,10 @@
 			match( File_lua, Match_or_tbl )
 			gmatch( File_lua, Match_or_tbl )
 			count( File_lua, Match_or_tbl )
+		}
+		image = {
+			data( bmp_image )
+			to_pixels( bmp_image, Size, Return_pos )
 		}
 		decode = {
 			create_bmp_reader( filename ) = {
@@ -4227,6 +4233,61 @@
 				Max = ke4.math.round( Max * 10000 )
 				return ke4.math.round( ke4.math.i( Num - Min, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
 			end,  --!_G.ke4.math.clamp2( 3 * (j - 1) / (maxj - 1) )!
+			
+			audio = function( Audio, Time, Start, Loops, Scale, Offset_time, Values )
+				--convierte un archivo .wav en valores o transformaciones para shapes :D
+				local Wav_fil = Audio or "test.wav"
+				local Wav_frm = 2 * frame_dur
+				local Wav_max = Loops or 12
+				local Wav_scl = Scale or 1 / 86 -- = 0.0116 vertical scale
+				local Wav_otm = Offset_time or 0
+				if Wav_scl <= 0 then
+					Wav_scl = abs( Wav_scl )
+				end
+				if Wav_fil:match( "%.wav" ) == nil then
+					Wav_fil = Wav_fil .. ".wav"
+				end
+				if Wav_max <= 0 then
+					Wav_max = 2
+				end
+				local reader = ke4.decode.create_wav_reader( Wav_fil )
+				local chunk_size = reader.sample_from_ms( Wav_frm )
+				local max_transfos = ceil( (Time + 2 * Wav_otm) / Wav_frm )
+				local barras = ceil( Wav_max )
+				local vals_tbl, idx, ms
+				local val_y_tbl = { }
+				for i = 1, max_transfos do
+					ms = Start + Wav_frm * (i - 1)
+					reader.position( floor( reader.sample_from_ms( ms ) ) )
+					vals_tbl = reader.samples( chunk_size )[ 1 ]
+					idx = ceil( (#vals_tbl + 1) / (barras + 1) )
+					val_y_tbl[ i ] = { }
+					for k = 1, barras do
+						val_y_tbl[ i ][ k ] = vals_tbl[ k * idx ]
+					end
+				end
+				local transfos_vals = { }
+				for i = 1, barras do
+					transfos_vals[ i ] = { }
+					for k = 1, max_transfos do
+						transfos_vals[ i ][ k ] = floor( abs( val_y_tbl[ k ][ i ] ) * Wav_scl )
+					end
+				end
+				local transfos_tags = { }
+				for i = 1, barras do
+					transfos_tags[ i ] = format( "\\fscy%s", transfos_vals[ i ][ 1 ] )
+					for k = 2, max_transfos do
+						transfos_tags[ i ] = transfos_tags[ i ] .. format( "\\t(%s,%s,\\fscy%s)", (k - 1) * Wav_frm, k * Wav_frm, transfos_vals[ i ][ k ] )
+					end
+				end
+				if Values then
+					return transfos_vals
+				end
+				return transfos_tags
+				--code line: bars = _G.ke4.math.audio( "test.wav", line.duration, line.start_time, 20 )
+				--!maxloop( #bars )!{\an2\pos(!$lleft + 30 * (j - 1)!,$bottom)\bord0\shad0\fscx25!bars[ j ]!\p1}!_G.ke4.shape.rectangle!
+			end,
+
 		},
 		
 		-- Random sublibrary
@@ -4861,10 +4922,10 @@
 				return ""
 			end, --{!_G.ke4.text.to_clip( line, line.text_stripped, { line.left, line.top } )!}
 			
-			to_pixels = function( Text_Config, Text, Ratio )
+			to_pixels = function( Text_Config, Text, Ratio, Return_pos )
 				local text_2pixel = Text or "text.to_pixels"
 				local Ratio = Ratio or 1
-				local pixel, pixel_datas = { }, { }
+				local pixels, pixel_datas, pixel_pos = { }, { }, { }
 				if ke4.text.to_shape( Text_Config, text_2pixel ) == "" then
 					return ""
 				end
@@ -4881,15 +4942,47 @@
 					end
 				end
 				for i = 1, #pixel_table do
-					pixel[ i ] = { }
-					pixel[ i ].x = pixel_datas[ i ][ 2 ] - 0.5 * Ratio * text_width
-					pixel[ i ].y = pixel_datas[ i ][ 1 ] - 0.5 * Ratio * text_height
-					pixel[ i ].a = ke4.alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+					pixels[ i ] = {
+						x = pixel_datas[ i ][ 2 ] - 0.5 * Ratio * text_width,
+						y = pixel_datas[ i ][ 1 ] - 0.5 * Ratio * text_height,
+						a = ke4.alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+					}
+					pixel_pos[ i ] = {
+						x = ke4.math.round( pixel_datas[ i ][ 2 ] - 0.5 * Ratio * text_width ),
+						y = ke4.math.round( pixel_datas[ i ][ 1 ] - 0.5 * Ratio * text_height )
+					}
 				end
-				return pixel
-				-- code line: pixels = _G.ke4.text.to_pixels( line.styleref, line.text_stripped )
+				if Return_pos then
+					return pixel_pos, pixels
+				end
+				return pixels
+				-- code syl: pixels = _G.ke4.text.to_pixels( line, syl.text_stripped )
 				-- template syl notext noblank
 			end, --!maxloop( #pixels )!{\an5\pos(!$x + pixels[ j ].x!,!$y + pixels[ j ].y!)\1a!pixels[ j ].a!\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
+			
+			image = function( Text_Config, Text, bmp_image )
+				local text_image = Text or "text.image"
+				local bmp_image = bmp_image or "test.bmp"
+				local px_text_pos, px_text_sett = ke4.text.to_pixels( Text_Config, text_image, nil, true )
+				local px_image_pos, px_image_sett = ke4.image.to_pixels( bmp_image, nil, true )
+				local pixels, ix = { }
+				for i = 1, #px_image_sett do
+					if type( px_text_pos ) == "table" then
+						if ke4.table.inside( px_text_pos, px_image_pos[ i ] ) then
+							ix = ke4.table.index( px_text_pos, px_image_pos[ i ] )
+							pixels[ #pixels + 1 ] = {
+								x = px_text_sett[ ix ].x,
+								y = px_text_sett[ ix ].y,
+								a = px_image_sett[ i ].a,
+								c = px_image_sett[ i ].c
+							}
+						end
+					end
+				end
+				return pixels
+				--code syl: pixels = _G.ke4.text.image( line, syl.text_stripped, "test.bmp" )
+				--!maxloop( #pixels )!{\an5\pos(!$x + pixels[ j ].x!,!$y + pixels[ j ].y!)\1c!pixels[ j ].c!\1a!pixels[ j ].a!\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
+			end,
 			
 			bord_to_pixels = function( Text_Config, Text, Pixel )
 				local text_2bord = Text or "text.bord_to_pixels"
@@ -4978,7 +5071,7 @@
 				function pyointa.tangential2P( Pnts, t_ )
 					local tanVec, XY, dpos = { }, { }, { }
 					XY = pyointa.difference( Pnts )
-					dpos = pyointa.tDifferential( XY, t_ ) 
+					dpos = pyointa.tDifferential( XY, t_ )
 					for i = 1, 2 do
 						tanVec[ i ] = dpos[ 2 ][ i ] / math.sqrt( dpos[ 2 ][ 1 ] ^ 2 + dpos[ 2 ][ 2 ] ^ 2 )
 					end
@@ -7702,6 +7795,9 @@
 						Tags_s[ i ] = format( "{\\1c%s}", ke4.random.color( nil, 82 ) )
 					end
 				end
+				if ke4.table.type( Tags_s ) == "table" then
+					Tags_s = ke4.table.concat4( Tags_s )
+				end --december 06th 2019
 				local tag_N = "{"
 				if Vertical then
 					tag_N = "{\\p0}\\N{\\p1"
@@ -8432,7 +8528,70 @@
 				--Filterx = function( shp, si ) if si % 2 == 1 then return _G.ke4.shape.displace( shp, 0, -10 ) end return _G.ke4.shape.displace( shp, 0, 10 ) end
 				--{\p1}!_G.ke4.shape.filtershape( Shp, Filterx )!
 			end,
-
+			
+			from_audio = function( Audio, Time, Start, Width, Height, Thickness )
+				-- xres, yres and ratio ----------------
+				local xres, yres = aegisub.video_size( )
+				if not xres then
+					xres, yres = 1280, 720
+				end
+				ratio = xres / 1280
+				-- frame_dur ---------------------------
+				local msa, msb = aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+				if msb then
+					frame_dur = ke4.math.round( ( msb - msa ) / 100, 3 )
+				end
+				----------------------------------------
+				local Wav_fil = Audio or "test.wav"
+				local Wav_frm = 2 * frame_dur
+				local Wav_wth = Width or 120 * ratio
+				local Wav_hht = (Height == nil) and 1 / 220 or 1 / Height --0.0045
+				local Wav_tkn = Thickness or 4 * ratio
+				local Wav_otm = Time or 1000
+				if Wav_hht <= 0 then
+					Wav_hht = 1 / 150
+				end
+				local function audio_to_shape( Samples, Width, Height_scale, Thickness )
+					local thick, n = Thickness / 2, #Samples
+					local Shape = format( "m 0 %s l", -thick )
+					for i = 2, n do
+						if i < n then
+							Shape = format( "%s %s %s", Shape, (i - 1) / (n - 1) * Width, Samples[ i ] * Height_scale - thick )
+						else
+							Shape = format( "%s %s %s", Shape, (i - 1) / (n - 1) * Width, -thick )
+						end
+					end
+					for i = n, 1, -1 do
+						if i > 1
+							and i < n then
+							Shape = format( "%s %s %s", Shape, (i - 1) / (n - 1) * Width, Samples[ i ] * Height_scale + thick )
+						else
+							Shape = format( "%s %s %s", Shape, (i - 1) / (n - 1) * Width, thick )
+						end
+					end
+					return Shape
+				end
+				if Wav_fil:match( "%.wav" ) == nil then
+					Wav_fil = Wav_fil .. ".wav"
+				end
+				local reader = ke4.decode.create_wav_reader( Wav_fil )
+				local chunk_size = reader.sample_from_ms( Wav_frm / 32 )
+				local max_n, ms = ceil( Wav_otm / Wav_frm )
+				local configs = { }
+				for i = 1, max_n do
+					ms = Start + Wav_frm * (i - 1)
+					reader.position( floor( reader.sample_from_ms( ms ) ) )
+					configs[ i ] = {
+						ini = Wav_frm * (i - 1),
+						fin = Wav_frm * i,
+						shape = ke4.shape.ratio( audio_to_shape( reader.samples( chunk_size )[ 1 ], Wav_wth / 4, Wav_hht, Wav_tkn ), 4, 1 )
+					}
+				end
+				return configs
+				--code line: Audio = _G.ke4.shape.from_audio( "test.wav", line.duration, line.start_time , 400, 220 )
+				--!maxloop( #Audio )!!retime( "preline", Audio[ j ].ini, Audio[ j ].fin )!{\an5\pos($x,$y)\bord0\shad0\p1}!Audio[ j ].shape!
+			end,
+			
 			bounding = function( shape )
 				-- Calculates shape bounding box
 				if type( shape ) ~= "string" then
@@ -15589,7 +15748,50 @@
 				return count_fl
 			end
 		},
-
+		
+		-- Image sublibrary
+		image = {
+			data = function( bmp_image )
+				local bmp_color, bmp_alpha = { }, { }
+				local bmp_image = bmp_image or "test.bmp"
+				local bmp_xdata = ke4.decode.create_bmp_reader( bmp_image ).data_packed( )
+				for i = 1, #bmp_xdata do
+					bmp_color[ i ] = ke4.color.val2ass( bmp_xdata[ i ].r, bmp_xdata[ i ].g, bmp_xdata[ i ].b )
+					bmp_alpha[ i ] = ke4.alpha.val2ass( 255 - bmp_xdata[ i ].a )
+				end
+				return bmp_color, bmp_alpha
+			end, --image.data( )
+			
+			to_pixels = function( bmp_image, Size, Return_pos )
+				local bmp_image = bmp_image or "test.bmp"
+				local Size = Size or 1
+				local bmp_color, bmp_alpha = ke4.image.data( bmp_image )
+				local bmp_wth = ke4.decode.create_bmp_reader( bmp_image ).width( )
+				local bmp_hht = ke4.decode.create_bmp_reader( bmp_image ).height( )
+				local pixels, pixel_pos = { }, { }
+				for i = 1, #bmp_color do
+					if bmp_alpha[ i ] ~= "&HFF&" then
+						pixels[ #pixels + 1 ] = {
+							x = ((i - 1) % bmp_wth + 1) * Size - bmp_wth * Size / 2 + Size / 2,
+							y = ceil( i / bmp_hht - 1 ) * Size - bmp_hht * Size / 2 + Size / 2,
+							a = bmp_alpha[ i ],
+							c = bmp_color[ i ]
+						}
+						pixel_pos[ #pixel_pos + 1 ] = {
+							x = ke4.math.round( ((i - 1) % bmp_wth + 1) * Size - bmp_wth * Size / 2 + Size / 2 ),
+							y = ke4.math.round( ceil( i / bmp_hht - 1 ) * Size - bmp_hht * Size / 2 + Size / 2 )
+						}
+					end
+				end
+				if Return_pos then
+					return pixel_pos, pixels
+				end
+				return pixels
+				--code once: pixels = _G.ke4.image.to_pixels( "auto.bmp" )
+				--!maxloop( #pixels )!{\an5\pos(!$x + pixels[ j ].x!,!$y + pixels[ j ].y!)\1c!pixels[ j ].c!\1a!pixels[ j ].a!\bord0\shad0\p1}m 0 0 l 0 1 l 1 1 l 1 0 
+			end,
+		},
+		
 		-- Decoder sublibrary
 		decode = {
 			create_bmp_reader = function( filename )
