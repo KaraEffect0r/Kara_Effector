@@ -1,6 +1,6 @@
-﻿	-----------------------------------------------------------------------------------------------------------------------------------------
-	--[[ ( c ) Copyright 2012 - 2019, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki	   All rights reserved / October 07th 2019 Colombia. ]]--
-	-----------------------------------------------------------------------------------------------------------------------------------------
+﻿	-------------------------------------------------------------------------------------------------------------------------------
+	--[[ ( c ) Copyright 2012 - 2020, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki					  April 04th 2020 Colombia ]]--
+	-------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.6 legacy
 	--> Contáctanos:
 	
@@ -11,30 +11,31 @@
 	--> http://www.youtube.com/user/victor8607
 	--> http://www.youtube.com/user/NatsuoKE
 	--> http://www.youtube.com/user/karalaura2012
-	-----------------------------------------------------------------------------------------------------------------------------------------
-	--[[ El proyecto Effector es un archivo lua que tiene la capacidad de implementar efectos prediseñados de Karaoke, Edición y de Líneas de
-	Traducción, también brinda la opción de poderlos modificar y crear nuevos Efectos, si así se desea. El Effector está dotado de una amplia
-	Librería que permite ejecutar los fx que tiene por Default y también crear nuevas y multiples combinaciones.
-	El uso del Effector es libre, si se desea se pueden colocar los respectivos créditos de su autor y/o colaboradores. La mayor parte de las
-	combinaciones de Efectos y Funciones son capaces de reproducir casi cualquier tipo de fx, además de poseer una amplia variedad de figuras
-	(Shapes) para los efectos que así lo requieran.
-	Deseamos que el Effector les sea de gran utilidad y sirva de punto de inicio para que cada uno pueda hacer libremente sus propios efectos
-	y lograr combinaciones que sean usadas cuando se necesiten. Recomendamos evitar cualquier forma de modificación en el código del Effector
-	o de su Librería, a menos que estén completamente seguros de lo que están haciendo ya que lo que más factible es que deje de funcionar de
-	manera correcta. Sin más, nos despedimos, esperando que este trabajo sea del agrado de todos ustedes. ^^'... ]]--
-	--=====================================================================================================================================--
+	-------------------------------------------------------------------------------------------------------------------------------
+	--[[ El proyecto Effector son una serie de archivos lua que tienen la capacidad de implementar efectos prediseñados de Karaoke,
+	Edición y de Líneas de Traducción, también brinda la opción de poderlos modificar y de crear nuevos Efectos desde ceros, si así
+	se desea. El Kara Effector está dotado de una amplia Librería que permite ejecutar los fx que tiene por Default y también crear
+	nuevas y multiples combinaciones.
+	El uso del Kara Effector es libre, si se desea pueden colocar los respectivos créditos en sus proyectos hechos, de su autor y/o
+	colaboradores.  La mayor parte de las combinaciones de Efectos y Funciones internas son capaces de realizar casi cualquier tipo
+	de fx, además de poseer una amplia variedad de figuras (Shapes) para los efectos que así lo requieran.
+	Deseamos que el Kara Effector les sea de gran utilidad y les sirva de punto de partida para que cada uno de ustedes pueda hacer
+	libremente sus propios efectos y lograr combinaciones que sean usadas cuando se necesiten.  Recomendamos evitar cualquier forma
+	de modificación en el código del Kara Effector o de alguna de sus Librerías,  a menos que estén completamente seguros de lo que
+	están haciendo, ya que lo que más factible es que deje de funcionar de manera correcta o que simplemente no lo haga. Y sin más,
+	nos despedimos, esperando que este trabajo sea del agrado de todos ustedes. ^^'... ]]--
+	--===========================================================================================================================--
 	include( "karaskel.lua" )
 	include( "Effector-utils-lib-3.6.lua" )
-	--=====================================================================================================================================--
+	--===========================================================================================================================--
 	script_name		   = "Kara Effector"
 	script_description = "Effects Automation Karaokes. Creating Effects with Modifiable Parameters"
 	script_author	   = "KaraLaura"
 	script_version	   = "3.6"
-	--=====================================================================================================================================--
+	--===========================================================================================================================--
 	Path_Effector_newfx_lua = nil
 	--Path_Effector_newfx_lua = "C:\\Users\\HP4\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
-	Path_Effector_newfx_lua = "C:\\Users\\victo\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
-	--=====================================================================================================================================--
+	--===========================================================================================================================--
 	leadin_fx, hilight_fx, leadout_fx = { }, { }, { }
 	shape_fx, transla_fx, function_fx = { }, { }, { }
 	leadin_fx_library, hilight_fx_library, leadout_fx_library = { }, { }, { }
@@ -63,9 +64,9 @@
 		[ 5 ] = transla_fx_library,
 		[ 6 ] = function_fx_library,
 	}
-	--=====================================================================================================================================--
+	--===========================================================================================================================--
 
-	count_save, randpf, count_pf = 1, math.pyf( ), 0
+	count_save, randpf, count_pf, table_random = 1, math.pyf( ), 0
 	function effector.do_fx( subs, meta, line, sett )
 		----------------------------
 		ratio, frame_dur = 1, 41.708
@@ -114,6 +115,7 @@
 		local txt_chars = line.text_stripped:gsub( "\\N", " " ):gsub( "  ", " " )
 		char, left, width, line.char = { }, l.left, 0, linefx[ ii ].char
 		char.i = 1
+		char.ii = 1
 		char.n = unicode.len( txt_chars )
 		if fx__.noblank then
 			txt_chars = txt_chars:gsub( " ", "" )
@@ -172,6 +174,10 @@
 		----------------------------------------------------------------------------------
 		text.color = format( "\\1c%s\\3c%s\\4c%s", text.color1, text.color3, text.color4 )
 		text.alpha = format( "\\1a%s\\3a%s\\4a%s", text.alpha1, text.alpha3, text.alpha4 )
+		if text.alpha1 == text.alpha3
+			and text.alpha1 == text.alpha4 then
+			text.alpha =  format( "\\alpha%s", text.alpha1 )
+		end --april 04th 2020
 		text.style = txt_c1 .. txt_c3 .. txt_c4 .. txt_a1 .. txt_a3 .. txt_a4
 		text.alpha0 = "\\alpha&HFF&"
 		shape.color = format( "\\1c%s\\3c%s\\4c%s", shape.color1, shape.color3, shape.color4 )
@@ -1042,10 +1048,20 @@
 										--variables de funciones paramétricas--
 										fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 										fun_x = fun_x1( fx__, meta, line, s )
-										fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										local point_xy --march 31st 2020
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+											fx.fun_x = point_xy.x * fx.scale_x
+										else
+											fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										end
 										fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 										fun_y = fun_y1( fx__, meta, line, s )
-										fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											fx.fun_y = point_xy.y * fx.scale_y
+										else
+											fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										end
 										--definir líneas de texto, verticales u horizontales--
 										fx.pos_x, fx.pos_y = effector.knj( fx__.v_kanji, fx__.reverfx )
 										fx.off_x, fx.off_y = effector.modify_pos( )
@@ -1101,6 +1117,27 @@
 										effector.pos_config( )
 										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										--------------------------------------------------
+										tags_style = text.style
+										-----------------------
+										fx.add_tags = ""
+										if fx__.t_type ~= "Template Line [Word]"
+											and fx__.t_type ~= "Template Line [Syl]"
+											and fx__.t_type ~= "Template Line [Char]" then
+											if fx__.language ~= "Automation Auto-4" then
+												addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+												addtag = addtag1( fx__, meta, line, x, y )
+												for k, v in pairs( addtag ) do
+													if type( addtag[ k ] ) == "table" then
+														addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+													end
+												end
+												fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+											else
+												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+											end
+											fx.add_tags = tag.dark( fx.add_tags )
+										end
+										-----------------------
 										returnfx = { [ 1 ] = fx__.returnfx }
 										if pcall( loadstring( format( "return function( fx__, meta, syl, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 											returnfx1 = loadstring( format( "return function( fx__, meta, syl, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -1120,13 +1157,17 @@
 											end
 											returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 											fx.Det = ""
-											tags_style = text.style
-											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-												fx.Det = "\\p1"
-												if returnfx[ 1 ]:match( "\\p%d" ) then
-													fx.Det = ""
+											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+												if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+													or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+													fx.Det = "" --february 01st 2020
+												else
+													fx.Det = "\\p1"
+													if returnfx[ 1 ]:match( "\\p%d" ) then
+														fx.Det = ""
+													end
+													tags_style = shape.style
 												end
-												tags_style = shape.style
 											end
 											if fx.Det == "\\p1"
 												or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -1137,23 +1178,9 @@
 													fx.tag_size = "\\fscx100\\fscy100"
 												end
 											end
-											if fx__.t_type ~= "Template Line [Word]"
-												and fx__.t_type ~= "Template Line [Syl]"
-												and fx__.t_type ~= "Template Line [Char]" then
-												if fx__.language ~= "Automation Auto-4" then
-													addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-													addtag = addtag1( fx__, meta, line, x, y )
-													for k, v in pairs( addtag ) do
-														if type( addtag[ k ] ) == "table" then
-															addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-														end
-													end
-													fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-												else
-													fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-												end
-												fx.add_tags = tag.dark( fx.add_tags )
-											else
+											if fx__.t_type == "Template Line [Word]"
+												or fx__.t_type == "Template Line [Syl]"
+												or fx__.t_type == "Template Line [Char]" then
 												returnfx[ 1 ] = tag.to_temp( tag.HTML_to_ass( fx__.addtag ) )
 												returnfx[ 1 ] = tag.dark( returnfx[ 1 ] )
 												fx.add_tags = ""
@@ -1430,10 +1457,20 @@
 											--variables de funciones paramétricas--
 											fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 											fun_x = fun_x1( fx__, meta, line, s )
-											fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+											local point_xy
+											if table.type( { fun_x[ 1 ] } ) == "shape" then
+												point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+												fx.fun_x = point_xy.x * fx.scale_x
+											else
+												fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+											end
 											fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 											fun_y = fun_y1( fx__, meta, line, s )
-											fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+											if table.type( { fun_x[ 1 ] } ) == "shape" then
+												fx.fun_y = point_xy.y * fx.scale_y
+											else
+												fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+											end
 											--definir líneas de texto, verticales u horizontales--
 											fx.pos_x, fx.pos_y = effector.knj( fx__.v_kanji, fx__.reverfx )
 											fx.off_x, fx.off_y = effector.modify_pos( )
@@ -1489,6 +1526,23 @@
 											effector.pos_config( )
 											fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 											--------------------------------------------------
+											tags_style = text.style
+											-----------------------
+											fx.add_tags = ""
+											if fx__.language ~= "Automation Auto-4" then
+												addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+												addtag = addtag1( fx__, meta, line, x, y )
+												for k, v in pairs( addtag ) do
+													if type( addtag[ k ] ) == "table" then
+														addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+													end
+												end
+												fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+											else
+												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+											end
+											fx.add_tags = tag.dark( fx.add_tags )
+											-----------------------
 											returnfx = { [ 1 ] = fx__.returnfx }
 											if pcall( loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 												returnfx1 = loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -1511,13 +1565,17 @@
 												end
 												returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 												fx.Det = ""
-												tags_style = text.style
-												if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-													fx.Det = "\\p1"
-													if returnfx[ 1 ]:match( "\\p%d" ) then
-														fx.Det = ""
+												if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+													if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+														or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+														fx.Det = "" --february 01st 2020
+													else
+														fx.Det = "\\p1"
+														if returnfx[ 1 ]:match( "\\p%d" ) then
+															fx.Det = ""
+														end
+														tags_style = shape.style
 													end
-													tags_style = shape.style
 												end
 												if fx.Det == "\\p1"
 													or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -1528,19 +1586,6 @@
 														fx.tag_size = "\\fscx100\\fscy100"
 													end
 												end
-												if fx__.language ~= "Automation Auto-4" then
-													addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-													addtag = addtag1( fx__, meta, line, x, y )
-													for k, v in pairs( addtag ) do
-														if type( addtag[ k ] ) == "table" then
-															addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-														end
-													end
-													fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-												else
-													fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-												end
-												fx.add_tags = tag.dark( fx.add_tags )
 												if char.text ~= noblank1
 													and char.text ~= noblank2 then
 													if fxgroup == true
@@ -1770,10 +1815,20 @@
 										--variables de funciones paramétricas--
 										fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 										fun_x = fun_x1( fx__, meta, line, s )
-										fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										local point_xy
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+											fx.fun_x = point_xy.x * fx.scale_x
+										else
+											fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										end
 										fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 										fun_y = fun_y1( fx__, meta, line, s )
-										fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											fx.fun_y = point_xy.y * fx.scale_y
+										else
+											fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										end
 										--definir posición inicial--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
@@ -1831,6 +1886,23 @@
 										effector.pos_config( )
 										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										--------------------------------------------------
+										tags_style = text.style
+										-----------------------
+										fx.add_tags = ""
+										if fx__.language ~= "Automation Auto-4" then
+											addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+											addtag = addtag1( fx__, meta, line, x, y )
+											for k, v in pairs( addtag ) do
+												if type( addtag[ k ] ) == "table" then
+													addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+												end
+											end
+											fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+										else
+											fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+										end
+										fx.add_tags = tag.dark( fx.add_tags )
+										-----------------------
 										returnfx = { [ 1 ] = fx__.returnfx }
 										if pcall( loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 											returnfx1 = loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -1849,13 +1921,17 @@
 											end
 											returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 											fx.Det = ""
-											tags_style = text.style
-											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-												fx.Det = "\\p1"
-												if returnfx[ 1 ]:match( "\\p%d" ) then
-													fx.Det = ""
+											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+												if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+													or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+													fx.Det = "" --february 01st 2020
+												else
+													fx.Det = "\\p1"
+													if returnfx[ 1 ]:match( "\\p%d" ) then
+														fx.Det = ""
+													end
+													tags_style = shape.style
 												end
-												tags_style = shape.style
 											end
 											if fx.Det == "\\p1"
 												or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -1866,19 +1942,6 @@
 													fx.tag_size = "\\fscx100\\fscy100"
 												end
 											end
-											if fx__.language ~= "Automation Auto-4" then
-												addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-												addtag = addtag1( fx__, meta, line, x, y )
-												for k, v in pairs( addtag ) do
-													if type( addtag[ k ] ) == "table" then
-														addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-													end
-												end
-												fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-											else
-												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-											end
-											fx.add_tags = tag.dark( fx.add_tags )
 											if fxgroup == true
 												and returnfx[ 1 ]:gsub( "%b{}", "" ) ~= ""
 												and returnfx[ 1 ]:gsub( "%b{}", "" ) ~= " " then
@@ -2137,10 +2200,20 @@
 									--variables de funciones paramétricas--
 									fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 									fun_x = fun_x1( fx__, meta, line, s )
-									fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+									local point_xy
+									if table.type( { fun_x[ 1 ] } ) == "shape" then
+										point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+										fx.fun_x = point_xy.x * fx.scale_x
+									else
+										fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+									end
 									fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 									fun_y = fun_y1( fx__, meta, line, s )
-									fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+									if table.type( { fun_x[ 1 ] } ) == "shape" then
+										fx.fun_y = point_xy.y * fx.scale_y
+									else
+										fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+									end
 									--definir las posiciones iniciales--
 									fx.pos_x = fx.center_x
 									fx.pos_y = fx.center_y
@@ -2197,6 +2270,23 @@
 									effector.pos_config( )
 									fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 									--------------------------------------------------
+									tags_style = text.style
+									-----------------------
+									fx.add_tags = ""
+									if fx__.language ~= "Automation Auto-4" then
+										addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+										addtag = addtag1( fx__, meta, line, x, y )
+										for k, v in pairs( addtag ) do
+											if type( addtag[ k ] ) == "table" then
+												addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+											end
+										end
+										fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+									else
+										fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+									end
+									fx.add_tags = tag.dark( fx.add_tags )
+									-----------------------
 									returnfx = { [ 1 ] = fx__.returnfx }
 									if pcall( loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 										returnfx1 = loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -2215,13 +2305,17 @@
 										end
 										returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 										fx.Det = ""
-										tags_style = text.style
-										if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-											fx.Det = "\\p1"
-											if returnfx[ 1 ]:match( "\\p%d" ) then
-												fx.Det = ""
+										if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+											if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+												or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+												fx.Det = "" --february 01st 2020
+											else
+												fx.Det = "\\p1"
+												if returnfx[ 1 ]:match( "\\p%d" ) then
+													fx.Det = ""
+												end
+												tags_style = shape.style
 											end
-											tags_style = shape.style
 										end
 										if fx.Det == "\\p1"
 											or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -2232,19 +2326,6 @@
 												fx.tag_size = "\\fscx100\\fscy100"
 											end
 										end
-										if fx__.language ~= "Automation Auto-4" then
-											addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-											addtag = addtag1( fx__, meta, line, x, y )
-											for k, v in pairs( addtag ) do
-												if type( addtag[ k ] ) == "table" then
-													addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-												end
-											end
-											fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-										else
-											fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-										end
-										fx.add_tags = tag.dark( fx.add_tags )
 										if fxgroup == true
 											and returnfx[ 1 ]:gsub( "%b{}", "" ) ~= ""
 											and returnfx[ 1 ]:gsub( "%b{}", "" ) ~= " " then
@@ -2463,10 +2544,20 @@
 										--variables de funciones paramétricas--
 										fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 										fun_x = fun_x1( fx__, meta, line, s )
-										fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										local point_xy
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+											fx.fun_x = point_xy.x * fx.scale_x
+										else
+											fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										end
 										fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 										fun_y = fun_y1( fx__, meta, line, s )
-										fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											fx.fun_y = point_xy.y * fx.scale_y
+										else
+											fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										end
 										--definir las posiciones iniciales--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
@@ -2523,6 +2614,23 @@
 										effector.pos_config( )
 										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										--------------------------------------------------
+										tags_style = text.style
+										-----------------------
+										fx.add_tags = ""
+										if fx__.language ~= "Automation Auto-4" then
+											addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+											addtag = addtag1( fx__, meta, line, x, y )
+											for k, v in pairs( addtag ) do
+												if type( addtag[ k ] ) == "table" then
+													addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+												end
+											end
+											fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+										else
+											fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+										end
+										fx.add_tags = tag.dark( fx.add_tags )
+										-----------------------
 										returnfx = { [ 1 ] = fx__.returnfx }
 										if pcall( loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 											returnfx1 = loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -2541,13 +2649,17 @@
 											end
 											returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 											fx.Det = ""
-											tags_style = text.style
-											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-												fx.Det = "\\p1"
-												if returnfx[ 1 ]:match( "\\p%d" ) then
-													fx.Det = ""
+											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+												if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+													or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+													fx.Det = "" --february 01st 2020
+												else
+													fx.Det = "\\p1"
+													if returnfx[ 1 ]:match( "\\p%d" ) then
+														fx.Det = ""
+													end
+													tags_style = shape.style
 												end
-												tags_style = shape.style
 											end
 											if fx.Det == "\\p1"
 												or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -2558,19 +2670,6 @@
 													fx.tag_size = "\\fscx100\\fscy100"
 												end
 											end
-											if fx__.language ~= "Automation Auto-4" then
-												addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-												addtag = addtag1( fx__, meta, line, x, y )
-												for k, v in pairs( addtag ) do
-													if type( addtag[ k ] ) == "table" then
-														addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-													end
-												end
-												fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-											else
-												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-											end
-											fx.add_tags = tag.dark( fx.add_tags )
 											if fxgroup == true
 												and returnfx[ 1 ]:gsub( "%b{}", "" ) ~= ""
 												and returnfx[ 1 ]:gsub( "%b{}", "" ) ~= " " then
@@ -2804,10 +2903,20 @@
 										--variables de funciones paramétricas--
 										fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 										fun_x = fun_x1( fx__, meta, line, s )
-										fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										local point_xy
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+											fx.fun_x = point_xy.x * fx.scale_x
+										else
+											fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										end
 										fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 										fun_y = fun_y1( fx__, meta, line, s )
-										fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											fx.fun_y = point_xy.y * fx.scale_y
+										else
+											fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										end
 										--definir las posiciones iniciales--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
@@ -2864,6 +2973,23 @@
 										effector.pos_config( )
 										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										--------------------------------------------------
+										tags_style = text.style
+										-----------------------
+										fx.add_tags = ""
+										if fx__.language ~= "Automation Auto-4" then
+											addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+											addtag = addtag1( fx__, meta, line, x, y )
+											for k, v in pairs( addtag ) do
+												if type( addtag[ k ] ) == "table" then
+													addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+												end
+											end
+											fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+										else
+											fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+										end
+										fx.add_tags = tag.dark( fx.add_tags )
+										-----------------------
 										returnfx = { [ 1 ] = fx__.returnfx }
 										if pcall( loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 											returnfx1 = loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -2886,13 +3012,17 @@
 											end
 											returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 											fx.Det = ""
-											tags_style = text.style
-											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-												fx.Det = "\\p1"
-												if returnfx[ 1 ]:match( "\\p%d" ) then
-													fx.Det = ""
+											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+												if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+													or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+													fx.Det = "" --february 01st 2020
+												else
+													fx.Det = "\\p1"
+													if returnfx[ 1 ]:match( "\\p%d" ) then
+														fx.Det = ""
+													end
+													tags_style = shape.style
 												end
-												tags_style = shape.style
 											end
 											if fx.Det == "\\p1"
 												or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -2903,19 +3033,6 @@
 													fx.tag_size = "\\fscx100\\fscy100"
 												end
 											end
-											if fx__.language ~= "Automation Auto-4" then
-												addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-												addtag = addtag1( fx__, meta, line, x, y )
-												for k, v in pairs( addtag ) do
-													if type( addtag[ k ] ) == "table" then
-														addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-													end
-												end
-												fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-											else
-												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-											end
-											fx.add_tags = tag.dark( fx.add_tags )
 											if char.text ~= noblank1
 												and char.text ~= noblank2 then
 												if fxgroup == true
@@ -3153,10 +3270,20 @@
 										--variables de funciones paramétricas--
 										fun_x1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_x ) ) )( )
 										fun_x = fun_x1( fx__, meta, line, s )
-										fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										local point_xy
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											point_xy = shape.parametric( fun_x[ 1 ], s_i[ 1 ] )
+											fx.fun_x = point_xy.x * fx.scale_x
+										else
+											fx.fun_x = (fun_x[ 1 ] or 0) * fx.scale_x
+										end
 										fun_y1 = loadstring( format( "return function( fx__, meta, line, s ) return { %s } end", tag.tonumber( fx__.fun_y ) ) )( )
 										fun_y = fun_y1( fx__, meta, line, s )
-										fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										if table.type( { fun_x[ 1 ] } ) == "shape" then
+											fx.fun_y = point_xy.y * fx.scale_y
+										else
+											fx.fun_y = (fun_y[ 1 ] or 0) * fx.scale_y
+										end
 										--definir las posiciones iniciales--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
@@ -3213,6 +3340,23 @@
 										effector.pos_config( )
 										fx.pos = effector.pos( Nmove, tb_pos, tags_times )
 										--------------------------------------------------
+										tags_style = text.style
+										-----------------------
+										fx.add_tags = ""
+										if fx__.language ~= "Automation Auto-4" then
+											addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
+											addtag = addtag1( fx__, meta, line, x, y )
+											for k, v in pairs( addtag ) do
+												if type( addtag[ k ] ) == "table" then
+													addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
+												end
+											end
+											fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
+										else
+											fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
+										end
+										fx.add_tags = tag.dark( fx.add_tags )
+										-----------------------
 										returnfx = { [ 1 ] = fx__.returnfx }
 										if pcall( loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) ) ) == true then
 											returnfx1 = loadstring( format( "return function( fx__, meta, line ) return { %s } end", tag.HTML_to_ass( fx__.returnfx ) ) )( )
@@ -3235,13 +3379,17 @@
 											end
 											returnfx[ 1 ] = tag.dark( tostring( returnfx[ 1 ] ) )
 											fx.Det = ""
-											tags_style = text.style
-											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m %-?%d+[%.%d+]* %-?%d+[%.%d+]*" ) then
-												fx.Det = "\\p1"
-												if returnfx[ 1 ]:match( "\\p%d" ) then
-													fx.Det = ""
+											if returnfx[ 1 ]:gsub( "%b{}", "" ):match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+												if returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 0 100 "
+													or returnfx[ 1 ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == "m 0 0 m 100 100 " then
+													fx.Det = "" --february 01st 2020
+												else
+													fx.Det = "\\p1"
+													if returnfx[ 1 ]:match( "\\p%d" ) then
+														fx.Det = ""
+													end
+													tags_style = shape.style
 												end
-												tags_style = shape.style
 											end
 											if fx.Det == "\\p1"
 												or returnfx[ 1 ]:match( "\\p%d" ) then
@@ -3252,19 +3400,6 @@
 													fx.tag_size = "\\fscx100\\fscy100"
 												end
 											end
-											if fx__.language ~= "Automation Auto-4" then
-												addtag1 = loadstring( format( "return function( fx__, meta, line, x, y ) return { %s } end", tag.HTML_to_ass( fx__.addtag ) ) )( )
-												addtag = addtag1( fx__, meta, line, x, y )
-												for k, v in pairs( addtag ) do
-													if type( addtag[ k ] ) == "table" then
-														addtag[ k ] = table.view( addtag[ k ], format( "Add_Tags_%s_table", k ) )
-													end
-												end
-												fx.add_tags = tag.do_tag( table.op( addtag, "concat" ) )
-											else
-												fx.add_tags = tag.to_Auto4( tag.HTML_to_ass( fx__.addtag ) )
-											end
-											fx.add_tags = tag.dark( fx.add_tags )
 											if char.text ~= noblank1
 												and char.text ~= noblank2 then
 												if fxgroup == true
@@ -3303,6 +3438,7 @@
 								end
 								left = left + width
 								char.i = char.i + ci
+								char.ii = char.ii + 1
 							end
 						end
 					end
@@ -3317,6 +3453,7 @@
 		random_mode = nil
 		retime_mode = nil
 		addtags_mode = nil
+		oscill_random = nil
 		oscill_default = nil
 		------------------------
 	end
@@ -5554,16 +5691,16 @@
 	Keane_You_Do_Not_See_Me = effector.create_fx( "LOfx", "Keane_You_Do_Not_See_Me", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50lo + 2f + 300", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "2", "", "syl.text", "tag.only( syl.i % 2 == 1, tag.only( j == 1, \"\\\\an4\\\\pos(fx.move_l1, fx.move_y1)\\\\1c&H0000FF&\\\\fscx0\\\\te(80,420,0.8,\\\\fscxr1)\", \"\\\\an6\\\\pos(fx.move_r1, fx.move_y1)\\\\te(80,420,0.8,\\\\fscx0)\" ), tag.only( j == 1, \"\\\\an6\\\\pos(fx.move_r1, fx.move_y1)\\\\1c&H0000FF&\\\\fscx0\\\\te(80,420,0.8,\\\\fscxr1)\", \"\\\\an4\\\\pos(fx.move_l1, fx.move_y1)\\\\te(80,420,0.8,\\\\fscx0)\" ) ), \"\\\\fad(0,160)\"", "", "Lua", false, false )
 	Keane_You_Have_Not_Told_Me_Anything = effector.create_fx( "LOfx", "Keane_You_Have_Not_Told_Me_Anything", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50lo + 2f + 300", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "2", "", "syl.text", "tag.only( syl.i % 2 == 1, tag.only( j == 1, \"\\\\an8\\\\move(fx.move_x1, fx.move_t1 + l.descent, fx.move_x1, fx.move_t1, fx.dur - 420, fx.dur - 80)\\\\1c&H0000FF&\\\\fscy0\\\\te(80,420,0.8,\\\\fscyr1)\", \"\\\\an2\\\\move(fx.move_x1, fx.move_b1, fx.move_x1, fx.move_b1 - l.descent, fx.dur - 420, fx.dur - 80)\\\\te(80,420,0.8,\\\\fscy0)\" ), tag.only( j == 1, \"\\\\an2\\\\move(fx.move_x1, fx.move_b1 - l.descent, fx.move_x1, fx.move_b1, fx.dur - 420, fx.dur - 80)\\\\1c&H0000FF&\\\\fscy0\\\\te(80,420,0.8,\\\\fscyr1)\", \"\\\\an8\\\\move(fx.move_x1, fx.move_t1, fx.move_x1, fx.move_t1 + l.descent, fx.dur - 420, fx.dur - 80)\\\\te(80,420,0.8,\\\\fscy0)\" ) ), \"\\\\fad(0,160)\"", "", "Lua", false, false )
 	Keane_Bonus_Track = effector.create_fx( "LOfx", "Keane_Bonus_Track", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50lo + 2f + 300", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "2", "", "syl.text", "tag.only2( { syl.i % 4 == 1, syl.i % 4 == 2, syl.i % 4 == 3, syl.i % 4 == 0 }, tag.only( j == 1, \"\\\\an4\\\\pos(fx.move_l1, fx.move_y1)\\\\1c&H0000FF&\\\\fscx0\\\\te(80,420,0.8,\\\\fscxr1)\", \"\\\\an6\\\\pos(fx.move_r1, fx.move_y1)\\\\te(80,420,0.8,\\\\fscx0)\" ), tag.only( j == 1, \"\\\\an2\\\\move(fx.move_x1, fx.move_b1 - l.descent, fx.move_x1, fx.move_b1, fx.dur - 420, fx.dur - 80)\\\\1c&H0000FF&\\\\fscy0\\\\te(80,420,0.8,\\\\fscyr1)\", \"\\\\an8\\\\move(fx.move_x1, fx.move_t1, fx.move_x1, fx.move_t1 + l.descent, fx.dur - 420, fx.dur - 80)\\\\te(80,420,0.8,\\\\fscy0)\" ), tag.only( j == 1, \"\\\\an6\\\\pos(fx.move_r1, fx.move_y1)\\\\1c&H0000FF&\\\\fscx0\\\\te(80,420,0.8,\\\\fscxr1)\", \"\\\\an4\\\\pos(fx.move_l1, fx.move_y1)\\\\te(80,420,0.8,\\\\fscx0)\" ), tag.only( j == 1, \"\\\\an8\\\\move(fx.move_x1, fx.move_t1 + l.descent, fx.move_x1, fx.move_t1, fx.dur - 420, fx.dur - 80)\\\\1c&H0000FF&\\\\fscy0\\\\te(80,420,0.8,\\\\fscyr1)\", \"\\\\an2\\\\move(fx.move_x1, fx.move_b1, fx.move_x1, fx.move_b1 - l.descent, fx.dur - 420, fx.dur - 80)\\\\te(80,420,0.8,\\\\fscy0)\" ) ), \"\\\\fad(0,160)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1 = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 8f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_leadout = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_leadout", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50lo + 8f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_buttline = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_buttline", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50mid2 + 17f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_inverse = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_inverse", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time - 50lo + 14f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_midline = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_midline", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50mid1 + 16f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
 	Made_In_Abyss_ED_1 = effector.create_fx( "LOfx", "Made_In_Abyss_ED_1", "Char", false, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.start_time + t_final", "l.end_time + 20lo + 2f", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\blur1.2\\\\fad(0,120)\"", "t_final = (syl.dur > 16f ) and syl.dur or 16f", "Lua", false, false )
 	Made_in_Abyss_ED_1_Funny = effector.create_fx( "LOfx", "Made_in_Abyss_ED_1_Funny", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 25lo + 12f", "", "", "", "", "char.center", "char.middle", "", "", "2", "0", "fx.pos_x", "fx.pos_b, fx.pos_b + 4r", "fx.dur - 14f, fx.dur - 10f", "1", "", "char.text", "\"\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"", "", "Lua", false, false )
 	Made_in_Abyss_ED_1_Funny_buttline = effector.create_fx( "LOfx", "Made_in_Abyss_ED_1_Funny_buttline", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 25mid2 + 20f", "", "", "", "", "char.center", "char.middle", "", "", "2", "0", "fx.pos_x", "fx.pos_b, fx.pos_b + 4r", "fx.dur - 14f, fx.dur - 10f", "1", "", "char.text", "\"\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"", "", "Lua", false, false )
 	Made_in_Abyss_ED_1_Funny_inverse = effector.create_fx( "LOfx", "Made_in_Abyss_ED_1_Funny_inverse", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time - 25lo + 19f", "", "", "", "", "char.center", "char.middle", "", "", "2", "0", "fx.pos_x", "fx.pos_b, fx.pos_b + 4r", "fx.dur - 14f, fx.dur - 10f", "1", "", "char.text", "\"\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"", "", "Lua", false, false )
 	Made_in_Abyss_ED_1_Funny_midline = effector.create_fx( "LOfx", "Made_in_Abyss_ED_1_Funny_midline", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 25mid1 + 20f", "", "", "", "", "char.center", "char.middle", "", "", "2", "0", "fx.pos_x", "fx.pos_b, fx.pos_b + 4r", "fx.dur - 14f, fx.dur - 10f", "1", "", "char.text", "\"\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1 = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 8f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_leadout = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_leadout", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50lo + 8f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_buttline = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_buttline", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50mid2 + 17f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_inverse = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_inverse", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time - 50lo + 14f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_midline = effector.create_fx( "LOfx", "Made_In_Abyss_OP_1_midline", "Syl", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 50mid1 + 16f", "", "", "", "", "syl.center", "syl.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "syl.text", "\"\\\\clip(fx.pos_l,fx.pos_t,fx.pos_r,fx.pos_b)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
 	Meave_Light_I = effector.create_fx( "LOfx", "Meave_Light_I", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 25lo + 2f", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\te(120,200,\\\\13c&HFFFFFF&\\\\bord6r\\\\shad0:0\\\\blur3)\\\\fad(0,150)\"", "", "Lua", false, false )
 	Meave_Light_I_buttline = effector.create_fx( "LOfx", "Meave_Light_I_buttline", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time + 25mid2 + 10f", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\te(120,200,\\\\13c&HFFFFFF&\\\\bord6r\\\\shad0:0\\\\blur3)\\\\fad(0,150)\"", "", "Lua", false, false )
 	Meave_Light_I_inverse = effector.create_fx( "LOfx", "Meave_Light_I_inverse", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + syl.end_time", "l.end_time - 25lo + 9f", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\te(120,200,\\\\13c&HFFFFFF&\\\\bord6r\\\\shad0:0\\\\blur3)\\\\fad(0,150)\"", "", "Lua", false, false )
@@ -6888,11 +7025,6 @@
 	Line_Title_001_X_RB_RT = effector.create_fx( "TLfx", "Line_Title_001_X_RB_RT", "Translation Line", true, false, "#09BBB9", "#848484", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "Title_Text( )", "", "Title_Text = function( )\n	local Dx = 150r\n	local delay1 = 800\n	local move_x, move_y = { left = -1, right = 1 }, { top = -1, bottom = 1 }\n	local sx, sy = move_x.right, (line.i % 2 == 1) and move_y.bottom or move_y.top\n	maxloop( 5 )\n	if j == 1 then\n		retime( \"preline\", 0, l.dur - delay1 )\n		return format( \"{\\\\an%s\\\\move(%s,%s,%s,%s,0,%s)\\\\bs0\\\\fscx0\\\\fscy( l.height )\\\\1cSC1\\\\t(0,%s,0.9,\\\\fscx( l.width + 60r ))\\\\t(1000,1500,0.8,\\\\fscy3.6r\\\\1c%s)\\\\p1}m 0 0 l 0 100 l 100 100 l 100 0 \",\n			2 + sx + ((sy == 1) and 0 or 6), fx.pos_x + sx * (0.5 * l.width + 30r + Dx), fx.pos_y + sy * 0.5 * l.height,\n			fx.pos_x + sx * (0.5 * l.width + 30r), fx.pos_y + sy * 0.5 * l.height, delay1, delay1, color.interpolate( shape.color1, \"&H000000&\", 0.3 )\n		)\n	elseif j == 2 then\n		retime( \"preline\", 0, l.dur - delay1 )\n		return format( \"{\\\\an5\\\\move(%s,%s,%s,%s,0,%s)\\\\bs0\\\\1c&H000000&\\\\clip(%s,%s,%s,%s)\\\\t(0,%s,0.92,\\\\clip(%s,%s,%s,%s))\\\\t(1500,2000,\\\\alpha&HFF&)}%s\",\n			fx.pos_x - sx * Dx, fx.pos_y, fx.pos_x, fx.pos_y, delay1,\n			fx.pos_x + sx * (0.5 * l.width + 30r + Dx), fx.pos_t, fx.pos_x + sx * (0.5 * l.width + 30r + Dx), fx.pos_b, delay1,\n			fx.pos_x + sx * (0.5 * l.width + 30r + Dx), fx.pos_t, fx.pos_x - sx * (0.5 * l.width + 30r), fx.pos_b, line.text_stripped\n		)\n	elseif j == 3 then\n		retime( \"preline\", 0, l.dur - delay1 )\n		return format( \"{\\\\an5\\\\clip(%s,%s,%s,%s)\\\\t(1000,1500,0.8,\\\\clip(%s,%s,%s,%s))}%s\",\n			fx.pos_x + sx * (0.5 * l.width + 30r + Dx), fx.pos_y - sy * 0.5 * l.height, fx.pos_x - sx * (0.5 * l.width + 30r), fx.pos_y - sy * 0.5 * l.height,\n			fx.pos_x + sx * (0.5 * l.width + 30r + Dx), fx.pos_y - sy * 0.5 * l.height, fx.pos_x - sx * (0.5 * l.width + 30r), fx.pos_y + sy * 0.5 * l.height, line.text_stripped\n		)\n	elseif j == 4 then\n		retime( \"preline\", l.dur - delay1, l.dur )\n		return format( \"{\\\\an5\\\\move(%s,%s,%s,%s,0,500)\\\\clip(%s,%s,%s,%s)}%s\",\n			fx.pos_x, fx.pos_y, fx.pos_x, fx.pos_y + sy * l.height,\n			fx.pos_l - 30r, fx.pos_t, fx.pos_r + 30r, fx.pos_b, line.text_stripped\n		)\n	end\n	retime( \"preline\", l.dur - delay1, l.dur )\n	return format( \"{\\\\an%s\\\\pos(%s,%s)\\\\bs0\\\\fscx( l.width + 60r )\\\\fscy3.6r\\\\1c%s\\\\t(500,%s,\\\\fscx0)\\\\p1}m 0 0 l 0 100 l 100 100 l 100 0\",\n		5 - sy * 3, fx.pos_x, fx.pos_y + sy * 0.5 * l.height, color.interpolate( shape.color1, \"&H000000&\", 0.3 ), delay1\n	)\nend", "Lua", false, false )
 	Line_Title_002_I_RB = effector.create_fx( "TLfx", "Line_Title_002_I_RB", "Translation Line", true, false, "#FFC1D4", "#88B199", "#A07625", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "5", "", "Mark_title( )", "", "Mark_title = function( )\n	local sign_x, sign_y = { -1, 1, 1, -1 }, { -1, -1, 1, 1 }\n	local aligns, diment = { 7, 9, 3, 1 }, { x = l.width + 64r, y = l.height + 5r }\n	local sizexy = { { diment.x, 4r }, { 4r, diment.y } }\n	local length = { 0, diment.x, diment.y, diment.x, diment.y }\n	local Ratio = 0.28\n	maxloop( 7 )\n	if j < 5 then\n		relayer( 1 )\n		retime( \"line\", table.op( length, \"suma\", j ) * Ratio - 200 * Ratio, 0 )\n		return format( \"{\\\\an%s\\\\move(%s,%s,%s,%s,%s,%s)\\\\bs0\\\\fscx%s\\\\fscy%s\\\\t(0,%s,\\\\fsc%s)\\\\t(%s,%s,\\\\fsc%s)}%s\",\n			aligns[ j ], fx.pos_x + 0.5 * sign_x[ j ] * diment.x, fx.pos_y + 0.5 * sign_y[ j ] * diment.y,\n			(j % 2 == 1) and fx.pos_x - 0.5 * sign_x[ j ] * diment.x or fx.pos_x + 0.5 * sign_x[ j ] * diment.x,\n			(j % 2 == 1) and fx.pos_y + 0.5 * sign_y[ j ] * diment.y or fx.pos_y - 0.5 * sign_y[ j ] * diment.y,\n			table.op( length, \"suma\", 5 ) * Ratio, table.op( length, \"suma\", 5 ) * Ratio + ((j % 2 == 1) and diment.x or diment.y) * Ratio,\n			(j % 2 == 1) and 0 or sizexy[ (j - 1) % 2 + 1 ][ 1 ], (j % 2 ~= 1) and 0 or sizexy[ (j - 1) % 2 + 1 ][ 2 ],\n			((j % 2 == 1) and diment.x or diment.y) * Ratio, ((j % 2 == 1) and \"x\" or \"y\") .. sizexy[ (j - 1) % 2 + 1 ][ (j - 1) % 2 + 1 ],\n			table.op( length, \"suma\", 5 ) * Ratio, table.op( length, \"suma\", 5 ) * Ratio + ((j % 2 == 1) and diment.x or diment.y) * Ratio,\n			((j % 2 == 1) and \"x\" or \"y\") .. 0, shape.rectangle\n		)\n	elseif j == 5 then\n		relayer( 0 )\n		retime( \"line\", -200, 0 )\n		return format( \"{\\\\an3\\\\move(%s,%s,%s,%s,%s,%s)\\\\1cSC3\\\\bs0\\\\fscx0\\\\fscy%s\\\\t(0,%s,\\\\fscx%s)\\\\t(%s,%s,\\\\fscx0)}%s{\\\\fscx0\\\\t(%s,%s,\\\\fscx%s)\\\\t(%s,%s,\\\\fscy4r)\\\\1cSC4}%s\",\n			fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.dur - diment.x * Ratio, fx.dur,\n			diment.y, 2 * diment.x * Ratio, diment.x, 2 * diment.x * Ratio, 4 * diment.x * Ratio, shape.rectangle,\n			2 * diment.x * Ratio, 4 * diment.x * Ratio, diment.x, 5 * diment.x * Ratio, 6 * diment.x * Ratio, shape.rectangle\n		)\n	end\n	relayer( 1 )\n	retime( \"line\", -200, 0 )\n	if j == 6 then\n		return format( \"{\\\\clip(%s,%s,%s,%s)\\\\bs0\\\\1c&H000000&\\\\t(0,%s,\\\\clip(%s,%s,%s,%s))\\\\t(%s,%s,\\\\clip(%s,%s,%s,%s))}%s\",\n			fx.pos_x + 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, 2 * diment.x * Ratio,\n			fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, 2 * diment.x * Ratio, 4 * diment.x * Ratio,\n			fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x - 0.5 * diment.x, fx.pos_y + 0.5 * diment.y,\n			line.text_stripped\n		)\n	end\n	return format( \"{\\\\clip(%s,%s,%s,%s)\\\\t(%s,%s,\\\\clip(%s,%s,%s,%s))\\\\t(%s,%s,\\\\clip(%s,%s,%s,%s))}%s\",\n		fx.pos_x + 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, 2 * diment.x * Ratio, 4 * diment.x * Ratio,\n		fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, fx.dur - diment.x * Ratio, fx.dur,\n		fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, line.text_stripped\n	)\nend", "Lua", false, false )
 	Line_Title_002_I_LB = effector.create_fx( "TLfx", "Line_Title_002_I_LB", "Translation Line", true, false, "#FFC1D4", "#88B199", "#A07625", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "5", "", "Mark_title( )", "", "Mark_title = function( )\n	local sign_x, sign_y = { -1, 1, 1, -1 }, { -1, -1, 1, 1 }\n	local aligns, diment = { 7, 9, 3, 1 }, { x = l.width + 64r, y = l.height + 5r }\n	local sizexy = { { diment.x, 4r }, { 4r, diment.y } }\n	local length = { 0, diment.x, diment.y, diment.x, diment.y }\n	local Ratio = 0.28\n	maxloop( 7 )\n	if j < 5 then\n		relayer( 1 )\n		retime( \"line\", table.op( length, \"suma\", j ) * Ratio - 200 * Ratio, 0 )\n		return format( \"{\\\\an%s\\\\move(%s,%s,%s,%s,%s,%s)\\\\bs0\\\\fscx%s\\\\fscy%s\\\\t(0,%s,\\\\fsc%s)\\\\t(%s,%s,\\\\fsc%s)}%s\",\n			aligns[ j ], fx.pos_x + 0.5 * sign_x[ j ] * diment.x, fx.pos_y + 0.5 * sign_y[ j ] * diment.y,\n			(j % 2 == 1) and fx.pos_x - 0.5 * sign_x[ j ] * diment.x or fx.pos_x + 0.5 * sign_x[ j ] * diment.x,\n			(j % 2 == 1) and fx.pos_y + 0.5 * sign_y[ j ] * diment.y or fx.pos_y - 0.5 * sign_y[ j ] * diment.y,\n			table.op( length, \"suma\", 5 ) * Ratio, table.op( length, \"suma\", 5 ) * Ratio + ((j % 2 == 1) and diment.x or diment.y) * Ratio,\n			(j % 2 == 1) and 0 or sizexy[ (j - 1) % 2 + 1 ][ 1 ], (j % 2 ~= 1) and 0 or sizexy[ (j - 1) % 2 + 1 ][ 2 ],\n			((j % 2 == 1) and diment.x or diment.y) * Ratio, ((j % 2 == 1) and \"x\" or \"y\") .. sizexy[ (j - 1) % 2 + 1 ][ (j - 1) % 2 + 1 ],\n			table.op( length, \"suma\", 5 ) * Ratio, table.op( length, \"suma\", 5 ) * Ratio + ((j % 2 == 1) and diment.x or diment.y) * Ratio,\n			((j % 2 == 1) and \"x\" or \"y\") .. 0, shape.rectangle\n		)\n	elseif j == 5 then\n		relayer( 0 )\n		retime( \"line\", -200, 0 )\n		return format( \"{\\\\an1\\\\move(%s,%s,%s,%s,%s,%s)\\\\1cSC3\\\\bs0\\\\fscx0\\\\fscy%s\\\\t(0,%s,\\\\fscx%s)\\\\t(%s,%s,\\\\fscx0)}%s{\\\\fscx0\\\\t(%s,%s,\\\\fscx%s)\\\\t(%s,%s,\\\\fscy4r)\\\\1cSC4}%s\",\n			fx.pos_x - 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.dur - diment.x * Ratio, fx.dur,\n			diment.y, 2 * diment.x * Ratio, diment.x, 2 * diment.x * Ratio, 4 * diment.x * Ratio, shape.rectangle,\n			2 * diment.x * Ratio, 4 * diment.x * Ratio, diment.x, 5 * diment.x * Ratio, 6 * diment.x * Ratio, shape.rectangle\n		)\n	end\n	relayer( 1 )\n	retime( \"line\", -200, 0 )\n	if j == 6 then\n		return format( \"{\\\\clip(%s,%s,%s,%s)\\\\bs0\\\\1c&H000000&\\\\t(0,%s,\\\\clip(%s,%s,%s,%s))\\\\t(%s,%s,\\\\clip(%s,%s,%s,%s))}%s\",\n			fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x - 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, 2 * diment.x * Ratio,\n			fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, 2 * diment.x * Ratio, 4 * diment.x * Ratio,\n			fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x - 0.5 * diment.x, fx.pos_y + 0.5 * diment.y,\n			line.text_stripped\n		)\n	end\n	return format( \"{\\\\clip(%s,%s,%s,%s)\\\\t(%s,%s,\\\\clip(%s,%s,%s,%s))\\\\t(%s,%s,\\\\clip(%s,%s,%s,%s))}%s\",\n		fx.pos_x + 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, 2 * diment.x * Ratio, 4 * diment.x * Ratio,\n		fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y + 0.5 * diment.y, fx.dur - diment.x * Ratio, fx.dur,\n		fx.pos_x - 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, fx.pos_x + 0.5 * diment.x, fx.pos_y - 0.5 * diment.y, line.text_stripped\n	)\nend", "Lua", false, false )
-	Made_In_Abyss_OP_1 = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 40li - 20 * char.n + 300", "l.end_time + 40lo + 20 * char.n - 300", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_buttline = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_buttline", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 40mid2 + 400", "l.end_time + 40mid2 + 400", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_inverse = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_inverse", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time - 40li + 200", "l.end_time - 40li + 200", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_midline = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_midline", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 40mid1", "l.end_time + 40mid1", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
-	Made_In_Abyss_OP_1_Line = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_Line", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time - 4f", "l.end_time + 4f", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
 	Made_In_Abyss_ED_1 = effector.create_fx( "TLfx", "Made_In_Abyss_ED_1", "Translation Char", false, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 30li - 15 * char.n + 200", "l.end_time + 30lo + 15 * char.n - 200", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\blur1.2\\\\fscxy0\\\\t(0,3f,\\\\fscxyr1.3)\\\\t(3f,6f,\\\\fscxyr1)\\\\te(3f,6f,\\\\fscxyr1.3)\\\\te(0,3f,\\\\fscxyr0)\\\\fad(120,120)\"", "", "Lua", false, false )
 	Made_In_Abyss_ED_1_buttline = effector.create_fx( "TLfx", "Made_In_Abyss_ED_1_buttline", "Translation Char", false, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 30mid2 + 200", "l.end_time + 30mid2 + 200", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\blur1.2\\\\fscxy0\\\\t(0,3f,\\\\fscxyr1.3)\\\\t(3f,6f,\\\\fscxyr1)\\\\te(3f,6f,\\\\fscxyr1.3)\\\\te(0,3f,\\\\fscxyr0)\\\\fad(120,120)\"", "", "Lua", false, false )
 	Made_In_Abyss_ED_1_inverse = effector.create_fx( "TLfx", "Made_In_Abyss_ED_1_inverse", "Translation Char", false, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time - 30li + 310", "l.end_time - 30li + 310", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\blur1.2\\\\fscxy0\\\\t(0,3f,\\\\fscxyr1.3)\\\\t(3f,6f,\\\\fscxyr1)\\\\te(3f,6f,\\\\fscxyr1.3)\\\\te(0,3f,\\\\fscxyr0)\\\\fad(120,120)\"", "", "Lua", false, false )
@@ -6902,6 +7034,11 @@
 	Made_in_Abyss_ED_1_Funny_buttline = effector.create_fx( "TLfx", "Made_in_Abyss_ED_1_Funny_buttline", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "char.center", "char.middle", "", "", "2", "1", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "Abyss( )", "Abyss = function( )\n	local delay = 30mid2 + 200\n	maxloop( 2 )\n	if j == 1 then\n		retime( \"preline\", delay, delay + 0.5 * l.dur )\n		return \"\\\\move(fx.pos_x,fx.pos_b - 4r,fx.pos_x,fx.pos_b,10f,14f)\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\t(0,2f,\\\\fscxr1.52\\\\fscyr0.5)\\\\t(2f,4f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\t(4f,6f,\\\\fscxr1\\\\fscyr0.85)\\\\t(6f,8f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\t(8f,10f,\\\\fscxr1.52\\\\fscyr0.5)\\\\t(10f,14f,\\\\fscxyr1)\\\\fad(120,0)\"\n	end\n	retime( \"preline\", delay + 0.5 * l.dur, delay + l.dur )\n	return \"\\\\move(fx.pos_x,fx.pos_b,fx.pos_x,fx.pos_b + 4r,fx.dur - 14f,fx.dur - 10f)\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"\nend", "Lua", false, false )
 	Made_in_Abyss_ED_1_Funny_inverse = effector.create_fx( "TLfx", "Made_in_Abyss_ED_1_Funny_inverse", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "char.center", "char.middle", "", "", "2", "1", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "Abyss( )", "Abyss = function( )\n	local delay = -30li + 310\n	maxloop( 2 )\n	if j == 1 then\n		retime( \"preline\", delay, delay + 0.5 * l.dur )\n		return \"\\\\move(fx.pos_x,fx.pos_b - 4r,fx.pos_x,fx.pos_b,10f,14f)\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\t(0,2f,\\\\fscxr1.52\\\\fscyr0.5)\\\\t(2f,4f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\t(4f,6f,\\\\fscxr1\\\\fscyr0.85)\\\\t(6f,8f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\t(8f,10f,\\\\fscxr1.52\\\\fscyr0.5)\\\\t(10f,14f,\\\\fscxyr1)\\\\fad(120,0)\"\n	end\n	retime( \"preline\", delay + 0.5 * l.dur, delay + l.dur )\n	return \"\\\\move(fx.pos_x,fx.pos_b,fx.pos_x,fx.pos_b + 4r,fx.dur - 14f,fx.dur - 10f)\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"\nend", "Lua", false, false )
 	Made_in_Abyss_ED_1_Funny_midline = effector.create_fx( "TLfx", "Made_in_Abyss_ED_1_Funny_midline", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "char.center", "char.middle", "", "", "2", "1", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "Abyss( )", "Abyss = function( )\n	local delay = 30mid1 - 340\n	maxloop( 2 )\n	if j == 1 then\n		retime( \"preline\", delay, delay + 0.5 * l.dur )\n		return \"\\\\move(fx.pos_x,fx.pos_b - 4r,fx.pos_x,fx.pos_b,10f,14f)\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\t(0,2f,\\\\fscxr1.52\\\\fscyr0.5)\\\\t(2f,4f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\t(4f,6f,\\\\fscxr1\\\\fscyr0.85)\\\\t(6f,8f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\t(8f,10f,\\\\fscxr1.52\\\\fscyr0.5)\\\\t(10f,14f,\\\\fscxyr1)\\\\fad(120,0)\"\n	end\n	retime( \"preline\", delay + 0.5 * l.dur, delay + l.dur )\n	return \"\\\\move(fx.pos_x,fx.pos_b,fx.pos_x,fx.pos_b + 4r,fx.dur - 14f,fx.dur - 10f)\\\\org(fx.pos_x - 10000r,fx.pos_y)\\\\te(10f,14f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(8f,10f,\\\\fscxr0.5\\\\fscyr1.5\\\\fr0.06)\\\\te(6f,8f,\\\\fscxr1\\\\fscyr0.85)\\\\te(4f,6f,\\\\fscxr0.5\\\\fscyr1.45\\\\fr0)\\\\te(2f,4f,\\\\fscxr1.52\\\\fscyr0.5)\\\\te(0,2f,\\\\fscxyr1)\\\\fad(0,120)\"\nend", "Lua", false, false )
+	Made_In_Abyss_OP_1 = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 40li - 20 * char.n + 300", "l.end_time + 40lo + 20 * char.n - 300", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_buttline = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_buttline", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 40mid2 + 400", "l.end_time + 40mid2 + 400", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_inverse = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_inverse", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time - 40li + 200", "l.end_time - 40li + 200", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_midline = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_midline", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time + 40mid1", "l.end_time + 40mid1", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
+	Made_In_Abyss_OP_1_Line = effector.create_fx( "TLfx", "Made_In_Abyss_OP_1_Line", "Translation Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time - 4f", "l.end_time + 4f", "", "", "", "", "char.center", "char.middle", "", "", "5, chars = 3", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "\"\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b)\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3\\\\t(0,8f,\\\\clip(fx.pos_l - 3r,fx.pos_t,fx.pos_r + 3r,fx.pos_b))\\\\t(6f,8f,\\\\134c~\\\\bord~\\\\blur0)\\\\te(0,8f,\\\\clip(fx.pos_x,fx.pos_t,fx.pos_x,fx.pos_b))\\\\te(6f,8f,\\\\134c&HFFFFFF&\\\\bord3r\\\\blur3)\"", "", "Lua", false, false )
 	Mark_I_Rectangle_Line = effector.create_fx( "TLfx", "Mark_I_Rectangle_Line", "Translation Line", true, false, "#FFFFFF", "#FFFFFF", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y + tag.only( j == 1, 4r )", "", "2", "", "tag.only( j == 1, shape.size( shape.rectangle, l.width + 16r, l.height ), line.text_stripped )", "tag.only( j == 1, \"\\\\1a255\\\\bord3r\\\\shad0\" ), \"\\\\fad(200,200)\"", "", "Lua", false, false )
 	Mark_II_Capsule_Line = effector.create_fx( "TLfx", "Mark_II_Capsule_Line", "Translation Line", true, false, "#FFFFFF", "#FFFFFF", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y + tag.only( j == 1, 4r )", "", "2", "", "tag.only( j == 1, capsule( ), line.text_stripped )", "tag.only( j == 1, \"\\\\1a255\\\\bord3r\\\\shad0\" ), \"\\\\fad(200,200)\"", "capsule = function( )	\n	local Dy, Dx = 1.00 * l.height, l.width\n	Box = format( \"m %s 0 b %s 0 0 %s 0 %s b 0 %s %s %s %s %s l %s %s b %s %s %s %s %s %d b %s %s %s 0 %s 0 \",\n		0.5 * Dy, 0.22 * Dy, 0.22 * Dy, 0.5 * Dy, 0.78 * Dy, 0.22 * Dy, Dy, 0.5 * Dy, Dy, 0.5 * Dy + Dx, Dy,\n		0.78 * Dy + Dx, Dy, Dy + Dx, 0.78 * Dy, Dy + Dx, 0.5 * Dy, Dy + Dx, 0.22 * Dy, 0.78 * Dy + Dx, 0.5 * Dy + Dx\n	)\n	return shape.ASSDraw3( Box )\nend", "Lua", false, false )
 	Mark_III_Insert_Song = effector.create_fx( "TLfx", "Mark_III_Insert_Song", "Translation Line", true, false, "#FFFFFF", "#FFFFFF", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "l.center", "l.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y + tag.only( j == 1, 4r )", "", "2", "", "tag.only( j == 1, mark_IS( ), line.text_stripped )", "tag.only( j == 1, \"\\\\1a255\\\\bord3r\\\\shad0\" ), \"\\\\fad(200,200)\"", "mark_IS = function( )\n	local Dy = l.height\n	local Dx = l.width\n	local offy = Dy / 4\n	local P = { offy, 0, 0, Dy / 2, offy, Dy, 2 * offy, Dy, offy, Dy / 2, 2 * offy, 0, 3 * offy, 0, 2 * offy, Dy / 2, 3 * offy, Dy, 4 * offy, Dy,\n		3 * offy, Dy / 2, 4 * offy, 0, 5 * offy, 0, 4 * offy, Dy / 2, 5 * offy, Dy, 7 * offy + Dx, Dy, 8 * offy + Dx, Dy / 2, 7 * offy + Dx, 0,\n		8 * offy + Dx, 0, 9 * offy + Dx, Dy / 2, 8 * offy + Dx, Dy, 9 * offy + Dx, Dy, 10 * offy + Dx, Dy / 2, 9 * offy + Dx, 0,\n		10 * offy + Dx, 0, 11 * offy + Dx, Dy / 2, 10 * offy + Dx, Dy, 11 * offy + Dx, Dy, 12 * offy + Dx, Dy / 2, 11 * offy + Dx, 0\n	}\n	local Shape_fx = format( \"m %s %s l %s %s l %s %s l %s %s l %s %s l %s %s m %s %s l %s %s l %s %s l %s %s l %s %s l %s %s m %s %s l %s %s l %s %s l %s %s l %s %s l %s %s m %s %s l %s %s l %s %s l %s %s l %s %s l %s %s m %s %s l %s %s l %s %s l %s %s l %s %s l %s %s \", unpack( P ) )\n	return Shape_fx\nend", "Lua", false, false )

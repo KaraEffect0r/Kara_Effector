@@ -1,5 +1,5 @@
 ﻿	----------------------------------------------------------------------------------------------------------
-	--[[ ( c ) Copyright 2012 - 2019, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki				  		  ]]--
+	--[[ ( c ) Copyright 2012 - 2020, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki				  		  ]]--
 	----------------------------------------------------------------------------------------------------------
 	-- Effector-utils-lib ------------------------------------------------------------------------------------
 	Effector_Lib_authors  = "Itachi Akatsuki & Vict8r"
@@ -79,6 +79,7 @@
 			table.bigradient( gradient1, gradient2, Size )
 			table.mask( Color_or_Alpha, Maskfx, Mode, First )
 			table.remember( table_ref, table_val )
+			table.random( Table_or_Number )
 		+	table.delete( Table, ... )
 		+	table.permute( Table )
 		+	table.ipol( Table, Size, Tags, algorithm )
@@ -375,6 +376,8 @@
 		-	shape.filtershape( Shape, ... )
 			shape.intersect( Shape1, Shape2 )
 			shape.insert( Shape1, Shape2 )
+			shape.parametric( Shape, Pixel )
+			shape.beziercut( Bezier, t )
 		
 		librería text
 		-	text.upper( Text )
@@ -383,7 +386,7 @@
 		-	text.infx( syl_in_fx, true_false )
 		-	text.outfx( syl_out_fx )
 		-	text.tag( ... )
-		+	text.rand( Text_ran, num_tran, dur_tran, extra_tags, table_rand, text_all )
+		+	text.rand( Text, num_tran, dur_tran, extra_tags, table_rand, text_all )
 		+	text.inclip( Text )
 		+	text.outclip( Text )
 		+	text.karaoke_true( Table )
@@ -478,9 +481,9 @@
 	shape.triangle  = "m 50 0 l 0 86 l 100 86 l 50 0 "
 	shape.rectangle = "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
 	shape.circangle = "m 20 0 b 8 0 0 8 0 20 l 0 80 b 0 92 8 100 20 100 l 80 100 b 92 100 100 92 100 80 l 100 20 b 100 8 92 0 80 0 l 20 0 "
-	shape.pixel		= "m 0 0 l 0 1 l 1 1 l 1 0 l 0 0 "
+	shape.pixel		= "m 0 0 l 0 1 l 1 1 l 1 0 "
 	shape.pentagon	= "m 50 0 l 0 36 l 19 95 l 81 95 l 100 36 l 50 0 "
-	shape.hexagon	= "m 50 0 l 0 29 l 0 87 l 50 116 l 100 87 l 100 29 l 50 0 "
+	shape.hexagon	= "m 100 43.301 l 75 0 l 25 0 l 0 43.301 l 25 86.602 l 75 86.602 l 100 43.301 "
 	shape.octagon	= "m 29 0 l 0 29 l 0 71 l 29 100 l 71 100 l 100 71 l 100 29 l 71 0 l 29 0 "
 	shape.heart		= "m 50 25 b 32 0 0 16 0 40 b 0 68 24 71 50 106 b 75 71 100 68 100 40 b 100 16 68 0 50 25 "
 	shape.heart2t	= "m 50 25 b 32 0 0 16 0 40 b 0 68 24 71 50 100 b 75 71 100 68 100 40 b 100 16 68 0 50 25 m 79 27 b 74 25 76 20 81 22 b 90 26 93 36 93 43 b 93 48 87 48 87 43 b 87 39 86 30 79 27 "
@@ -924,6 +927,12 @@
 	end
 	
 	function random.alphava( Ai, Af )
+		if type( Ai ) == "function" then
+			Ai = Ai( )
+		end
+		if type( Af ) == "function" then
+			Af = Af( )
+		end
 		return format( "(%s,%s,%s,%s)",
 			random.alpha( Ai, Af ), random.alpha( Ai, Af ),
 			random.alpha( Ai, Af ), random.alpha( Ai, Af )
@@ -936,7 +945,12 @@
 		if type( ... ) == "table" then
 			Table_e = ...
 		end
-		return Table_e[ R( #Table_e ) ]
+		local rand_e = Table_e[ R( #Table_e ) ]
+		if rand_e == table_random then
+			rand_e = random.e( Table_e )
+		end
+		table_random = rand_e
+		return rand_e
 	end
 	
 	function random.unique( table_or_number, index_r ) --( table_or_number[, index_r] )
@@ -1025,63 +1039,101 @@
 	end
 	
 	function table.inside( Table, e, str1, str2 )	-- only for indexed table
-		--retorna "false" o "true" si un elemento está dentro de una tabla
+		--retorna "false" o "true" si un elemento, captura o tipo de elemento está en una tabla
 		local repl1 = str1 or ""
 		local repl2 = str2 or ""
 		effector.print_error( Table, "table",  "table.inside", 1 )
 		effector.print_error( repl1, "string", "table.inside", 3 )
 		effector.print_error( repl2, "string", "table.inside", 4 )
-		for _, v in ipairs( Table ) do
-			if type( e ) ~= "table" then
-				if type( v ) == "string" then
-					if e == v:gsub( repl1, repl2 ) then
-						return true
-					end
-				else
-					if e == v then
-						return true
-					end
-				end
-			else
+		local e_types = { --tipos de elementos
+			"function", "table", "string", "color", "alpha",
+			"shape", "clip", "number", "boolean", "thread", "userdata"
+		}
+		if type( e ) == "table" then
+			for k, v in ipairs( Table ) do
 				if table.compare( v, e ) then
 					return true
 				end
+			end --si la tabla "e" está dentro de la tabla
+		elseif type( e ) == "string" then
+			for k, v in ipairs( Table ) do
+				if table.type( { v } ) == e then
+					return true --add: march 17th 2020
+					--tipo de elemento
+				elseif type( v ) == "string" then
+					if e == v:gsub( repl1, repl2 ) then
+						return true --string modificado
+					elseif e:match( "%%" ) then
+						if v:match( e ) then
+							return true
+						end --tag.only( table.inside( { 1, 2, "a4a" }, "%d+[%.%d]*" ), "ok", "not" )
+					end --captura en los elementos strings
+				elseif v == e then
+					return true
+				end --strings iguales
 			end
-		end
+		else
+			for k, v in ipairs( Table ) do
+				if v == e then
+					return true
+				end --elementos iguales
+			end
+		end --tag.only( table.inside( { 1, 2, "a", "b", 3 }, "string" ), "ok", "not" )
 		return false
-	end
+	end --mod: march 18th 2020
 	
 	function table.index( Table, e, str1, str2 )	-- only for indexed table
-		--retorna la posición (index) de un elemento dentro de una tabla
+		--retorna la posición o índice de un elemento o tipo de elemento en una tabla
 		local repl1 = str1 or ""
 		local repl2 = str2 or ""
 		effector.print_error( Table, "table",  "table.index", 1 )
 		effector.print_error( repl1, "string", "table.index", 3 )
 		effector.print_error( repl2, "string", "table.index", 4 )
-		if table.inside( Table, e, repl1, repl2 ) == true then
-			for k, v in ipairs( Table ) do
-				if type( e ) ~= "table" then
-					if type( v ) == "string" then
-						if e == v:gsub( repl1, repl2 ) then
-							return k
-						end
-					else
-						if e == v then
-							return k
-						end
-					end
-				else
+		local e_types = { --tipo de elementos
+			"function", "table", "string", "color", "alpha",
+			"shape", "clip", "number", "boolean", "thread", "userdata"
+		}
+		if table.inside( Table, e, repl1, repl2 )
+			or table.inside( e_types, e ) then
+			if type( e ) == "table" then
+				for k, v in ipairs( Table ) do
 					if table.compare( v, e ) then
 						return k
 					end
+				end --si la tabla "e" está dentro de la tabla
+			elseif type( e ) == "string" then
+				for k, v in ipairs( Table ) do
+					if table.type( { v } ) == e then
+						return k --add: march 17th 2020
+						--tipo de elemento
+					elseif type( v ) == "string" then
+						if e == v:gsub( repl1, repl2 ) then
+							return k --string modificado
+						elseif e:match( "%%" ) then
+							if v:match( e ) then
+								return k
+							end --table.index( { 1, 2, "a4a" }, "%d+[%.%d]*" )
+						end --captura en los elementos strings
+					elseif v == e then
+						return k
+					end --strings iguales
 				end
-			end
+			else
+				for k, v in ipairs( Table ) do
+					if v == e then
+						return k
+					end --elementos iguales
+				end
+			end --table.index( { 1, 2, "a", "b", 3 }, "string" )
 		end
 		return e
-	end
+	end --mod: march 18th 2020
 	
 	function table.show( Table )		-- only for indexed table
-		--retorna el contenido de una tabla, entre paréntesis y separados por comas (,)
+		--retorna el contenido de una tabla separados por comas (,)
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
 		effector.print_error( Table, "table", "table.show", 1 )
 		local t_show, t_show2 = "", ""
 		for i = 1, #Table do
@@ -1099,6 +1151,10 @@
 
 	function table.duplicate( Table )
 		--duplica completamente el contenido de una tabla
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
+		--effector.print_error( Table, "table", "table.duplicate", 1 )
 		local lookup_table = { }
 		local function table_copy( Table )
 			if type( Table ) ~= "table" then
@@ -1118,6 +1174,12 @@
 	
 	function table.compare( Table1, Table2 )
 		--retorna "false" o "true" al comparar dos tablas
+		if type( Table1 ) == "function" then
+			Table1 = Table1( )
+		end
+		if type( Table2 ) == "function" then
+			Table2 = Table2( )
+		end
 		if type( Table1 ) ~= type( Table2 ) then
 			return false
 		end
@@ -1150,6 +1212,9 @@
 	function table.complete( Table, Start_time, End_time )
 		--ingresa el tiempo inicial y final de una línea kara
 		--en una tabla de tiempos y los ordena ascendentemente
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
 		local End_time = End_time or fx.end_time
 		local Start_time = Start_time or fx.start_time
 		effector.print_error( Table, "table", "table.complete", 1 )
@@ -1335,7 +1400,8 @@
 		return t_rmake
 	end
 	
-	function table.concat1( Table, ... )-->Table = {a, b, c}; ... = {1, 2, 3} -->return {1a,2a,3a, 1b,2b,3b, 1c,2c,3c}
+	function table.concat1( Table, ... )
+		--table.concat1( { "a", "b", "c" }, { 1, 2, 3 } ) = { "1a", "2a", "3a", "1b", "2b", "3b", "1c", "2c", "3c" }
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
@@ -1352,7 +1418,8 @@
 		return Table_Concat
 	end
 	
-	function table.concat2( Table, ... )-->Table = {a, b, c}; ... = {1, 2, 3} -->return {1a2a3a, 1b2b3b, 1c2c3c}
+	function table.concat2( Table, ... )
+		--table.concat2( { "a", "b", "c" }, { 1, 2, 3 } ) = { "1a2a3a", "1b2b3b", "1c2c3c" }
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
@@ -1376,7 +1443,7 @@
 	end
 	
 	function table.concat3( ... )
-		--"concatena" uno a uno los elementos de dos o más tablas
+		--concatena uno a uno los elementos de las tablas ingresadas
 		local Tables = { ... }
 		if #Tables == 1 then
 			Tables = ...
@@ -1406,10 +1473,10 @@
 			end
 		end
 		return tbl_twin --may 20th 2018
-	end --table.concat3( { "A", "B", "C", "D" }, "1", { "w", "x", "y", "z" } )
+	end --table.concat3( { "A", "B", "C" }, "1", { "x", "y" } ) = { "A1x", "B1y", "C1x" }
 	
 	function table.concat4( ... )
-		-->table.concat4( { "a", "b", "c", "d" }, { 1, 2, 3 } ) = { a1, b2, c3, d }
+		-->table.concat4( { "a", "b", "c", "d" }, { 1, 2, 3 } ) = { "a1", "b2", "c3", "d" }
 		--concatena uno a uno los elementos de las tablas ingresadas
 		--si no hay emparejamiento, concatena con un string vacío ( "" )
 		local Table = { ... }
@@ -1475,6 +1542,7 @@
 
 	function table.count( Table, e )
 		-- cuenta la cantidad de veces que está un elemento en una tabla
+		-- o la cantidad de veces que está una captura o un tipo de elemento en ella
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
@@ -1484,16 +1552,47 @@
 		effector.print_error( Table, "table", "table.count", 1 )
 		effector.print_error( e, "true", "table.count", 2 )
 		local Count = 0
-		for k, v in pairs( Table ) do
-			if e == v then
-				Count = Count + 1
+		local e_types = {
+			"function", "table", "string", "color", "alpha",
+			"shape", "clip", "number", "boolean", "thread", "userdata"
+		}
+		if type( e ) == "table" then
+			for k, v in pairs( Table ) do
+				if table.compare( v, e ) then
+					Count = Count + 1
+				end
+			end --si la tabla "e" está dentro de la tabla
+		elseif type( e ) == "string" then
+			if table.inside( e_types, e ) then
+				for k, v in pairs( Table ) do
+					if table.type( { v } ) == e then
+						Count = Count + 1
+					end --add: march 17th 2020
+				end --tipo de elemento
+			else
+				for k, v in pairs( Table ) do
+					if type( v ) == "string" then
+						if v:match( e ) then
+							Count = Count + 1
+						end --captura en los elementos strings
+					elseif v == e then
+						Count = Count + 1
+					end --strings iguales
+				end
 			end
-		end
+		else
+			for k, v in pairs( Table ) do
+				if v == e then
+					Count = Count + 1
+				end --elementos iguales
+			end
+		end --table.count( { 1, 2, "a", "b", 3 }, "number" )
 		return Count
 	end
 	
 	function table.pos( Table, e )
 		--retorna una tabla con las posiciones del elemento "e"
+		--de tipo, captura o de igualdad
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
@@ -1503,11 +1602,42 @@
 		effector.print_error( Table, "table", "table.pos", 1 )
 		effector.print_error( e, "true", "table.pos", 2 )
 		local Table_pos = { }
-		for k, v in pairs( Table ) do
-			if e == v then
-				table.insert( Table_pos, k )
+		-------------------------------------------------------
+		local e_types = {
+			"function", "table", "string", "color", "alpha",
+			"shape", "clip", "number", "boolean", "thread", "userdata"
+		}
+		if type( e ) == "table" then
+			for k, v in pairs( Table ) do
+				if table.compare( v, e ) then
+					Table_pos[ #Table_pos + 1 ] = k
+				end
+			end --si la tabla "e" está dentro de la tabla
+		elseif type( e ) == "string" then
+			if table.inside( e_types, e ) then
+				for k, v in pairs( Table ) do
+					if table.type( { v } ) == e then
+						Table_pos[ #Table_pos + 1 ] = k
+					end --add: march 17th 2020
+				end --tipo de elemento
+			else
+				for k, v in pairs( Table ) do
+					if type( v ) == "string" then
+						if v:match( e ) then
+							Table_pos[ #Table_pos + 1 ] = k
+						end --captura en los elementos strings
+					elseif v == e then
+						Table_pos[ #Table_pos + 1 ] = k
+					end --strings iguales
+				end
 			end
-		end
+		else
+			for k, v in pairs( Table ) do
+				if v == e then
+					Table_pos[ #Table_pos + 1 ] = k
+				end --elementos iguales
+			end
+		end --table.pos( { 1, 2, "a", "b", 3 }, "number" )
 		return Table_pos
 	end
 	
@@ -1519,39 +1649,55 @@
 		if type( Number_str ) == "function" then
 			Number_str = Number_str( )
 		end
-		local String = String or ""
-		local Number = Number_str or 1
-		effector.print_error( String, "string", "table.string", 1 )
-		effector.print_error( Number, "number", "table.string", 2 )
-		local Table_str, chars_, Len_str = { }, { }, unicode.len( String )
-		for c in unicode.chars( String ) do
-			table.insert( chars_, c )
-		end
-		if Number >= Len_str then
-			return { String }
-		end
-		for i = 1, Len_str - Number + 1 do
-			Table_str[ i ] = ""
-			for k = 1, Number do
-				Table_str[ i ] = Table_str[ i ] .. chars_[ i + k - 1 ]
+		local Table_string, Chars_string = { }, { }
+		if type( String ) == "table" then
+			for i = 1, #String do
+				Table_string[ i ] = table.string( String[ i ], Number_str )
 			end
-		end
-		return Table_str
+		else --recursividad: march 07th 2020
+			local String = String or ""
+			local Number = Number_str or 1
+			effector.print_error( String, "string", "table.string", 1 )
+			effector.print_error( Number, "number", "table.string", 2 )
+			local Len_string = unicode.len( String )
+			local tbl_string = { }
+			for c in unicode.chars( String ) do
+				table.insert( Chars_string, c )
+			end
+			if Number >= Len_string then
+				return { String }
+			end
+			for i = 1, Len_string - Number + 1 do
+				tbl_string[ i ] = ""
+				for k = 1, Number do
+					tbl_string[ i ] = tbl_string[ i ] .. Chars_string[ i + k - 1 ]
+				end
+			end
+			Table_string = table.duplicate( tbl_string )
+		end --table.string( { "String", "demo" }, 2 )
+		return Table_string
 	end
-	
+
 	function table.space( String )
 		--retorna una tabla con las posciones de los espacios (" ") que contenga un string
 		if type( String ) == "function" then
 			String = String( )
 		end
-		effector.print_error( String, "string", "table.space", 1 )
-		local Table_s, Table_spc = table.string( String ), { }
-		for i = 1, #Table_s do
-			if Table_s[ i ] == " " then
-				table.insert( Table_spc, i )
+		local Table_space = { }
+		if type( String ) == "table" then
+			for i = 1, #String do
+				Table_space[ i ] = table.space( String[ i ] )
 			end
-		end
-		return Table_spc
+		else --recursividad: march 07th 2020
+			effector.print_error( String, "string", "table.space", 1 )
+			local Table_string = table.string( String )
+			for i = 1, #Table_string do
+				if Table_string[ i ] == " " then
+					Table_space[ #Table_space + 1 ] = i
+				end
+			end
+		end --table.space( { "line demo", "string word fx" } )
+		return Table_space
 	end
 	
 	function table.word( String )
@@ -1598,7 +1744,7 @@
 					table.remove( Table_ret, table.index( Table_ret, retire_e[ i ] ) )
 				end
 			end
-		end
+		end --2020 incluirla en table.delete
 		return Table_ret
 	end --table.retire( { 21, 22, 23, 24, 25, 26 }, { { 1, 4 } } )
 	
@@ -1665,7 +1811,7 @@
 	end
 
 	function table.reverse( Table )
-		--invierte el orden de los elementos de una tabla
+		--invierte el orden de los elementos de una tabla indexada
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
@@ -1678,7 +1824,7 @@
 	end
 	
 	function table.cyclic( Table ) --{a,b,c,d,e} --> {a,b,c,d,e,d,c,b}
-		--crea un "ciclo" con los elementos de una tabla
+		--crea un "ciclo" con los elementos de una tabla indexada
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
@@ -1830,11 +1976,25 @@
 				table_inverse[ i ] = Table[ #Table - i + 1 ]
 			end
 			return table_inverse
+		elseif mode == "idx" then --march 17th 2020
+		--organiza por index los elementos de la tabla
+			local table_idx = { }
+			for k, v in pairs( Table ) do
+				if type( k ) == "number" then
+					table_idx[ #table_idx + 1 ] = v
+				else
+					table_idx[ k ] = v
+				end
+			end
+			return table_idx
 		end
 	end
 	
 	function table.gradient( Size, ... )
 		-- example algorithm: "sin( pi * %s )"
+		if type( Size ) == "function" then
+			Size = Size( )
+		end
 		local toGradient = { ... }
 		if type( ... ) == "table" then
 			toGradient = ...
@@ -1874,6 +2034,15 @@
 	end --"\\1c" .. table.gradient( val_n, "&H0000FF&", text.color1, "&H00FFFF&" )[val_i]
 	
 	function table.bigradient( gradient1, gradient2, Size )
+		if type( gradient1 ) == "function" then
+			gradient1 = gradient1( )
+		end
+		if type( gradient2 ) == "function" then
+			gradient2 = gradient2( )
+		end
+		if type( Size ) == "function" then
+			Size = Size( )
+		end
 		local gradient1 = color.from_error( gradient1 or text.color1 )
 		local gradient2 = color.from_error( gradient2 or text.color2 )
 		local Size = math.round( Size or val_n )
@@ -1910,6 +2079,18 @@
 	end --"\\1vc" .. table.bigradient( {"&H0000FF&", text.color1}, "&H00FFFF&", val_n )[val_i]
 	
 	function table.mask( Color_or_Alpha, Maskfx, Mode, First )
+		if type( Color_or_Alpha ) == "function" then
+			Color_or_Alpha = Color_or_Alpha( )
+		end
+		if type( Maskfx ) == "function" then
+			Maskfx = Maskfx( )
+		end
+		if type( Mode ) == "function" then
+			Mode = Mode( )
+		end
+		if type( First ) == "function" then
+			First = First( )
+		end
 		local vectorMask = color.from_error( Color_or_Alpha or text.color1 )
 		if type( vectorMask ) ~= "table" then
 			vectorMask = { vectorMask }
@@ -1996,6 +2177,9 @@
 	function table.random( Table_or_Number )
 		--retorna un elemento aleatoriamente de la tabla ingresada
 		--o un número entero al azar entre 1 y el número ingresado
+		if type( Table_or_Number ) == "function" then
+			Table_or_Number = Table_or_Number( )
+		end
 		local T_o_N = Table_or_Number or { 1 }
 		effector.print_error( T_o_N, "numbertable", "table.random", 1 )
 		if type( T_o_N ) == "number" then
@@ -2005,21 +2189,64 @@
 				T_o_N[ i ] = i
 			end
 		end
-		return T_o_N[ R( #T_o_N ) ]
+		local rand_e = T_o_N[ R( #T_o_N ) ]
+		if rand_e == table_random then
+			rand_e = table.random( T_o_N )
+		end
+		table_random = rand_e
+		return rand_e
 	end	--table.random( 9 )
 	
 	function table.delete( Table, ... )
 		--elimina el o los elementos, o una tabla de elementos
 		--que estén dentro de una tabla seleccionada "Table"
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
 		local tbl_delete, retire_e = table.duplicate( Table ), { ... }
 		if type( ... ) == "table" then
 			retire_e = ...
 		end
+		local e_types = {
+			"function", "table", "string", "color", "alpha",
+			"shape", "clip", "number", "boolean", "thread", "userdata"
+		}
 		for i = 1, #retire_e do
-			while table.inside( tbl_delete, retire_e[ i ] ) == true do
-				table.remove( tbl_delete, table.index( tbl_delete, retire_e[ i ] ) )
+			if type( retire_e[ i ] ) == "string" then
+				if table.inside( e_types, retire_e[ i ] ) then
+					for k, v in pairs( Table ) do --add: march 15rd 2020
+						if table.type( { v } ) == retire_e[ i ] then
+							tbl_delete[ k ] = nil
+						end --table.delete( { 1, 2, "a", "b", 3 }, "number" )
+					end --tipo de elemento
+				else
+					for k, v in pairs( Table ) do
+						if v == retire_e[ i ] then
+							tbl_delete[ k ] = nil
+							--si son el mismo string
+						elseif type( v ) == "string"
+							and v:match( retire_e[ i ] ) then
+							tbl_delete[ k ] = nil
+						end --capturas en los elementos string
+					end
+				end
+			elseif type( retire_e[ i ] ) == "table" then
+				for k, v in pairs( Table ) do
+					if table.compare( v, retire_e[ i ] ) then
+						tbl_delete[ k ] = nil
+					end
+				end --tablas
+			else
+				for k, v in pairs( Table ) do
+					if v == retire_e[ i ] then
+						tbl_delete[ k ] = nil
+					end --si son el mismo elemento
+				end
 			end
 		end
+		if table.compare( Table, tbl_delete ) == false then
+			tbl_delete = table.op( tbl_delete, "idx" )
+		end --table.delete( { 1, 2, x = "a", "b", [ 2 ] = 3 }, "string" )
 		return tbl_delete
 	end
 
@@ -2027,6 +2254,9 @@
 		--retorna una tabla que contiene las tablas con todas las
 		--combinaciones posibles que se pueden hacer de la tabla ingresada
 		--{ 1, 2, 3 } --> { {2, 3, 1}, {2, 1, 3}, {3, 1, 2}, {3, 2, 1}, {1, 3, 2}, {1, 2, 3} }
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
 		local Table_Per = { }
 		local function output( table_per )
 			local tbl_inside = { }
@@ -2071,6 +2301,79 @@
 		if #Table == 1 then
 			Table[ 2 ] = Table[ 1 ]
 		end
+		---------------------
+		for i = 1, #Table do
+			if type( Table[ i ] ) == "string" then
+				if Table[ i ]:match( "\\[%d]*%a+%-?[%d&#]^*[%.%dH&%x]*" ) then
+					if Tags == nil then
+						Tags = { Table[ i ]:match( "(\\[%d]*%a+)%-?[%d&#]^*[%.%dH&%x]*" ) }
+					else
+						if not table.inside( Tags, Table[ i ]:match( "(\\[%d]*%a+)%-?[%d&#]^*[%.%dH&%x]*" ) ) then
+							table.insert( Tags, Table[ i ]:match( "(\\[%d]*%a+)%-?[%d&#]^*[%.%dH&%x]*" ) )
+						end
+					end
+					Table[ i ] = Table[ i ]:match( "\\[%d]*%a+(%-?[%d&#]^*[%.%dH&%x]*)" )
+				elseif Table[ i ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) then
+					if Tags == nil then
+						Tags = { Table[ i ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) }
+					else
+						if not table.inside( Tags, Table[ i ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) ) then
+							table.insert( Tags, Table[ i ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) )
+						end
+					end
+					Table[ i ] = string.toval( Table[ i ]:match( "\\[%d]*%a+(R[%a]*%b())" ) )
+				elseif Table[ i ]:match( "\\[%d]*%a+%b()" ) then
+					if Tags == nil then
+						Tags = { Table[ i ]:match( "(\\[%d]*%a+)%b()" ) }
+					else
+						if not table.inside( Tags, Table[ i ]:match( "(\\[%d]*%a+)%b()" ) ) then
+							table.insert( Tags, Table[ i ]:match( "(\\[%d]*%a+)%b()" ) )
+						end
+					end
+					Table[ i ] = string.toval( Table[ i ]:match( "\\[%d]*%a+(%b())" ) )
+				end
+				if tonumber( Table[ i ] ) then
+					Table[ i ] = tonumber( Table[ i ] )
+				end
+			elseif type( Table[ i ] ) == "table" then
+				for k = 1, #Table[ i ] do
+					if type( Table[ i ][ k ] ) == "string" then
+						if Table[ i ][ k ]:match( "\\[%d]*%a+%-?[%d&#]^*[%.%dH&%x]*" ) then
+							if Tags == nil then
+								Tags = { Table[ i ][ k ]:match( "(\\[%d]*%a+)%-?[%d&#]^*[%.%dH&%x]*" ) }
+							else
+								if not table.inside( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)%-?[%d&#]^*[%.%dH&%x]*" ) ) then
+									table.insert( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)%-?[%d&#]^*[%.%dH&%x]*" ) )
+								end
+							end
+							Table[ i ][ k ] = Table[ i ][ k ]:match( "\\[%d]*%a+(%-?[%d&#]^*[%.%dH&%x]*)" )
+						elseif Table[ i ][ k ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) then
+							if Tags == nil then
+								Tags = { Table[ i ][ k ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) }
+							else
+								if not table.inside( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) ) then
+									table.insert( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)R[%a]*%b()" ) )
+								end
+							end
+							Table[ i ][ k ] = string.toval( Table[ i ][ k ]:match( "\\[%d]*%a+(R[%a]*%b())" ) )
+						elseif Table[ i ][ k ]:match( "\\[%d]*%a+%b()" ) then
+							if Tags == nil then
+								Tags = { Table[ i ][ k ]:match( "(\\[%d]*%a+)%b()" ) }
+							else
+								if not table.inside( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)%b()" ) ) then
+									table.insert( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)%b()" ) )
+								end
+							end
+							Table[ i ][ k ] = string.toval( Table[ i ][ k ]:match( "\\[%d]*%a+(%b())" ) )
+						end
+						if tonumber( Table[ i ][ k ] ) then
+							Table[ i ][ k ] = tonumber( Table[ i ][ k ] )
+						end --table.ipol( { { "\\fscx20", 80 }, { "\\blur1", 5 } }, 8 )
+					end
+				end
+			end --january 22nd 2020
+		end --table.ipol( { "\\fscx20", "\\fscx80" }, 8 )
+		---------------------
 		if Size < #Table then
 			Size = #Table
 		end
@@ -2084,7 +2387,7 @@
 			---------------------------------------------
 			-- interpola el valor de dos números
 			local function ipol_number( val_1, val_2, pct_ipol )
-				return val_1 + (val_2 - val_1) * pct_ipol
+				return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 			end
 			---------------------------------------------
 			-- interpola el valor de dos shapes o dos clips
@@ -2145,12 +2448,18 @@
 				pct_ip = floor( (i - 1) % (max_loop / (#Table_ipol - 1)) ) / (max_loop / (#Table_ipol - 1))
 				ipols[ i ] = ipol_function( ipol_i, ipol_f, math.format( algorithm_ipol, pct_ip ) )
 			end --table.ipol( { 12, 31 }, 11, "\\fscy", "sin( pi * %s )" )
-			--fixed: october 07th 2019
-			pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
-			ipol_i = Table_ipol[ floor( pct_ip ) ]
+			--------------------------------------------
+			if algorithm_ipol:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then --si el algoritmo es una shape
+				pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * #Table_ipol
+				--tag.loop( { 0, 100 }, shape.trajectory( ) )
+				--tag.loop( { 0, 100 }, shape.circle .. shape.displace( shape.circle, 100 ) )
+			else -- si el algoritmo es un módulo de varianza enre 0 y 1
+				pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
+			end --fixed: january 28th 2020
+			ipol_i = Table_ipol[ floor( pct_ip ) ] or Table_ipol[ 1 ]
 			ipol_f = Table_ipol[ floor( pct_ip ) + 1 ] or Table_ipol[ floor( pct_ip ) ]
 			ipols[ #ipols + 1 ] = ipol_function( ipol_i, ipol_f, math.clamp( math.format( algorithm_ipol, 1 ) ) )
-			--ipols[ #ipols + 1 ] = Table_ipol[ #Table_ipol ]
+			--------------------------------------------
 			if fx.filter == "mod"
 				and ipol_coloralpha == "coloralpha" then
 				local coloralpha_ipos = { }
@@ -2270,25 +2579,37 @@
 		return tbl_ipol_funct( Table, Size, Tags, algorithm )
 	end --table.ipol2( { 12, 31, 20, 13, 47 }, 21, "\\fscy" )
 
-
 	function table.capture( String, Capture )
-		--crea una tabla con las capturas de un String
+		--crea una tabla con las capturas de un String o los strings de una tabla
+		--genera una tabla independiente por cada uno de los strings
+		if type( String ) == "function" then
+			String = String( )
+		end
+		if type( Capture ) == "function" then
+			Capture = Capture( )
+		end
 		local tbl_cap = { }
-		local String = String or ""
-		local Capture = Capture or ""
-		effector.print_error( String, "string", "table.capture", 1 )
-		effector.print_error( Capture, "stringtable", "table.capture", 2 )
-		if type( Capture ) == "table" then
-			for i = 1, #Capture do
-				for cap in String:gmatch( Capture[ i ] ) do
+		if type( String ) == "table" then
+			for i = 1, #String do
+				tbl_cap[ i ] = table.capture( String[ i ], Capture )
+			end
+		else --recursividad: march 07th 2020
+			local String = String or ""
+			local Capture = Capture or ""
+			effector.print_error( String, "string", "table.capture", 1 )
+			effector.print_error( Capture, "stringtable", "table.capture", 2 )
+			if type( Capture ) == "table" then
+				for i = 1, #Capture do
+					for cap in String:gmatch( Capture[ i ] ) do
+						table.insert( tbl_cap, cap )
+					end
+				end
+			else
+				for cap in String:gmatch( Capture ) do
 					table.insert( tbl_cap, cap )
 				end
 			end
-		else
-			for cap in String:gmatch( Capture ) do
-				table.insert( tbl_cap, cap )
-			end
-		end
+		end --table.capture( { "line demo", "string word fx" }, "o" )
 		return tbl_cap
 	end --may 12th 2018
 
@@ -2298,6 +2619,12 @@
 		local Capture = Capture or "KEfx"
 		if type( Table ) == "function" then
 			Table = Table( )
+		end
+		if type( Capture ) == "function" then
+			Capture = Capture( )
+		end
+		if type( Replace ) == "function" then
+			Replace = Replace( )
 		end
 		effector.print_error( Table, "table", "table.gsub", 1 )
 		effector.print_error( Capture, "stringtable", "table.gsub", 2 )
@@ -2315,64 +2642,89 @@
 				end
 			end
 			tbl_gsub[ k ] = val
-		end
+		end --table.gsub( { "line demo", x = "string word fx" }, "o", "O" )
 		return tbl_gsub
 	end --may 27th 2018
 
 	function table.match( Table, Capture )
-		-- genera una tabla con las coincidencias que encuentre
+		--genera una tabla con las coincidencias que encuentre, de igualdad, de tipo o de captura
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
+		if type( Capture ) == "function" then
+			Capture = Capture( )
+		end
+		effector.print_error( Table, "table", "table.match", 1 )
+		effector.print_error( Capture, "stringtable", "table.match", 2 )
 		local tbl_match = { }
 		local table_mch = table.duplicate( Table )
+		local e_types = {
+			"function", "table", "string", "color", "alpha",
+			"shape", "clip", "number", "boolean", "thread", "userdata"
+		}
 		if type( Capture ) == "table" then
 			for i = 1, #Capture do
-				if table.inside( table_mch, Capture[ i ] ) then
-					table.insert( tbl_match, Capture[ i ] )
-				else
-					for _, val in pairs( table_mch ) do
-						if Capture[ i ] == val then
-							table.insert( tbl_match, Capture[ i ] )
-						elseif type( val ) == "string"
-							and type( Capture[ i ] ) == "string" then
-							if val:match( Capture[ i ] ) then
-								table.insert( tbl_match, val:match( Capture[ i ] ) )
-							end
-						end
+				for k, val in pairs( table_mch ) do
+					if table.inside( e_types, Capture[ i ] ) then
+						--si el elemento de la tabla es del mismo tipo que el indicado
+						if table.type( { val } ) == Capture[ i ] then
+							tbl_match[ k ] = val
+							--table.match( { "a", "b", x = "c", [ 5 ] = 1, 2, { 3 } }, { "string", 1 } )
+						end --march 17th 2020
+					elseif Capture[ i ] == val then
+						--si la captura es el valor de un elemento en la tabla
+						tbl_match[ k ] = Capture[ i ]
+					elseif type( val ) == "string"
+						and type( Capture[ i ] ) == "string" then
+						--si el elemento es un string con la captura indicada
+						if val:match( Capture[ i ] ) then
+							tbl_match[ k ] = val
+						end --table.match( { "aba", "b", x = "c", [ 5 ] = 1, 2, { 3 } }, { "a", 1 } )
+					elseif table.compare( val, Capture[ i ] ) then
+						--si la tabla (Capture[ i ]) es uno de los elementos de la tabla
+						tbl_match[ k ] = val
 					end
 				end
 			end
 		else
-			if table.inside( table_mch, Capture ) then
-				table.insert( tbl_match, Capture )
-			else
-				for _, val in pairs( table_mch ) do
-					if Capture == val then
-						table.insert( tbl_match, Capture )
-					elseif type( val ) == "string"
-						and type( Capture ) == "string" then
-						if val:match( Capture ) then
-							table.insert( tbl_match, val:match( Capture ) )
-						end
+			for k, val in pairs( table_mch ) do
+				if table.inside( e_types, Capture ) then
+					--si el elemento de la tabla es del mismo tipo que el indicado
+					if table.type( { val } ) == Capture then
+						tbl_match[ k ] = val
+					end
+				elseif Capture == val then
+					--si la captura es el valor de un elemento en la tabla
+					tbl_match[ k ] = Capture
+				elseif type( val ) == "string"
+					and type( Capture ) == "string" then
+					--si el elemento es un string con la captura indicada
+					if val:match( Capture ) then
+						tbl_match[ k ] = val
 					end
 				end
-			end
+			end --table.match( { "a", "b", x = "c", [ 5 ] = 1, 2, 3 }, "c" )
 		end
 		return tbl_match
 	end --may 30th 2018
-	
+
 	function table.unique( Table )
 		--elimina los elementos repetidos de una tabla
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
 		local tbl_uni = { }
 		effector.print_error( Table, "table", "table.unique", 1 )
 		local tbl_cop = table.duplicate( Table )
 		while #tbl_cop > 0 do
 			table.insert( tbl_uni, tbl_cop[ 1 ] )
 			tbl_cop = table.retire( tbl_cop, tbl_cop[ 1 ] )
-		end --table.unique( { 1, 2, 2, 2, 5, 6, 7, 8 } )
+		end --table.unique( { 1, 2, 2, 2, 5, 6, 7, 7, 8 } )
 		return tbl_uni
 	end --may 12th 2018
 	
 	function table.twin( ... )
-		--crea una tabla con los emparejamientos uno a uno de los elementos de las tablas ingresadas
+		--crea una tabla con los emparejamientos uno a uno posibles de los elementos de las tablas ingresadas
 		local Table = { ... }
 		if #Table == 1 then
 			Table = ...
@@ -2395,10 +2747,51 @@
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
-		effector.print_error( Table, "table", "table.type", 1 )
+		--effector.print_error( Table, "table", "table.type", 1 )
+		if type( Table ) ~= "table" then
+			return Table
+		end --february 01st 2020
 		if #Table > 0 then
 			::go_to_ini::
 			if type( Table[ 1 ] ) == "string" then
+				--shape mod: march 20th 2020
+				if Table[ 1 ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+					local is_shape = 0
+					for i = 1, #Table do
+						if type( Table[ i ] ) == "string"
+							and Table[ i ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+							is_shape = is_shape + 1
+						end
+						if type( Table[ i ] ) == "function"
+							and type( Table[ i ]( ) ) == "string" then
+							if Table[ i ]( ):match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
+								is_shape = is_shape + 1
+							end
+						end
+					end
+					if is_shape == #Table then
+						return "shape"
+					end
+				end
+				--clip
+				if Table[ 1 ]:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+					local is_clip = 0
+					for i = 1, #Table do
+						if type( Table[ i ] ) == "string"
+							and Table[ i ]:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+							is_clip = is_clip + 1
+						end
+						if type( Table[ i ] ) == "function"
+							and type( Table[ i ]( ) ) == "string" then
+							if Table[ i ]( ):match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
+								is_clip = is_clip + 1
+							end
+						end
+					end
+					if is_clip == #Table then
+						return "clip"
+					end
+				end
 				--color
 				if Table[ 1 ]:match( "%x%x%x%x%x%x" ) then
 					local is_color = 0
@@ -2442,45 +2835,8 @@
 						return "alpha"
 					end
 				end
-				--shape
-				if Table[ 1 ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
-					local is_shape = 0
-					for i = 1, #Table do
-						if type( Table[ i ] ) == "string"
-							and Table[ i ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
-							is_shape = is_shape + 1
-						end
-						if type( Table[ i ] ) == "function"
-							and type( Table[ i ]( ) ) == "string" then
-							if Table[ i ]( ):match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
-								is_shape = is_shape + 1
-							end
-						end
-					end
-					if is_shape == #Table then
-						return "shape"
-					end
-				end
-				--clip
-				if Table[ 1 ]:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
-					local is_clip = 0
-					for i = 1, #Table do
-						if type( Table[ i ] ) == "string"
-							and Table[ i ]:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
-							is_clip = is_clip + 1
-						end
-						if type( Table[ i ] ) == "function"
-							and type( Table[ i ]( ) ) == "string" then
-							if Table[ i ]( ):match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
-								is_clip = is_clip + 1
-							end
-						end
-					end
-					if is_clip == #Table then
-						return "clip"
-					end
-				end
 			end
+			--string
 			if type( Table[ 1 ] ) == "string" then
 				for i = 1, #Table do
 					if type( Table[ i ] ) ~= "string" then
@@ -2645,7 +3001,7 @@
 	end --string.count( "&HF58628&", "%x" )
 
 	function string.toval( String )
-		--convierte un string en el valor real que representa
+		--convierte un string al valor real que representa
 		if type( String ) == "function" then
 			String = String( )
 		end
@@ -3595,6 +3951,27 @@
 		end --math.format( "frame_dur" )
 		effector.print_error( String, "string", "math.format", 1 )
 		effector.print_error( Values, "table", "math.format", 2 )
+		------------------------------------------------------------------
+		if String:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+			local function shape_to_t( Shape, t )
+				--convierte las coordenadas "y" de una shape en el parámetro t
+				local Shape = shape.origin( shape.size( Shape, 100 ) )
+				local Point = shape.point( Shape, 2 )
+				local n = #Point
+				local t = math.round( math.clamp( t ) * n )
+				if type( t ) == "number" then
+					if t < 1 then
+						t = 1
+					elseif t > n then
+						t = n
+					end
+				end
+				return math.round( Point[ t ].y / 100, 3 )
+			end --"m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*"
+			local Shape = shape.ASSDraw3( String )
+			return shape_to_t( Shape, Values[ 1 ] )
+		end --january 27th 2020
+		------------------------------------------------------------------
 		local line = linefx[ ii ]
 		local max_index = string.count( String, "%%[aAcdeEfgGioqsuxX]^*" ) --modos del string.format
 		local str_mathf = format( String, unpack( table.replay( ceil( max_index / #Values ), Values ) ) )
@@ -3699,6 +4076,12 @@
 		if type( py2 ) == "string" then
 			py2 = tonumber( py2 )
 		end
+		--[[---------------------------------
+		if type( px1 ) == "string"
+			and type( px2 ) == "string"then
+			
+		end --april 08th 2020
+		--]]---------------------------------
 		if type( px1 ) ~= "table"
 			and px2 == nil then				--math.distance( Px, Py )
 			x1 = 0
@@ -4221,6 +4604,9 @@
 						end
 					end
 				end
+			end
+			if Retrurn == "table" then
+				return MBpos_x, MBpos_y
 			end
 			maxloop( MB_m )
 			MB_t = j / MB_m
@@ -7136,7 +7522,7 @@
 		:gsub( "@", "" ) --february 08th 2017 quedaba dentro de los \\t
 		:gsub( "%)M", "%)" ) --january 19th 2018 marca M de los \\t
 		-------------------------------------
-		local function tag_round( TagString )
+		local function tag_roundfx( TagString )
 			-- redondea los valores numéricos de los tags
 			local dec_round = 3 --> por default
 			if tag_round --> modificado desde "Variables [fx]:"
@@ -7152,7 +7538,7 @@
 		end
 		-------------------------------------
 		-- gsub( "\\[^\\{}]*" ) captura los tags, todos
-		return tag_round( string.change( Text, "\\org%b()", 1 ) ) --april 20th 2018
+		return tag_roundfx( string.change( Text, "\\org%b()", 1 ) ) --april 20th 2018
 	end --tag.dark
 	
 	function tag.timefx( String )
@@ -7999,6 +8385,7 @@
 					[ 13 ] = ":outclip",			[ 14 ] = ":deformed",			[ 15 ] = ":deformed2",
 					[ 16 ] = ":do_shape",			[ 17 ] = ":to_shape",			[ 18 ] = ":bord_to_shape",
 					[ 19 ] = ":to_pixels",			[ 20 ] = ":to_clip",			[ 21 ] = ":bord_to_pixels",
+					[ 22 ] = ":move",
 				}
 				local functions_fun = {
 					[ 01 ] = "text.upper",			[ 02 ] = "text.lower",			[ 03 ] = "text.tag",
@@ -8008,6 +8395,7 @@
 					[ 13 ] = "text.outclip",		[ 14 ] = "text.deformed",		[ 15 ] = "text.deformed2",
 					[ 16 ] = "text.do_shape",		[ 17 ] = "text.to_shape",		[ 18 ] = "text.bord_to_shape",
 					[ 19 ] = "text.to_pixels",		[ 20 ] = "text.to_clip",		[ 21 ] = "text.bord_to_pixels",
+					[ 22 ] = "text.move",
 				}
 				local TextS = TextS:sub( 2, -2 )
 				if table.inside( functions_str, FunctionT ) then
@@ -8364,7 +8752,8 @@
 		effector.print_error( DurDelay, "numbertablefunction", "tag.oscill", 2 )
 		local time_ini, index_ii, time_tot, dur_tag1 = 0, 0, DurTotal, DurDelay
 		local accel, dilat, offset_t, time_off, Tags = 1, 0, 0, 0, { ... }
-		if type( DurTotal ) == "table" then
+		if type( DurTotal ) == "table"
+			and type( DurTotal[ 1 ] ) ~= "table" then
 			time_ini =  DurTotal[ 1 ] or 0
 			time_tot = (DurTotal[ 2 ] or fx.dur) - time_ini
 			index_ii = (DurTotal[ 3 ] or 1) - 1
@@ -8400,11 +8789,15 @@
 		---------------------------------
 		if type( ... ) == "function" then
 			Tags = Tags[ 1 ]( )
-		end
-		-- add: july 24th 2018 ----------
+			if type( Tags ) ~= "table" then
+				Tags = { Tags }
+			end
+		end --tag.oscill( fx.dur, 1000, function( ) return "\\blurR( 4 )" end )
+		-- add: july 24th 2018 --------
 		if type( ... ) == "table" then
 			Tags = ...
 		end
+		-------------------------------
 		local time_i, time_f, tags_fx = 0, 1, ""
 		local indicator, tag_osc = 1, ""
 		if type( DurDelay ) == "number" then
@@ -8413,6 +8806,16 @@
 			dur_tag1 = 0
 		end
 		local dur_func, dur_tag2 = 0, 0
+		-------------------------------
+		if type( DurTotal ) == "table"
+			and type( DurTotal[ 1 ] ) == "table" then
+			local multi_oscill = { }
+			for i = 1, #DurTotal do
+				multi_oscill[ i ] = tag.oscill( DurTotal[ i ], DurDelay, ... )
+			end
+			return table.concat( multi_oscill ) --january 25th 2020
+		end --tag.oscill( { { 0, 500 }, { fx.dur - 500, fx.dur } }, 100, "\\1cR( )" )
+		-------------------------------
 		i = 0
 		while time_tot > 0 do
 			if type( DurDelay ) == "function" then
@@ -8423,7 +8826,7 @@
 				time_i = math.round( dur_tag1 * i + time_ini + time_off, 2 )
 				if type( DurDelay ) == "table" and
 					type( DurDelay[ 1 ] ) == "table" then
-					time_f = time_i + DurDelay[ 1 ][ 2 ]
+					time_f = time_i + (DurDelay[ 1 ][ 2 ] or 0)
 				else
 					time_f = math.round( (dur_tag1 + dilat) * (i + 1) + time_ini + time_off, 2 )
 				end
@@ -8442,6 +8845,13 @@
 				end
 				tag_osc = Tags[ indicator ]
 			end
+			-- january 15th 2020 ------------------------------------------------------------
+			if oscill_random then
+				tag_osc = table.random( Tags )
+				if type( tag_osc ) == "function" then
+					tag_osc = tag_osc( i )
+				end
+			end --tag.oscill( fx.dur, 1000, { "\\blur1", "\\blur2", "\\blur3" } )
 			---------------------------------------------------------------------------------
 			if oscill_default
 				and time_tot - dur_tag1 <= 0 then
@@ -10106,7 +10516,7 @@
 		local function ipol_number( val_1, val_2, pct_ipol )
 			local val_1 = val_1 or 0
 			local val_2 = val_2 or val_1
-			return val_1 + (val_2 - val_1) * pct_ipol
+			return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 		end
 		---------------------------------------------
 		-- interpola el valor de dos shapes o dos clips
@@ -10868,11 +11278,13 @@
 			if fx.add_tags:match( delete_tags[ i ] ) then
 				--return_kefx = return_kefx:gsub( delete_tags[ i ], "" )
 				return_kefx = string.change( return_kefx, delete_tags[ i ], nil,
-					{ "%b{}[ ]*m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*[%-?%d%.mlb ]*", "\\t[cdefirswx%~%-%d]*%b()" }
+					{ "%b{}.", "%b{}[ ]*m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*[%-?%d%.mlb ]*", "\\t[cdefirswx%~%-%d]*%b()" }
 				)
-				--mod: april 26th 2019
-				--esta modificación protege los tags que estén dentro de las transfos \\t[cdefirswx%~%-%d]*
-				--y a las shapes que ya tienen tags agregados
+				--mod: january 25th 2020
+				--esta modificación protege los tags en los siguientes casos:
+				--tags de la función text.move
+				--tags agregados de las shapes
+				--tags que estén dentro de las transfos \\t[cdefirswx%~%-%d]*
 			end
 		end
 		return return_kefx
@@ -13297,9 +13709,7 @@
 		---------------------------------
 	end
 
-	function shape.redraw( Shape, tract, Section )
-		--redibuja la Shape de forma que cada parte que la conforme
-		--"line" o "bezier" sea seccionada en partes iguales (tract)
+	function shape.redraw( Shape, tract, Section, Continued )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13309,76 +13719,103 @@
 		local tract = tract or 2
 		effector.print_error( Shape, "shape", "shape.redraw", 1 )
 		effector.print_error( tract, "number", "shape.redraw", 2 )
-		local Shape = shape.ASSDraw3( Shape )
+		local Shape = shape.ASSDraw3( Shape ) or shape.circle
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
-				Shape[ i ] = shape.redraw( Shape[ i ], tract, Section )
+				Shape[ i ] = shape.redraw( Shape[ i ], tract, Section, Continued )
 			end
 		else --recursividad: september 08th 2019
-			local shape_parts, shape_sgm, shape_redraw = { }, { }, { }
-			local shape_new = recall.shprd
-			local length, angle_, n, N
+			if Continued then
+				Shape = "m" .. Shape:gsub( "m", "l" ):sub( 2, -1 )
+			end --la convierte en una shape contínua
+			local segments, segm_tbl, c = { }
 			local Section = Section or "all"
+			local shape_new = recall.shprd
 			if j == 1 then
-				shape_new = ""
-				for c in Shape:gmatch( "[mlb]^* %-?%d+[%.%d]* [%-%.%d ]*" ) do
-					table.insert( shape_parts, c )
+				for c in Shape:gmatch( "[blm]^*%s+%-?%d+[%-%.%d ]*" ) do
+					segments[ #segments + 1 ] = c .. "x"
 				end
-				for i = 1, #shape_parts do
-					shape_sgm[ i ] = { }
-					for c in shape_parts[ i ]:gmatch( "%S+" ) do
-						table.insert( shape_sgm[ i ], tonumber( c ) or c )
-					end
-				end
-				for i = 1, #shape_sgm do
-					shape_redraw[ i ] = { }
-					if shape_sgm[ i ][ 1 ] == "m" then
-						shape_redraw[ i ] = shape_sgm[ i ]
-					elseif shape_sgm[ i ][ 1 ] == "l" then
-						if Section ~= "bezier" then
-							n = #shape_sgm[ i - 1 ]
-							length = math.distance( shape_sgm[ i - 1 ][ n - 1 ], shape_sgm[ i - 1 ][ n ], shape_sgm[ i ][ 2 ], shape_sgm[ i ][ 3 ] )
-							angle_ = math.angle( shape_sgm[ i - 1 ][ n - 1 ], shape_sgm[ i - 1 ][ n ], shape_sgm[ i ][ 2 ], shape_sgm[ i ][ 3 ] )
-							N = ceil( length / tract )
-							shape_redraw[ i ][ -1 ] = shape_sgm[ i - 1 ][ n - 1 ]
-							shape_redraw[ i ][ 0 ]  = shape_sgm[ i - 1 ][ n ]
-							for k = 1, N do
-								local Px = shape_sgm[ i - 1 ][ n - 1 ] + math.polar( angle_, length * k / N, "x" )
-								local Py = shape_sgm[ i - 1 ][ n - 0 ] + math.polar( angle_, length * k / N, "y" )
-								shape_redraw[ i ][ k ] = format( "%s %s", Px, Py )
+				segm_tbl = { [ 1 ] = segments[ 1 ]:gsub( "x", "" ) }
+				if Section == "line" then
+					for i = 2, #segments do
+						segm_tbl[ i ] = segments[ i ]:gsub( "l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x",
+							function( x2, y2 )
+								local x2, y2 = tonumber( x2 ), tonumber( y2 )
+								local x1, y1 = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x" )
+								x1, y1 = tonumber( x1 ), tonumber( y1 )
+								local angle = math.angle( x1, y1, x2, y2 )
+								local length = math.distance( x1, y1, x2, y2 )
+								local parts = length / math.round( length / tract )
+								local newline = ""
+								for k = 1, math.round( length / parts ) do
+									newline = newline .. format( "l %s %s ",
+										x1 + math.polar( angle, parts * k, "x" ),
+										y1 + math.polar( angle, parts * k, "y" )
+									)
+								end --shape.redraw( "m -5 -5 l -5 20 l 20 20 l 20 -5 l -5 -5 ", 10, "line" )
+								return newline
 							end
-							table.insert( shape_redraw[ i ], 1, "l" )
-						else
-							shape_redraw[ i ] = shape_sgm[ i ]
-						end
-					elseif shape_sgm[ i ][ 1 ] == "b" then
-						if Section ~= "line" then
-							n = #shape_sgm[ i - 1 ]
-							local Bx = { shape_sgm[ i - 1 ][ n - 1 ], shape_sgm[ i ][ 2 ], shape_sgm[ i ][ 4 ], shape_sgm[ i ][ 6 ] }
-							local By = { shape_sgm[ i - 1 ][ n - 0 ], shape_sgm[ i ][ 3 ], shape_sgm[ i ][ 5 ], shape_sgm[ i ][ 7 ] }
-							length = math.length_bezier( shape_sgm[ i - 1 ][ n - 1 ],  shape_sgm[ i - 1 ][ n ], shape_sgm[ i ][ 2 ], 
-								shape_sgm[ i ][ 3 ], shape_sgm[ i ][ 4 ], shape_sgm[ i ][ 5 ], shape_sgm[ i ][ 6 ], shape_sgm[ i ][ 7 ] )
-							N = ceil( length / tract )
-							for k = 1, N do
-								local Px, Py = math.confi_bezier( 4, Bx, By, k / N )
-								shape_redraw[ i ][ k ] = format( "%s %s", Px, Py )
+						)
+					end
+				elseif Section == "bezier" then
+					for i = 2, #segments do
+						segm_tbl[ i ] = segments[ i ]:gsub( "b%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+x",
+							function( Bezier )
+								local Bezier = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+)x" ) .. Bezier
+								local length = math.length_bezier( Bezier )
+								local parts = length / math.round( length / tract )
+								local newbezier, n = "", math.round( length / parts )
+								for k = 1, n do
+									newbezier = newbezier .. format( "l %s %s ",
+										math.confi_bezier( 4, Bezier, nil, k / n )
+									)
+								end
+								return newbezier
 							end
-							table.insert( shape_redraw[ i ], 1, "l" )
-						else
-							shape_redraw[ i ] = shape_sgm[ i ]
-						end
+						)
 					end
+				else
+					for i = 2, #segments do
+						segm_tbl[ i ] = segments[ i ]:gsub( "l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x",
+							function( x2, y2 )
+								local x2, y2 = tonumber( x2 ), tonumber( y2 )
+								local x1, y1 = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x" )
+								x1, y1 = tonumber( x1 ), tonumber( y1 )
+								local angle = math.angle( x1, y1, x2, y2 )
+								local length = math.distance( x1, y1, x2, y2 )
+								local parts = length / math.round( length / tract )
+								local newline = ""
+								for k = 1, math.round( length / parts ) do
+									newline = newline .. format( "l %s %s ",
+										x1 + math.polar( angle, parts * k, "x" ),
+										y1 + math.polar( angle, parts * k, "y" )
+									) --shape.redraw( "m -5 -5 l -5 20 l 20 20 l 20 -5 l -5 -5 " )
+								end
+								return newline
+							end
+						)
+						:gsub( "b%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+x",
+							function( Bezier )
+								local Bezier = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+)x" ) .. Bezier
+								local length = math.length_bezier( Bezier )
+								local parts = length / math.round( length / tract )
+								local newbezier, n = "", math.round( length / parts )
+								for k = 1, n do
+									newbezier = newbezier .. format( "l %s %s ",
+										math.confi_bezier( 4, Bezier, nil, k / n )
+									)
+								end
+								return newbezier
+							end
+						)
+					end --shape.redraw( "m 15 0 b 0 0 0 20 15 20 l 45 20 b 60 20 60 0 45 0 l 15 0 " )
 				end
-				for i = 1, #shape_redraw do
-					for k = 1, #shape_redraw[ i ] do
-						shape_new = shape_new .. shape_redraw[ i ][ k ] .. " "
-					end
-				end
-				Shape = remember( "shprd", shape.ASSDraw3( shape_new ) )
+				shape_new = table.concat( segm_tbl ):gsub( "x", "" )
+				Shape = remember( "shprd", shape_new )
 			end
-		end
-		return Shape --shape.redraw( { shape.circle, shape.rectangle }, 3 )
-	end --shape.redraw( shape.circle, 3 )
+		end --shape.redraw( { shape.circle, shape.rectangle }, 3 )
+		return Shape --shape.redraw( shape.circle, 3 )
+	end --rewrite: march 30th 2020
 
 	function shape.modify( Shape, modify )
 		--le aplica un "filtro" (función) a los valores numéricos de la Shape
@@ -13484,8 +13921,8 @@
 				Shape[ i ] = shape.filter2( Shape[ i ], Filter, Split )
 			end
 		else --recursividad: september 09th 2019
-			Shape = Yutils.shape.split( Shape, Split )
-			Shape = Yutils.shape.flatten( Shape, Split )
+			Shape = Yutils.shape.split( Shape, Split )		--secciona rectas
+			Shape = Yutils.shape.flatten( Shape, Split )	--secciona beziers
 			shape.info( Shape )
 			Pk = 0
 			Shape = Yutils.shape.filter( Shape,
@@ -13784,23 +14221,80 @@
 			if type( Pixel ) == "table" then
 				pxl1 = Pixel[ 1 ]
 				pxl2 = Pixel[ 2 ] or 0
+				Axis = Axis or "xy" --fix: april 04th 2020
 			end
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
-				function( x, y )
-					if Axis == "x"
-						or Axis == nil then
-						x = x + pxl1 * (y - miny) / h_shape
-					elseif Axis == "y" then
-						y = y + pxl1 * (x - minx) / w_shape
-					else
-						x = x + pxl1 * (y - miny) / h_shape
-						y = y + pxl2 * (x - minx) / w_shape
+			local funct
+			if Axis == "x"
+				or Axis == nil then
+				if type( pxl1 ) == "table" then
+					--mod: april 04th 2020
+					funct = function( x, y )
+						local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
+						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
+						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
+						return format( "%s %s", x, y )
 					end
-					return format( "%s %s", x, y )
+				else
+					funct = function( x, y )
+						local x = x + pxl1 * (y - miny) / h_shape
+						return format( "%s %s", x, y )
+					end
 				end
-			)
+			elseif Axis == "y" then
+				if type( pxl1 ) == "table" then
+					funct = function( x, y )
+						local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
+						local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
+						local y = y + signy * propy * pxl1[ 1 ] * (x - minx) / w_shape
+						return format( "%s %s", x, y )
+					end
+				else
+					funct = function( x, y )
+						local y = y + pxl1 * (x - minx) / w_shape
+						return format( "%s %s", x, y )
+					end
+				end
+			else
+				if type( pxl1 ) == "table"
+					and type( pxl2 ) == "table" then
+					funct = function( x, y )
+						local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
+						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
+						local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
+						local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
+						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
+						local y = y + signy * propy * pxl2[ 1 ] * (x - minx) / w_shape
+						return format( "%s %s", x, y )
+					end
+				elseif type( pxl1 ) == "table"
+					and type( pxl2 ) == "number" then
+					funct = function( x, y )
+						local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
+						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
+						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
+						local y = y + pxl2 * (x - minx) / w_shape
+						return format( "%s %s", x, y )
+					end
+				elseif type( pxl1 ) == "number"
+					and type( pxl2 ) == "table" then
+					funct = function( x, y )
+						local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
+						local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
+						local x = x + pxl1 * (y - miny) / h_shape
+						local y = y + signy * propy * pxl2[ 1 ] * (x - minx) / w_shape
+						return format( "%s %s", x, y )
+					end
+				else
+					funct = function( x, y )
+						local x = x + pxl1 * (y - miny) / h_shape
+						local y = y + pxl2 * (x - minx) / w_shape
+						return format( "%s %s", x, y )
+					end
+				end
+			end
+			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", funct )
 			Shape = shape.ASSDraw3( Shape )
-		end
+		end	--shape.oblique( shape.rectangle, { { 20 } }, "y" )
 		return Shape
 	end
 
@@ -13936,6 +14430,9 @@
 		else --recursividad: september 08th 2019
 			local Dx = Dx or 0
 			local Dy = Dy or 0
+			if type( Dx ) == "table" then
+				Dx, Dy = math.polar( Dx[ 1 ], Dx[ 2 ] )
+			end --add: april 12th 2020
 			effector.print_error( Dx, "number", "shape.displace", 2 )
 			effector.print_error( Dy, "number", "shape.displace", 3 )
 			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
@@ -13981,10 +14478,10 @@
 			local CenterY = CenterY or 0
 			effector.print_error( CenterX, "number", "shape.centerpos", 2 )
 			effector.print_error( CenterY, "number", "shape.centerpos", 3 )
-			local Shape = shape.displace( shape.incenter( Shape ), CenterX, CenterY )
+			Shape = shape.displace( shape.incenter( Shape ), CenterX, CenterY )
 		end
 		return Shape
-	end
+	end --shape.centerpos( shape.circle, 300, 300 )
 	
 	function shape.firstpos( Shape, pos_x, pos_y )
 		--Desplaza la Shape respecto a su primer punto, al punto P = ( pos_x, pos_y )
@@ -14144,7 +14641,9 @@
 				--la dimensión en "y" se modifica proporcionalmente según como se modifique en "x"
 				Shape = shape.ratio( Shape, { Szx }, nil, Mode )
 			else
-				Shape = shape.ratio( Shape, Szx / shape.width( Shape ), Szy / shape.height( Shape ), Mode )
+				local ratio_x = shape.width( Shape ) > 0 and Szx / shape.width( Shape ) or 1
+				local ratio_y = shape.height( Shape ) > 0 and Szy / shape.height( Shape ) or 1 --add: april 12th 2020
+				Shape = shape.ratio( Shape, ratio_x, ratio_y, Mode )
 			end --mod: january 05th 2019
 		end
 		return Shape
@@ -14163,7 +14662,7 @@
 		end
 		if type( Dxy ) == "function" then
 			Dxy = Dxy( )
-		end
+		end --shape.array( "m 0 0 l 0 10 l 10 10 l 10 0 ", 8, "radial", 20 )
 		local Loops = Loops or 6
 		local An_mo = Angles_or_mode or 0
 		local disxy = Dxy or 0
@@ -14876,25 +15375,25 @@
 					if type( Rx[ 1 ] ) == "table" then
 						randx = tostring( Rx[ 1 ][ 1 ] ) .. ">" .. tostring( Rx[ 1 ][ 2 ] )
 					else
-						randx = Rrd( Rx[ 1 ], Rx[ 2 ], 1, i, Counter2 )
+						randx = Rrd( Rx[ 1 ], Rx[ 2 ], 0.05, i, Counter2 ) --january 15th 2020	1 --> 0.05
 					end
 				elseif type( Rx ) == "function" then
 					Rx_func = Rx( )
-					randx = Rrd( -Rx_func, Rx_func, 1, i, Counter2 )
+					randx = Rrd( -Rx_func, Rx_func, 0.05, i, Counter2 )
 				else
-					randx = Rrd( -Rx, Rx, 1, i, Counter2 )
+					randx = Rrd( -Rx, Rx, 0.05, i, Counter2 )
 				end
 				if type( Ry ) == "table" then
 					if type( Ry[ 1 ] ) == "table" then
 						randy = tostring( Ry[ 1 ][ 1 ] ) .. ">" .. tostring( Ry[ 1 ][ 2 ] )
 					else
-						randy = Rrd( Ry[ 1 ], Ry[ 2 ], 1, -pi * i, Counter2 )
+						randy = Rrd( Ry[ 1 ], Ry[ 2 ], 0.05, -pi * i, Counter2 )
 					end
 				elseif type( Ry ) == "function" then
 					Ry_func = Ry( )
-					randy = Rrd( -Ry_func, Ry_func, 1, -pi * i, Counter2 )
+					randy = Rrd( -Ry_func, Ry_func, 0.05, -pi * i, Counter2 )
 				else
-					randy = Rrd( -Ry, Ry, 1, -pi * i, Counter2 )
+					randy = Rrd( -Ry, Ry, 0.05, -pi * i, Counter2 )
 				end
 				if type( randx ) == "number" then
 					if dur_t - tgdur <= 0 then
@@ -16283,6 +16782,9 @@
 			end
 		end
 		effector.print_error( Tags_s, "table", "shape.multi9", 3 )
+		if table.type( Tags_s ) == "table" then
+			Tags_s = table.concat4( Tags_s )
+		end --december 06th 2019
 		local tag_N = "{"
 		if Vertical then
 			tag_N = "{\\p0}\\N{\\p1"
@@ -16309,7 +16811,7 @@
 				)
 			end;
 			Loop = ceil( (l.width + 160) / 4 );
-			tags = table.ipol( { 255, 80, 255 }, Loop, "\\1a" )
+			tags = table.ipol( { "\\1a255", 80, 255 }, Loop )
 			shape.multi9( my_filter, Loop, tags )
 			--]]
 		end
@@ -16507,7 +17009,7 @@
 		return format( "{\\an7%s\\p1}%s", Wav_pos, Shape )
 	end --shape.from_audio( )
 	
-	function shape.to_pixels( Shape, Shape2, Seed, Filter )
+	function shape.to_pixels( Shape, Shape2, Seed, Filter, Table )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -16538,13 +17040,18 @@
 				pixel[ i ].a = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
 			end
 			pixel = remember( "pxl", pixel ) --fix: september 08th 2018
-			maxloop( #pixel_datas )
+			if Table == nil then
+				maxloop( #pixel_datas )
+			end
 		end
 		pixel_pos = effector.new_pos( pixel[ j ].x, pixel[ j ].y )
 		if Filter then
 			pixel_pos = Filter( pixel )
 		end
 		fx.pos_x, fx.pos_y = pixel[ j ].x, pixel[ j ].y
+		if Table then
+			return pixel
+		end
 		---------------------------------------
 		if Shape2 then
 			if type( Shape2 ) == "function" then
@@ -17288,6 +17795,15 @@
 	
 	function shape.deformed2( Shape, Defor_x, Defor_y )
 		--deforma los puntos internos de un conjunto de shapes matriz
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		if type( Defor_x ) == "function" then
+			Defor_x = Defor_x( )
+		end
+		if type( Defor_y ) == "function" then
+			Defor_y = Defor_y( )
+		end
 		local Shape = Shape or shape.rectangle
 		local coors = { }
 		local deforx = Defor_x or 6 * ratio
@@ -17496,8 +18012,16 @@
 	
 	function shape.insert( Shape1, Shape2 )
 		--inserta mutuamente el código de una shape en la otra
+		if type( Shape1 ) == "function" then
+			Shape1 = Shape1( )
+		end
+		if type( Shape2 ) == "function" then
+			Shape2 = Shape2( )
+		end
 		local Shape1 = Shape1 or shape.rectangle
 		local Shape2 = Shape2 or shape.circle
+		effector.print_error( Shape1, "shape", "shape.insert", 1 )
+		effector.print_error( Shape2, "shape", "shape.insert", 2 )
 		-------------------------------------
 		local function parts( Shape )
 			--segmentos de una shape
@@ -17515,7 +18039,7 @@
 			local type_part_2 = Part_2:match( "[mlb]^*" )	--tipo de segmento de shape 2
 			local type_part_3 = Part_3:match( "[mlb]^*" )	--tipo de segmento de shape 2
 			if type_part_1 == type_part_2 then
-				--si son del mismo tipo, retorna el segmento 1
+				--si son del mismo tipo, retorna ambos segmentos
 				return { Part_1, Part_2 }
 			end
 			local xpoint1, xpoint2 --punto de referencia del segmento 1
@@ -17530,7 +18054,7 @@
 				or type_part_3 == "l" then
 				--toma en cuenta las dos coordenadas del segmento
 				xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-			else --toma en cuenta las dos primeras coordenadas del segmento
+			else --toma en cuenta las dos últimas coordenadas del segmento
 				xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
 			end
 			--segmento 2 insertado en el 1
@@ -17572,7 +18096,149 @@
 		Shape_fx1[ 1 ], Shape_fx2[ 1 ] = Parts_1[ 1 ], Parts_2[ 1 ]
 		return table.concat( Shape_fx1 ), table.concat( Shape_fx2 ) --november 22nd 2019
 	end --shape.insert( shape.rectangle, shape.circle )
-
+	
+	function shape.parametric( Shape, Pixel )
+		--convierte una shape en posiciones de la función paramétrica
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		if type( Pixel ) == "function" then
+			Pixel = Pixel( )
+		end
+		local Pixel = Pixel or 4 * ratio
+		effector.print_error( Shape, "shape", "shape.parametric", 1 )
+		effector.print_error( Pixel, "number", "shape.parametric", 2 )
+		local shpxy = recall.pxy
+		local Shape = shape.ASSDraw3( Shape )
+		if j == 1 then
+			shpxy = remember( "pxy", shape.point( Shape, Pixel ) )
+		end
+		maxloop( #shpxy )
+		return shpxy[ j ] --march 31st 2020
+	end --shape.parametric( shape.circle )
+	
+	function shape.beziercut( Bezier, t )
+		--segmenta en partes a un tramo de shape bezier
+		if type( Bezier ) == "function" then
+			Bezier = Bezier( )
+		end
+		if type( t ) == "function" then
+			t = t( )
+		end
+		local t = t or 0.5
+		local function cut( Sbezier, St )
+			effector.print_error( Sbezier, "shape", "shape.beziercut", 1 )
+			effector.print_error( St, "numbertable", "shape.beziercut", 2 )
+			local Sbezier = shape.ASSDraw3( Sbezier )
+			local Parts, x, y = { }
+			for x, y in Sbezier:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*%s+)" ) do
+				Parts[ #Parts + 1 ] = {
+					x = tonumber( x ),
+					y = tonumber( y )
+				}
+			end
+			for i = 1, 3 do --longitudes y ángulos de las tres rectas principales
+				Parts[ i ].l = math.distance( Parts[ i ].x, Parts[ i ].y, Parts[ i + 1 ].x, Parts[ i + 1 ].y )
+				Parts[ i ].a =    math.angle( Parts[ i ].x, Parts[ i ].y, Parts[ i + 1 ].x, Parts[ i + 1 ].y )
+			end
+			for i = 5, 7 do --coordenadas de los tres puntos de corte principales
+				Parts[ i ] = {
+					x = Parts[ i - 4 ].x + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "x" ),
+					y = Parts[ i - 4 ].y + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "y" )
+				}
+			end
+			for i = 4, 5 do --longitudes y ángulos de las dos rectas secundarias
+				Parts[ i ].l = math.distance( Parts[ i + 1 ].x, Parts[ i + 1 ].y, Parts[ i + 2 ].x, Parts[ i + 2 ].y )
+				Parts[ i ].a =    math.angle( Parts[ i + 1 ].x, Parts[ i + 1 ].y, Parts[ i + 2 ].x, Parts[ i + 2 ].y )
+			end
+			for i = 8, 9 do --coordenadas de los dos puntos de corte secundarios
+				Parts[ i ] = {
+					x = Parts[ i - 3 ].x + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "x" ),
+					y = Parts[ i - 3 ].y + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "y" )
+				}
+			end
+			--longitud de la última recta
+			Parts[ 6 ].l = math.distance( Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 9 ].x, Parts[ 9 ].y )
+			Parts[ 6 ].a =    math.angle( Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 9 ].x, Parts[ 9 ].y )
+			--coordenadas del último punto
+			Parts[ 10 ] = {
+				x = Parts[ 8 ].x + math.polar( Parts[ 6 ].a, St * Parts[ 6 ].l, "x" ),
+				y = Parts[ 8 ].y + math.polar( Parts[ 6 ].a, St * Parts[ 6 ].l, "y" )
+			}
+			local bezier_parts = {
+				[ 1 ] = format( "m %s %s b %s %s %s %s %s %s ",
+					Parts[ 1 ].x, Parts[ 1 ].y, Parts[ 5 ].x, Parts[ 5 ].y,
+					Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 10 ].x, Parts[ 10 ].y
+				),
+				[ 2 ] = format( "m %s %s b %s %s %s %s %s %s ",
+					Parts[ 10 ].x, Parts[ 10 ].y, Parts[ 9 ].x, Parts[ 9 ].y,
+					Parts[ 7 ].x, Parts[ 7 ].y, Parts[ 4 ].x, Parts[ 4 ].y
+				)
+			}
+			return bezier_parts
+		end
+		if type( t ) == "number" then
+			if not Bezier then
+				local Beziers = {
+					[ 1 ] = {
+						[ 1 ] = "m 50 0 b 50 -28 28 -50 0 -50 ",
+						[ 2 ] = "m 0 -50 b -28 -50 -50 -28 -50 0 ",
+						[ 3 ] = "m -50 0 b -50 28 -28 50 0 50 ",
+						[ 4 ] = "m 0 50 b 28 50 50 28 50 0 "
+					},
+					[ 2 ] = {
+						[ 1 ] = "b 50 -28 28 -50 0 -50 ",
+						[ 2 ] = "b -28 -50 -50 -28 -50 0 ",
+						[ 3 ] = "b -50 28 -28 50 0 50 ",
+						[ 4 ] = "b 28 50 50 28 50 0 "
+					}
+				}
+				local Angle = t * 360
+				local indic = ceil( Angle / 90 )
+				local shape_i = Beziers[ 2 ][ indic ]
+				local shape_f = Beziers[ 1 ][ indic + 1 ]
+				local shp_pre, shp_pos, shapex = "", ""
+				local circle = { }
+				for i = 1, indic - 1 do
+					shp_pre = shp_pre .. Beziers[ 2 ][ i ]
+				end
+				if Angle % 90 == 0 then
+					for i = indic + 2, 4 do
+						shp_pos = shp_pos .. Beziers[ 2 ][ i ]
+					end
+					circle[ 1 ] = "m 50 0 " .. shp_pre .. shape_i
+					circle[ 2 ] = shape_f .. shp_pos
+				else
+					for i = indic + 1, 4 do
+						shp_pos = shp_pos .. Beziers[ 2 ][ i ]
+					end
+					shapex = cut( Beziers[ 1 ][ indic ], t )
+					circle[ 1 ] = "m 50 0 " .. shp_pre .. shapex[ 1 ]:gsub( "m %-?%d+[%.%d]* %-?%d+[%.%d]* ", "" )
+					circle[ 2 ] = shapex[ 2 ] .. shp_pos
+				end
+				return circle --add: april 22nd 2020
+			end
+			return cut( Bezier, t )
+			--shape.beziercut( "m 50 0 b 22 0 0 22 0 50 ", 0.5 )
+		elseif type( t ) == "table" then
+			local n = abs( ceil( t[ 1 ] ) )
+			if n < 3 then
+				n = 3
+			end
+			local Parts = { [ 1 ] = cut( Bezier, 1 / n ) }
+			for i = 2, n - 1 do
+				Parts[ i ] = cut( Parts[ i - 1 ][ 2 ], 1 / (n - i + 1) )
+			end
+			local total_parts = { }
+			for i = 1, #Parts do
+				total_parts[ i ] = Parts[ i ][ 1 ]
+			end
+			total_parts[ n ] = Parts[ #Parts ][ 2 ]
+			return total_parts
+			--shape.beziercut( "m 50 0 b 22 0 0 22 0 50 ", { 4 } )
+		end
+	end --april 08th 2020
+	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "text" -----------------------------------------------------------------
 	function text.upper( Text )
@@ -17730,7 +18396,7 @@
 				max_ipol = count_n
 			end
 			local function ipol_number( val_1, val_2, pct_ipol )
-				return val_1 + (val_2 - val_1) * pct_ipol
+				return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 			end
 			local ipol_function = ipol_number
 			if tag_into:match( "\\c" )
@@ -17804,8 +18470,8 @@
 		return return_text
 	end --line.text_stripped:tag( "\\fscy{ 100, 200, 50 }", { "\\1c", "&H00FFFF&", "&HFF00FF&", "&HFFFF00&" } )
 	
-	function text.rand( Text_ran, num_tran, dur_tran, extra_tags, table_rand, text_all )
-		local Text_ran = Text_ran or val_text
+	function text.rand( Text, num_tran, dur_tran, extra_tags, table_rand, text_all )
+		local Text_ran = Text or val_text
 		local dur_tran = abs( dur_tran or 2 * frame_dur )
 		local num_tran = abs( math.round( num_tran or 5 ) )
 		local del_tran = 0 --add: july 29th 2018
@@ -18193,6 +18859,80 @@
 		return syls_in_text, syls_in_text_dur
 	end
 
+	function text.text2char2( line_text_str, line_text_dur )
+	--text.text2char2( line.text, fx.dur )
+		local words_in_text = text.to_word( line_text_str, line_text_dur )
+		local syls_in_text, syls_in_text_stp, syls_in_text_dur = { }, { }, { }
+		local chars_in_text, chars_in_text_dur, chars_in_linetext_str = { }, { }
+		if text.karaoke_true( words_in_text ) == true then
+			for i = 1, #words_in_text do
+				for c_2c1 in words_in_text[ i ]:gmatch( "{.-}[\32-\122\124\126-\255]*" ) do
+					table.insert( syls_in_text, c_2c1 )
+				end
+			end
+			for i = 1, #syls_in_text do
+				if text.remove_tags( syls_in_text[ i ] ) == "" then
+					syls_in_text[ i ] = syls_in_text[ i ] .. "KEfx"
+				end
+			end
+			for i = 1, #syls_in_text do
+				syls_in_text_dur[ i ] = { }
+				for c_2c2 in syls_in_text[ i ]:gmatch( "\\[kK]^*[fo]*%d+" ) do
+					table.insert( syls_in_text_dur[ i ], c_2c2:match( "%d+" ) )
+				end
+				syls_in_text_dur[ i ] = table.op( syls_in_text_dur[ i ], "sum" ) * 10
+			end
+			for i = 1, #syls_in_text do
+				syls_in_text_stp[ i ] = text.remove_tags( syls_in_text[ i ] )
+				if syls_in_text_stp[ i ] == "KEfx" then
+					table.insert( chars_in_text, "KEfx" )
+				else
+					for c_2c3 in unicode.chars( syls_in_text_stp[ i ] ) do
+						table.insert( chars_in_text, c_2c3 )
+					end
+				end
+				if syls_in_text_stp[ i ] == "KEfx" then
+					table.insert( chars_in_text_dur, syls_in_text_dur[ i ] )
+				else
+					if syls_in_text_stp[ i ]:gsub( " ", "" ) == ""
+						or syls_in_text_stp[ i ]:gsub( " ", "" ) == syls_in_text_stp[ i ] then
+						for k = 1, unicode.len( syls_in_text_stp[ i ] ) do
+							table.insert(
+								chars_in_text_dur, math.round( syls_in_text_dur[ i ] / unicode.len( syls_in_text_stp[ i ] ), 2 )
+							)
+						end
+					else
+						local syl_in_text_stp2
+						for k = 1, unicode.len( syls_in_text_stp[ i ] ) do
+							if table.string( syls_in_text_stp[ i ] )[ k ] == " " then
+								table.insert( chars_in_text_dur, 0 )
+							else
+								syl_in_text_stp2 = syls_in_text_stp[ i ]:gsub( " ", "" )
+								table.insert( chars_in_text_dur,
+									math.round( syls_in_text_dur[ i ] / unicode.len( syl_in_text_stp2 ), 2 )
+								)
+							end
+						end
+					end
+				end
+			end
+		else
+			for c_2c4 in unicode.chars( text.remove_tags( line_text_str ) ) do
+				table.insert( chars_in_text, c_2c4 )
+			end
+			chars_in_linetext_str = #table.retire( table.duplicate( chars_in_text ), " " )
+			for i = 1, #chars_in_text do
+				if chars_in_text[ i ] == " "
+					or chars_in_text[ i ] == "" then
+					table.insert( chars_in_text_dur, 0 )
+				else
+					table.insert( chars_in_text_dur, math.round( line_text_dur / chars_in_linetext_str, 3 ) )
+				end
+			end
+		end
+		return { chars_in_text, chars_in_text_dur }
+	end
+	
 	function text.text2char( line_text_str, line_text_dur )
 		local words_in_text = text.to_word( line_text_str, line_text_dur )
 		local syls_in_text, syls_in_text_stp, syls_in_text_dur = { }, { }, { }
@@ -18537,8 +19277,6 @@
 		--june 28th 2018
 	end --local p_txt, p_dur, p_cen, p_wid, p_lef, p_rig
 	
-	-------------------------------------------------------------------------------------------------
-	-- Librería de Funciones "text" usando Yutils.lua by Youka --------------------------------------
 	function text.to_shape( Text, Scale, Tags, Offset )
 		local Text = Text or val_text
 		while Text:sub( -1, -1 ) == " " do
@@ -18725,7 +19463,7 @@
 		return ""
 	end --text.deformed2( syl.text )
 
-	function text.to_pixels( Text, Mode, Shape, Space, Ratio )
+	function text.to_pixels( Text, Mode, Shape, Space, Ratio, Table )
 		local text_2pixel = Text or val_text
 		local shape_pixel
 		local Ratio = Ratio or 1
@@ -18750,13 +19488,18 @@
 				pixel[ i ].y = fx.pos_t + pixel_datas[ i ][ 1 ] - 0.5 * (Ratio - 1) * aegisub.height( text_2pixel )
 				pixel[ i ].a = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
 			end
-			maxloop( #pixel_datas )
-			Px, Py = remember( "PPx", { } ), remember( "PPy", { } )
-			for i = 1, 5 do
-				Px[ i ] = Rrs( 20, 50 )
-				Py[ i ] = Rrs( 20, 50 )
+			if Table == nil then
+				maxloop( #pixel_datas )
+				Px, Py = remember( "PPx", { } ), remember( "PPy", { } )
+				for i = 1, 5 do
+					Px[ i ] = Rrs( 20, 50 )
+					Py[ i ] = Rrs( 20, 50 )
+				end
 			end
 		end
+		if Table then
+			return pixel
+		end --january 15th 2020
 		local to_an = math.angle( fx.move_x1, fx.move_y1, pixel[ j ].x, pixel[ j ].y )
 		---------------------------------------
 		if Shape then
@@ -19073,7 +19816,7 @@
 		local bmp_tag = effector.new_pos( posx, posy )
 		bmp_tag = format( "{%s\\1c%s\\1a%s}", bmp_tag, bmp_color[ j ], bmp_alpha[ j ] )
 		return format( "%s{\\bord0\\shad0\\fscx%s\\fscy%s\\p1}%s", bmp_tag, 100 * Size, 100 * Size, shape.pixel )
-	end -- image.to_pixels( )
+	end -- image.to_pixels( ) --image.to_pixels( "pngbar.png" )
 	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "aegisub" --------------------------------------------------------------
@@ -20696,10 +21439,9 @@
 		val_center, val_middle, val_left, val_right = l.center, l.middle, l.left, l.right
 		val_top, val_bottom, val_dur = l.top, l.bottom, line.duration
 		val_start, val_end, val_mid = line.start_time, line.end_time, line.mid_time
-		--line.i, line.n = l_counter, maxil_counter
-		val_i, val_n = l_counter, maxil_counter --line.i, line.n fix: october 09th 2018
+		val_i, val_n = l_counter, maxil_counter
 		if fx__.t_type == "Syl"
-			or fx__.t_type == "Syl Multi" then --add: october 09th 2018
+			or fx__.t_type == "Syl Multi" then
 			val_width, val_height, val_text = syl.width, syl.height, syl.text
 			val_center, val_middle, val_left, val_right = syl.center, syl.middle, syl.left, syl.right
 			val_top, val_bottom, val_dur = syl.top, syl.bottom, syl.duration
@@ -20742,7 +21484,7 @@
 			val_center, val_middle, val_left, val_right = char.center, char.middle, char.left, char.right
 			val_top, val_bottom, val_dur = char.top, char.bottom, char.duration
 			val_start, val_end, val_mid = char.start_time, char.end_time, char.start_time + char.duration / 2
-			val_i, val_n = char.i, char.n
+			val_i, val_n, val_ii = char.i, char.n, char.ii
 		end
 	end
 	
@@ -21051,7 +21793,6 @@
 				linefx[ i ].word[ k ].text			= text.karaoke_true( words_line )
 													and words_line[ k ]:gsub( "KEclip", " " )
 													or format( "{\\k%s}%s", math.round( words_dur[ k ] / 10 ), words_line[ k ] ):gsub( "KEclip", " " )
-			--	linefx[ i ].word[ k ].tags			= linefx[ i ].word[ k ].text:match( "%b{}" )
 				linefx[ i ].word[ k ].tags			= tags_in_word( linefx[ i ].word[ k ].text )
 				linefx[ i ].word[ k ].text_raw		= linefx[ i ].word[ k ].text:gsub( "KEclip", " " )
 				linefx[ i ].word[ k ].text_stripped	= text.text2stripped( words_line[ k ] )
@@ -21078,33 +21819,39 @@
 				table.insert( mmdur[ i ].wo, linefx[ i ].word[ k ].dur )
 			end
 			--
-			linefx[ i ].word.tags		= { }
-			linefx[ i ].word.width		= { }
-			linefx[ i ].word.left		= { }
-			linefx[ i ].word.center		= { }
-			linefx[ i ].word.right		= { }
-			linefx[ i ].word.top		= { }
-			linefx[ i ].word.middle		= { }
-			linefx[ i ].word.bottom		= { }
-			linefx[ i ].word.height		= { }
-			linefx[ i ].word.duration	= { }
-			linefx[ i ].word.dur		= { }
-			linefx[ i ].word.start_time	= { }
-			linefx[ i ].word.end_time	= { }
+			linefx[ i ].words = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #words_line do
-				linefx[ i ].word.tags[ k ]			= linefx[ i ].word[ k ].tags
-				linefx[ i ].word.width[ k ]			= linefx[ i ].word[ k ].width
-				linefx[ i ].word.left[ k ]			= linefx[ i ].word[ k ].left
-				linefx[ i ].word.center[ k ]		= linefx[ i ].word[ k ].center
-				linefx[ i ].word.right[ k ]			= linefx[ i ].word[ k ].right
-				linefx[ i ].word.top[ k ]			= linefx[ i ].word[ k ].top
-				linefx[ i ].word.middle[ k ]		= linefx[ i ].word[ k ].middle
-				linefx[ i ].word.bottom[ k ]		= linefx[ i ].word[ k ].bottom
-				linefx[ i ].word.height[ k ]		= linefx[ i ].word[ k ].height
-				linefx[ i ].word.duration[ k ]		= linefx[ i ].word[ k ].duration
-				linefx[ i ].word.dur[ k ]			= linefx[ i ].word[ k ].dur
-				linefx[ i ].word.start_time[ k ]	= linefx[ i ].word[ k ].start_time
-				linefx[ i ].word.end_time[ k ]		= linefx[ i ].word[ k ].end_time
+				linefx[ i ].words.tags[ k ]				= linefx[ i ].word[ k ].tags
+				linefx[ i ].words.width[ k ]			= linefx[ i ].word[ k ].width
+				linefx[ i ].words.left[ k ]				= linefx[ i ].word[ k ].left
+				linefx[ i ].words.center[ k ]			= linefx[ i ].word[ k ].center
+				linefx[ i ].words.right[ k ]			= linefx[ i ].word[ k ].right
+				linefx[ i ].words.top[ k ]				= linefx[ i ].word[ k ].top
+				linefx[ i ].words.middle[ k ]			= linefx[ i ].word[ k ].middle
+				linefx[ i ].words.bottom[ k ]			= linefx[ i ].word[ k ].bottom
+				linefx[ i ].words.height[ k ]			= linefx[ i ].word[ k ].height
+				linefx[ i ].words.duration[ k ]			= linefx[ i ].word[ k ].duration
+				linefx[ i ].words.dur[ k ]				= linefx[ i ].word[ k ].dur
+				linefx[ i ].words.start_time[ k ]		= linefx[ i ].word[ k ].start_time
+				linefx[ i ].words.end_time[ k ]			= linefx[ i ].word[ k ].end_time
+				linefx[ i ].words.text[ k ]				= linefx[ i ].word[ k ].text
+				linefx[ i ].words.text_stripped[ k ]	= linefx[ i ].word[ k ].text_stripped
 			end
 			--
 			for k = #words_line + 1, 2 * #words_line do
@@ -21153,33 +21900,39 @@
 				table.insert( mmdur[ i ].sy, linefx[ i ].syl[ k ].dur )
 			end
 			--
-			linefx[ i ].syl.tags		= { }
-			linefx[ i ].syl.width		= { }
-			linefx[ i ].syl.left		= { }
-			linefx[ i ].syl.center		= { }
-			linefx[ i ].syl.right		= { }
-			linefx[ i ].syl.top			= { }
-			linefx[ i ].syl.middle		= { }
-			linefx[ i ].syl.bottom		= { }
-			linefx[ i ].syl.height		= { }
-			linefx[ i ].syl.duration	= { }
-			linefx[ i ].syl.dur			= { }
-			linefx[ i ].syl.start_time	= { }
-			linefx[ i ].syl.end_time	= { }
+			linefx[ i ].syls = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #syls_line do
-				linefx[ i ].syl.tags[ k ]		= linefx[ i ].syl[ k ].tags
-				linefx[ i ].syl.width[ k ]		= linefx[ i ].syl[ k ].width
-				linefx[ i ].syl.left[ k ]		= linefx[ i ].syl[ k ].left
-				linefx[ i ].syl.center[ k ]		= linefx[ i ].syl[ k ].center
-				linefx[ i ].syl.right[ k ]		= linefx[ i ].syl[ k ].right
-				linefx[ i ].syl.top[ k ]		= linefx[ i ].syl[ k ].top
-				linefx[ i ].syl.middle[ k ]		= linefx[ i ].syl[ k ].middle
-				linefx[ i ].syl.bottom[ k ]		= linefx[ i ].syl[ k ].bottom
-				linefx[ i ].syl.height[ k ]		= linefx[ i ].syl[ k ].height
-				linefx[ i ].syl.duration[ k ]	= linefx[ i ].syl[ k ].duration
-				linefx[ i ].syl.dur[ k ]		= linefx[ i ].syl[ k ].dur
-				linefx[ i ].syl.start_time[ k ]	= linefx[ i ].syl[ k ].start_time
-				linefx[ i ].syl.end_time[ k ]	= linefx[ i ].syl[ k ].end_time
+				linefx[ i ].syls.tags[ k ]			= linefx[ i ].syl[ k ].tags
+				linefx[ i ].syls.width[ k ]			= linefx[ i ].syl[ k ].width
+				linefx[ i ].syls.left[ k ]			= linefx[ i ].syl[ k ].left
+				linefx[ i ].syls.center[ k ]		= linefx[ i ].syl[ k ].center
+				linefx[ i ].syls.right[ k ]			= linefx[ i ].syl[ k ].right
+				linefx[ i ].syls.top[ k ]			= linefx[ i ].syl[ k ].top
+				linefx[ i ].syls.middle[ k ]		= linefx[ i ].syl[ k ].middle
+				linefx[ i ].syls.bottom[ k ]		= linefx[ i ].syl[ k ].bottom
+				linefx[ i ].syls.height[ k ]		= linefx[ i ].syl[ k ].height
+				linefx[ i ].syls.duration[ k ]		= linefx[ i ].syl[ k ].duration
+				linefx[ i ].syls.dur[ k ]			= linefx[ i ].syl[ k ].dur
+				linefx[ i ].syls.start_time[ k ]	= linefx[ i ].syl[ k ].start_time
+				linefx[ i ].syls.end_time[ k ]		= linefx[ i ].syl[ k ].end_time
+				linefx[ i ].syls.text[ k ]			= linefx[ i ].syl[ k ].text
+				linefx[ i ].syls.text_stripped[ k ]	= linefx[ i ].syl[ k ].text_stripped
 			end
 			--
 			for k = #syls_line + 1, 2 * #syls_line do
@@ -21256,31 +22009,38 @@
 				table.insert( mmdur[ i ].sm, linefx[ i ].sylmulti[ k ].dur )
 			end
 			--
-			linefx[ i ].sylmulti.width		= { }
-			linefx[ i ].sylmulti.left		= { }
-			linefx[ i ].sylmulti.center		= { }
-			linefx[ i ].sylmulti.right		= { }
-			linefx[ i ].sylmulti.top		= { }
-			linefx[ i ].sylmulti.middle		= { }
-			linefx[ i ].sylmulti.bottom		= { }
-			linefx[ i ].sylmulti.height		= { }
-			linefx[ i ].sylmulti.duration	= { }
-			linefx[ i ].sylmulti.dur		= { }
-			linefx[ i ].sylmulti.start_time	= { }
-			linefx[ i ].sylmulti.end_time	= { }
+			linefx[ i ].sylmultis = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #sylmulti_line do
-				linefx[ i ].sylmulti.width[ k ]			= linefx[ i ].sylmulti[ k ].width
-				linefx[ i ].sylmulti.left[ k ]			= linefx[ i ].sylmulti[ k ].left
-				linefx[ i ].sylmulti.center[ k ]		= linefx[ i ].sylmulti[ k ].center
-				linefx[ i ].sylmulti.right[ k ]			= linefx[ i ].sylmulti[ k ].right
-				linefx[ i ].sylmulti.top[ k ]			= linefx[ i ].sylmulti[ k ].top
-				linefx[ i ].sylmulti.middle[ k ]		= linefx[ i ].sylmulti[ k ].middle
-				linefx[ i ].sylmulti.bottom[ k ]		= linefx[ i ].sylmulti[ k ].bottom
-				linefx[ i ].sylmulti.height[ k ]		= linefx[ i ].sylmulti[ k ].height
-				linefx[ i ].sylmulti.duration[ k ]		= linefx[ i ].sylmulti[ k ].duration
-				linefx[ i ].sylmulti.dur[ k ]			= linefx[ i ].sylmulti[ k ].dur
-				linefx[ i ].sylmulti.start_time[ k ]	= linefx[ i ].sylmulti[ k ].start_time
-				linefx[ i ].sylmulti.end_time[ k ]		= linefx[ i ].sylmulti[ k ].end_time
+				linefx[ i ].sylmultis.width[ k ]			= linefx[ i ].sylmulti[ k ].width
+				linefx[ i ].sylmultis.left[ k ]				= linefx[ i ].sylmulti[ k ].left
+				linefx[ i ].sylmultis.center[ k ]			= linefx[ i ].sylmulti[ k ].center
+				linefx[ i ].sylmultis.right[ k ]			= linefx[ i ].sylmulti[ k ].right
+				linefx[ i ].sylmultis.top[ k ]				= linefx[ i ].sylmulti[ k ].top
+				linefx[ i ].sylmultis.middle[ k ]			= linefx[ i ].sylmulti[ k ].middle
+				linefx[ i ].sylmultis.bottom[ k ]			= linefx[ i ].sylmulti[ k ].bottom
+				linefx[ i ].sylmultis.height[ k ]			= linefx[ i ].sylmulti[ k ].height
+				linefx[ i ].sylmultis.duration[ k ]			= linefx[ i ].sylmulti[ k ].duration
+				linefx[ i ].sylmultis.dur[ k ]				= linefx[ i ].sylmulti[ k ].dur
+				linefx[ i ].sylmultis.start_time[ k ]		= linefx[ i ].sylmulti[ k ].start_time
+				linefx[ i ].sylmultis.end_time[ k ]			= linefx[ i ].sylmulti[ k ].end_time
+				linefx[ i ].sylmultis.text[ k ]				= linefx[ i ].sylmulti[ k ].text
+				linefx[ i ].sylmultis.text_stripped[ k ]	= linefx[ i ].sylmulti[ k ].text_stripped
 			end
 			--
 			for k = #sylmulti_line + 1, 2 * #sylmulti_line do
@@ -21341,31 +22101,38 @@
 				table.insert( mmdur[ i ].ro, linefx[ i ].roma[ k ].dur )
 			end
 			--
-			linefx[ i ].roma.width		= { }
-			linefx[ i ].roma.left		= { }
-			linefx[ i ].roma.center		= { }
-			linefx[ i ].roma.right		= { }
-			linefx[ i ].roma.top		= { }
-			linefx[ i ].roma.middle		= { }
-			linefx[ i ].roma.bottom		= { }
-			linefx[ i ].roma.height		= { }
-			linefx[ i ].roma.duration	= { }
-			linefx[ i ].roma.dur		= { }
-			linefx[ i ].roma.start_time	= { }
-			linefx[ i ].roma.end_time	= { }
+			linefx[ i ].romas = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #roma_line do
-				linefx[ i ].roma.width[ k ]			= linefx[ i ].roma[ k ].width
-				linefx[ i ].roma.left[ k ]			= linefx[ i ].roma[ k ].left
-				linefx[ i ].roma.center[ k ]		= linefx[ i ].roma[ k ].center
-				linefx[ i ].roma.right[ k ]			= linefx[ i ].roma[ k ].right
-				linefx[ i ].roma.top[ k ]			= linefx[ i ].roma[ k ].top
-				linefx[ i ].roma.middle[ k ]		= linefx[ i ].roma[ k ].middle
-				linefx[ i ].roma.bottom[ k ]		= linefx[ i ].roma[ k ].bottom
-				linefx[ i ].roma.height[ k ]		= linefx[ i ].roma[ k ].height
-				linefx[ i ].roma.duration[ k ]		= linefx[ i ].roma[ k ].duration
-				linefx[ i ].roma.dur[ k ]			= linefx[ i ].roma[ k ].dur
-				linefx[ i ].roma.start_time[ k ]	= linefx[ i ].roma[ k ].start_time
-				linefx[ i ].roma.end_time[ k ]		= linefx[ i ].roma[ k ].end_time
+				linefx[ i ].romas.width[ k ]			= linefx[ i ].roma[ k ].width
+				linefx[ i ].romas.left[ k ]				= linefx[ i ].roma[ k ].left
+				linefx[ i ].romas.center[ k ]			= linefx[ i ].roma[ k ].center
+				linefx[ i ].romas.right[ k ]			= linefx[ i ].roma[ k ].right
+				linefx[ i ].romas.top[ k ]				= linefx[ i ].roma[ k ].top
+				linefx[ i ].romas.middle[ k ]			= linefx[ i ].roma[ k ].middle
+				linefx[ i ].romas.bottom[ k ]			= linefx[ i ].roma[ k ].bottom
+				linefx[ i ].romas.height[ k ]			= linefx[ i ].roma[ k ].height
+				linefx[ i ].romas.duration[ k ]			= linefx[ i ].roma[ k ].duration
+				linefx[ i ].romas.dur[ k ]				= linefx[ i ].roma[ k ].dur
+				linefx[ i ].romas.start_time[ k ]		= linefx[ i ].roma[ k ].start_time
+				linefx[ i ].romas.end_time[ k ]			= linefx[ i ].roma[ k ].end_time
+				linefx[ i ].romas.text[ k ]				= linefx[ i ].roma[ k ].text
+				linefx[ i ].romas.text_stripped[ k ]	= linefx[ i ].roma[ k ].text_stripped
 			end
 			--
 			for k = #roma_line + 1, 2 * #roma_line do
@@ -21422,31 +22189,38 @@
 				table.insert( mmdur[ i ].hi, linefx[ i ].hira[ k ].dur )
 			end
 			--
-			linefx[ i ].hira.width		= { }
-			linefx[ i ].hira.left		= { }
-			linefx[ i ].hira.center		= { }
-			linefx[ i ].hira.right		= { }
-			linefx[ i ].hira.top		= { }
-			linefx[ i ].hira.middle		= { }
-			linefx[ i ].hira.bottom		= { }
-			linefx[ i ].hira.height		= { }
-			linefx[ i ].hira.duration	= { }
-			linefx[ i ].hira.dur		= { }
-			linefx[ i ].hira.start_time	= { }
-			linefx[ i ].hira.end_time	= { }
+			linefx[ i ].hiras = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #hira_line do
-				linefx[ i ].hira.width[ k ]			= linefx[ i ].hira[ k ].width
-				linefx[ i ].hira.left[ k ]			= linefx[ i ].hira[ k ].left
-				linefx[ i ].hira.center[ k ]		= linefx[ i ].hira[ k ].center
-				linefx[ i ].hira.right[ k ]			= linefx[ i ].hira[ k ].right
-				linefx[ i ].hira.top[ k ]			= linefx[ i ].hira[ k ].top
-				linefx[ i ].hira.middle[ k ]		= linefx[ i ].hira[ k ].middle
-				linefx[ i ].hira.bottom[ k ]		= linefx[ i ].hira[ k ].bottom
-				linefx[ i ].hira.height[ k ]		= linefx[ i ].hira[ k ].height
-				linefx[ i ].hira.duration[ k ]		= linefx[ i ].hira[ k ].duration
-				linefx[ i ].hira.dur[ k ]			= linefx[ i ].hira[ k ].dur
-				linefx[ i ].hira.start_time[ k ]	= linefx[ i ].hira[ k ].start_time
-				linefx[ i ].hira.end_time[ k ]		= linefx[ i ].hira[ k ].end_time
+				linefx[ i ].hiras.width[ k ]			= linefx[ i ].hira[ k ].width
+				linefx[ i ].hiras.left[ k ]				= linefx[ i ].hira[ k ].left
+				linefx[ i ].hiras.center[ k ]			= linefx[ i ].hira[ k ].center
+				linefx[ i ].hiras.right[ k ]			= linefx[ i ].hira[ k ].right
+				linefx[ i ].hiras.top[ k ]				= linefx[ i ].hira[ k ].top
+				linefx[ i ].hiras.middle[ k ]			= linefx[ i ].hira[ k ].middle
+				linefx[ i ].hiras.bottom[ k ]			= linefx[ i ].hira[ k ].bottom
+				linefx[ i ].hiras.height[ k ]			= linefx[ i ].hira[ k ].height
+				linefx[ i ].hiras.duration[ k ]			= linefx[ i ].hira[ k ].duration
+				linefx[ i ].hiras.dur[ k ]				= linefx[ i ].hira[ k ].dur
+				linefx[ i ].hiras.start_time[ k ]		= linefx[ i ].hira[ k ].start_time
+				linefx[ i ].hiras.end_time[ k ]			= linefx[ i ].hira[ k ].end_time
+				linefx[ i ].hiras.text[ k ]				= linefx[ i ].hira[ k ].text
+				linefx[ i ].hiras.text_stripped[ k ]	= linefx[ i ].hira[ k ].text_stripped
 			end
 			--
 			for k = #hira_line + 1, 2 * #hira_line do
@@ -21503,31 +22277,38 @@
 				table.insert( mmdur[ i ].ka, linefx[ i ].kata[ k ].dur )
 			end
 			--
-			linefx[ i ].kata.width		= { }
-			linefx[ i ].kata.left		= { }
-			linefx[ i ].kata.center		= { }
-			linefx[ i ].kata.right		= { }
-			linefx[ i ].kata.top		= { }
-			linefx[ i ].kata.middle		= { }
-			linefx[ i ].kata.bottom		= { }
-			linefx[ i ].kata.height		= { }
-			linefx[ i ].kata.duration	= { }
-			linefx[ i ].kata.dur		= { }
-			linefx[ i ].kata.start_time	= { }
-			linefx[ i ].kata.end_time	= { }
+			linefx[ i ].katas = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #kata_line do
-				linefx[ i ].kata.width[ k ]			= linefx[ i ].kata[ k ].width
-				linefx[ i ].kata.left[ k ]			= linefx[ i ].kata[ k ].left
-				linefx[ i ].kata.center[ k ]		= linefx[ i ].kata[ k ].center
-				linefx[ i ].kata.right[ k ]			= linefx[ i ].kata[ k ].right
-				linefx[ i ].kata.top[ k ]			= linefx[ i ].kata[ k ].top
-				linefx[ i ].kata.middle[ k ]		= linefx[ i ].kata[ k ].middle
-				linefx[ i ].kata.bottom[ k ]		= linefx[ i ].kata[ k ].bottom
-				linefx[ i ].kata.height[ k ]		= linefx[ i ].kata[ k ].height
-				linefx[ i ].kata.duration[ k ]		= linefx[ i ].kata[ k ].duration
-				linefx[ i ].kata.dur[ k ]			= linefx[ i ].kata[ k ].dur
-				linefx[ i ].kata.start_time[ k ]	= linefx[ i ].kata[ k ].start_time
-				linefx[ i ].kata.end_time[ k ]		= linefx[ i ].kata[ k ].end_time
+				linefx[ i ].katas.width[ k ]			= linefx[ i ].kata[ k ].width
+				linefx[ i ].katas.left[ k ]				= linefx[ i ].kata[ k ].left
+				linefx[ i ].katas.center[ k ]			= linefx[ i ].kata[ k ].center
+				linefx[ i ].katas.right[ k ]			= linefx[ i ].kata[ k ].right
+				linefx[ i ].katas.top[ k ]				= linefx[ i ].kata[ k ].top
+				linefx[ i ].katas.middle[ k ]			= linefx[ i ].kata[ k ].middle
+				linefx[ i ].katas.bottom[ k ]			= linefx[ i ].kata[ k ].bottom
+				linefx[ i ].katas.height[ k ]			= linefx[ i ].kata[ k ].height
+				linefx[ i ].katas.duration[ k ]			= linefx[ i ].kata[ k ].duration
+				linefx[ i ].katas.dur[ k ]				= linefx[ i ].kata[ k ].dur
+				linefx[ i ].katas.start_time[ k ]		= linefx[ i ].kata[ k ].start_time
+				linefx[ i ].katas.end_time[ k ]			= linefx[ i ].kata[ k ].end_time
+				linefx[ i ].katas.text[ k ]				= linefx[ i ].kata[ k ].text
+				linefx[ i ].katas.text_stripped[ k ]	= linefx[ i ].kata[ k ].text_stripped
 			end
 			--
 			for k = #kata_line + 1, 2 * #kata_line do
@@ -21573,34 +22354,51 @@
 				table.insert( mmwth[ i ].ch, linefx[ i ].char[ k ].width )
 				table.insert( mmdur[ i ].ch, linefx[ i ].char[ k ].dur )
 			end
-			--
-			linefx[ i ].char.tags		= { }
-			linefx[ i ].char.width		= { }
-			linefx[ i ].char.left		= { }
-			linefx[ i ].char.center		= { }
-			linefx[ i ].char.right		= { }
-			linefx[ i ].char.top		= { }
-			linefx[ i ].char.middle		= { }
-			linefx[ i ].char.bottom		= { }
-			linefx[ i ].char.height		= { }
-			linefx[ i ].char.duration	= { }
-			linefx[ i ].char.dur		= { }
-			linefx[ i ].char.start_time	= { }
-			linefx[ i ].char.end_time	= { }
+			--[[
+			if fx__.noblank == false then
+				for k = 1, #chars_line do
+					if linefx[ i ].char[ k ]
+						and linefx[ i ].char[ k ].text_stripped == " " then
+						table.remove( linefx[ i ].char, k )
+					end
+				end
+				local text_without_spaces = linefx[ i ].text:gsub( " ", "" )
+				chars_line = text.text2char( text_without_spaces, linefx[ i ].duration )
+			end
+			--]]
+			linefx[ i ].chars = {
+				tags			= { },
+				width			= { },
+				left			= { },
+				center			= { },
+				right			= { },
+				top				= { },
+				middle			= { },
+				bottom			= { },
+				height			= { },
+				duration		= { },
+				dur				= { },
+				start_time		= { },
+				end_time		= { },
+				text			= { },
+				text_stripped	= { }
+			}
 			for k = 1, #chars_line do
-				linefx[ i ].char.tags[ k ]			= linefx[ i ].char[ k ].tags
-				linefx[ i ].char.width[ k ]			= linefx[ i ].char[ k ].width
-				linefx[ i ].char.left[ k ]			= linefx[ i ].char[ k ].left
-				linefx[ i ].char.center[ k ]		= linefx[ i ].char[ k ].center
-				linefx[ i ].char.right[ k ]			= linefx[ i ].char[ k ].right
-				linefx[ i ].char.top[ k ]			= linefx[ i ].char[ k ].top
-				linefx[ i ].char.middle[ k ]		= linefx[ i ].char[ k ].middle
-				linefx[ i ].char.bottom[ k ]		= linefx[ i ].char[ k ].bottom
-				linefx[ i ].char.height[ k ]		= linefx[ i ].char[ k ].height
-				linefx[ i ].char.duration[ k ]		= linefx[ i ].char[ k ].duration
-				linefx[ i ].char.dur[ k ]			= linefx[ i ].char[ k ].dur
-				linefx[ i ].char.start_time[ k ]	= linefx[ i ].char[ k ].start_time
-				linefx[ i ].char.end_time[ k ]		= linefx[ i ].char[ k ].end_time
+				linefx[ i ].chars.tags[ k ]				= linefx[ i ].char[ k ].tags
+				linefx[ i ].chars.width[ k ]			= linefx[ i ].char[ k ].width
+				linefx[ i ].chars.left[ k ]				= linefx[ i ].char[ k ].left
+				linefx[ i ].chars.center[ k ]			= linefx[ i ].char[ k ].center
+				linefx[ i ].chars.right[ k ]			= linefx[ i ].char[ k ].right
+				linefx[ i ].chars.top[ k ]				= linefx[ i ].char[ k ].top
+				linefx[ i ].chars.middle[ k ]			= linefx[ i ].char[ k ].middle
+				linefx[ i ].chars.bottom[ k ]			= linefx[ i ].char[ k ].bottom
+				linefx[ i ].chars.height[ k ]			= linefx[ i ].char[ k ].height
+				linefx[ i ].chars.duration[ k ]			= linefx[ i ].char[ k ].duration
+				linefx[ i ].chars.dur[ k ]				= linefx[ i ].char[ k ].dur
+				linefx[ i ].chars.start_time[ k ]		= linefx[ i ].char[ k ].start_time
+				linefx[ i ].chars.end_time[ k ]			= linefx[ i ].char[ k ].end_time
+				linefx[ i ].chars.text[ k ]				= linefx[ i ].char[ k ].text
+				linefx[ i ].chars.text_stripped[ k ]	= linefx[ i ].char[ k ].text_stripped
 			end
 			--
 			for k = #chars_line + 1, 2 * #chars_line do
