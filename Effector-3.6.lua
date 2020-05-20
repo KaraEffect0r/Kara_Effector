@@ -1,5 +1,5 @@
 ﻿	-------------------------------------------------------------------------------------------------------------------------------
-	--[[ ( c ) Copyright 2012 - 2020, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki					  April 04th 2020 Colombia ]]--
+	--[[ ( c ) Copyright 2012 - 2020, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki						May 19th 2020 Colombia ]]--
 	-------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.6 legacy
 	--> Contáctanos:

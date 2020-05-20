@@ -158,6 +158,7 @@
 			math.to16( Num )
 			math.clamp( Num, Min, Max )
 			math.clamp2( Num, Min, Max )
+			math.cubic( c1, c2, c3, c4 )
 		
 		librería tag
 		+	tag.redefine( String )
@@ -365,7 +366,7 @@
 		+	shape.trim( Shape, Lines, Mark, Ratio )
 		+	shape.reduce( Shape )
 		+	shape.inclip( Tags )
-		<	shape.matrix( Shape, Matrix )
+		<	shape.matrix( Shape, ... )
 		/	shape.do_shape( Shape1, Shape2, Mode, Split )
 		<	shape.to_outline( Shape, Bord )
 		/	shape.point( Shape, Pixel )
@@ -377,8 +378,16 @@
 			shape.intersect( Shape1, Shape2 )
 			shape.insert( Shape1, Shape2 )
 			shape.parametric( Shape, Pixel )
-			shape.beziercut( Bezier, t )
+			shape.cut( Tract, t )
+			shape.pointpos( Shape, P1, P2 )
 		
+		librería graph
+			graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
+			graph.line( Configs, Bord )
+			graph.banner( Width, Height, Mode, Bord )
+			graph.gear( Radius, n, Dent, Double )
+			graph.cake( Radius, Angle, Bord, Space, Tags, Extra )
+	
 		librería text
 		-	text.upper( Text )
 		-	text.lower( Text )
@@ -473,10 +482,10 @@
 		+	effector.macro_fx( subtitles, selected_lines, active_line )
 	}
 	--]]
-	-----------------------------------------------------------------------------------------------------------------------------------
-	alpha = { } color = { } effector = { } image = { } random = { } recall = { } shape = { } tag = { } temp = { } text = { } file = { }
-	-----------------------------------------------------------------------------------------------------------------------------------
-	-- Librería de shapes prediceñadas del Kara Effector ------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------------------------
+	alpha = { } color = { } effector = { } image = { } random = { } recall = { } shape = { } tag = { } temp = { } text = { } file = { } graph = { }
+	-----------------------------------------------------------------------------------------------------------------------------------------------
+	-- Librería de shapes prediceñadas del Kara Effector ------------------------------------------------------------------------------------------
 	shape.circle	= "m 50 0 b 22 0 0 22 0 50 b 0 78 22 100 50 100 b 78 100 100 78 100 50 b 100 22 78 0 50 0 "
 	shape.triangle  = "m 50 0 l 0 86 l 100 86 l 50 0 "
 	shape.rectangle = "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
@@ -1517,7 +1526,7 @@
 	end --december 13th 2018
 
 	function table.replay( Len, ... )	-->Len = 3; t = {a, b, c} -->return {a,b,c, a,b,c, a,b,c}
-		--replica n cantidad de veces a los elementos de una tabla, o los ingresados
+		--replica n cantidad de veces a los elementos de una tabla, o los elementos ingresados
 		if type( Len ) == "function" then
 			Len = Len( )
 		end
@@ -2392,6 +2401,7 @@
 			---------------------------------------------
 			-- interpola el valor de dos shapes o dos clips
 			local function ipol_shpclip( val_1, val_2, pct_ipol )
+				--table.ipol( { shape.circle .. shape.displace( shape.circle, 200, 0 ), shape.triangle }, 50 )[ j ]
 				local val_1, val_2 = shape.insert( val_1, val_2 )
 				local tbl_1, tbl_2, k = { }, { }, 0
 				for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
@@ -2531,54 +2541,6 @@
 		return tbl_ipol_funct( Table, Size, Tags, algorithm )
 	end --january 11th 2018
 	
-	function table.ipol2( Table, Size, Tags, algorithm )
-		--retorna una tabla con la interpolación de los valores de la tabla ingresada
-		--interpola números, shapes, clips vectoriales, clips rectangulares, colores y transparencias
-		local Table = Table or { 0, 1 }
-		local Size = ceil( abs( Size or 10 ) )
-		if #Table == 1 then
-			Table[ 2 ] = Table[ 1 ]
-		end
-		if Size < #Table then
-			Size = #Table
-		end
-		local algorithm = algorithm or "%s" -- algorithm example: "%s ^ 0.5"
-		local function tbl_ipol_funct( Table_ipol, Size_ipol, Tags_ipol, algorithm_ipol )
-			local ipols = { }
-			for i = 1, Size_ipol do
-				ipols[ i ] = math.round( tag.ipol( math.format( algorithm_ipol, (i - 1) / (Size_ipol - 1) ), Table_ipol ), 3 )
-			end
-			if Tags_ipol then --concatena los valores con los Tags_ipol, si los hay
-				return table.concat2( ipols, Tags_ipol )
-			end
-			return ipols
-		end
-		-- determina si los elementos son tablas, clip's o shapes
-		local function type_table( Table )
-			if type( Table[ 1 ] ) == "table" then
-				for i = 1, #Table do
-					if type( Table[ i ] ) ~= "table" then
-						return "mixed"
-					end
-				end
-				return "table"
-			end
-			return "others"
-		end
-		-------------------------------------------------------------
-		if type_table( Table ) == "table" then
-			local tbls_ipol, Tags_tbl = { }, Tags
-			for i = 1, #Table do
-				if type( Tags ) == "table" then
-					Tags_tbl = Tags[ i ] or ""
-				end
-				itbls_ipol[ i ] = tbl_ipol_funct( Table[ i ], Size, Tags_tbl, algorithm )
-			end
-			return table.concat4( tbls_ipol )
-		end --october 07th 2019
-		return tbl_ipol_funct( Table, Size, Tags, algorithm )
-	end --table.ipol2( { 12, 31, 20, 13, 47 }, 21, "\\fscy" )
-
 	function table.capture( String, Capture )
 		--crea una tabla con las capturas de un String o los strings de una tabla
 		--genera una tabla independiente por cada uno de los strings
@@ -2598,14 +2560,31 @@
 			local Capture = Capture or ""
 			effector.print_error( String, "string", "table.capture", 1 )
 			effector.print_error( Capture, "stringtable", "table.capture", 2 )
+			local special_cap = {
+				[ "color" ] = "[\\%dvc]*[&#]^*H?%x%x%x%x%x%x&?",
+				[ "alpha" ] = "[\\%dvc]*[&#]^*H?%x%x&?",
+				[ "number" ] = "%-?%d+[%.%d]*",
+				[ "shape" ] = "m%s+%-?%d+[%.%-%d blm]*",
+				[ "clip" ] = "\\i?clip%b()",
+				[ "word" ] = "%S+",
+			}--add: may 10th 2020
+			local captbl
 			if type( Capture ) == "table" then
 				for i = 1, #Capture do
-					for cap in String:gmatch( Capture[ i ] ) do
+					captbl = Capture[ i ]
+					if special_cap[ captbl ] then
+						captbl = special_cap[ captbl ]
+					end --add may 09th 2020
+					for cap in String:gmatch( captbl ) do
 						table.insert( tbl_cap, cap )
 					end
 				end
 			else
-				for cap in String:gmatch( Capture ) do
+				captbl = Capture
+				if special_cap[ captbl ] then
+					captbl = special_cap[ captbl ]
+				end
+				for cap in String:gmatch( captbl ) do
 					table.insert( tbl_cap, cap )
 				end
 			end
@@ -3000,7 +2979,7 @@
 		return str_count
 	end --string.count( "&HF58628&", "%x" )
 
-	function string.toval( String )
+	function string.toval( String, val )
 		--convierte un string al valor real que representa
 		if type( String ) == "function" then
 			String = String( )
@@ -3008,6 +2987,7 @@
 		local String = String or ""
 		effector.print_error( String, "string", "string.toval", 1 )
 		local line, str_to_val = linefx[ ii ]
+		--val = val
 		if type( String ) == "string" then
 			-- march 15th 2018 ----------------------
 			String = String:gsub( "%.line", ".LINE" )
@@ -4036,10 +4016,9 @@
 		end
 		return Num_round
 	end
-	
+
 	function math.distance( px1, py1, px2, py2 )
 		--mide la distancia entre dos puntos o entre un punto y el origen ( 0, 0 )
-		local x1, x2, y1, y2 = 0, 0, 0, 0
 		if px1 then
 			if type( px1 ) == "function" then
 				px1 = px1( )
@@ -4064,171 +4043,193 @@
 			end
 			effector.print_error( py2, "numberstringtable", "math.distance", 4 )
 		end
-		if type( px1 ) == "string" then
-			px1 = tonumber( px1 )
+		local x1, x2, y1, y2
+		if type( px1 ) == "table" then
+			--si el primer parámetro es tabla
+			x1, y1 = px1[ 1 ], px1[ 2 ]
+			if px1[ 3 ]
+				and px1[ 4 ] then
+				x2, y2 = px1[ 3 ], px1[ 4 ]
+			else
+				x2, y2 = tonumber( py1 ), tonumber( px2 )
+			end
 		end
-		if type( px2 ) == "string" then
-			px2 = tonumber( px2 )
+		if type( py1 ) == "table" then
+			--si el segund parámetro es tabla
+			x2, y2 = py1[ 1 ], py1[ 2 ]
 		end
-		if type( py1 ) == "string" then
-			py1 = tonumber( py1 )
+		if type( px2 ) == "table" then
+			--si el tercer parámetro es tabla
+			x2, y2 = px2[ 1 ], px2[ 2 ]
 		end
-		if type( py2 ) == "string" then
-			py2 = tonumber( py2 )
-		end
-		--[[---------------------------------
 		if type( px1 ) == "string"
-			and type( px2 ) == "string"then
-			
-		end --april 08th 2020
-		--]]---------------------------------
-		if type( px1 ) ~= "table"
-			and px2 == nil then				--math.distance( Px, Py )
-			x1 = 0
-			y1 = 0
-			x2 = px1
-			y2 = py1
-		elseif type( px1 ) ~= "table"
-			and type( px2 ) ~= "table" then	--math.distance( Px1, Py1, Px2, Py2 )
-			x1 = px1
-			y1 = py1
-			x2 = px2
-			y2 = py2
-		elseif type( px1 ) ~= "table"
-			and type( px2 ) == "table" then	--math.distance( Px1, Py1, { Px2, Py2 } )
-			x1 = px1
-			y1 = py1
-			x2 = px2[ 1 ]
-			y2 = px2[ 2 ]
-		elseif type( px1 ) == "table"
-			and py1 == nil then				--math.distance( { Px, Py } )
-			x1 = 0
-			y1 = 0
-			x2 = px1[ 1 ]
-			y2 = px1[ 2 ]
-		elseif type( px1 ) == "table"
-			and type( py1 ) == "table" then	--math.distance( { Px1, Py1 }, { Px2, Py2 } )
-			x1 = px1[ 1 ]
-			y1 = px1[ 2 ]
-			x2 = py1[ 1 ]
-			y2 = py1[ 2 ]
-		elseif type( px1 ) == "table"
-			and type( py1 ) ~= "table" then	--math.distance( { Px1, Py1 }, Px2, Py2 )
-			x1 = px1[ 1 ]
-			y1 = px1[ 2 ]
-			x2 = py1
-			y2 = px2
+			and px1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then --"-5 6"
+			--si el primer parámetro es un punto o segmento shape
+			if px1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+[blm ]*%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then --"0 0 l 0 0"
+				x1, y1, x2, y2 = px1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+[blm ]*(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+			else
+				x1, y1 = px1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+				x2, y2 = py1, px2
+			end
+			x1, y1, x2, y2 = tonumber( x1 ), tonumber( y1 ), tonumber( x2 ), tonumber( y2 )
+		end
+		if type( py1 ) == "string"
+			and py1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			--si el segundo parámetro es un punto o segmento shape
+		   x2, y2 = py1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+		   x2, y2 = tonumber( x2 ), tonumber( y2 )
+		end
+		if type( px2 ) == "string"
+			and px2:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			--si el tercer parámetro es un punto o segmento shape
+		   x2, y2 = px2:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+		   x2, y2 = tonumber( x2 ), tonumber( y2 )
+		end
+		if type( tonumber( px1 ) ) == "number"
+			and type( tonumber( py1 ) ) == "number" then
+			--si los dos primeros parámetros son number/string
+			x1 = tonumber( px1 )
+			y1 = tonumber( py1 )
+		end
+		if type( tonumber( px1 ) ) == "number"
+			and type( tonumber( py1 ) ) == "number" then 
+			if type( tonumber( px2 ) ) == "number" then
+				x2 = tonumber( px2 )
+			end
+			if type( tonumber( py2 ) ) == "number" then
+				y2 = tonumber( py2 )
+			end
+		end
+		if x2 == nil then
+			x2, y2 = 0, 0
+		end
+		if not x1 then
+			return 0
 		end
 		return math.round( ((x2 - x1) ^ 2 + (y2 - y1) ^ 2) ^ 0.5, 3 )
-	end
+	end --rewrite: april 27th 2020
 	
 	function math.angle( px1, py1, px2, py2 )
 		--mide el ángulo entre dos puntos o entre el origen ( 0, 0 ) y un punto
-		local angle, x1, x2, y1, y2 = 0, 0, 0, 0, 0
+		--este ángulo es medido según las coordenadas del ASSDraw3
 		if px1 then
 			if type( px1 ) == "function" then
 				px1 = px1( )
 			end
-			effector.print_error( px1, "numberstringtable", "math.distance", 1 )
+			effector.print_error( px1, "numberstringtable", "math.angle", 1 )
 		end
 		if py1 then
 			if type( py1 ) == "function" then
 				py1 = py1( )
 			end
-			effector.print_error( py1, "numberstringtable", "math.distance", 2 )
+			effector.print_error( py1, "numberstringtable", "math.angle", 2 )
 		end
 		if px2 then
 			if type( px2 ) == "function" then
 				px2 = px2( )
 			end
-			effector.print_error( px2, "numberstringtable", "math.distance", 3 )
+			effector.print_error( px2, "numberstringtable", "math.angle", 3 )
 		end
 		if py2 then
 			if type( py2 ) == "function" then
 				py2 = py2( )
 			end
-			effector.print_error( py2, "numberstringtable", "math.distance", 4 )
+			effector.print_error( py2, "numberstringtable", "math.angle", 4 )
 		end
-		if type( px1 ) == "string" then
-			px1 = tonumber( px1 )
+		local x1, x2, y1, y2
+		if type( px1 ) == "table" then
+			--si el primer parámetro es tabla
+			x1, y1 = px1[ 1 ], px1[ 2 ]
+			if px1[ 3 ]
+				and px1[ 4 ] then
+				x2, y2 = px1[ 3 ], px1[ 4 ]
+			else
+				x2, y2 = tonumber( py1 ), tonumber( px2 )
+			end
 		end
-		if type( px2 ) == "string" then
-			px2 = tonumber( px2 )
+		if type( py1 ) == "table" then
+			--si el segund parámetro es tabla
+			x2, y2 = py1[ 1 ], py1[ 2 ]
 		end
-		if type( py1 ) == "string" then
-			py1 = tonumber( py1 )
+		if type( px2 ) == "table" then
+			--si el tercer parámetro es tabla
+			x2, y2 = px2[ 1 ], px2[ 2 ]
 		end
-		if type( py2 ) == "string" then
-			py2 = tonumber( py2 )
+		if type( px1 ) == "string"
+			and px1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			--si el primer parámetro es un punto o segmento shape
+			if px1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+[blm ]*%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+				x1, y1, x2, y2 = px1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+[blm ]*(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+			else
+				x1, y1 = px1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+				x2, y2 = py1, px2
+			end
+			x1, y1, x2, y2 = tonumber( x1 ), tonumber( y1 ), tonumber( x2 ), tonumber( y2 )
 		end
-		if type( px1 ) ~= "table"
-			and px2 == nil then
-			x1 = 0
-			y1 = 0
-			x2 = px1
-			y2 = py1
-		elseif type( px1 ) ~= "table"
-			and type( px2 ) ~= "table" then
-			x1 = px1
-			y1 = py1
-			x2 = px2
-			y2 = py2
-		elseif type( px1 ) ~= "table"
-			and type( px2 ) == "table" then
-			x1 = px1
-			y1 = py1
-			x2 = px2[ 1 ]
-			y2 = px2[ 2 ]
-		elseif type( px1 ) == "table"
-			and py1 == nil then
-			x1 = 0
-			y1 = 0
-			x2 = px1[ 1 ]
-			y2 = px1[ 2 ]
-		elseif type( px1 ) == "table"
-			and type( py1 ) == "table" then
-			x1 = px1[ 1 ]
-			y1 = px1[ 2 ]
-			x2 = py1[ 1 ]
-			y2 = py1[ 2 ]
-		elseif type( px1 ) == "table"
-			and type( py1 ) ~= "table" then
-			x1 = px1[ 1 ]
-			y1 = px1[ 2 ]
-			x2 = py1
-			y2 = px2
+		if type( py1 ) == "string"
+			and py1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			--si el segundo parámetro es un punto o segmento shape
+		   x2, y2 = py1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+		   x2, y2 = tonumber( x2 ), tonumber( y2 )
+		end
+		if type( px2 ) == "string"
+			and px2:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			--si el tercer parámetro es un punto o segmento shape
+		   x2, y2 = px2:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+		   x2, y2 = tonumber( x2 ), tonumber( y2 )
+		end
+		if type( tonumber( px1 ) ) == "number"
+			and type( tonumber( py1 ) ) == "number" then
+			--si los dos primeros parámetros son number/string
+			x1 = tonumber( px1 )
+			y1 = tonumber( py1 )
+		end
+		if type( tonumber( px1 ) ) == "number"
+			and type( tonumber( py1 ) ) == "number" then 
+			if type( tonumber( px2 ) ) == "number" then
+				x2 = tonumber( px2 )
+			end
+			if type( tonumber( py2 ) ) == "number" then
+				y2 = tonumber( py2 )
+			end
+		end
+		if x2 == nil then
+			x2, y2 = x1, y1
+			x1, y1 = 0, 0
+		end
+		if x2 == nil
+			or (x1 == x2 and y1 == y2) then
+			return 0
 		end
 		local Ang = deg( atan( (y2 - y1) / (x2 - x1) ) )
 		if x2 > x1
-			and y2 > y1 then
-			angle = 360 - Ang
-		elseif x2 > x1
-			and y2 < y1 then
-			angle = -Ang
-		elseif x2 < x1
-			and y2 < y1 then
-			angle = 180 - Ang
-		elseif x2 < x1
-			and y2 > y1 then
-			angle = 180 - Ang
-		elseif x2 > x1
 			and y2 == y1 then
 			angle = 0
-		elseif x2 < x1
-			and y2 == y1 then
-			angle = 180
-		elseif x2 == x1
-			and y2 < y1 then
-			angle = 90
+		elseif x2 > x1
+			and y2 > y1 then
+			angle = 360 - Ang
 		elseif x2 == x1
 			and y2 > y1 then
 			angle = 270
-		elseif x2 == x1
+		elseif x2 < x1
+			and y2 > y1 then
+			angle = 180 - Ang
+		elseif x2 < x1
 			and y2 == y1 then
-			angle = 0
+			angle = 180
+		elseif x2 < x1
+			and y2 < y1 then
+			angle = 180 - Ang
+		elseif x2 == x1
+			and y2 < y1 then
+			angle = 90
+		elseif x2 > x1
+			and y2 < y1 then
+			angle = -Ang
 		end
+		--para coordenadas cartesianas angle = 360 - angle, si angle = 360 entocens angle = 0
 		return math.round( angle, 3 )
-	end
+	end --rewrite: april 27th 2020
 	
 	function math.polar( angle, radius, Return )
 		--retorna las coordenadas del punto ubicado en el ángulo y radio dado, respecto al origen
@@ -5074,39 +5075,51 @@
 	end
 	
 	function math.rotate( p, axis, angle )
+		--rota un punto p(x,y,z) en el espacio, respecto al eje seleccionado
 		if type( p ) == "function" then
 			p = p( )
 		end
 		if type( angle ) == "function" then
 			angle = angle( )
 		end
-		effector.print_error( p, "table", "math.rotate", 1 )
-		if angle then
-			effector.print_error( angle, "number", "math.rotate", 3 )
-		end
-		local angle = rad( angle or 0 )
-		local axisr = axis or "z"
+		effector.print_error( p, "stringtable", "math.rotate", 1 )
+		effector.print_error( angle, "number", "math.rotate", 3 )
 		local rot_p = { }
-		local coo_x = p[ 1 ] or 0
-		local coo_y = p[ 2 ] or 0
-		local coo_z = p[ 3 ] or 0
-		if axisr == "x" then
-			rot_p[ 1 ] = coo_x
-			rot_p[ 2 ] = cos( angle ) * coo_y - sin( angle ) * coo_z
-			rot_p[ 3 ] = sin( angle ) * coo_y + cos( angle ) * coo_z
-		elseif axisr == "y" then
-			rot_p[ 1 ] = cos( angle ) * coo_x + sin( angle ) * coo_z
-			rot_p[ 2 ] = coo_y
-			rot_p[ 3 ] = cos( angle ) * coo_z - sin( angle ) * coo_x
-		elseif axisr == "z" then
-			rot_p[ 1 ] = cos( angle ) * coo_x - sin( angle ) * coo_y
-			rot_p[ 2 ] = sin( angle ) * coo_x + cos( angle ) * coo_y
-			rot_p[ 3 ] = coo_z
+		if type( p ) == "string"
+			and p:match( "%-?%d[%.%d]*%s+%-?%d[%.%d]*" ) then
+			rot_p = p:gsub( "(%-?%d[%.%d]*)%s+(%-?%d[%.%d]*)",
+				function( x, y )
+					--local rot = math.rotate( { x, y }, axis, -angle ) en z
+					local rot = math.rotate( { x, y }, axis, angle )
+					return format( "%s %s", rot[ 1 ], rot[ 2 ] )
+				end --math.rotate( shape.rectangle, "z", 20 )
+			) --add: may 14th 2020
+		else
+			local angle = rad( angle )
+			local axisr = axis or "z"
+			--local rot_p = { }
+			local coo_x = tonumber( p[ 1 ] ) or 0
+			local coo_y = tonumber( p[ 2 ] ) or 0
+			local coo_z = tonumber( p[ 3 ] ) or 0 --add tonumber: may 14th 2020
+			if axisr == "x" then
+				rot_p[ 1 ] = coo_x
+				rot_p[ 2 ] = cos( angle ) * coo_y - sin( angle ) * coo_z
+				rot_p[ 3 ] = sin( angle ) * coo_y + cos( angle ) * coo_z
+			elseif axisr == "y" then
+				rot_p[ 1 ] = cos( angle ) * coo_x + sin( angle ) * coo_z
+				rot_p[ 2 ] = coo_y
+				rot_p[ 3 ] = cos( angle ) * coo_z - sin( angle ) * coo_x
+			elseif axisr == "z" then
+				rot_p[ 1 ] = cos( angle ) * coo_x - sin( angle ) * coo_y
+				rot_p[ 2 ] = sin( angle ) * coo_x + cos( angle ) * coo_y
+				rot_p[ 3 ] = coo_z
+			end
 		end
 		return rot_p
 	end
 	
 	function math.matrix_sum( A, B )
+		--suma los elementos de dos array, o a los elementos de un array con un número dado
 		effector.print_error( A, "numbertable", "math.matrix_sum", 1 )
 		effector.print_error( B, "numbertable", "math.matrix_sum", 2 )
 		local sum
@@ -5155,6 +5168,7 @@
 	end
 	
 	function math.matrix_trans( A )
+		--calcula la matriz transpuesta de un array cuadrado
 		effector.print_error( A, "table", "math.matrix_trans", 1 )
 		for _, v in ipairs( A ) do
 			if type( v ) ~= "number" then
@@ -5173,6 +5187,7 @@
 	end
 
 	function math.matrix_esc( A, Escalar )
+		--multiplica los valores de un array por un número (escalar)
 		effector.print_error( A, "table", "math.matrix_esc", 1 )
 		effector.print_error( Escalar, "number", "math.matrix_esc", 2 )
 		for _, v in ipairs( A ) do
@@ -5188,6 +5203,7 @@
 	end
 	
 	function math.matrix_mul( A, B )
+		--multiplica los valores de dos arrays
 		effector.print_error( A, "table", "math.matrix_mul", 1 )
 		effector.print_error( B, "table", "math.matrix_mul", 2 )
 		for _, v in ipairs( A ) do
@@ -5230,6 +5246,7 @@
 	end
 	
 	function math.matrix_mul2( ... )
+		--multipliaca los valores de todos los arrays ingresados
 		local Matrixes = { ... }
 		for i = 1, #Matrixes do
 			if #Matrixes[ i ] ~= 9 then
@@ -5253,6 +5270,7 @@
 	end
 	
 	function math.matrix_cof( A, Return )
+		--calcula la matriz de cofactores de una matriz 3x3
 		effector.print_error( A, "table", "math.matrix_cof", 1 )
 		if #A ~= 9 then
 			error( "<<Error: math.matrix_cof>> Debe ser una matriz 3x3\n3x3 matrix expected", 2 )
@@ -5299,6 +5317,7 @@
 	end
 	
 	function math.matrix_det( A )
+		--calucla el determinante de una matriz 3x3
 		effector.print_error( A, "table", "math.matrix_det", 1 )
 		if #A ~= 9 then
 			error( "<<Error: math.matrix_det>> Debe ser una matriz 3x3\n3x3 matrix expected", 2 )
@@ -5313,6 +5332,7 @@
 	end
 
 	function math.matrix_adj( A )
+		--calcula la matriz adjunta de una matriz 3x3
 		effector.print_error( A, "table", "math.matrix_adj", 1 )
 		if #A ~= 9 then
 			error( "<<Error: math.matrix_adj>> Debe ser una matriz 3x3\n3x3 matrix expected", 2 )
@@ -5327,6 +5347,7 @@
 	end
 
 	function math.matrix_inv( A )
+		--calcula la matriz inversa (si la hay) de una matriz 3x3
 		effector.print_error( A, "table", "math.matrix_det", 1 )
 		if #A ~= 9 then
 			error( "<<Error: math.matrix_inv>> Debe ser una matriz 3x3\n3x3 matrix expected", 2 )
@@ -5341,6 +5362,7 @@
 	end
 	
 	function math.matrix_dis( Disx, Disy ) --> displace
+		--genera una matriz de desplazamiento 3x3 (en 2D)
 		if type( Disx ) == "function" then
 			Disx = Disx( )
 		end
@@ -5360,6 +5382,7 @@
 	end
 	
 	function math.matrix_rot( Angle, Axis, Orgx, Orgy ) --> rotation
+		--genera una matriz de rotación 3x3 (en 3D)
 		if type( Angle ) == "function" then
 			Angle = Angle( )
 		end
@@ -5401,6 +5424,7 @@
 	end
 	
 	function math.matrix_rat( Ratx, Raty, Orgx, Orgy ) --> ratio
+		--genera una matriz de proporción 3x3
 		if type( Ratx ) == "function" then
 			Ratx = Ratx( )
 		end
@@ -5431,6 +5455,7 @@
 	end
 	
 	function math.matrix_ref( Mode ) --> reflection
+		--genera una matriz de reflejo 3x3
 		local Ref_x = {
 			1,	0,	0,
 			0,	-1,	0,
@@ -5463,6 +5488,7 @@
 	end
 
 	function math.matrix_fil( Filxy, Axis ) --> oblique
+		--genera una matriz de afilamento 3x3
 		if type( Filxy ) == "function" then
 			Filxy = Filxy( )
 		end
@@ -5495,6 +5521,7 @@
 	end
 	
 	function math.i( counter, A, B, C )
+		--genera una sucesión de números basado en algoritmos predeterminados
 		if type( counter ) == "function" then
 			counter = counter( )
 		end
@@ -5544,22 +5571,23 @@
 				and B + D - ((D - 1 - (D - 1) * ceil( idx / (D - 1) ) + idx) * (-1) ^ (ceil( idx / (D - 1) ) + 1) + (D + 1) * (1 + (-1) ^ ceil( idx / (D - 1) )) / 2)
 				or  A + (E - 1 - (E - 1) * ceil( idx / (E - 1) ) + idx) * (-1) ^ (ceil( idx / (E - 1) ) + 1) + (E + 1) * (1 + (-1) ^ ceil( idx / (E - 1) )) / 2 - 1
 			),--[ 21 ]																-->( A-->B-->A )
-			[ 22 ] = 1 - floor( 1 / idx ),											-->( 0,11 ) primer 0 y el resto 1
-			[ 23 ] = floor( 1 / idx ),												-->( 1,00 ) primer 1 y el resto 0
-			[ 24 ] = A * (1 - floor( 1 / idx )),									-->( 0,AA ) primer 0 y el resto A
-			[ 25 ] = A * floor( 1 / idx ),											-->( A,00 ) primero A y el resto 0
-			[ 26 ] = A * floor( 1 / idx ) + B * (1 - floor( 1 / idx )),				-->( A,BB" ) primero A y el resto B
-			[ 27 ] = 1 - floor( (A * ceil( idx / A ) - idx + 1) / A ),				-->( 0<->11 ) primer 0 y (A-1)veces 1
-			[ 28 ] = floor( (A - A * ceil( idx / A ) + idx) / A ),					-->( 00<->1 ) (A-1)veces 0 el un 1
-			[ 29 ] = floor( (A * ceil( idx / A ) - idx + 1) / A ),					-->( 1<->00 ) primer 1 y (A-1)veces 0
-			[ 30 ] = 1 - floor( (A - A * ceil( idx / A ) + idx) / A ),				-->( 11<->0 ) (A-1)veces 1 el un 0
-			[ 31 ] = A * (1 - floor( (B * ceil( idx / B ) - idx + 1) / B )),		-->( 0<->AA ) primer 0 y (B-1)veces A
-			[ 32 ] = A * floor( (B - B * ceil( idx / B ) + idx) / B ),				-->( 00<->A ) (B-1)veces 0 y un A
-			[ 33 ] = A * floor( (B * ceil( idx / B ) - idx + 1) / B ),				-->( A<->00 ) primer A y (B-1)veces 0
-			[ 34 ] = A * (1 - floor( (B - B * ceil( idx / B ) + idx) / B )),		-->( AA<->0 ) (B-1)veces A y un 0
-			[ 35 ] = A * floor( (C * ceil( idx / C ) - idx + 1) / C ) + B * (1 - floor( (C * ceil( idx / C ) - idx + 1) / C )),	-->( A<->BB ) primer A y (C-1)veces B
-			[ 36 ] = A * (1 - floor( (C - C * ceil( idx / C ) + idx) / C )) + B * floor( (C - C * ceil( idx / C ) + idx) / C ),	-->( AA<->B ) (C-1)veces A y un B
-			[ 37 ] = floor( (idx - 1) / A ) + 1,									-->( N,n ) los Naturales n-veces cada uno
+			[ 22 ] = (A <= B) and (idx - 1) % (B - A + 1) + A or -1 * ((idx - 1) % (A - B + 1) - A), -- ( A-->B ) may 20th 2020
+			[ 23 ] = 1 - floor( 1 / idx ),											-->( 0,11 ) primer 0 y el resto 1
+			[ 24 ] = floor( 1 / idx ),												-->( 1,00 ) primer 1 y el resto 0
+			[ 25 ] = A * (1 - floor( 1 / idx )),									-->( 0,AA ) primer 0 y el resto A
+			[ 26 ] = A * floor( 1 / idx ),											-->( A,00 ) primero A y el resto 0
+			[ 27 ] = A * floor( 1 / idx ) + B * (1 - floor( 1 / idx )),				-->( A,BB" ) primero A y el resto B
+			[ 28 ] = 1 - floor( (A * ceil( idx / A ) - idx + 1) / A ),				-->( 0<->11 ) primer 0 y (A-1)veces 1
+			[ 29 ] = floor( (A - A * ceil( idx / A ) + idx) / A ),					-->( 00<->1 ) (A-1)veces 0 el un 1
+			[ 30 ] = floor( (A * ceil( idx / A ) - idx + 1) / A ),					-->( 1<->00 ) primer 1 y (A-1)veces 0
+			[ 31 ] = 1 - floor( (A - A * ceil( idx / A ) + idx) / A ),				-->( 11<->0 ) (A-1)veces 1 el un 0
+			[ 32 ] = A * (1 - floor( (B * ceil( idx / B ) - idx + 1) / B )),		-->( 0<->AA ) primer 0 y (B-1)veces A
+			[ 33 ] = A * floor( (B - B * ceil( idx / B ) + idx) / B ),				-->( 00<->A ) (B-1)veces 0 y un A
+			[ 34 ] = A * floor( (B * ceil( idx / B ) - idx + 1) / B ),				-->( A<->00 ) primer A y (B-1)veces 0
+			[ 35 ] = A * (1 - floor( (B - B * ceil( idx / B ) + idx) / B )),		-->( AA<->0 ) (B-1)veces A y un 0
+			[ 36 ] = A * floor( (C * ceil( idx / C ) - idx + 1) / C ) + B * (1 - floor( (C * ceil( idx / C ) - idx + 1) / C )),	-->( A<->BB ) primer A y (C-1)veces B
+			[ 37 ] = A * (1 - floor( (C - C * ceil( idx / C ) + idx) / C )) + B * floor( (C - C * ceil( idx / C ) + idx) / C ),	-->( AA<->B ) (C-1)veces A y un B
+			[ 38 ] = floor( (idx - 1) / A ) + 1,									-->( N,n ) los Naturales n-veces cada uno
 			-----------------------------------------------------------------------------------------------------------------
 			
 			[ "+,-" ]			= (-1) ^ (idx + 1),
@@ -5586,6 +5614,7 @@
 								and B + D - ((D - 1 - (D - 1) * ceil( idx / (D - 1) ) + idx) * (-1) ^ (ceil( idx / (D - 1) ) + 1) + (D + 1) * (1 + (-1) ^ ceil( idx / (D - 1) )) / 2)
 								or  A + (E - 1 - (E - 1) * ceil( idx / (E - 1) ) + idx) * (-1) ^ (ceil( idx / (E - 1) ) + 1) + (E + 1) * (1 + (-1) ^ ceil( idx / (E - 1) )) / 2 - 1
 								),
+			[ "A-->B" ]			= (A <= B) and (idx - 1) % (B - A + 1) + A or -1 * ((idx - 1) % (A - B + 1) - A), --may 20th 2020 math.i( j, 5, 7 )[ "A-->B" ]
 			[ "0,11" ]			= 1 - floor( 1 / idx ),
 			[ "1,00" ]			= floor( 1 / idx ),
 			[ "0,AA" ]			= A * (1 - floor( 1 / idx )),
@@ -6138,6 +6167,7 @@
 	end --november 27th 2018
 	
 	function math.audio( Audio_wav, Loops, Scale, Offset_time, Values )
+		--convierte un archivo .wav en valores o transformaciones para shapes :D
 		local Wav_fil = Audio_wav or "test.wav"
 		local Wav_frm = 2 * frame_dur
 		local Wav_max = Loops or 12
@@ -6190,11 +6220,10 @@
 			return transfos_vals
 		end
 		return transfos_tags --december 05th 2018
-		--convierte un archivo .wav en valores o transformaciones para shapes :D
 	end --math.audio( )
 
 	function math.to16( Num )
-		--decimal to hexadecimal
+		--convierte un número de base decimal a hexadecimal
 		if type( Num ) == "function" then
 			Num = Num( )
 		end
@@ -6248,6 +6277,8 @@
 	end --math.clamp( 3, 5, 10 )
 	
 	function math.clamp2( Num, Min, Max )
+		--restringe un número entre un mínimo y un máximo
+		--en caso de exceder un límite, se regresará en forma de rebote
 		if type( Num ) == "function" then
 			Num = Num( )
 		end
@@ -6271,7 +6302,47 @@
 		local Max = math.round( Max * 10000 )
 		return math.round( math.i( Num - Min, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
 	end --math.clamp2( 3m, 0, 1 )
-
+	
+	function math.cubic( c1, c2, c3, c4 )
+		--calcula la raíz o raíces de una ecuación cúbica
+		local a = c2 / c1
+		local b = c3 / c1
+		local c = c4 / c1
+		local Q = (3 * b - a ^ 2) / 9
+		local P = (-2 * a ^ 3 + 9 * a * b - 27 * c) / 54
+		local D = Q ^ 3 + P ^ 2
+		local x, S, T = { }
+		if D == 0 then --math.cubic( 1, -4, 5, -2 )
+			S = P ^ (1 / 3)
+			T = P ^ (1 / 3)
+			if P < 0 then
+				S = -1 * abs( P ) ^ (1 / 3)
+				T = -1 * abs( P ) ^ (1 / 3)
+			end
+			x[ 1 ] = math.round( -a / 3 + S + T, 3 )
+			x[ 2 ] = math.round( -a / 3 - 0.5 * (S + T), 3 )
+			if x[ 2 ] == x[ 1 ] then
+				x[ 2 ] = nil
+			end
+		elseif D > 0 then --math.cubic( 1, -4, 5, 2 )
+			S = (P + D ^ 0.5) ^ (1 / 3)
+			T = (P - D ^ 0.5) ^ (1 / 3)
+			if (P + D ^ 0.5) < 0 then
+				S = -1 * abs( P + D ^ 0.5 ) ^ (1 / 3)
+			end
+			if (P - D ^ 0.5) < 0 then
+				T = -1 * abs( P - D ^ 0.5 ) ^ (1 / 3)
+			end
+			x[ 1 ] = math.round( -a / 3 + S + T, 3 )
+		else --math.cubic( 1, -2, -1, 2 )
+			local A = acos( P / ((-Q) ^ 1.5) )
+			x[ 1 ] = math.round( 2 * ((-Q) ^ 0.5) * cos( (2 * pi * 0 + A) / 3 ) - a / 3, 3 )
+			x[ 2 ] = math.round( 2 * ((-Q) ^ 0.5) * cos( (2 * pi * 1 + A) / 3 ) - a / 3, 3 )
+			x[ 3 ] = math.round( 2 * ((-Q) ^ 0.5) * cos( (2 * pi * 2 + A) / 3 ) - a / 3, 3 )
+		end
+		return x
+	end --may 12th 2020
+	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "tag" ------------------------------------------------------------------
 	
@@ -8447,6 +8518,15 @@
 				return tonumber( capture ) * varx
 			end
 		)
+		String = String:gsub( "(%-?%d+[%.%d]*)([jJ]^*)",
+			function( capture, variable )
+				local varx = j
+				if variable == "J" then
+					varx = J
+				end
+				return tonumber( capture ) * varx
+			end
+		)--add: may 10th 2020
 		-- multiplica una constante por alguno de los módulos
 		String = String:gsub( "(%-?%d+[%.%d]*)(m[crsw123]*)",
 			function( Num, Module )
@@ -10453,60 +10533,7 @@
 		return color_chng4
 	end
 	
-	function tag.ipol2( Ipol_1, Ipol_2, Ipol_i )
-		local Val_1, Val_2, v1, v2 = { }, { }, "", ""
-		if Ipol_i == nil then
-			Ipol_i = 0.5
-		elseif Ipol_i <= 0 then
-			Ipol_i = 0
-		elseif Ipol_i >= 1 then
-			Ipol_i = 1
-		end
-		if type( Ipol_1 ) == "number"
-			and type( Ipol_2 ) == "number" then
-			return Ipol_1 + Ipol_i * (Ipol_2 - Ipol_1)
-		elseif type( Ipol_1 ) == "string"
-			and type( Ipol_2 ) == "string" then
-			Ipol_1 = color.from_error( Ipol_1 )
-			Ipol_2 = color.from_error( Ipol_2 )
-			for c in Ipol_1:gmatch( "&.-&" ) do
-				table.insert( Val_1, c )
-			end
-			for c in Ipol_2:gmatch( "&.-&" ) do
-				table.insert( Val_2, c )
-			end
-			if #Val_1 == 0 or #Val_2 == 0 then
-				return Ipol_1, Ipol_2
-			end
-			v1, v2 = Val_1[ 1 ], Val_2[ 1 ]
-			if #Val_1 == 4 then
-				v1 = format( "(%s,%s,%s,%s)", Val_1[ 1 ], Val_1[ 2 ], Val_1[ 3 ], Val_1[ 4 ] )
-			end
-			if #Val_2 == 4 then
-				v2 = format( "(%s,%s,%s,%s)", Val_2[ 1 ], Val_2[ 2 ], Val_2[ 3 ], Val_2[ 4 ] )
-			end
-			if v1:len( ) > 25 then
-				v1 = color.vc_to_c( v1 )
-			end
-			if v2:len( ) > 25 then
-				v2 = color.vc_to_c( v2 )
-			end
-			if v1:len( ) == 25 then
-				v1 = alpha.va_to_a( v1 )
-			end
-			if v2:len( ) == 25 then
-				v2 = alpha.va_to_a( v2 )
-			end
-			if v1:len( ) == 5
-				and v2:len( ) == 5 then
-				return alpha.ipolfx( Ipol_i, v1, v2 )
-			end
-			return color.ipolfx( Ipol_i, v1, v2 )
-		end
-		return Ipol_1, Ipol_2
-	end
-	
-	tag.ipol = function( Ipol_i, ... )
+	function tag.ipol( Ipol_i, ... )
 		local valors = { ... }
 		if type( ... ) == "table" then
 			valors = ...
@@ -10520,84 +10547,24 @@
 		end
 		---------------------------------------------
 		-- interpola el valor de dos shapes o dos clips
-		---[[
 		local function ipol_shpclip( val_1, val_2, pct_ipol )
-			local function ipairx( Shape1, Shape2 )
-				local function parts( Shape )
-					--partes que posee una shape
-					local Parts = { }
-					for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
-						table.insert( Parts, p )
-					end
-					return Parts
-				end
-				local function count( Shape )
-					--cantidad de puntos que posee una shape
-					local n = 0
-					local Shape = Shape:gsub( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*",
-						function( point )
-							n = n + 1
-						end
-					)
-					return n
-				end
-				local Parts1 = parts( Shape1 )
-				local Parts2 = parts( Shape2 )
-				local Point1 = count( Shape1 )
-				local Point2 = count( Shape2 )
-				if Point1 >= Point2 then
-					return Shape1
-				end
-				local difere = Point2 - Point1
-				local addpoi = ceil( difere / 3 )
-				local idx = ( floor( #Parts1 / addpoi ) > 0 ) and floor( #Parts1 / addpoi ) or 1
-				local xpoint
-				for i = 1, addpoi do
-					xpoint = Parts1[ (idx * i - 1) % #Parts1 + 1 ]:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) .. " "
-					Parts1[ (idx * i - 1) % #Parts1 + 1 ] = Parts1[ (idx * i - 1) % #Parts1 + 1 ] .. "b " .. xpoint .. xpoint .. xpoint
-				end
-				return table.concat( Parts1 )
+			local val_1, val_2 = shape.insert( val_1, val_2 )
+			local tbl_1, tbl_2, k = { }, { }, 0
+			for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
+				table.insert( tbl_1, tonumber( c ) )
 			end
-			-----------------------------------
-			local val_1 = ipairx( val_1, val_2 )
-			local tbl_1, tbl_2, k = { }, { }, 1
-			for px, py in val_1:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
-				tbl_1[ #tbl_1 + 1 ] = { tonumber( px ), tonumber( py ) }
+			for c in val_2:gmatch( "%-?%d+[%.%d]*" ) do
+				table.insert( tbl_2, tonumber( c ) )
 			end
-			for px, py in val_2:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" ) do
-				tbl_2[ #tbl_2 + 1 ] = { tonumber( px ), tonumber( py ) }
-			end
-			--------------
-			local function ipair_fx( num_min, num_max )
-				--genera una tabla de "emparejamiento"
-				local n_min = math.min( num_min, num_max )
-				local n_max = math.max( num_min, num_max )
-				local inter = floor( n_max / n_min )
-				local modul = n_max % n_min
-				local index = { }
-				for i = 1, inter * n_min do
-					index[ i ] = math.i( i, inter )[ "N,n" ]
-				end
-				for i = 1, modul do
-					table.insert( index, floor( n_max / modul ) * i, index[ floor( n_max / modul ) * i - 1 ] )
-				end
-				return index
-			end
-			--------------
-			local tbl_ipar = ipair_fx( #tbl_1, #tbl_2 )
-			local val_ipol, idx
-			val_ipol = val_1:gsub( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)",
-				function( val_x, val_y )
-					idx = tbl_ipar[ k ]
-					local val_x = tbl_1[ k ][ 1 ] + ( tbl_2[ idx ][ 1 ] - tbl_1[ k ][ 1 ]) * pct_ipol
-					local val_y = tbl_1[ k ][ 2 ] + ( tbl_2[ idx ][ 2 ] - tbl_1[ k ][ 2 ]) * pct_ipol
+			local val_ipol = val_1:gsub( "%-?%d+[%.%d]*",
+				function( val )
 					k = k + 1
-					return math.round( val_x, 3 ) .. " " .. math.round( val_y, 3 )
+					local val = tbl_1[ k ] + (tbl_2[ k ] - tbl_1[ k ]) * pct_ipol
+					return math.round( val, 3 )
 				end
 			)
 			return val_ipol
-		end
-		--]]
+		end --may 19th 2020
 		---------------------------------------------
 		-- busca un string dentro de la tabla
 		local function string_in_tbl( str_in_tbl )
@@ -13585,9 +13552,14 @@
 		if fx.filter == "mod" then
 			Round = 0
 		end -- cifras redondeadas si se elije el VSFilterMod
+		local Shape = Shape or nil
+		if not Shape
+			and linefx[ ii ].text:match( "\\i?clip%b()" ) then
+			Shape = linefx[ ii ].text:match( "\\i?clip%b()" )
+		end --add: april 28th 2020
+		Shape = Shape or "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
 		effector.print_error( Shape, "shape", "shape.ASSDraw3", 1 )
 		effector.print_error( Round, "number", "shape.ASSDraw3", 2 )
-		local Shape = Shape or "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.ASSDraw3( Shape[ i ], Round )
@@ -13684,8 +13656,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.info", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.info", 1 )
 		local shape_coor, shape_x, shape_y = { }, { }, { }
 		for coor in Shape:gmatch( "%-?%d+[%.%d]*" ) do
 			table.insert( shape_coor, tonumber( coor ) )
@@ -13717,9 +13689,9 @@
 			tract = tract( )
 		end
 		local tract = tract or 2
+		local Shape = shape.ASSDraw3( Shape ) or shape.circle
 		effector.print_error( Shape, "shape", "shape.redraw", 1 )
 		effector.print_error( tract, "number", "shape.redraw", 2 )
-		local Shape = shape.ASSDraw3( Shape ) or shape.circle
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.redraw( Shape[ i ], tract, Section, Continued )
@@ -13825,9 +13797,9 @@
 		local modify = modify or function( x, y )
 			return x, y
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.modify", 1 )
 		effector.print_error( modify, "function", "shape.modify", 2 )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.modify( Shape[ i ], modify )
@@ -13869,9 +13841,9 @@
 		local Filter = Filter or function( x, y )
 			return x, y
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.filter", 1 )
 		effector.print_error( Filter, "function", "shape.filter", 2 )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.filter( Shape[ i ], Filter )
@@ -13912,10 +13884,10 @@
 		local Filter = Filter or function( x, y )
 			return x, y
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.filter2", 1 )
 		effector.print_error( Filter, "function", "shape.filter2", 2 )
 		effector.print_error( Split, "number", "shape.filter2", 3 )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.filter2( Shape[ i ], Filter, Split )
@@ -13954,8 +13926,8 @@
 		if type( Split ) == "function" then
 			Split = Split( )
 		end
-		effector.print_error( Shape, "shape", "shape.filter3", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.filter3", 1 )
 		local filters = { ... }
 		if type( ... ) == "table" then
 			filters = ...
@@ -14026,8 +13998,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.length", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.length", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.length( Shape[ i ], parts )
@@ -14066,8 +14038,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.width", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.width", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.width( Shape[ i ], Height )
@@ -14116,7 +14088,7 @@
 			return format( "{\\an7\\pos(0,0)\\p1}%s", shape.ASSDraw3( Shape ) )
 		end
 	end
-
+	
 	function shape.rotate( Shape, Angle, org_x, org_y )	-- in z axis
 		--rota la Shape respecto al eje "z" con un punto de origen predeterminado
 		if type( Shape ) == "function" then
@@ -14131,24 +14103,43 @@
 		if type( org_y ) == "function" then
 			org_y = org_y( )
 		end
-		effector.print_error( Shape, "shape", "shape.rotate", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.rotate", 1 )
 		local Ang = Angle or 0
 		local cx = org_x or 0
 		local cy = org_y or 0
-		effector.print_error( Ang, "number", "shape.rotate", 2 )
+		effector.print_error( Ang, "numbertable", "shape.rotate", 2 )
 		effector.print_error( cx, "numberstring", "shape.rotate", 3 )
-		effector.print_error( cy, "number", "shape.rotate", 4 )
+		effector.print_error( cy, "numberstring", "shape.rotate", 4 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.rotate( Shape[ i ], Angle, org_x, org_y )
 			end
 		else --recursividad: september 08th 2019
+			if type( Angle ) == "table" then --add: may 01st 2020
+				--Ang depende del ángulo entre dos puntos o un punto y el origen
+				if Angle[ 1 ]
+					and type( Angle[ 1 ] ) ~= "table" then
+					Angle[ 1 ] = { Angle[ 1 ] }
+				end
+				if not Angle[ 1 ] then
+					Angle[ 1 ] = { }
+					Angle[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+					Angle[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
+					Angle[ 1 ][ 2 ] = Angle[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
+				end
+				Ang = Angle[ 2 ] - math.angle( Angle[ 1 ][ 1 ], Angle[ 1 ][ 2 ] )
+			end
 			if cx == "center" then
 				shape.info( Shape )
 				cx = c_shape
 				cy = m_shape
 			end
+			if type( cx ) == "string"
+				and cx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+				cy = tonumber( cx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+				cx = tonumber( cx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+			end --add: may 18th 2020
 			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
 				function( x, y )
 					local new_ang = math.angle( cx, cy, x, y )
@@ -14172,14 +14163,19 @@
 		if type( Relative ) == "function" then
 			Relative = Relative( )
 		end
-		effector.print_error( Shape, "shape",  "shape.reflect", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape",  "shape.reflect", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.reflect( Shape[ i ], Axis, Relative )
 			end
 		else --recursividad: september 08th 2019
 			local Reltv = Relative or 0
+			if type( Relative ) == "string" then
+				Relative = Relative:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				Relative = Relative:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				Reltv = string.toval( Relative )
+			end --add: may 03rd 2020
 			effector.print_error( Reltv, "number", "shape.reflect", 3 )
 			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
 				function( x, y )
@@ -14208,9 +14204,9 @@
 		if type( Pixel ) == "function" then
 			Pixel = Pixel( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.oblique", 1 )
 		effector.print_error( Pixel, "numbertable", "shape.oblique", 2 )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.oblique( Shape[ i ], Pixel, Axis )
@@ -14222,6 +14218,26 @@
 				pxl1 = Pixel[ 1 ]
 				pxl2 = Pixel[ 2 ] or 0
 				Axis = Axis or "xy" --fix: april 04th 2020
+				if type( pxl1 ) == "string" then
+					pxl1 = pxl1:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+					pxl1 = pxl1:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+					pxl1 = string.toval( pxl1 )
+				elseif type( pxl1 ) == "table"
+					and type( pxl1[ 1 ] ) == "string" then
+					pxl1[ 1 ] = pxl1[ 1 ]:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+					pxl1[ 1 ] = pxl1[ 1 ]:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+					pxl1[ 1 ] = string.toval( pxl1[ 1 ] )
+				end
+				if type( pxl2 ) == "string" then
+					pxl2 = pxl2:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+					pxl2 = pxl2:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+					pxl2 = string.toval( pxl2 )
+				elseif type( pxl2 ) == "table"
+					and type( pxl2[ 1 ] ) == "string" then
+					pxl2[ 1 ] = pxl2[ 1 ]:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+					pxl2[ 1 ] = pxl2[ 1 ]:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+					pxl2[ 1 ] = string.toval( pxl2[ 1 ] )
+				end --add: may 03rd 2020
 			end
 			local funct
 			if Axis == "x"
@@ -14233,12 +14249,12 @@
 						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
 						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
 						return format( "%s %s", x, y )
-					end
+					end --shape.oblique( shape.rectangle, { { 20 } }, "x" )		<--->
 				else
 					funct = function( x, y )
 						local x = x + pxl1 * (y - miny) / h_shape
 						return format( "%s %s", x, y )
-					end
+					end --shape.oblique( shape.rectangle, { 20 }, "x" )			--->
 				end
 			elseif Axis == "y" then
 				if type( pxl1 ) == "table" then
@@ -14303,8 +14319,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.to_bezier", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.to_bezier", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.to_bezier( Shape[ i ] )
@@ -14336,8 +14352,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.reverse", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.reverse", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.reverse( Shape[ i ] )
@@ -14397,8 +14413,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.origin", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.origin", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.origin( Shape[ i ] )
@@ -14421,8 +14437,8 @@
 		if type( Dy ) == "function" then
 			Dy = Dy( )
 		end
-		effector.print_error( Shape, "shape", "shape.displace", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.displace", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.displace( Shape[ i ], Dx, Dy )
@@ -14430,9 +14446,27 @@
 		else --recursividad: september 08th 2019
 			local Dx = Dx or 0
 			local Dy = Dy or 0
+			if type( Dx ) == "string" --shape.displace( shape.rectangle, "m 20 20 " )
+				and Dx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+				Dy = tonumber( Dx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+				Dx = tonumber( Dx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+			end --add: may 18th 2020
 			if type( Dx ) == "table" then
+				--movimiento polar, indicando ángulo y radio
 				Dx, Dy = math.polar( Dx[ 1 ], Dx[ 2 ] )
 			end --add: april 12th 2020
+			---------------------------
+			if type( Dx ) == "string" then
+				Dx = Dx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				Dx = Dx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				Dx = string.toval( Dx )
+			end
+			if type( Dy ) == "string" then
+				Dy = Dy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				Dy = Dy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				Dy = string.toval( Dy )
+			end
+			-- add: may 02nd 2020 -----
 			effector.print_error( Dx, "number", "shape.displace", 2 )
 			effector.print_error( Dy, "number", "shape.displace", 3 )
 			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
@@ -14476,6 +14510,21 @@
 		else --recursividad: september 08th 2019
 			local CenterX = CenterX or 0
 			local CenterY = CenterY or 0
+			if type( CenterX ) == "string" --shape.centerpos( shape.rectangle, "m 20 20 " )
+				and CenterX:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+				CenterY = tonumber( CenterX:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+				CenterX = tonumber( CenterX:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+			end --add: may 18th 2020
+			if type( CenterX ) == "string" then
+				CenterX = CenterX:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				CenterX = CenterX:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				CenterX = string.toval( CenterX )
+			end
+			if type( CenterY ) == "string" then
+				CenterY = CenterY:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				CenterY = CenterY:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				CenterY = string.toval( CenterY )
+			end --add: may 03rd 2020
 			effector.print_error( CenterX, "number", "shape.centerpos", 2 )
 			effector.print_error( CenterY, "number", "shape.centerpos", 3 )
 			Shape = shape.displace( shape.incenter( Shape ), CenterX, CenterY )
@@ -14494,8 +14543,8 @@
 		if type( pos_y ) == "function" then
 			pos_y = pos_y( )
 		end
-		effector.print_error( Shape, "shape", "shape.firstpos", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.firstpos", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.firstpos( Shape[ i ], pos_x, pos_y )
@@ -14503,6 +14552,21 @@
 		else --recursividad: september 08th 2019
 			local first_x = pos_x or 0
 			local first_y = pos_y or 0
+			if type( first_x ) == "string" --shape.firstpos( shape.rectangle, "m 20 20 " )
+				and first_x:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+				first_y = tonumber( first_x:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+				first_x = tonumber( first_x:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+			end --add: may 18th 2020
+			if type( first_x ) == "string" then
+				first_x = first_x:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				first_x = first_x:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				first_x = string.toval( first_x )
+			end
+			if type( first_y ) == "string" then
+				first_y = first_y:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				first_y = first_y:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				first_y = string.toval( first_y )
+			end --add: may 03rd 2020
 			effector.print_error( first_x, "number", "shape.firstpos", 2 )
 			effector.print_error( first_y, "number", "shape.firstpos", 3 )
 			local first_p = { }
@@ -14530,9 +14594,9 @@
 			Mode = Mode( )
 		end --add: january 05th 2019
 		local Mode = Mode or 0
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.ratio", 1 )
 		effector.print_error( Mode, "number", "shape.ratio", 4 )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.ratio( Shape[ i ], Ratiox, Ratioy, Mode )
@@ -14549,7 +14613,25 @@
 			if Ratiox then
 				Rx = Ratiox
 				if type( Ratiox ) == "table" then
-					Rx = Ratiox[ 1 ] / shape.width( Shape )
+					if #Ratiox == 2 then --add: may 01st 2020
+						--Rx depende de la distancia entre dos puntos o un punto y el origen
+						if Ratiox[ 1 ]
+							and type( Ratiox[ 1 ] ) ~= "table" then
+							Ratiox[ 1 ] = { Ratiox[ 1 ] }
+						end
+						if not Ratiox[ 1 ] then
+							Ratiox[ 1 ] = { }
+							Ratiox[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+							Ratiox[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
+							Ratiox[ 1 ][ 2 ] = Ratiox[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
+						end
+						Rx = Ratiox[ 2 ] / math.distance( Ratiox[ 1 ][ 1 ], Ratiox[ 1 ][ 2 ] )
+						if math.distance( Ratiox[ 1 ][ 1 ], Ratiox[ 1 ][ 2 ] ) == 0 then
+							Rx = Ratiox[ 2 ] / shape.width( Shape )
+						end
+					else
+						Rx = Ratiox[ 1 ] / shape.width( Shape )
+					end
 				end
 			else
 				Rx = 1
@@ -14616,9 +14698,9 @@
 			Mode = Mode( )
 		end
 		local Mode = Mode or 0
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.size", 1 )
 		effector.print_error( Mode, "number", "shape.size", 4 )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.size( Shape[ i ], SizeX, SizeY, Mode )
@@ -14632,6 +14714,16 @@
 			if type( Szy ) == "table" then
 				Szy = shape.height( Shape ) + Szy[ 1 ]
 			end
+			if type( Szx ) == "string" then
+				Szx = Szx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				Szx = Szx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				Szx = string.toval( Szx )
+			end
+			if type( Szy ) == "string" then
+				Szy = Szy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				Szy = Szy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				Szy = string.toval( Szy )
+			end --add: may 03rd 2020
 			effector.print_error( Szx, "numbertable", "shape.size", 2 )
 			effector.print_error( Szy, "numbertable", "shape.size", 3 )
 			if Szx == 0 then
@@ -15196,11 +15288,6 @@
 		if type( t2 ) == "function" then
 			t2 = t2( )
 		end
-		if Shape == nil
-			and linefx[ ii ].text:match( "\\i?clip%b()" ) then
-			Shape = shape.ASSDraw3( linefx[ ii ].text:match( "\\i?clip%b()" ) )
-		end
-		effector.print_error( Shape, "stringtable", "shape.Smove", 1 )
 		local time2 = t2 or fx.movet_f
 		local time1 = t1 or fx.movet_i
 		effector.print_error( time1, "number", "shape.Smove", 2 )
@@ -15225,6 +15312,7 @@
 			end
 		end
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "stringtable", "shape.Smove", 1 )
 		local tags2 = recall.shSmtag
 		if j == 1 then
 			--Shape = Yutils.shape.flatten( Shape, 3 )
@@ -16053,8 +16141,8 @@
 		if type( Mark ) == "function" then
 			Mark = Mark( )
 		end
-		effector.print_error( Shape, "shape", "shape.divide", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.divide", 1 )
 		local Shapes, mark = { }, ""
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
@@ -16099,8 +16187,9 @@
 		if type( Index_2 ) == "function" then
 			Index_2 = Index_2( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.retire", 1 )
-		local Shape, coor = shape.ASSDraw3( Shape ), { }
+		local coor, c = { }
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.retire( Shape[ i ], Index_1, Index_2 )
@@ -16934,8 +17023,8 @@
 		if type( Size ) == "function" then
 			Size = Size( )
 		end
-		effector.print_error( Shape, "shape", "shape.bord", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.bord", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.bord( Shape[ i ], Bord, Size )
@@ -17019,8 +17108,8 @@
 		if type( Seed ) == "function" then
 			Seed = Seed( )
 		end
-		effector.print_error( Shape, "shape", "shape.to_pixels", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.to_pixels", 1 )
 		shape.info( Shape )
 		local shape_pixel, pixel_table
 		local pixel_datas, pixel, pixel_pos = { }, recall.pxl, ""
@@ -17108,8 +17197,8 @@
 		if type( Seed ) == "function" then
 			Seed = Seed( )
 		end
-		effector.print_error( Shape, "shape", "shape.bord_to_pixels", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.bord_to_pixels", 1 )
 		local bord_shape
 		local size_pixel = Pixel or 2
 		local seed_space = Seed or 1
@@ -17212,8 +17301,8 @@
 		if type( Ratio ) == "function" then
 			Ratio = Ratio( )
 		end
-		effector.print_error( Shape, "shape", "shape.trim", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.trim", 1 )
 		local Mark = Mark or ""
 		local Ratio = Ratio or 1
 		effector.print_error( Lines, "table", "shape.trim", 2 )
@@ -17375,8 +17464,8 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		effector.print_error( Shape, "shape", "shape.reduce", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.reduce", 1 )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.reduce( Shape[ i ] )
@@ -17415,9 +17504,11 @@
 	end
 
 	function shape.matrix( Shape, ... )
+		--aplica una transformación por medio de una o más matrices
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.matrix", 1 )
 		local Matrixes = { ... }
 		if #Matrixes == 0 then
@@ -17438,7 +17529,6 @@
 			end
 		end
 		local Matrix = math.matrix_mul2( unpack( Matrixes ) )
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.matrix( Shape[ i ], ... )
@@ -17537,11 +17627,15 @@
 			Split = Split( )
 		end
 		local Split = Split or 2
+		local Mode  = Mode or 1
 		local Shape1 = shape.ASSDraw3( Shape1 )
 		local Shape2 = shape.ASSDraw3( Shape2 )
+		effector.print_error( Shape1, "shape", "shape.do_shape", 1 )
+		effector.print_error( Shape2, "shape", "shape.do_shape", 2 )
+		effector.print_error( Mode,  "number", "shape.do_shape", 3 )
+		effector.print_error( Split, "number", "shape.do_shape", 4 )
 		local Shape1 = shape.filter2( Shape1, nil, Split )
 		local Ratio = math.round( shape.width( Shape1 ) / shape.length( Shape2 ), 3 )
-		local Mode = Mode or 1
 		local Filter
 		if type( Mode ) == "function" then
 			Filter = Mode
@@ -17619,8 +17713,8 @@
 			Pixel = Pixel( )
 		end
 		local Pixel = Pixel or nil
-		effector.print_error( Shape, "shape",  "shape.point", 1 )
 		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape",  "shape.point", 1 )
 		local Points, ShapeR = recall.pnts
 		if j == 1 then
 			Points = remember( "pnts", { } )
@@ -17667,10 +17761,10 @@
 			Deformed2 = Axis[ 1 ]
 			Pixel2 = Axis[ 2 ]
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.deformed", 1 )
 		effector.print_error( Deformed1, "number", "shape.deformed", 2 )
 		effector.print_error( Pixel1, "number", "shape.deformed", 3 )
-		local Shape = shape.ASSDraw3( Shape )
 		local shape_filter = function( x, y )
 			local px, py = x, y
 			if Axis == "x" then
@@ -17872,6 +17966,7 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.filtershape", 1 )
 		local filters = { ... }
 		if type( ... ) == "table" then
@@ -17882,7 +17977,6 @@
 				return Shape_ii
 			end
 		end
-		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.filtershape( Shape[ i ], ... )
@@ -18022,81 +18116,76 @@
 		local Shape2 = Shape2 or shape.circle
 		effector.print_error( Shape1, "shape", "shape.insert", 1 )
 		effector.print_error( Shape2, "shape", "shape.insert", 2 )
-		-------------------------------------
-		local function parts( Shape )
-			--segmentos de una shape
-			local Parts = { }
-			for p in Shape:gmatch( "[mlb]^*%s+%-?%d+[%.%d]*%s+[%-%.%d ]*" ) do
-				table.insert( Parts, p )
+		Shape1 = shape.divide( Shape1 )
+		Shape2 = shape.divide( Shape2 )
+		local Shape1_D = table.duplicate( Shape1 )
+		local Shape2_D = table.duplicate( Shape2 )
+		local dif, idx, i
+		if #Shape1 > #Shape2 then
+			dif = #Shape1 - #Shape2
+			i = 1
+			while i <= dif do
+				idx = math.i( i, #Shape2 )[ "1-->A" ]
+				Shape2[ idx ] = Shape2[ idx ] .. Shape2_D[ idx ]
+				i = i + 1
 			end
-			return Parts
-		end
-		-------------------------------------
-		local function valxy( Part_1, Part_2, Part_3 )
-			local new_part1, new_part2 = ""
-			local Part_3 = Part_3 or Part_2
-			local type_part_1 = Part_1:match( "[mlb]^*" )	--tipo de segmento de shape 1
-			local type_part_2 = Part_2:match( "[mlb]^*" )	--tipo de segmento de shape 2
-			local type_part_3 = Part_3:match( "[mlb]^*" )	--tipo de segmento de shape 2
-			if type_part_1 == type_part_2 then
-				--si son del mismo tipo, retorna ambos segmentos
-				return { Part_1, Part_2 }
-			end
-			local xpoint1, xpoint2 --punto de referencia del segmento 1
-			if type_part_1 == "m"
-				or type_part_1 == "l" then
-				--toma en cuenta las dos coordenadas del segmento
-				xpoint1 = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-			else --toma en cuenta las dos últimas coordenadas del segmento
-				xpoint1 = Part_1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
-			end
-			if type_part_3 == "m"
-				or type_part_3 == "l" then
-				--toma en cuenta las dos coordenadas del segmento
-				xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-			else --toma en cuenta las dos últimas coordenadas del segmento
-				xpoint2 = Part_3:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*)" )
-			end
-			--segmento 2 insertado en el 1
-			if type_part_2 == "m"
-				or type_part_2 == "l" then
-				new_part1 = Part_1 .. type_part_2 .. " " .. xpoint1 .. " "
-			else
-				new_part1 = Part_1 .. type_part_2 .. " " .. xpoint1 .. " " .. xpoint1 .. " " .. xpoint1 .. " "
-			end
-			--segmento 1 insertado en el 2
-			if type_part_1 == "m"
-				or type_part_1 == "l" then
-				new_part2 = type_part_1 .. " " .. xpoint2 .. " " .. Part_2
-			else
-				new_part2 = type_part_1 .. " " .. xpoint2 .. " " .. xpoint2 .. " " .. xpoint2 .. " " .. Part_2
-			end
-			return { new_part1, new_part2 }
-		end
-		-------------------------------------
-		local Parts_1 = parts( Shape1 )				--segmentos de la shape 1
-		local Parts_2 = parts( Shape2 )				--segmentos de la shape 2
-		local Shape_fx1, Shape_fx2 = { }, { }		--modificaciones de las shapes 1 y 2
-		local last_point_1 = Parts_1[ #Parts_1 ]	--último segmento de la shape 1
-		local last_point_2 = Parts_2[ #Parts_2 ]	--último segmento de la shape 2
-		local max_n = math.max( #Parts_1, #Parts_2 )
-		for i = 2, max_n do
-			if Parts_1[ i ]
-				and Parts_2[ i ] then
-				Shape_fx1[ i ] = valxy( Parts_1[ i ], Parts_2[ i ] )[ 1 ]
-				Shape_fx2[ i ] = valxy( Parts_1[ i ], Parts_2[ i ], Parts_2[ i - 1 ] )[ 2 ]
-			elseif Parts_1[ i ] then
-				Shape_fx1[ i ] = valxy( Parts_1[ i ], last_point_2 )[ 1 ]
-				Shape_fx2[ i ] = valxy( Parts_1[ i ], last_point_2 )[ 2 ]
-			else
-				Shape_fx1[ i ] = valxy( last_point_1, Parts_2[ i ] )[ 1 ]
-				Shape_fx2[ i ] = valxy( last_point_1, Parts_2[ i ], Parts_2[ i - 1 ] )[ 2 ]
+		elseif #Shape2 > #Shape1 then
+			dif = #Shape2 - #Shape1
+			i = 1
+			while i <= dif do
+				idx = math.i( i, #Shape1 )[ "1-->A" ]
+				Shape1[ idx ] = Shape1[ idx ] .. Shape1_D[ idx ]
+				i = i + 1
 			end
 		end
-		Shape_fx1[ 1 ], Shape_fx2[ 1 ] = Parts_1[ 1 ], Parts_2[ 1 ]
-		return table.concat( Shape_fx1 ), table.concat( Shape_fx2 ) --november 22nd 2019
-	end --shape.insert( shape.rectangle, shape.circle )
-	
+		-----------------------------------------------
+		local function shape_iso( Shape1, Shape2 )
+			--shape_iso( shape.circle, "m 0 0 l 0 20 l 30 20 l 0 0 " )
+			local Shape1 = shape.to_bezier( Shape1 )
+			local Shape2 = shape.to_bezier( Shape2 )
+			local bezier1, b1 = { }
+			for b1 in Shape1:gmatch( "[bm]^* %-?%d[%.%-%d ]*" ) do
+				bezier1[ #bezier1 + 1 ] = b1
+			end
+			local bezier2, b2 = { }
+			for b2 in Shape2:gmatch( "[bm]^* %-?%d[%.%-%d ]*" ) do
+				bezier2[ #bezier2 + 1 ] = b2
+			end
+			local dif, idx, newb, i
+			if #bezier1 > #bezier2 then
+				dif = #bezier1 - #bezier2
+				i = 1
+				while i <= dif do
+					idx = math.i( i, 2, #bezier2 )[ "A-->B" ]
+					newb = bezier2[ idx ]:reverse( ):match( "%d[%.%-%d]* %d[%.%-%d]*" ):reverse( )
+					bezier2[ idx ] = bezier2[ idx ] .. format( "b %s %s %s ", newb, newb, newb )
+					i = i + 1
+				end
+			elseif #bezier2 > #bezier1 then
+				dif = #bezier2 - #bezier1
+				i = 1
+				while i <= dif do
+					idx = math.i( i, 2, #bezier1 )[ "A-->B" ]
+					newb = bezier1[ idx ]:reverse( ):match( "%d[%.%-%d]* %d[%.%-%d]*" ):reverse( )
+					bezier1[ idx ] = bezier1[ idx ] .. format( "b %s %s %s ", newb, newb, newb )
+					i = i + 1
+				end
+			end
+			Shape1 = table.concat( bezier1 )
+			Shape2 = table.concat( bezier2 )
+			return Shape1, Shape2
+		end
+		-----------------------------------------------
+		Shape1 = shape.divide( table.concat( Shape1 ) )
+		Shape2 = shape.divide( table.concat( Shape2 ) )
+		for i = 1, #Shape1 do
+			Shape1[ i ], Shape2[ i ] = shape_iso( Shape1[ i ], Shape2[ i ] )
+		end
+		Shape1 = table.concat( Shape1 )
+		Shape2 = table.concat( Shape2 )
+		return Shape1, Shape2
+	end --rewrite: may 19th 2020
+
 	function shape.parametric( Shape, Pixel )
 		--convierte una shape en posiciones de la función paramétrica
 		if type( Shape ) == "function" then
@@ -18106,139 +18195,991 @@
 			Pixel = Pixel( )
 		end
 		local Pixel = Pixel or 4 * ratio
+		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.parametric", 1 )
 		effector.print_error( Pixel, "number", "shape.parametric", 2 )
 		local shpxy = recall.pxy
-		local Shape = shape.ASSDraw3( Shape )
 		if j == 1 then
 			shpxy = remember( "pxy", shape.point( Shape, Pixel ) )
 		end
 		maxloop( #shpxy )
 		return shpxy[ j ] --march 31st 2020
 	end --shape.parametric( shape.circle )
-	
-	function shape.beziercut( Bezier, t )
-		--segmenta en partes a un tramo de shape bezier
-		if type( Bezier ) == "function" then
-			Bezier = Bezier( )
+
+	function shape.cut( Shape, t, AddPoint )
+		--shape.cut( shape.circle, 0.65 )
+		if type( Shape ) == "function" then
+			Shape = Shape( )
 		end
 		if type( t ) == "function" then
 			t = t( )
 		end
-		local t = t or 0.5
-		local function cut( Sbezier, St )
-			effector.print_error( Sbezier, "shape", "shape.beziercut", 1 )
-			effector.print_error( St, "numbertable", "shape.beziercut", 2 )
-			local Sbezier = shape.ASSDraw3( Sbezier )
-			local Parts, x, y = { }
-			for x, y in Sbezier:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*%s+)" ) do
-				Parts[ #Parts + 1 ] = {
-					x = tonumber( x ),
-					y = tonumber( y )
-				}
+		local t = t or 0.85
+		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.cut", 1 )
+		effector.print_error( t, "numbertable", "shape.cut", 2 )
+		local function shape_cut( Shape, t, AddPoint )
+			local function cut_tract( Shape, t )
+				--segmenta en partes a una Shape
+				if math.round( t, 3 ) == 0 then
+					return { "", Shape }
+				elseif math.round( t, 3 ) == 1 then
+					return { Shape, "" }
+				end
+				local function xcut( tract, t )
+					local Shp_parts
+					local tract = shape.ASSDraw3( tract )
+					if math.round( t, 3 ) == 0 then
+						return { "", tract }
+					elseif math.round( t, 3 ) == 1 then
+						return { tract, "" }
+					end
+					if tract:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+l%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+" ) then
+						local x1, y1, x2, y2 = tract:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+" )
+						local Angle = math.angle( x1, y1, x2, y2 )
+						local Dista = math.distance( x1, y1, x2, y2 )
+						local x3, y3 = math.polar( Angle, Dista * t )
+						Shp_parts = {
+							[ 1 ] = format( "m %s %s l %s %s ", x1, y1, x1 + x3, y1 + y3 ),
+							[ 2 ] = format( "m %s %s l %s %s ", x1 + x3, y1 + y3, x2, y2 )
+						}
+					else
+						local Parts, x, y = { }
+						for x, y in tract:gmatch( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*%s+)" ) do
+							Parts[ #Parts + 1 ] = {
+								x = tonumber( x ),
+								y = tonumber( y )
+							}
+						end
+						for i = 1, 3 do --longitudes y ángulos de las tres rectas principales
+							Parts[ i ].l = math.distance( Parts[ i ].x, Parts[ i ].y, Parts[ i + 1 ].x, Parts[ i + 1 ].y )
+							Parts[ i ].a =    math.angle( Parts[ i ].x, Parts[ i ].y, Parts[ i + 1 ].x, Parts[ i + 1 ].y )
+						end
+						for i = 5, 7 do --coordenadas de los tres puntos de corte principales
+							Parts[ i ] = {
+								x = Parts[ i - 4 ].x + math.polar( Parts[ i - 4 ].a, t * Parts[ i - 4 ].l, "x" ),
+								y = Parts[ i - 4 ].y + math.polar( Parts[ i - 4 ].a, t * Parts[ i - 4 ].l, "y" )
+							}
+						end
+						for i = 4, 5 do --longitudes y ángulos de las dos rectas secundarias
+							Parts[ i ].l = math.distance( Parts[ i + 1 ].x, Parts[ i + 1 ].y, Parts[ i + 2 ].x, Parts[ i + 2 ].y )
+							Parts[ i ].a =    math.angle( Parts[ i + 1 ].x, Parts[ i + 1 ].y, Parts[ i + 2 ].x, Parts[ i + 2 ].y )
+						end
+						for i = 8, 9 do --coordenadas de los dos puntos de corte secundarios
+							Parts[ i ] = {
+								x = Parts[ i - 3 ].x + math.polar( Parts[ i - 4 ].a, t * Parts[ i - 4 ].l, "x" ),
+								y = Parts[ i - 3 ].y + math.polar( Parts[ i - 4 ].a, t * Parts[ i - 4 ].l, "y" )
+							}
+						end
+						--longitud de la última recta
+						Parts[ 6 ].l = math.distance( Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 9 ].x, Parts[ 9 ].y )
+						Parts[ 6 ].a =    math.angle( Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 9 ].x, Parts[ 9 ].y )
+						--coordenadas del último punto
+						Parts[ 10 ] = {
+							x = Parts[ 8 ].x + math.polar( Parts[ 6 ].a, t * Parts[ 6 ].l, "x" ),
+							y = Parts[ 8 ].y + math.polar( Parts[ 6 ].a, t * Parts[ 6 ].l, "y" )
+						}
+						Shp_parts = {
+							[ 1 ] = format( "m %s %s b %s %s %s %s %s %s ",
+								Parts[ 1 ].x, Parts[ 1 ].y, Parts[ 5 ].x, Parts[ 5 ].y,
+								Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 10 ].x, Parts[ 10 ].y
+							),
+							[ 2 ] = format( "m %s %s b %s %s %s %s %s %s ",
+								Parts[ 10 ].x, Parts[ 10 ].y, Parts[ 9 ].x, Parts[ 9 ].y,
+								Parts[ 7 ].x, Parts[ 7 ].y, Parts[ 4 ].x, Parts[ 4 ].y
+							)
+						}
+					end
+					return Shp_parts
+				end
+				local parts, c = { }
+				for c in Shape:gmatch( "[blm]^* %-?%d+[%.%-%d ]*" ) do
+					parts[ #parts + 1 ] = { s = c }
+				end
+				local frequence_ra = 0
+				for i = 2, #parts do
+					parts[ i ].s = parts[ i - 1 ].s:reverse( ):match( "%s+%d[%.%-%d]*%s+%d[%.%-%d]*" ):reverse( ) .. parts[ i ].s
+					parts[ i ].l = shape.length( "m " .. parts[ i ].s )
+					parts[ i ].m = frequence_ra + parts[ i ].l
+					frequence_ra = parts[ i ].m
+				end
+				table.remove( parts, 1 )
+				local xlength = t * shape.length( Shape )
+				local k = 0
+				repeat
+					k = k + 1
+				until parts[ k ].m >= xlength
+				local new_t = (xlength - parts[ k ].m + parts[ k ].l) / parts[ k ].l
+				local cuts = xcut( "m " .. parts[ k ].s, new_t )
+				local shape_i = Shape:match( "m%s+%-?%d+[%.%-%d]*%s+%-?%d+[%.%-%d]* " )
+				for i = 1, k - 1 do
+					shape_i = shape_i .. parts[ i ].s:gsub( "%-?%d+[%.%-%d]*%s+%-?%d+[%.%-%d]* ", "", 1 )
+				end
+				shape_i = shape_i .. cuts[ 1 ]:gsub( "m%s+%-?%d+[%.%-%d]*%s+%-?%d+[%.%-%d]* ", "", 1 )
+				local shape_f = cuts[ 2 ]
+				for i = k + 1, #parts do
+					shape_f = shape_f .. parts[ i ].s:gsub( "%-?%d+[%.%-%d]*%s+%-?%d+[%.%-%d]* ", "", 1 )
+				end
+				if shape_f:match( "m" ) == nil then
+					shape_f = "m" .. shape_i:reverse( ):match( "%s+%d[%.%-%d]*%s+%d[%.%-%d]* " ):reverse( ) .. shape_f
+				end
+				return { shape_i, shape_f }
 			end
-			for i = 1, 3 do --longitudes y ángulos de las tres rectas principales
-				Parts[ i ].l = math.distance( Parts[ i ].x, Parts[ i ].y, Parts[ i + 1 ].x, Parts[ i + 1 ].y )
-				Parts[ i ].a =    math.angle( Parts[ i ].x, Parts[ i ].y, Parts[ i + 1 ].x, Parts[ i + 1 ].y )
+			local parts_shp, c = { }
+			for c in Shape:gmatch( "m%s+%-?%d+[%.%-%d bl]*" ) do
+				parts_shp[ #parts_shp + 1 ] = { s = c }
 			end
-			for i = 5, 7 do --coordenadas de los tres puntos de corte principales
-				Parts[ i ] = {
-					x = Parts[ i - 4 ].x + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "x" ),
-					y = Parts[ i - 4 ].y + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "y" )
-				}
+			local frequence_ra = 0
+			for i = 1, #parts_shp do
+				parts_shp[ i ].l = shape.length( parts_shp[ i ].s )
+				parts_shp[ i ].m = frequence_ra + parts_shp[ i ].l
+				frequence_ra = parts_shp[ i ].m
 			end
-			for i = 4, 5 do --longitudes y ángulos de las dos rectas secundarias
-				Parts[ i ].l = math.distance( Parts[ i + 1 ].x, Parts[ i + 1 ].y, Parts[ i + 2 ].x, Parts[ i + 2 ].y )
-				Parts[ i ].a =    math.angle( Parts[ i + 1 ].x, Parts[ i + 1 ].y, Parts[ i + 2 ].x, Parts[ i + 2 ].y )
+			local xlength = t * shape.length( Shape )
+			local k = 0
+			repeat
+				k = k + 1
+			until parts_shp[ k ].m >= xlength
+			local new_t = (xlength - parts_shp[ k ].m + parts_shp[ k ].l) / parts_shp[ k ].l
+			local cuts = cut_tract( parts_shp[ k ].s, new_t )
+			local shape_i = ""
+			for i = 1, k - 1 do
+				shape_i = shape_i .. parts_shp[ i ].s
 			end
-			for i = 8, 9 do --coordenadas de los dos puntos de corte secundarios
-				Parts[ i ] = {
-					x = Parts[ i - 3 ].x + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "x" ),
-					y = Parts[ i - 3 ].y + math.polar( Parts[ i - 4 ].a, St * Parts[ i - 4 ].l, "y" )
-				}
+			shape_i = shape_i .. cuts[ 1 ]
+			local shape_f = cuts[ 2 ]
+			for i = k + 1, #parts_shp do
+				shape_f = shape_f .. parts_shp[ i ].s
 			end
-			--longitud de la última recta
-			Parts[ 6 ].l = math.distance( Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 9 ].x, Parts[ 9 ].y )
-			Parts[ 6 ].a =    math.angle( Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 9 ].x, Parts[ 9 ].y )
-			--coordenadas del último punto
-			Parts[ 10 ] = {
-				x = Parts[ 8 ].x + math.polar( Parts[ 6 ].a, St * Parts[ 6 ].l, "x" ),
-				y = Parts[ 8 ].y + math.polar( Parts[ 6 ].a, St * Parts[ 6 ].l, "y" )
-			}
-			local bezier_parts = {
-				[ 1 ] = format( "m %s %s b %s %s %s %s %s %s ",
-					Parts[ 1 ].x, Parts[ 1 ].y, Parts[ 5 ].x, Parts[ 5 ].y,
-					Parts[ 8 ].x, Parts[ 8 ].y, Parts[ 10 ].x, Parts[ 10 ].y
-				),
-				[ 2 ] = format( "m %s %s b %s %s %s %s %s %s ",
-					Parts[ 10 ].x, Parts[ 10 ].y, Parts[ 9 ].x, Parts[ 9 ].y,
-					Parts[ 7 ].x, Parts[ 7 ].y, Parts[ 4 ].x, Parts[ 4 ].y
-				)
-			}
-			return bezier_parts
+			return { shape_i, shape_f }
 		end
 		if type( t ) == "number" then
-			if not Bezier then
-				local Beziers = {
-					[ 1 ] = {
-						[ 1 ] = "m 50 0 b 50 -28 28 -50 0 -50 ",
-						[ 2 ] = "m 0 -50 b -28 -50 -50 -28 -50 0 ",
-						[ 3 ] = "m -50 0 b -50 28 -28 50 0 50 ",
-						[ 4 ] = "m 0 50 b 28 50 50 28 50 0 "
-					},
-					[ 2 ] = {
-						[ 1 ] = "b 50 -28 28 -50 0 -50 ",
-						[ 2 ] = "b -28 -50 -50 -28 -50 0 ",
-						[ 3 ] = "b -50 28 -28 50 0 50 ",
-						[ 4 ] = "b 28 50 50 28 50 0 "
-					}
-				}
-				local Angle = t * 360
-				local indic = ceil( Angle / 90 )
-				local shape_i = Beziers[ 2 ][ indic ]
-				local shape_f = Beziers[ 1 ][ indic + 1 ]
-				local shp_pre, shp_pos, shapex = "", ""
-				local circle = { }
-				for i = 1, indic - 1 do
-					shp_pre = shp_pre .. Beziers[ 2 ][ i ]
-				end
-				if Angle % 90 == 0 then
-					for i = indic + 2, 4 do
-						shp_pos = shp_pos .. Beziers[ 2 ][ i ]
-					end
-					circle[ 1 ] = "m 50 0 " .. shp_pre .. shape_i
-					circle[ 2 ] = shape_f .. shp_pos
-				else
-					for i = indic + 1, 4 do
-						shp_pos = shp_pos .. Beziers[ 2 ][ i ]
-					end
-					shapex = cut( Beziers[ 1 ][ indic ], t )
-					circle[ 1 ] = "m 50 0 " .. shp_pre .. shapex[ 1 ]:gsub( "m %-?%d+[%.%d]* %-?%d+[%.%d]* ", "" )
-					circle[ 2 ] = shapex[ 2 ] .. shp_pos
-				end
-				return circle --add: april 22nd 2020
+			if t < 0 then
+				t = 0
+			elseif t > 1 then
+				t = 1
 			end
-			return cut( Bezier, t )
-			--shape.beziercut( "m 50 0 b 22 0 0 22 0 50 ", 0.5 )
+			return shape_cut( Shape, t )
+			--shape.cut( "m 50 0 b 22 0 0 22 0 50 ", 0.5 )
 		elseif type( t ) == "table" then
 			local n = abs( ceil( t[ 1 ] ) )
 			if n < 3 then
 				n = 3
 			end
-			local Parts = { [ 1 ] = cut( Bezier, 1 / n ) }
+			local xParts = { [ 1 ] = shape_cut( Shape, 1 / n ) }
 			for i = 2, n - 1 do
-				Parts[ i ] = cut( Parts[ i - 1 ][ 2 ], 1 / (n - i + 1) )
+				xParts[ i ] = shape_cut( xParts[ i - 1 ][ 2 ], 1 / (n - i + 1) )
 			end
 			local total_parts = { }
-			for i = 1, #Parts do
-				total_parts[ i ] = Parts[ i ][ 1 ]
+			for i = 1, #xParts do
+				total_parts[ i ] = xParts[ i ][ 1 ]
 			end
-			total_parts[ n ] = Parts[ #Parts ][ 2 ]
+			total_parts[ n ] = xParts[ #xParts ][ 2 ]
+			----------------
+			local Px, Py, Pa
+			if AddPoint then
+				shape.info( Shape )
+				Px, Py = c_shape, m_shape
+				if type( AddPoint ) == "table" then
+					Px, Py = AddPoint[ 1 ], AddPoint[ 2 ]
+					if type( Px ) == "string" then
+						Px = Px:gsub( "(%d)x", "%1 * x" ):gsub( "x", c_shape )
+						Px = Px:gsub( "(%d)y", "%1 * y" ):gsub( "y", m_shape )
+						Px = string.toval( Px )
+					end
+					if type( Py ) == "string" then
+						Py = Py:gsub( "(%d)x", "%1 * x" ):gsub( "x", c_shape )
+						Py = Py:gsub( "(%d)y", "%1 * y" ):gsub( "y", m_shape )
+						Py = string.toval( Py )
+					end
+				end
+				Pa = format( " %s %s ", Px, Py )
+				for i = 1, #total_parts do
+					total_parts[ i ] = "m" .. Pa .. total_parts[ i ]:gsub( "m", "l", 1 ) .."l" .. Pa
+				end
+			end --shape.cut( shape.rectangle, { 3 }, 1 )
+			----------------
 			return total_parts
-			--shape.beziercut( "m 50 0 b 22 0 0 22 0 50 ", { 4 } )
 		end
-	end --april 08th 2020
+	end --may 10th 2020
 	
+	function shape.pointpos( Shape, P1, P2 )
+		--shape.pointpos( shape.circle, 2, { 0, 0 } )
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		if type( P1 ) == "function" then
+			P1 = P1( )
+		end
+		if type( P2 ) == "function" then
+			P2 = P2( )
+		end
+		local Shape = shape.ASSDraw3( Shape )
+		local P1 = P1 or Shape
+		local P2 = P2 or Shape
+		effector.print_error( Shape, "shape", "shape.pointpos", 1 )
+		effector.print_error( P1, "numberstringtable", "shape.pointpos", 2 )
+		effector.print_error( P2, "stringtable", "shape.pointpos", 3 )
+		local points, c = { }
+		local x1, y1, x2, y2 = 0, 0, 0, 0
+		if type( P1 ) == "string"
+			and P1:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			x1, y1 = P1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+			x1, y1 = tonumber( x1 ), tonumber( y1 )
+		elseif type( P1 ) == "table" then
+			if P1.x and P1.y then
+				x1, y1 = P1.x, P1.y
+			else
+				x1, y1 = P1[ 1 ], P1[ 2 ]
+			end
+		elseif type( P1 ) == "number" then
+			for c in Shape:gmatch( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) do
+				points[ #points + 1 ] = c
+			end
+			if points[ P1 ] then
+				P1 = points[ P1 ]
+			else
+				P1 = points[ 1 ]
+			end
+			x1, y1 = P1:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+			x1, y1 = tonumber( x1 ), tonumber( y1 )
+		end
+		if type( P2 ) == "string"
+			and P2:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" ) then
+			x2, y2 = P2:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)" )
+			x2, y2 = tonumber( x2 ), tonumber( y2 )
+		elseif type( P2 ) == "table" then
+			if P2.x and P2.y then
+				x2, y2 = P2.x, P2.y
+			else
+				x2, y2 = P2[ 1 ], P2[ 2 ]
+			end
+		end
+		local Dx, Dy = x2 - x1, y2 - y1
+		return shape.displace( Shape, Dx, Dy )
+	end --april 30th 2020
+	
+	-------------------------------------------------------------------------------------------------
+	-- Librería de Funciones "graph" -- add: may 18th 2020 ------------------------------------------
+	function graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
+		if type( n ) == "function" then
+			n = n( )
+		end
+		if type( Height ) == "function" then
+			Height = Height( )
+		end
+		if type( Angle ) == "function" then
+			Angle = Angle( )
+		end
+		if type( Bord ) == "function" then
+			Bord = Bord( )
+		end
+		if type( Space ) == "function" then
+			Space = Space( )
+		end
+		if type( Tags ) == "function" then
+			Tags = Tags( )
+		end
+		if type( n ) == "function" then
+			Extra = Extra( )
+		end
+		local n = n or 6
+		local Height, Width = Height or 100 * ratio
+		if type( Height ) == "table" then
+			Width = Height[ 2 ] or 0
+			Height = Height[ 1 ] or 100 * ratio
+		end
+		local Angle = Angle or 360
+		local Bord = Bord or nil
+		local Bord_i, Anglex, multi_polygon = 0, 0, ""
+		local Space = Space or 0
+		effector.print_error( n, "number", "graph.polygon", 1 )
+		effector.print_error( Height, "numbertable", "graph.polygon", 2 )
+		effector.print_error( Angle, "numbertable", "graph.polygon", 3 )
+		effector.print_error( Space, "number", "graph.polygon", 5 )
+		n = abs( ceil( n ) )
+		if n < 3 then
+			n = 3
+		end
+		local Theta = 90 * (n - 2) / n
+		local function graph_polygon( n, Height, Angle, Bord, Extra, Width )
+			local function do_polygon( n, Radius, Angle )
+				local Radius = Radius or 50 * ratio
+				local Anglex = 360 / n
+				local Thetax = 90 * (n - 2) / n
+				local Anglix = 90 - Anglex * floor( 90 / Anglex )
+				local Poly = ""
+				if  n % 2 == 0 then --n par
+					for i = 1, n + 1 do
+						Poly = Poly .. format( "l %s %s ", math.polar( Anglex * (i - 1), Radius ) )
+					end
+					Poly = Poly:gsub( "l", "m", 1 )
+					if Angle then
+						local Parts, c = { }
+						for c in Poly:gmatch( "[ml]^* %-?%d+[%.%d]* %-?%d+[%.%d]* " ) do
+							Parts[ #Parts + 1 ] = c
+						end
+						local N = ceil( Angle / Anglex ) + 1
+						Poly = ""
+						for i = 1, N - 1 do
+							Poly = Poly .. Parts[ i ]
+						end
+						local t = (Angle % Anglex) / Anglex
+						if t == 0 then
+							t = 1
+						end
+						Parts[ N ] = shape.cut( Parts[ N - 1 ]:gsub( "l", "m" ) .. Parts[ N ], t )[ 1 ]:match( "l %-?%d+[%.%d]* %-?%d+[%.%d]* " )
+						Poly = "m 0 0 " .. Poly:gsub( "m", "l" ) .. Parts[ N ]
+					else
+						Poly = "m 0 0 " .. Poly:gsub( "m", "l" )
+					end
+				else --n impar
+					local fakex = Radius * sin( rad( Thetax ) ) / sin( rad( 180 - Thetax - Anglix ) )
+					local fakey = Radius * sin( rad( Anglix ) ) / sin( rad( 180 - Thetax - Anglix ) )
+					Poly = format( "l %s 0 ", fakex )
+					for i = 1, n do
+						Poly = Poly .. format( "l %s %s ", math.polar( Anglix + Anglex * (i - 1), Radius ) )
+					end
+					Poly = Poly .. format( "l %s 0 ", fakex )
+					Poly = Poly:gsub( "l", "m", 1 )
+					if Angle then
+						if Angle <= Anglix then
+							Poly = format( "m 0 0 l %s 0 l %s %s ", fakex,
+								fakex + math.polar( Thetax + Anglix, fakey * Angle / Anglix, "x" ),
+								math.polar( 180 - Thetax - Anglix, fakey * Angle / Anglix, "y" )
+							)
+						else
+							local Parts, c = { }
+							for c in Poly:gmatch( "[ml]^* %-?%d+[%.%d]* %-?%d+[%.%d]* " ) do
+								Parts[ #Parts + 1 ] = c
+							end
+							local N = ceil( (Angle - Anglix) / Anglex ) + 2
+							Poly = format( "m 0 0 l %s 0 ", fakex )
+							for i = 2, N - 1 do
+								Poly = Poly .. Parts[ i ]
+							end
+							local t = ((Angle - Anglix) % Anglex) / Anglex
+							if t == 0 then
+								t = 1
+							end
+							if N == #Parts then
+								Parts[ N ] = Parts[ 2 ]
+							end
+							Parts[ N ] = shape.cut( Parts[ N - 1 ]:gsub( "l", "m" ) .. Parts[ N ], t )[ 1 ]:match( "l %-?%d+[%.%d]* %-?%d+[%.%d]* " )
+							Poly = Poly .. Parts[ N ]
+						end
+					else
+						Poly = "m 0 0 " .. Poly:gsub( "m", "l" )
+					end
+				end
+				return Poly
+			end --graph.polygon( 8, 40, 300 )
+			local Height = Height or 100 * ratio
+			local n = n or 6
+			n = abs( ceil( n ) )
+			if n < 3 then
+				n = 3
+			end
+			local Theta = 90 * (n - 2) / n
+			local Radius_1 = Height / (1 + sin( rad( Theta ) )) --n impar
+			-------------------------------------------------------------
+			local Radius = Height / ((sin( rad( Theta ) )) ^ (n % 2) + sin( rad( Theta ) ))
+			if type( Width ) == "number"
+				and Width > 2 * Radius * sin( rad( 360 / n ) ) ^ (n % 2) then
+				local function movepoint( Shape, Dx )
+					local Parts, c = { }
+					for c in Shape:gmatch( "[blm]* %-?%d+[%.%d]* %-?%d+[%.%d]*" ) do
+						Parts[ #Parts + 1 ] = c
+					end
+					Parts[ 1 ] = Parts[ 1 ]:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
+						function( x, y )
+							local x, y = tonumber( x ), tonumber( y )
+							if x == 0 then
+								return format( "0 %s l %s %s", y, x + Dx, y )
+							elseif x > 0 then
+								return format( "%s %s", x + Dx, y )
+							end
+						end
+					)
+					for i = 2, #Parts do
+						Parts[ i ] = Parts[ i ]:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
+							function( x, y )
+								local x, y = tonumber( x ), tonumber( y )
+								if math.round( x ) == 0 then
+									local p1 = Parts[ i - 1 ]:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" )
+									if Parts[ i - 1 ]:match( "%-?%d+[%.%d]* %-?%d+[%.%d]* l %-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+										p1 = Parts[ i - 1 ]:match( "(%-?%d+[%.%d]* %-?%d+[%.%d]*) l %-?%d+[%.%d]* %-?%d+[%.%d]*" )
+										if p1:match( "(0 %-?%d+[%.%d]*)" ) then
+											p1 = Parts[ i - 1 ]:match( "%-?%d+[%.%d]* %-?%d+[%.%d]* l (%-?%d+[%.%d]* %-?%d+[%.%d]*)" )
+										end
+									end
+									local Angle = math.angle( p1, x, y )
+									if Angle <= 90 or Angle >= 270 then
+										return format( "0 %s l %s %s", y, x + Dx, y )
+									end
+									return format( "%s %s l 0 %s", x + Dx, y, y )
+								elseif x > 0 then
+									return format( "%s %s", x + Dx, y )
+								end
+							end
+						)
+					end
+					return table.concat( Parts, " " )
+				end
+			end
+			-------------------------------------------------------------
+			if n % 2 == 0 then --n par
+				Radius_1 = Height / (2 * sin( rad( Theta ) ))
+			end
+			local S1, S2, shp_polygon
+			if not Bord then
+				S1 = do_polygon( n, Radius_1, Angle )
+				shp_polygon = S1 .. "l 0 0 "
+				if type( Width ) == "number"
+					and Width > 2 * Radius * sin( rad( 360 / n ) ) ^ (n % 2) then
+					return movepoint( shp_polygon, Width - 2 * Radius * sin( rad( 360 / n ) ) ^ (n % 2) )
+				end
+				return shp_polygon
+			end
+			local Radius_2 = Radius_1 + Bord / sin( rad( Theta ) )
+			S1 = do_polygon( n, Radius_2, Angle )
+			if n % 2 == 0 then --n par
+				S1 = S1:gsub( "m 0 0 ", format( "m %s 0 ", Radius_1 ) ):gsub( "l", "ll", 1 )
+			end
+			S2 = shape.reverse( do_polygon( n, Radius_1, Angle ) )
+			S2 = S2:gsub( "m", "lll" )
+			S2 = S2:reverse( ):gsub( " %d+[%.%-%d]* %d+[%.%-%d]* l", "", 1 )
+			if n % 2 == 1 then --n impar
+				local last_p = S2:match( " %d+[%.%d%-]* %d+[%.%d%-]* " ):reverse( )
+				S1 = S1:gsub( "m 0 0 ", format( "m%s", last_p ) ):gsub( "l", "ll", 1 )
+			end
+			shp_polygon = S1 .. S2:reverse( )
+			------------------
+			local puntas = {
+				[ "\\" ] = "m 0 0 l 0 28.86 l 100 0 ",
+				[ "/" ] = "m 0 0 l 100 28.86 l 100 0 ",
+				[ "<" ] = "m 0 0 l 50 -28.86 l 100 0 ",
+				[ ">" ] = "m 0 0 l 50 28.86 l 100 0 ",
+				[ "(" ] = "m 0 0 b 0 28 22 50 50 50 b 78 50 100 28 100 0 ",
+				[ ")" ] = "m 0 0 b 0 -28 22 -50 50 -50 b 78 -50 100 -28 100 0 ",
+				[ "v" ] = "m 0 0 l -25 0 l 25 29 l 75 0 l 50 0 "
+			}
+			if Extra then
+				local Anglex = 360 / n
+				local Thetax = 90 * (n - 2) / n
+				local Anglix = 90 - Anglex * floor( 90 / Anglex )
+				if Extra[ 1 ] then --añadir longitud extra al inicio
+					shp_polygon = shp_polygon:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ll (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ",
+						function( x1, y1, x2, y2 ) --graph.polygon( 6, 200, 270, 20, nil, nil, { 50 } )
+							local nx1 = x2 + math.polar( (450 - Thetax) / 2, Bord / cos( rad( (90 - Theta) / 2 ) ), "x" )
+							local ny1 = y2 + math.polar( (450 - Thetax) / 2, Bord / cos( rad( (90 - Theta) / 2 ) ), "y" )
+							if n % 2 == 1 then --graph.polygon( 5, 200, 270, 20, nil, nil, { 50 } )
+								nx1 = x2 + math.polar( (270 + Anglix + Thetax) / 2, Bord / sin( rad( (90 + Anglix + Theta) / 2 ) ), "x" )
+								ny1 = y2 + math.polar( (270 + Anglix + Thetax) / 2, Bord / sin( rad( (90 + Anglix + Theta) / 2 ) ), "y" )
+							end
+							local add = " %s %s l %s %s ll %s %s l %s %s "
+							return format( add, nx1, ny1, nx1, y1 + Extra[ 1 ], x2, y2 + Extra[ 1 ], x2, y2 )
+						end
+					)
+					shp_polygon = shp_polygon:reverse( ):gsub( " %d+[%.%d%-]* %d+[%.%d%-]*", "", 1 ):reverse( ) --elimina el último punto
+					shp_polygon = shp_polygon .. shp_polygon:match( "%-?%d+[%.%d]* %-?%d+[%.%d]* " ) --añade el primer punto al final :D
+				end
+				if Extra[ 2 ] then --añadir longitud extra al final
+					shp_polygon = shp_polygon:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) l (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) lll (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ",
+						function( x0, y0, x1, y1, x2, y2 )
+							local Angle = Angle + 90
+							--graph.polygon( 6, 200, 210, 20, nil, nil, { 40, 80, ">", "v" } )
+							if n % 2 == 1 then
+								Angle = math.angle( format( "%s %s l %s %s", x0, y0, x1, y1 ) ) -- 90
+							end --graph.polygon( 5, 200, 270, 20, nil, nil, { nil, 80, "v", "v" } )
+							local x3 = tonumber( x1 ) + math.polar( Angle, Extra[ 2 ], "x" )
+							local y3 = tonumber( y1 ) + math.polar( Angle, Extra[ 2 ], "y" )
+							local x4 = tonumber( x2 ) + math.polar( Angle, Extra[ 2 ], "x" )
+							local y4 = tonumber( y2 ) + math.polar( Angle, Extra[ 2 ], "y" )
+							local add = " %s %s l %s %s l %s %s lll %s %s l %s %s "
+							return format( add, x0, y0, x1, y1, x3, y3, x4, y4, x2, y2 )
+						end
+					)
+				end
+				if Extra[ 3 ] then
+					local tip = Extra[ 3 ]
+					if puntas[ tip ] then
+						tip = puntas[ tip ]
+					end
+					shp_polygon = shp_polygon:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ll (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ",
+						function( x1, y1, x2, y2 )
+							local x1, y1 = tonumber( x1 ), tonumber( y1 )
+							--graph.polygon( 7, 200, 270, 20, nil, nil, { nil, nil, "v" } )
+							local Shape = shape.rotate( shape.ratio( tip, { nil, x2 - x1 } ), { nil, 0 } )
+							return shape.firstpos( Shape, x1, y1 ):gsub( "m", "" )
+							--graph.polygon( 6, 200, 270, 20, nil, nil, { 60, nil, "v" } )
+						end
+					)
+				end
+				if Extra[ 4 ] then
+					local tip = Extra[ 4 ]
+					if puntas[ tip ] then
+						tip = puntas[ tip ]
+					end
+					shp_polygon = shp_polygon:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) l (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) lll (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ",
+						function( x0, y0, x1, y1, x2, y2 )
+							local x1, y1 = tonumber( x1 ), tonumber( y1 )
+							local Shape = shape.rotate( shape.ratio( tip, { nil, Bord } ), { nil, 0 } )
+							local Angle = Angle - 180
+							if n % 2 == 1 then
+								Angle = math.angle( format( "%s %s l %s %s", x0, y0, x1, y1 ) ) + 90
+							end --graph.polygon( 5, 200, 270, 20, nil, nil, { 60, nil, "v", "v" } )
+							Shape = shape.firstpos( shape.rotate( Shape, Angle ), x1, y1 ):gsub( "m", "" )
+							return format( " %s %s l ", x0, y0 ) .. Shape
+						end
+					)
+				end
+			end
+			------------------
+			if type( Width ) == "number"
+				and Width > 2 * Radius * sin( rad( 360 / n ) ) ^ (n % 2) then
+				return movepoint( shp_polygon, Width - 2 * Radius * sin( rad( 360 / n ) ) ^ (n % 2) )
+			end
+			return shp_polygon
+		end --graph.polygon( 5, 200, 250, 20 )
+		if type( Angle ) == "number" then
+			return shape.origin( graph_polygon( n, Height, Angle, Bord, Extra, Width ) )
+			--graph.polygon( 6, 300, 320, 10 )
+		end
+		if type( Angle ) == "table" then
+			--una concéntrica a la otra
+			for i = 1, #Angle do
+				multi_polygon = multi_polygon .. graph_polygon( n, Height + Bord_i, Angle[ i ], Bord, Extra, Width )
+				Bord_i = Bord_i + 2 * (Bord + Space / sin( rad( Theta ) ))
+			end --graph.polygon( 6, 40, { 240, 180, 200, 100, 80 }, 20, 5 )
+		end
+		multi_polygon = shape.origin( multi_polygon )
+		if Tags then
+			multi_polygon = shape.fusion( multi_polygon, Tags )
+		end --graph.polygon( 10, 50, { 240, 180, 200, 100, 80, 300, 200, 100 }, 15, 4, table.ipol( { "\\1c&H00FF00&", "\\1c&H0000FF&" }, 8 ) )
+		return multi_polygon
+	end --may 02nd 2020
+	
+	function graph.line( Configs, Bord )
+		--crea trayectos lineales consecutivos de ancho específico
+		--Configs = { { a1, l1 }, { a2, l2 }, { a3, l3 },... } or Shape
+		if type( Configs ) == "function" then
+			Configs = Configs( )
+		end
+		if type( Bord ) == "function" then
+			Bord = Bord( )
+		end
+		local Configs = Configs or nil
+		local Bord = Bord or 5 * ratio
+		if not Configs
+			and linefx[ ii ].text:match( "\\i?clip%b()" ) then
+			Configs = shape.ASSDraw3( linefx[ ii ].text:match( "\\i?clip%b()" ) )
+		end
+		effector.print_error( Configs, "stringtable", "graph.line", 1 )
+		effector.print_error( Bord, "number", "graph.line", 2 )
+		local function graph_line( Configs, Bord )
+			local x_i, y_i = 0, 0
+			local Points, is_shape, letters = { }
+			if type( Configs ) == "string" then
+				local Shape = shape.ASSDraw3( Configs )
+				Points = shape.point( Shape )
+				x_i, y_i = Points[ 1 ].x, Points[ 1 ].y
+				Configs = { }
+				for i = 1, #Points - 1 do
+					Configs[ i ] = {
+						[ 1 ] = math.angle( Points[ i ].x, Points[ i ].y, Points[ i + 1 ].x, Points[ i + 1 ].y ),
+						[ 2 ] = math.distance( Points[ i ].x, Points[ i ].y, Points[ i + 1 ].x, Points[ i + 1 ].y ),
+					}
+				end
+				is_shape = true
+				letters = { }
+				local c
+				for c in Shape:gmatch( "[blm]* %-?%d+[%.%d]* %-?%d+[%.%d]*" ) do
+					letters[ #letters + 1 ] = c
+				end
+			end
+			local n = #Configs
+			local p1 = { [ 0 ] = { x = x_i, y = y_i, a = Configs[ 1 ][ 1 ], l = 0 } }
+			for i = 1, n do
+				p1[ i ] = {
+					x = p1[ i - 1 ].x + math.polar( Configs[ i ][ 1 ], Configs[ i ][ 2 ], "x" ),
+					y = p1[ i - 1 ].y + math.polar( Configs[ i ][ 1 ], Configs[ i ][ 2 ], "y" ),
+					a = Configs[ i ][ 1 ],
+					l = Configs[ i ][ 2 ]
+				}
+			end
+			local Lines, Coord = { [ 1 ] = format( "m %s %s ", x_i, y_i ) }
+			for i = 1, n do
+				Lines[ 1 ] = Lines[ 1 ] .. format( "l %s %s ", p1[ i ].x, p1[ i ].y )
+			end
+			local Segments, new_shp_1, new_shp_2, s = { }, "", ""
+			if is_shape then
+				for s in Lines[ 1 ]:gmatch( "%-?%d+[%.%d]* %-?%d+[%.%d]* " ) do
+					Segments[ #Segments + 1 ] = s
+				end
+				for i = 1, #Segments do
+					new_shp_1 = new_shp_1 .. letters[ i ]:sub( 1, 1 ) .. " " .. Segments[ i ]
+				end
+				Lines[ 1 ] = new_shp_1:gsub( "  ", " " )
+			end
+			local angle_int = { }
+			for i = 1, n do
+				angle_int[ i ] = 180 + p1[ i - 1 ].a - p1[ i ].a
+				if angle_int[ i ] < 0 then
+					angle_int[ i ] = angle_int[ i ] + 360
+				elseif angle_int[ i ] > 360 then
+					angle_int[ i ] = angle_int[ i ] - 360
+				end
+			end
+			local p2 = { [ n + 1 ] = { a = p1[ n ].a + 90 } }
+			for i = 1, n do
+				p2[ i ] = {
+					a = p1[ i ].a + angle_int[ i ] / 2
+				}
+				if p2[ i ].a < 0 then
+					p2[ i ].a = p2[ i ].a + 360
+				elseif p2[ i ].a > 360 then
+					p2[ i ].a = p2[ i ].a - 360
+				end
+			end
+			for i = 1, #p2 do
+				if p2[ i ].a > 360 then
+					p2[ i ].a = p2[ i ].a - 360
+				end
+				p2[ i ].b = p2[ i ].a - p1[ i - 1 ].a
+				if p2[ i ].b < 0 then
+					p2[ i ].b = p2[ i ].b + 360
+				end
+				if p2[ i ].b <= 90
+					or (angle_int[ i ] or 270) < 180 then
+					p2[ i ].r = abs( Bord / sin( rad( p2[ i ].b ) ) )
+				else
+					p2[ i ].r = abs( Bord / cos( rad( p2[ i ].b ) ) )
+				end
+			end
+			for i = 1, n + 1 do
+				p2[ i ].x = p1[ i - 1 ].x + math.polar( p2[ i ].a, -p2[ i ].r, "x" )
+				p2[ i ].y = p1[ i - 1 ].y + math.polar( p2[ i ].a, -p2[ i ].r, "y" )
+				-- -p2[ i ].r el signo menos hace que el borde se haga hacia la parte
+				-- exterior de las shapes "positivas" dibajadas en sentido antihorario
+			end
+			Lines[ 2 ] = format( "m %s %s ", p2[ 1 ].x, p2[ 1 ].y )
+			for i = 2, n + 1 do
+				Lines[ 2 ] = Lines[ 2 ] .. format( "l %s %s ", p2[ i ].x, p2[ i ].y )
+			end
+			if is_shape then
+				Segments = { }
+				for s in Lines[ 2 ]:gmatch( "%-?%d+[%.%d]* %-?%d+[%.%d]* " ) do
+					Segments[ #Segments + 1 ] = s
+				end
+				for i = 1, #Segments do
+					new_shp_2 = new_shp_2 .. letters[ i ]:sub( 1, 1 ) .. " " .. Segments[ i ]
+				end
+				Lines[ 2 ] = new_shp_2:gsub( "  ", " " )
+			end
+			local shp_line = Lines[ 1 ] .. shape.reverse( Lines[ 2 ] ):gsub( "m", "l" )
+			if is_shape then
+				return shp_line
+			end --graph.line( { { 0, 20 }, { 30, 20 }, { 0, 50 }, { 330, 20 }, { 0, 20 } }, 8 )
+			return shape.origin( shp_line )
+		end --april 18th 2020
+		if type( Configs ) == "string" then
+			local Shapes = shape.divide( Configs )
+			local multi_line = ""
+			for i = 1, #Shapes do
+				multi_line = multi_line .. graph_line( Shapes[ i ], Bord )
+			end
+			return multi_line
+		end --graph.line( shape.circle, 5 )
+		return graph_line( Configs, Bord )
+	end --april 28th 2020
+
+	function graph.banner( Width, Height, Mode, Bord )
+		if type( Width ) == "function" then
+			Width = Width( )
+		end
+		if type( Height ) == "function" then
+			Height = Height( )
+		end
+		if type( Mode ) == "function" then
+			Mode = Mode( )
+		end
+		if type( Bord ) == "function" then
+			Bord = Bord( )
+		end
+		local Mode_i = Mode:sub( 1, 1 ) or "["
+		local Mode_f = Mode:sub( 2, 2 ) or "]"
+		local Width = Width or 200
+		local Height = Height or 50
+		local Mode = Mode or "[]"
+		local Bord = Bord or nil
+		effector.print_error( Width, "number", "graph.banner", 1 )
+		effector.print_error( Height, "number", "graph.banner", 2 )
+		effector.print_error( Mode, "string", "graph.banner", 3 )
+		local function graph_banner( Width, Height, Mode )
+			local Shapes = {
+				[ 1 ] = { --inicios del banner
+					[ "[" ]  = "m 0 0 l 0 100 ",
+					[ "]" ]  = "m 0 0 l 0 100 ",
+					[ "<" ]  = "m 28.86 0 l 0 50 l 28.86 100 ",
+					[ ">" ]  = "m 0 0 l 28.86 50 l 0 100 ",
+					[ "/" ]  = "m 28.86 0 l 0 100 ",
+					[ "\\" ] = "m 0 0 l 28.86 100 ",
+					[ "(" ]  = "m 50 0 b 22 0 0 22 0 50 b 0 78 22 100 50 100 ",
+					[ ")" ]  = "m 0 0 b 17.591 9.974 28.88 28.447 28.88 50 b 28.88 71.553 17.591 90.026 0 100 "
+				},
+				[ 2 ] = { --finales del banner
+					[ "]" ]  = "m 0 100 l 0 0 ",
+					[ "[" ]  = "m 0 100 l 0 0 ",
+					[ "<" ]  = "m 0 100 l -28.86 50 l 0 0 ",
+					[ ">" ]  = "m -28.86 100 l 0 50 l -28.86 0 ",
+					[ "/" ]  = "m -28.86 100 l 0 0 ",
+					[ "\\" ] = "m 0 100 l -28.86 0 ",
+					[ "(" ]  = "m 0 100 b -17.591 90.026 -28.88 71.553 -28.88 50 b -28.88 28.447 -17.591 9.974 0 0 ",
+					[ ")" ]  = "m -50 100 b -22 100 0 78 0 50 b 0 22 -22 0 -50 0 "
+				}
+			}
+			if not Shapes[ 1 ][ Mode_i ] then
+				Mode_i = "["
+			end
+			if not Shapes[ 2 ][ Mode_f ] then
+				Mode_f = "]"
+			end
+			local ini = shape.ratio( Shapes[ 1 ][ Mode_i ], nil, { Height } )
+			local fin = shape.displace( shape.ratio( Shapes[ 2 ][ Mode_f ], nil, { Height } ), Width, 0 ):gsub( "m", "l" )
+			return ini .. fin --graph.banner( 300, 40, ")<" )
+		end
+		local shp_banner = graph_banner( Width, Height, Mode )
+		local mov_x1, mov_x2 = Bord, Bord
+		if Mode_i == "\\"
+			or Mode_i == "/" then
+			mov_x1 = 1.5 * Bord
+		elseif Mode_i == ">" then
+			mov_x1 = 2 * Bord
+		end
+		if Mode_f == "\\"
+			or Mode_f == "/" then
+			mov_x2 = 1.5 * Bord
+		elseif Mode_f == "<" then
+			mov_x2 = 2 * Bord
+		end
+		if Bord then
+			shp_border = graph_banner( Width + mov_x1 + mov_x2, Height + 2 * Bord, Mode )
+			shp_banner = shape.displace( shape.reverse( shp_banner ), mov_x1, Bord )
+			shp_banner = shp_border .. shp_banner
+		end
+		return shp_banner --graph.banner( 300, 40, "<>", 4 )
+	end --april 13th 2020
+
+	function graph.gear( Radius, n, Dent, Double )
+		if type( Radius ) == "function" then
+			Radius = Radius( )
+		end
+		if type( n ) == "function" then
+			n = n( )
+		end
+		if type( Dent ) == "function" then
+			Dent = Dent( )
+		end
+		local Radius = Radius or 100
+		local n = n or 8
+		local Dent = Dent or "m 0 0 l 100 0 "
+		Dent = shape.incenter( shape.rotate( Dent, { nil, 0 } ) )
+		effector.print_error( Radius, "number", "graph.gear", 1 )
+		effector.print_error( n, "number", "graph.gear", 2 )
+		effector.print_error( Dent, "shape", "graph.gear", 3 )
+		local function graph_gear( Radius, n, Dent )
+			local Ratio = 0.34
+			local angle = 360 / n
+			local arc1 = Ratio * angle
+			local arc2 = 0.5 * (1 + Ratio) * angle
+			local length = 2 * pi * Radius * angle / 360
+			local parts = {
+				[ 1 ] = shape.cut( shape.size( "m 50 0 b 50 -28 28 -50 0 -50 ", Radius ), arc1 / 90 )[ 1 ],
+				[ 2 ] = shape.displace(
+					shape.rotate(
+						shape.ratio( Dent, { nil, 0.3 * length } )	--size
+						, 90 + arc2									--rotation
+					)
+					, { arc2, Radius + 0.45 * length - shape.height( Dent ) / 5 }	--polar position
+				)
+			}
+			local dent = parts[ 1 ] .. parts[ 2 ]:gsub( "m", "l" )
+			local gear_shp = ""
+			for i = 1, n do
+				gear_shp = gear_shp .. shape.rotate( dent, angle * (i - 1) )
+			end
+			gear_shp = "m" .. gear_shp:gsub( "m", "l" ):sub( 2, -1 ) .. format( "l %s 0 ", Radius )
+			return shape.rotate( gear_shp, -arc2 ) --graph.gear( 100, 8 )
+		end --april 12th 2020
+		local circle = {
+			[ "-" ] = shape.reverse( "m 0 -50 b -28 -50 -50 -28 -50 0 b -50 28 -28 50 0 50 b 28 50 50 28 50 0 b 50 -28 28 -50 0 -50 " ),
+			[ "+" ] = "m 0 -50 b -28 -50 -50 -28 -50 0 b -50 28 -28 50 0 50 b 28 50 50 28 50 0 b 50 -28 28 -50 0 -50 "
+		}
+		local circle_add1 = shape.size( circle[ "-" ], 1.8 * Radius ) .. shape.size( circle[ "+" ], 1.5 * Radius )
+		local circle_add2 = shape.size( circle[ "-" ], 0.5 * Radius )
+		local shp_gear = graph_gear( Radius, n, Dent )
+		if Double then
+			shp_gear = shp_gear .. shape.reverse( graph_gear( 0.7 * Radius, n, Dent ) )
+			circle_add1 = shape.size( circle[ "+" ], 1.1 * Radius ) .. shape.size( circle[ "-" ], 0.9 * Radius )
+			circle_add2 = shape.size( circle[ "+" ], 0.5 * Radius )
+		end --graph.gear( 80, 8, "m -45 -16 l -20 0 l 20 0 l 45 -16 ", true )
+		return shape.origin( shp_gear .. circle_add1 .. circle_add2 )
+	end --april 12th 2020
+
+	function graph.cake( Radius, Angle, Bord, Space, Tags, Extra )
+		if type( Radius ) == "function" then
+			Radius = Radius( )
+		end
+		if type( Angle ) == "function" then
+			Angle = Angle( )
+		end
+		if type( Bord ) == "function" then
+			Bord = Bord( )
+		end
+		if type( Space ) == "function" then
+			Space = Space( )
+		end
+		if type( Tags ) == "function" then
+			Tags = Tags( )
+		end
+		if type( Extra ) == "function" then
+			Extra = Extra( )
+		end
+		local Radius = Radius or 50
+		local Angle = Angle or 225
+		local Bord = Bord or nil--10 * ratio
+		local Space = Space or 0
+		effector.print_error( Radius, "number", "graph.cake", 1 )
+		effector.print_error( Angle, "number", "graph.cake", 2 )
+		effector.print_error( Space, "number", "graph.cake", 3 )
+		local function graph_cake( Radius, Angle, Bord, Extra )
+			local function do_cake( Radius, Angle )
+				local Shape = "m 0 0 l 50 0 b 50 -28 28 -50 0 -50 b -28 -50 -50 -28 -50 0 b -50 28 -28 50 0 50 b 28 50 50 28 50 0 "
+				Shape = shape.size( Shape, Radius )
+				while Angle < 0 do
+					Angle = Angle + 360
+				end
+				if Angle == 360 then
+					return Shape
+				end
+				Angle = Angle % 360
+				if Angle % 90 == 0 then
+					Angle = Angle + 90
+				end
+				local n = ceil( Angle / 90 ) + 2
+				local t = math.round( (Angle % 90) / 90, 3 )
+				local Beziers, c = { }
+				for c in Shape:gmatch( "[blm]^* %-?%d+[%-%.%d ]*" ) do
+					Beziers[ #Beziers + 1 ] = c .. "x"
+				end
+				Beziers[ n ] = Beziers[ n - 1 ]:match( "(%-?%d+[%.%d]* %-?%d+[%.%d]* )x" ) .. Beziers[ n ]
+				Beziers[ n ] = shape.cut( "m " .. Beziers[ n ], t )[ 1 ]
+				local shpx = ""
+				for i = 1, n - 1 do
+					shpx = shpx .. Beziers[ i ]:gsub( "x", "" )
+				end
+				return shpx .. Beziers[ n ]:gsub( "m %-?%d+[%.%d]* %-?%d+[%.%d]* ", "" )
+			end --april 02nd 2020
+			local S1, S2, cake_circle
+			if not Bord then
+				S1 = do_cake( 2 * Radius, Angle )
+				cake_circle = S1 .. "l 0 0 "
+				return cake_circle
+			end
+			Radius = Radius + Bord
+			S1 = do_cake(  2 * Radius, Angle )
+			S1 = S1:gsub( "m 0 0 ", format( "m %s 0 ", Radius - Bord ) ):gsub( "l", "ll" )
+			S2 = shape.reverse( do_cake( 2 * ( Radius - Bord ), Angle ) )
+			S2 = S2:gsub( "l %-?%d+[%.%d]* %-?%d+[%.%d]* ", "" ):gsub( "m", "lll" )
+			cake_circle = S1 .. S2
+			-------------
+			local puntas = {
+				[ "\\" ] = "m 0 0 l 0 28.86 l 100 0 ",
+				[ "/" ] = "m 0 0 l 100 28.86 l 100 0 ",
+				[ "<" ] = "m 0 0 l 50 -28.86 l 100 0 ",
+				[ ">" ] = "m 0 0 l 50 28.86 l 100 0 ",
+				[ "(" ] = "m 0 0 b 0 28 22 50 50 50 b 78 50 100 28 100 0 ",
+				[ ")" ] = "m 0 0 b 0 -28 22 -50 50 -50 b 78 -50 100 -28 100 0 ",
+				[ "v" ] = "m 0 0 l -25 0 l 25 29 l 75 0 l 50 0 "
+			}
+			if Extra then
+				if Extra[ 1 ] then
+					cake_circle = cake_circle:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ll (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ",
+						function( x1, y1, x2, y2 )
+							local add = " %s %s l %s %s ll %s %s l %s %s "
+							return format( add, x1, y1, x1, y1 + Extra[ 1 ], x2, y2 + Extra[ 1 ], x2, y2 )
+						end
+					)
+				end
+				if Extra[ 2 ] then
+					cake_circle = cake_circle:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) lll (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ",
+						function( x1, y1, x2, y2 )
+							local x3 = tonumber( x1 ) + math.polar( Angle + 90, Extra[ 2 ], "x" )
+							local y3 = tonumber( y1 ) + math.polar( Angle + 90, Extra[ 2 ], "y" )
+							local x4 = tonumber( x2 ) + math.polar( Angle + 90, Extra[ 2 ], "x" )
+							local y4 = tonumber( y2 ) + math.polar( Angle + 90, Extra[ 2 ], "y" )
+							local add = " %s %s l %s %s lll %s %s l %s %s "
+							return format( add, x1, y1, x3, y3, x4, y4, x2, y2 )
+						end
+					)
+				end
+				if Extra[ 3 ] then
+					local tip = Extra[ 3 ]
+					if puntas[ tip ] then
+						tip = puntas[ tip ]
+					end
+					cake_circle = cake_circle:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) ll %-?%d+[%.%d]* %-?%d+[%.%d]* ",
+						function( x, y )
+							local x, y = tonumber( x ), tonumber( y )
+							local Shape = shape.rotate( shape.ratio( tip, { nil, Bord } ), { nil, 0 } )
+							return shape.firstpos( Shape, x, y ):gsub( "m", "" )
+						end
+					)
+				end
+				if Extra[ 4 ] then
+					local tip = Extra[ 4 ]
+					if puntas[ tip ] then
+						tip = puntas[ tip ]
+					end
+					cake_circle = cake_circle:gsub( " (%-?%d+[%.%d]*) (%-?%d+[%.%d]*) lll %-?%d+[%.%d]* %-?%d+[%.%d]* ",
+						function( x, y )
+							local x, y = tonumber( x ), tonumber( y )
+							local Shape = shape.rotate( shape.ratio( tip, { nil, Bord } ), { nil, 0 } )
+							return shape.firstpos( shape.rotate( Shape, Angle - 180 ), x, y ):gsub( "m", "" )
+						end
+					)
+				end
+			end --add: april 29th 2020
+			-------------
+			return cake_circle
+		end
+		--------------------------
+		if type( Angle ) == "number" then
+			return shape.origin( graph_cake( Radius, Angle, Bord, Extra ) )
+			--graph.cake( 100, 300, 10, nil, nil, { 100 } )
+		end --retorna el cake sin borde :D
+		local Bord_i, Anglex, multi_cake = 0, 0, ""
+		if type( Angle[ 1 ] ) == "table" then
+			--una seguida de la otra
+			for i = 1, #Angle[ 1 ] do
+				multi_cake = multi_cake .. shape.rotate( graph_cake( Radius, Angle[ 1 ][ i ], Bord, Extra ), Anglex )
+				Anglex = Anglex + Space + Angle[ 1 ][ i ]
+			end --graph.cake( 40, {{ 40, 40, 40, 60 }}, 10, 5 )
+		else
+			--una concéntrica a la otra
+			for i = 1, #Angle do
+				multi_cake = multi_cake .. graph_cake( Radius + Bord_i, Angle[ i ], Bord, Extra )
+				Bord_i = Bord_i + Bord + Space
+			end --graph.cake( 40, { 240, 180, 200, 100, 80 }, 10 )
+		end
+		multi_cake = shape.origin( multi_cake )
+		if Tags then
+			multi_cake = shape.fusion( multi_cake, Tags )
+		end --graph.cake( 50, { 240, 180, 200, 100, 80, 300, 200, 100 }, 15, 4, table.ipol( { "\\1c&H00FF00&", "\\1c&H0000FF&" }, 8 ) )
+		return multi_cake
+	end --april 11th 2020
+
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "text" -----------------------------------------------------------------
 	function text.upper( Text )
@@ -19284,16 +20225,32 @@
 		end
 		local text_scale = Scale or 1
 		local shape_scale = math.round( math.log( text_scale, 2 ) + 1 )
+		--------------------
+		local tags_configs, tagx = { }
+		if Text:match( "%b{}" ) then --extrae la configuración de los tags del texto
+			tagx = Text:match( "%b{}" )
+			Text = Text:gsub( "%b{}", "" )
+			tags_configs.font = tagx:match( "\\fn(%S+[^\\]*)" ) and tagx:match( "\\fn(%S+[^\\]*)" ) or nil
+			tags_configs.bold = tagx:match( "\\b%d" ) and (tagx:match( "\\b(%d)" ) == "1" and true or false) or nil
+			tags_configs.ital = tagx:match( "\\i%d" ) and (tagx:match( "\\i(%d)" ) == "1" and true or false) or nil
+			tags_configs.unde = tagx:match( "\\u%d" ) and (tagx:match( "\\u(%d)" ) == "1" and true or false) or nil
+			tags_configs.stri = tagx:match( "\\s%d" ) and (tagx:match( "\\s(%d)" ) == "1" and true or false) or nil
+			tags_configs.size = tagx:match( "\\fs(%d+[%.%d]*)" ) and tonumber( tagx:match( "\\fs(%d+[%.%d]*)" ) ) or nil
+			tags_configs.sc_x = tagx:match( "\\fscx(%d+[%.%d]*)" ) and tonumber( tagx:match( "\\fscx(%d+[%.%d]*)" ) ) or nil
+			tags_configs.sc_y = tagx:match( "\\fscy(%d+[%.%d]*)" ) and tonumber( tagx:match( "\\fscy(%d+[%.%d]*)" ) ) or nil
+			tags_configs.spac = tagx:match( "\\fsp(%-?%d+[%.%d]*)" ) and tonumber( tagx:match( "\\fsp(%-?%d+[%.%d]*)" ) ) or nil
+		end --add: may 13th 2020 thank to Zeref Sama :D
+		--------------------
 		local text_confi = {
-			[ 1 ] = l.fontname,
-			[ 2 ] = l.bold,
-			[ 3 ] = l.italic,
-			[ 4 ] = l.underline,
-			[ 5 ] = l.strikeout,
-			[ 6 ] = l.fontsize,
-			[ 7 ] = text_scale * l.scale_x / 100,
-			[ 8 ] = text_scale * l.scale_y / 100,
-			[ 9 ] = l.spacing,
+			[ 1 ] = tags_configs.font or l.fontname,
+			[ 2 ] = tags_configs.bold or l.bold,
+			[ 3 ] = tags_configs.ital or l.italic,
+			[ 4 ] = tags_configs.unde or l.underline,
+			[ 5 ] = tags_configs.stri or l.strikeout,
+			[ 6 ] = tags_configs.size or l.fontsize,
+			[ 7 ] = text_scale * (tags_configs.sc_x or l.scale_x) / 100,
+			[ 8 ] = text_scale * (tags_configs.sc_y or l.scale_y) / 100,
+			[ 9 ] = tags_configs.spac or l.spacing,
 		}
 		local text_font = Yutils.decode.create_font( unpack( text_confi ) )
 		local text_shape = shape.ASSDraw3( text_font.text_to_shape( Text ) )
@@ -19482,13 +20439,23 @@
 					table.insert( pixel_datas[ i ], v )
 				end
 			end
-			for i = 1, #pixel_table do
-				pixel[ i ] = { }
-				pixel[ i ].x = fx.pos_l + pixel_datas[ i ][ 2 ] - 0.5 * (Ratio - 1) * aegisub.width( text_2pixel )
-				pixel[ i ].y = fx.pos_t + pixel_datas[ i ][ 1 ] - 0.5 * (Ratio - 1) * aegisub.height( text_2pixel )
-				pixel[ i ].a = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+			local txt_w, txt_h = aegisub.width( text_2pixel ), aegisub.height( text_2pixel )
+			if type( Table ) == "table" then
+				pixel.x, pixel.y, pixel.a = { }, { }, { }
+				for i = 1, #pixel_table do
+					pixel.x[ i ] = pixel_datas[ i ][ 2 ] - 0.5 * (Ratio - 1) * txt_w
+					pixel.y[ i ] = pixel_datas[ i ][ 1 ] - 0.5 * (Ratio - 1) * txt_h
+					pixel.a[ i ] = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+				end
+				return pixel
 			end
-			if Table == nil then
+			if not Table then
+				for i = 1, #pixel_table do
+					pixel[ i ] = { }
+					pixel[ i ].x = fx.pos_l + pixel_datas[ i ][ 2 ] - 0.5 * (Ratio - 1) * txt_w
+					pixel[ i ].y = fx.pos_t + pixel_datas[ i ][ 1 ] - 0.5 * (Ratio - 1) * txt_h
+					pixel[ i ].a = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+				end
 				maxloop( #pixel_datas )
 				Px, Py = remember( "PPx", { } ), remember( "PPy", { } )
 				for i = 1, 5 do
@@ -19497,7 +20464,7 @@
 				end
 			end
 		end
-		if Table then
+		if Table then --text.to_pixels( "i", nil, nil, nil, nil, true )
 			return pixel
 		end --january 15th 2020
 		local to_an = math.angle( fx.move_x1, fx.move_y1, pixel[ j ].x, pixel[ j ].y )
@@ -19567,7 +20534,16 @@
 	function text.to_clip( Text, relative_pos, iclip, Scale )
 		local Text = Text or val_text
 		local text_scale = Scale or 1
+		local tagsx, angle, org_x, org_y
+		if Text:match( "%b{}" ) then
+			tagsx = Text:match( "%b{}" )
+			angle = tagsx:match( "\\fr[z]*%-?%d[%.%d]*" ) and tonumber( tagsx:match( "\\fr[z]*(%-?%d[%.%d]*)" ) ) or nil
+			--org_x = tagsx:match( "\\org%b()" ) and tonumber( tagsx:match( "\\fr[z]*(%-?%d[%.%d]*)" ) ) or nil
+		end --add may 18th 2020
 		local text_clip = text.to_shape( Text, text_scale, nil, true )
+		if angle then
+			text_clip = shape.rotate( text_clip, angle, "center" )
+		end
 		local text_mode = ""
 		if text_clip ~= "" then
 			if relative_pos then
@@ -19584,7 +20560,7 @@
 		end
 		return ""
 	end --text.to_clip( syl.text )
-
+	
 	function text.bord_to_pixels( Text, Shape, Pixel, Seed, Filter, Scale )
 		local text_2bord = Text or val_text
 		local bord_shape
@@ -19797,26 +20773,30 @@
 		return bmp_color, bmp_alpha
 	end --image.data( )
 	
-	function image.to_pixels( bmp_image, Size )
+	function image.to_pixels( bmp_image, Size, Table )
 		local bmp_color, bmp_alpha = recall.clr, recall.alp
 		local bmp_image = bmp_image or "test.bmp"
 		local Size = Size or 1
+		local bmp_wth, bmp_hht = recall.w, recall.h
 		if j == 1 then
 			bmp_color = remember( "clr", image.data( bmp_image, "color" ) )
 			bmp_alpha = remember( "alp", image.data( bmp_image, "alpha" ) )
-			maxloop( #bmp_color )
+			bmp_wth = remember( "w", Yutils.decode.create_bmp_reader( bmp_image ).width( ) )
+			bmp_hht = remember( "h", Yutils.decode.create_bmp_reader( bmp_image ).height( ) )
 		end
-		local bmp_wth = Yutils.decode.create_bmp_reader( bmp_image ).width( )
-		local bmp_hht = Yutils.decode.create_bmp_reader( bmp_image ).height( )
-		local posx = fx.pos_x + ((j - 1) % bmp_wth + 1) * Size - bmp_wth * Size / 2 + Size / 2
-		local posy = fx.pos_y + ceil( j / bmp_hht - 1 ) * Size - bmp_hht * Size / 2 + Size / 2
+		if Table then
+			return { color = bmp_color, alpha = bmp_alpha, width = bmp_wth, height = bmp_hht }
+		end
+		maxloop( #bmp_color )
+		local posx = fx.pos_x + math.i( j, bmp_wth )[ "1-->A" ] * Size - bmp_wth * Size / 2 + Size / 2
+		local posy = fx.pos_y + math.i( j, bmp_wth )[ "N,n" ] * Size - bmp_hht * Size / 2 + Size / 2
 		if bmp_alpha[ j ] == "&HFF&" then
 			return nil
 		end
 		local bmp_tag = effector.new_pos( posx, posy )
 		bmp_tag = format( "{%s\\1c%s\\1a%s}", bmp_tag, bmp_color[ j ], bmp_alpha[ j ] )
 		return format( "%s{\\bord0\\shad0\\fscx%s\\fscy%s\\p1}%s", bmp_tag, 100 * Size, 100 * Size, shape.pixel )
-	end -- image.to_pixels( ) --image.to_pixels( "pngbar.png" )
+	end --image.to_pixels( ) --image.to_pixels( "pngbar.png" )
 	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "aegisub" --------------------------------------------------------------
@@ -21031,7 +22011,7 @@
 	function effector.effect_offset( )
 		effect_val = { }
 		for c in l_fx:gmatch( "%-?%d+[%.%d+]*" ) do
-			table.insert( effect_val, c )
+			table.insert( effect_val, tonumber( c ) )
 		end
 		for i = 1, 64 do
 			effect_val[ i ] = effect_val[ i ] or 0
