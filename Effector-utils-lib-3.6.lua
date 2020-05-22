@@ -97,6 +97,7 @@
 		+	string.change( String, Capture, NoDelete, NoCapture, Change )
 		+	string.cap( String, Capture, Extra_Capture, Filter )
 		+	string.parts( String, Parts )
+			string.match2( String, Capture, Table )
 		
 		librería math
 		-	math.R( Rand_i, Rand_f )
@@ -355,8 +356,7 @@
 		+	shape.multi7( Part, Radius )
 		+	shape.multi8( Shape, Size_ini, Size_fin, Loop )
 		+	shape.multi9( Shape, Loop, Tags, Vertical )
-		-	shape.equality( Shape1, Shape2 )
-		-	shape.morphism( Size, Shape1, Shape2 )
+		-	shape.morphism( Size, Shape1, Shape2, Accel )
 		-	shape.bord( Shape, Bord, Size )
 		-	shape.from_audio( Audio, Width, Height_scale, Thickness, Offset_time )
 		-	shape.to_pixels( Shape, Shape2, Seed, Filter )
@@ -2387,6 +2387,9 @@
 			Size = #Table
 		end
 		local algorithm = algorithm or "%s"
+		if type( algorithm ) == "number" then
+			algorithm = "%s ^ " .. tostring( algorithm )
+		end --may 20th 2020
 		-- algorithm example: "%s ^ 0.5"
 		local function tbl_ipol_funct( Table_ipol, Size_ipol, Tags_ipol, algorithm_ipol, Shp_or_Clip )
 			---------------------------------------------
@@ -3283,6 +3286,30 @@
 		-- retorna una tabla con las partes de n tamaño de un string
 		-- string.parts( "por ejemplo", 2 ) --> { "po", "r ", "ej", "em", "pl", "o" }
 	end --june 23rd 2018
+	
+	function string.match2( String, Capture, Table )
+		--realiza captura múltiple de un patrón determinado
+		if type( String ) == "function" then
+			String = String( )
+		end
+		if type( Capture ) == "function" then
+			Capture = Capture( )
+		end
+		local String = String or ""
+		local Capture = Capture or "KE"
+		effector.print_error( String, "string", "string.match2", 1 )
+		effector.print_error( Capture, "stringtable", "string.match2", 2 )
+		local match_multi, i = "", -1
+		repeat
+			match_multi = match_multi .. Capture
+			i = i + 1
+		until String:match( match_multi ) == nil
+		match_multi = match_multi:gsub( Capture, "", 1 )
+		if Table then
+			return { match_multi, i }
+		end
+		return match_multi, i --string.match2( "frsfxfxfx456tr", "fx" )
+	end	--may 15th 2020
 
 	--------------------------------------------------------------------------------------------------
 	-- Ampliación de la Librería "math" --------------------------------------------------------------
@@ -16911,53 +16938,6 @@
 		--crea una shape formada por una secuencia de shapes en una única línea de fx
 	end --january 13th 2018
 	
-	function shape.equality( Shape1, Shape2 )
-		local segm1, segm2, Shapefx1, Shapefx2 = { }, { }, { }, { }
-		for c in Shape1:gmatch( "[blm]* %-?%d+[%.%d]* [%-%.%d ]*" ) do
-			table.insert( segm1, c )
-		end
-		for c in Shape2:gmatch( "[blm]* %-?%d+[%.%d]* [%-%.%d ]*" ) do
-			table.insert( segm2, c )
-		end
-		local difference = abs( #segm1 - #segm2 )
-		if difference == 0 then
-			return { Shape1, Shape2 }
-		end
-		local n, N, segm
-		if #segm1 < #segm2 then
-			n, N = ceil( difference / #segm1 ), ceil( #segm1 / difference )
-			for i = 1, #segm1 do
-				if i % N == 0 then
-					segm = ""
-					for k = 1, N + 1 do
-						segm = segm .. segm1[ i ]
-					end
-					Shapefx1[ i ] = segm
-				else
-					Shapefx1[ i ] = segm1[ i ]
-				end
-			end
-			Shapefx1 = table.op( Shapefx1, "concat" )
-			Shapefx2 = Shape2
-		else
-			n, N = ceil( difference / #segm2 ), ceil( #segm2 / difference )
-			for i = 1, #segm2 do
-				if i % N == 0 then
-					segm = ""
-					for k = 1, N + 1 do
-						segm = segm .. segm2[ i ]
-					end
-					Shapefx2[ i ] = segm
-				else
-					Shapefx2[ i ] = segm2[ i ]
-				end
-			end
-			Shapefx1 = Shape1
-			Shapefx2 = table.op( Shapefx2, "concat" )
-		end
-		return Shapefx1, Shapefx2
-	end
-	
 	function shape.morphism( Size, Shape1, Shape2, Accel )
 		if type( Size ) == "function" then
 			Size = Size( )
@@ -16971,45 +16951,19 @@
 		if type( Accel ) == "function" then
 			Accel = Accel( )
 		end
-		local Accel  = Accel or 1
+		local Accel = Accel or 1
 		local Shapes = recall.shape_morphism
 		effector.print_error( Size,  "number", "shape.morphism", 1 )
 		effector.print_error( Shape1, "shape", "shape.morphism", 2 )
 		effector.print_error( Shape2, "shape", "shape.morphism", 3 )
-		effector.print_error( Accel, "number", "shape.morphism", 4 )
-		if j == 1 then
-			local coor1, coor2 = { }, { }
-			local k
-			if Size < 2
-				or Size == nil then
-				Size = 4
-			end
-			Size = math.round( Size )
-			for c in Shape1:gmatch( "%-?%d+[%.%d]*" ) do
-				table.insert( coor1, tonumber( c ) )
-			end
-			for c in Shape2:gmatch( "%-?%d+[%.%d]*" ) do
-				table.insert( coor2, tonumber( c ) )
-			end
-			Shapes = { }
-			for i = 1, Size do
-				k = 1
-				Shapes[ i ] = Shape1:gsub( "%-?%d+[%.%d]*", 
-					function( val )
-						if coor2[ (k - 1) % #coor1 + 1 ]
-							and coor1[ k ] then
-							val = val + (coor2[ (k - 1) % #coor1 + 1 ] - coor1[ k ]) * ((i - 1) / (Size - 1)) ^ Accel
-						else
-							val = val + (coor1[ (k - 1) % #coor2 + 1 ] - coor2[ k ]) * (1 - (i - 1) / (Size - 1)) ^ Accel
-						end
-						k = k + 1
-						return val
-					end
-				)
-				Shapes[ i ] = shape.ASSDraw3( Shapes[ i ] )
-			end
-			Shapes = remember( "shape_morphism", Shapes )
+		effector.print_error( Accel, "numberstring", "shape.morphism", 4 )
+		if type( Accel ) == "number" then
+			Accel = "%s ^ " .. tostring( Accel )
 		end
+		if j == 1 then
+			--table.ipol( Table, Size, Tags, algorithm )
+			Shapes = remember( "shape_morphism", table.ipol( { Shape1, Shape2 }, Size, nil, Accel ) )
+		end --rewrite: may 20th 2020
 		return Shapes --shape.morphism( 6, shape.to_bezier( shape.rectangle ), shape.circle )
 	end --retorna una tabla con la interpolación entre las dos shapes ingresadas
 	
@@ -17115,21 +17069,29 @@
 		local pixel_datas, pixel, pixel_pos = { }, recall.pxl, ""
 		if j == 1 then
 			pixel_table = Yutils.shape.to_pixels( Shape )
-			pixel = { }
+			pixel = remember( "pxl", { } )
 			for i = 1, #pixel_table do
 				pixel_datas[ i ] = { }
 				for k, v in pairs( pixel_table[ i ] ) do
 					table.insert( pixel_datas[ i ], v )
 				end
 			end
-			for i = 1, #pixel_table do
-				pixel[ i ] = { }
-				pixel[ i ].x = fx.move_x1 - w_shape / 2 + pixel_datas[ i ][ 2 ]
-				pixel[ i ].y = fx.move_y1 - h_shape / 2 + pixel_datas[ i ][ 1 ]
-				pixel[ i ].a = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+			if type( Table ) == "table" then
+				pixel.x, pixel.y, pixel.a = { }, { }, { }
+				for i = 1, #pixel_table do
+					pixel.x[ i ] = pixel_datas[ i ][ 2 ] + 1
+					pixel.y[ i ] = pixel_datas[ i ][ 1 ] + 1
+					pixel.a[ i ] = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+				end --shape.to_pixels( shape.size( shape.rectangle, 10 ), nil, nil, nil, { 1 } )
+				return pixel --add: may 20th 2020
 			end
-			pixel = remember( "pxl", pixel ) --fix: september 08th 2018
-			if Table == nil then
+			if not Table then
+				for i = 1, #pixel_table do
+					pixel[ i ] = { }
+					pixel[ i ].x = fx.move_x1 - w_shape / 2 + pixel_datas[ i ][ 2 ]
+					pixel[ i ].y = fx.move_y1 - h_shape / 2 + pixel_datas[ i ][ 1 ]
+					pixel[ i ].a = alpha.val2ass( 255 - pixel_datas[ i ][ 3 ] )
+				end
 				maxloop( #pixel_datas )
 			end
 		end
@@ -17547,74 +17509,6 @@
 		end
 		return Shape
 	end
-	
-	function shape.iso( Shape1, Shape2, Trim )
-		local Trim = Trim or 8
-		local Shape1 = shape.filter2( Shape1, nil, Trim )
-		local Shape2 = shape.filter2( Shape2, nil, Trim )
-		local Shapes1 = shape.divide( Shape1 )
-		local Shapes2 = shape.divide( Shape2 )
-		local function equ( Table1, Table2 )
-			local table_max, table_min
-			local orden, tables = { }, { }
-			if #Table1 >= #Table2 then
-				table_max = table.duplicate( Table1 )
-				table_min = table.duplicate( Table2 )
-				orden = { 2, 1 }
-			else
-				table_max = table.duplicate( Table2 )
-				table_min = table.duplicate( Table1 )
-				orden = { 1, 2 }
-			end
-			for i = 1, #table_max - #table_min do
-				table.insert( table_min, table_min[ i ] )
-			end
-			tables = {
-				[ 1 ] = table_min,
-				[ 2 ] = table_max
-			}
-			return tables[ orden[ 1 ] ], tables[ orden[ 2 ] ]
-		end
-		local function equ_tramos( Tramo1, Tramo2 )
-			local function tramos( Shape )
-				segments = { }
-				for c in Shape:gmatch( "[mlb]^* %-?%d+[%.%d]*[%-%d%. ]*" ) do
-					table.insert( segments, c )
-				end
-				return segments
-			end
-			local segment_1 = tramos( Tramo1 )
-			local segment_2 = tramos( Tramo2 )
-			segment_1[ 1 ] = segment_1[ 1 ]:gsub( "m", "l" )
-			segment_2[ 1 ] = segment_2[ 1 ]:gsub( "m", "l" )
-			local segm_max, segm_min
-			local orden, Shapes = { }, { }
-			if #segment_1 >= #segment_2 then
-				segm_max = segment_1
-				segm_min = segment_2
-				orden = { 2, 1 }
-			else
-				segm_max = segment_2
-				segm_min = segment_1
-				orden = { 1, 2 }
-			end
-			for i = 1, #segm_max - #segm_min do
-				table.insert( segm_min, 2 * i - 1, segm_min[ 2 * i - 1 ] )
-			end
-			segm_min[ 1 ] = segm_min[ 1 ]:gsub( "l", "m" )
-			segm_max[ 1 ] = segm_max[ 1 ]:gsub( "l", "m" )
-			Shapes = {
-				[ 1 ] = table.op( segm_min, "concat" ),
-				[ 2 ] = table.op( segm_max, "concat" )
-			}
-			return Shapes[ orden[ 1 ] ], Shapes[ orden[ 2 ] ]
-		end
-		Shapes1, Shapes2 = equ( Shapes1, Shapes2 )
-		for i = 1, #Shapes1 do
-			Shapes1[ i ], Shapes2[ i ] = equ_tramos( Shapes1[ i ], Shapes2[ i ] )
-		end
-		return table.op( Shapes1, "concat" ), table.op( Shapes2, "concat" )
-	end --shape.iso( shape.circle, shape.rectangle )
 	
 	function shape.do_shape( Shape1, Shape2, Mode, Split )
 		if type( Shape1 ) == "function" then
@@ -18362,44 +18256,48 @@
 			return shape_cut( Shape, t )
 			--shape.cut( "m 50 0 b 22 0 0 22 0 50 ", 0.5 )
 		elseif type( t ) == "table" then
-			local n = abs( ceil( t[ 1 ] ) )
-			if n < 3 then
-				n = 3
-			end
-			local xParts = { [ 1 ] = shape_cut( Shape, 1 / n ) }
-			for i = 2, n - 1 do
-				xParts[ i ] = shape_cut( xParts[ i - 1 ][ 2 ], 1 / (n - i + 1) )
-			end
-			local total_parts = { }
-			for i = 1, #xParts do
-				total_parts[ i ] = xParts[ i ][ 1 ]
-			end
-			total_parts[ n ] = xParts[ #xParts ][ 2 ]
-			----------------
-			local Px, Py, Pa
-			if AddPoint then
-				shape.info( Shape )
-				Px, Py = c_shape, m_shape
-				if type( AddPoint ) == "table" then
-					Px, Py = AddPoint[ 1 ], AddPoint[ 2 ]
-					if type( Px ) == "string" then
-						Px = Px:gsub( "(%d)x", "%1 * x" ):gsub( "x", c_shape )
-						Px = Px:gsub( "(%d)y", "%1 * y" ):gsub( "y", m_shape )
-						Px = string.toval( Px )
-					end
-					if type( Py ) == "string" then
-						Py = Py:gsub( "(%d)x", "%1 * x" ):gsub( "x", c_shape )
-						Py = Py:gsub( "(%d)y", "%1 * y" ):gsub( "y", m_shape )
-						Py = string.toval( Py )
-					end
+			local total_parts = recall.parts
+			if j == 1 then --fix: may 21st 2020
+				total_parts = remember( "parts", { } )
+				local n = abs( ceil( t[ 1 ] ) )
+				if n < 3 then
+					n = 3
 				end
-				Pa = format( " %s %s ", Px, Py )
-				for i = 1, #total_parts do
-					total_parts[ i ] = "m" .. Pa .. total_parts[ i ]:gsub( "m", "l", 1 ) .."l" .. Pa
+				local xParts = { [ 1 ] = shape.cut( Shape, 1 / n ) }
+				for i = 2, n - 1 do
+					xParts[ i ] = shape.cut( xParts[ i - 1 ][ 2 ], 1 / (n - i + 1) )
+				end --shape.pos( table.concat( shape.cut( shape.circle, { 5 }, 1 ) ) )
+				for i = 1, #xParts do
+					total_parts[ i ] = xParts[ i ][ 1 ]
 				end
-			end --shape.cut( shape.rectangle, { 3 }, 1 )
-			----------------
-			return total_parts
+				total_parts[ n ] = xParts[ #xParts ][ 2 ]
+				--return total_parts
+				----------------
+				local Px, Py, Pa
+				if AddPoint then
+					shape.info( Shape )
+					Px, Py = c_shape, m_shape
+					if type( AddPoint ) == "table" then
+						Px, Py = AddPoint[ 1 ], AddPoint[ 2 ]
+						if type( Px ) == "string" then
+							Px = Px:gsub( "(%d)x", "%1 * x" ):gsub( "x", c_shape )
+							Px = Px:gsub( "(%d)y", "%1 * y" ):gsub( "y", m_shape )
+							Px = string.toval( Px )
+						end
+						if type( Py ) == "string" then
+							Py = Py:gsub( "(%d)x", "%1 * x" ):gsub( "x", c_shape )
+							Py = Py:gsub( "(%d)y", "%1 * y" ):gsub( "y", m_shape )
+							Py = string.toval( Py )
+						end
+					end
+					Pa = format( " %s %s ", Px, Py )
+					for i = 1, #total_parts do
+						total_parts[ i ] = "m" .. Pa .. total_parts[ i ]:gsub( "m", "l", 1 ) .."l" .. Pa
+					end
+				end --shape.cut( shape.rectangle, { 3 }, 1 )
+				----------------
+			end
+			return total_parts --shape.cut( shape.circle, { 5 }, 1 )
 		end
 	end --may 10th 2020
 	
@@ -20786,7 +20684,7 @@
 		end
 		if Table then
 			return { color = bmp_color, alpha = bmp_alpha, width = bmp_wth, height = bmp_hht }
-		end
+		end --image.to_pixels( "test.bmp", nil, true )
 		maxloop( #bmp_color )
 		local posx = fx.pos_x + math.i( j, bmp_wth )[ "1-->A" ] * Size - bmp_wth * Size / 2 + Size / 2
 		local posy = fx.pos_y + math.i( j, bmp_wth )[ "N,n" ] * Size - bmp_hht * Size / 2 + Size / 2
@@ -21985,6 +21883,7 @@
 				math.round( posx + fx.move_x4 - fx.pos_x, 3 ), math.round( posy + fx.move_y4 - fx.pos_y, 3 ) .. tags_times
 			)
 		end
+		--fx.pos_x, fx.pos_y = posx, posy
 		return newpos
 	end
 
