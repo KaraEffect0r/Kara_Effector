@@ -380,6 +380,9 @@
 			shape.parametric( Shape, Pixel )
 			shape.cut( Tract, t )
 			shape.pointpos( Shape, P1, P2 )
+			shape.pos( Shape )
+			shape.grid( Shape, Filter, Align, Line )
+			shape.gridr( Width, Height, Mode, Filter, Align )
 		
 		librería graph
 			graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
@@ -430,10 +433,14 @@
 		/	text.gradienth2( ... )
 		-	text.gradientv( ... )
 		*	text.maskclip( Fondo, Color, fxBord, fxMask, Shape, Space )
+			text.filter( Text, Split, ... )
+			text.move( Text, Dx, Dy, Ox, Oy, Accel )
+			text.grid( Text, Filter, Align, Line )
 		
 		librería image
 		+	image.data( bmp_image, Return )
 		+	image.to_pixels( bmp_image, Size )
+			image.grid( Image )
 		
 		librería aegisub
 		+	aegisub.word( line_text, line_dur, ci_ )
@@ -574,7 +581,7 @@
 		effector.print_error( val, "true", "set_temp", 2 )
 		temp[ ref ] = val
 		return val
-	end --Create New fx
+	end
 	
 	function remember( ref, val )
 		effector.print_error( ref, "numberstring", "remember", 1 )
@@ -590,6 +597,7 @@
 		if type( time_HMS ) == "function" then
 			time_HMS = time_HMS( )
 		end
+		local time_HMS = time_HMS or fx.offset.time_HMS or 0 --add: may 31st 2020
 		if type( time_HMS ) == "string" then
 			if time_HMS:match( "%d+%:%d+%:%d+%.%d+" ) then
 				local H, M, S, ms = time_HMS:match( "(%d+)%:(%d+)%:(%d+)%.(%d+)" )
@@ -638,6 +646,7 @@
 		if type( time_ms ) == "function" then
 			time_ms = time_ms( )
 		end
+		local time_ms = time_ms or fx.offset.time_ms or 0 --add: may 31st 2020
 		local time_to_HMS
 		if type( time_ms ) == "table" then
 			local rec_table = { }
@@ -675,6 +684,7 @@
 		if type( Time ) == "function" then
 			Time = Time( )
 		end
+		local Time = Time or fx.offset.Time or 0 --add: may 31st 2020
 		local t_to_frame
 		if type( Time ) == "table" then
 			local rec_table = { }
@@ -702,6 +712,7 @@
 		if type( frames ) == "function" then
 			frames = frames( )
 		end
+		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
 		local f_to_ms
 		if type( frames ) == "table" then
 			local rec_table = { }
@@ -718,6 +729,10 @@
 	
 	function frame_to_HMS( frames )
 		--convierte la cantidad de frames en un tiempo en formato HMS
+		if type( frames ) == "function" then
+			frames = frames( )
+		end
+		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
 		local f_to_HMS
 		if type( frames ) == "table" then
 			local rec_table = { }
@@ -739,7 +754,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or 60
+		local Delay = Delay or fx.offset.Delay or 60 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid1", 1 )
 		if val_i <= (val_n + 1) / 2 then
 			return Delay * (val_i - 1) - 200
@@ -989,6 +1004,9 @@
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
+		if Table == "" then
+			return { }
+		end --may 31st 2020
 		local cart
 		local autoref
 		local function isemptytable( Table )
@@ -8181,13 +8199,6 @@
 				function( tag_rev, val_rev )
 					local tag_inv = tag_rev .. val_rev
 					if tag_inv:match( "\\[%d]*c&H%x+&" ) then
-						--[[
-						local num_color = tag_inv:match( "\\([%d]*)" )
-						if num_color == "" then
-							num_color = "1"
-						end
-						return "<" .. tag_rev .. loadstring( "return text.color" .. num_color )( ) .. ">"
-						--]]
 						local r_nor, g_nor, b_nor = tag_inv:match( "(%x%x)(%x%x)(%x%x)" )
 						local r_inv, g_inv, b_inv = 255 - tonumber( r_nor, 16 ), 255 - tonumber( g_nor, 16 ), 255 - tonumber( b_nor, 16 )
 						return "<" .. tag_rev .. color.val2ass( b_inv, g_inv, r_inv ) .. ">"
@@ -8483,7 +8494,7 @@
 					[ 13 ] = ":outclip",			[ 14 ] = ":deformed",			[ 15 ] = ":deformed2",
 					[ 16 ] = ":do_shape",			[ 17 ] = ":to_shape",			[ 18 ] = ":bord_to_shape",
 					[ 19 ] = ":to_pixels",			[ 20 ] = ":to_clip",			[ 21 ] = ":bord_to_pixels",
-					[ 22 ] = ":move",
+					[ 22 ] = ":move",				[ 23 ] = ":filter",				[ 24 ] = ":move",
 				}
 				local functions_fun = {
 					[ 01 ] = "text.upper",			[ 02 ] = "text.lower",			[ 03 ] = "text.tag",
@@ -8493,7 +8504,7 @@
 					[ 13 ] = "text.outclip",		[ 14 ] = "text.deformed",		[ 15 ] = "text.deformed2",
 					[ 16 ] = "text.do_shape",		[ 17 ] = "text.to_shape",		[ 18 ] = "text.bord_to_shape",
 					[ 19 ] = "text.to_pixels",		[ 20 ] = "text.to_clip",		[ 21 ] = "text.bord_to_pixels",
-					[ 22 ] = "text.move",
+					[ 22 ] = "text.move",			[ 23 ] = "text.filter",			[ 24 ] = "text.move",
 				}
 				local TextS = TextS:sub( 2, -2 )
 				if table.inside( functions_str, FunctionT ) then
@@ -13956,7 +13967,8 @@
 		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.filter3", 1 )
 		local filters = { ... }
-		if type( ... ) == "table" then
+		if ...
+			and type( ... ) == "table" then
 			filters = ...
 		end
 		if #filters == 0 then
@@ -18357,6 +18369,244 @@
 		return shape.displace( Shape, Dx, Dy )
 	end --april 30th 2020
 	
+	function shape.pos( Shape )
+		--asigna la posición de cada una de las shapes individuales que conforman una shape
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.pos", 1 )
+		Shapes = shape.divide( Shape )
+		shape.info( Shape )
+		local cx, cy = c_shape, m_shape
+		maxloop( #Shapes )
+		shape.info( Shapes[ j ] )
+		local nx, ny = c_shape, m_shape
+		local pixel_pos = effector.new_pos( fx.pos_x + nx - cx, fx.pos_y + ny - cy )
+		return format( "{%s}", pixel_pos ) .. shape.origin( Shapes[ j ] )
+	end --may 21st 2020
+	
+	function shape.grid( Shape, Filter, Align, Line )
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		if type( Align ) == "function" then
+			Align = Align( )
+		end
+		local Shape = shape.origin( Shape or shape.size( shape.circle, 32 ) )
+		local Filter = Filter or function( ) return "" end
+		local Align = Align or 7					--alineación, en caso de ingresar imagen
+		local x_max, y_max = shape.width( Shape ), shape.height( Shape )
+		-----------------------------------
+		local function image_info( Image )
+			local get_info = image.to_pixels( Image, nil, true )
+			get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
+			local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
+			local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
+			local img_table, indx = { }, ""
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+				img_table[ indx ] = format( "%s%s",
+					get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
+					get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
+				)
+				img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
+			end
+			return img_table, an_x, an_y, get_info.width, get_info.height
+		end
+		local is_image, img_info
+		if type( Filter ) == "string" then			--si es una imagen .bmp
+			is_image = true
+			img_info, xi, yi, wi, hi = image_info( Filter )
+			Filter = function( i )
+				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+				x1, y1 = tonumber( x1 ), tonumber( y1 )
+				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+				local k = format( "%s,%s", xr, yr )
+				return img_info[ i ] or img_info[ k ] or "\\r"
+			end
+		end
+		-----------------------------------
+		local function min_alpha( String )
+			--elige al alpha más transparente y elimina al resto :D
+			local alphas, a = { }
+			for a in String:gmatch( "\\1a&H(%x%x)&" ) do
+				alphas[ #alphas + 1 ] = a
+			end
+			if #alphas > 1 then
+				for i = 1, #alphas do
+					alphas[ i ] = tonumber( alphas[ i ], 16 )
+				end
+				table.sort( alphas, function( a, b ) return a < b end )
+				String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
+			end
+			return String
+		end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
+		-----------------------------------
+		local tbl = shape.to_pixels( Shape, nil, nil, nil, { true } )
+		local tblx, str, c = { }
+		for i = 1, #tbl.x do
+			tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
+		end
+		local tbl_shp, id, is_shape = { }
+		for i = 1, y_max do
+			tbl_shp[ i ] = "{\\p1}"
+			for k = 1, x_max do
+				id = tostring( k ) .. "," .. tostring( i )
+				is_shape = format( "{\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
+				tbl_shp[ i ] = tbl_shp[ i ] .. ( tblx[ id ] and is_shape or "{\\x}m 0 0 l 1 1 " )
+			end
+			if not tbl_shp[ i ]:match( "1a" ) then
+				tbl_shp[ i ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
+			end
+			tbl_shp[ i ] = tbl_shp[ i ] .. "{\\p0}\\N"
+			while string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
+				str, c = string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 " )
+				tbl_shp[ i ] = tbl_shp[ i ]:gsub( str, format( "{\\x}m 0 0 l %s 1 ", c ) )
+			end		
+		end
+		local shape_px = table.concat( tbl_shp )
+		local k = 1
+		if is_image and Line then
+			shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = math.i( k, x_max )[ "1-->A" ]
+					py = math.i( k, x_max )[ "N,n" ]
+					cx = x_max / 2
+					cy = l.fontsize / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					capture = capture:gsub( "(%d+)(,%d+)",
+						function( x, y )
+							local x = tonumber( x )
+							x = floor( x + val_left - l.left )
+							return tostring( x ) .. y
+						end
+					)
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		else
+			shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = math.i( k, x_max )[ "1-->A" ]
+					py = math.i( k, x_max )[ "N,n" ]
+					cx = x_max / 2
+					cy = l.fontsize / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		end
+		shape_px = shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" ):gsub( "(1c)&H(%x+)&", "%1%2" )
+		return shape_px --shape.grid( )
+	end --may 14th 2020
+	
+	function shape.gridr( Width, Height, Mode, Filter, Align )
+		--shape.gridr( 50, 50, nil, "test.bmp" )
+		if type( Width ) == "function" then
+			Width = Width( )
+		end
+		if type( Height ) == "function" then
+			Height = Height( )
+		end
+		if type( Mode ) == "function" then
+			Mode = Mode( )
+		end
+		if type( Align ) == "function" then
+			Align = Align( )
+		end
+		local Width = ceil( Width or val_width )	--ancho del rectángulo
+		local Height = ceil( Height or val_height )	--alto del rectángulo
+		local Align = Align or 7					--alineación, en caso de ingresar imagen
+		local Filter = Filter or function( i ) return "\\x" end
+		----------------------------------
+		local function image_info( Image )
+			local get_info = image.to_pixels( Image, nil, true )
+			get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
+			local img_table, indx = { }, ""
+			local an_x = floor( ((Align - 1) % 3) * (Width - get_info.width) / 2 )
+			local an_y = floor( (3 - ceil( Align / 3 ) ) * (Height - get_info.height) / 2 )
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+				img_table[ indx ] = format( "%s%s",
+					get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
+					get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
+				)
+				img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
+			end
+			return img_table, an_x, an_y, get_info.width, get_info.height
+		end
+		if type( Filter ) == "string" then			--si es una imagen .bmp
+			local img_info, xi, yi, wi, hi = image_info( Filter )
+			Filter = function( i )
+				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+				x1, y1 = tonumber( x1 ), tonumber( y1 )
+				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+				local k = format( "%s,%s", xr, yr )
+				return img_info[ i ] or img_info[ k ] or "\\r"
+			end
+		end
+		----------------------------------
+		local Shape, mx = ""
+		if Mode == "h" then --barras horizontales
+			for i = 1, Height do
+				Shape = Shape .. format( "{\\p1\\pix}m 0 0 l 0 1 l %s 1 l %s 0 {\\p0}\\N", Width, Width )
+			end
+			mx = 1
+		elseif Mode == "v" then --barras verticales
+			Shape = "{\\p1}"
+			for i = 1, Width do
+				Shape = Shape .. format( "{\\pix}m 0 0 l 0 %s l 1 %s l 1 0 ", Height, Height )
+			end
+		else --cuadrícula
+			Shape = "{\\p1}"
+			for i = 1, Width do
+				Shape = Shape .. "{\\pix}m 0 0 l 0 1 l 1 1 l 1 0 "
+			end
+			Shape = Shape .. "{\\p0}\\N"
+			local shp = Shape
+			for i = 1, Height - 1 do
+				Shape = Shape .. shp
+			end
+		end
+		local k = 1
+		Shape = Shape:gsub( "\\pix",
+			function( capture )
+				px = mx or math.i( k, Width )[ "1-->A" ]
+				py = mx and k or math.i( k, Width )[ "N,n" ]
+				id = format( "%s,%s", px, py )
+				cx = Width / 2
+				cy = Height / 2
+				d = math.distance( cx, cy, px, py )
+				a = math.angle( cx, cy, px, py )
+				i = k
+				k = k + 1
+				return Filter( id )
+			end
+		)
+		local str, c
+		while string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 ", true )[ 2 ] > 1 do
+			str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
+			Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
+		end
+		Shape = Shape:gsub( "(1c)&H(%x+)&", "%1%2" )
+		return Shape --shape.gridr( )
+	end --may 14th 2020
+
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "graph" -- add: may 18th 2020 ------------------------------------------
 	function graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
@@ -20033,14 +20283,8 @@
 				Shape = linefx[ ii ].text:match( "\\i?clip%b()" )
 			end
 		end
-		local mode = mode or 2
-		--------------------------------------------
-		-- modos de 1 a 5 ingresados desde el script
-		if l_effect:match( "%d" ) then
-			mode = tonumber( l_effect:match( "%d" ) )
-		end --january 05th 2018
+		local mode = mode or fx.offset.mode or 2
 		mode = ceil( abs( mode ) )
-		--------------------------------------------
 		if type( Shape ) == "string" then
 			if l_actor:match( "circle" )
 				and Shape:match( "\\i?clip%b()" ) then
@@ -20051,8 +20295,8 @@
 				end
 				local ang_x, ang_y = Coor[ 1 ], Coor[ 2 ]
 				local angle = math.angle( center_x, center_y, ang_x, ang_y )
-				local shape_crc = shape.centerpos( shape.size( shape.circle, 2 * (Radius + effect_val[ 1 ]) ) )
-				shape_crc = shape.displace( shape.rotate( shape_crc, angle - 90 + effect_val[ 2 ] ), center_x, center_y )
+				local shape_crc = shape.centerpos( shape.size( shape.circle, 2 * (Radius + (fx.offset[ 1 ] or 0)) ) )
+				shape_crc = shape.displace( shape.rotate( shape_crc, angle - 90 + (fx.offset[ 2 ] or 0) ), center_x, center_y )
 				if l_actor:match( "icircle" ) then
 					shape_crc = shape.reverse( shape_crc )
 				end
@@ -20508,7 +20752,7 @@
 	end --text.bord_to_pixels( syl.text )
 
 	function text.gradienth( ... )
-		local shp_w = (tonumber( effect_val[ 1 ] ) > 0) and tonumber( effect_val[ 1 ] ) or 2
+		local shp_w = (tonumber( fx.offset[ 1 ] or 0 ) > 0) and tonumber( fx.offset[ 1 ] or 0 ) or 2
 		local Shape, cn = "", ceil( val_width / shp_w )
 		local gradh = table.gradient( { { cn } }, ... )
 		for i = 1, cn do
@@ -20518,7 +20762,7 @@
 	end --text.gradienth( "&H00FFFF&", "&H0000FF&" )
 	
 	function text.gradienth2( ... )
-		local shp_w = (tonumber( effect_val[ 1 ] ) > 0) and tonumber( effect_val[ 1 ] ) or 2
+		local shp_w = (tonumber( fx.offset[ 1 ] or 0 ) > 0) and tonumber( fx.offset[ 1 ] or 0 ) or 2
 		local Shape, cn2 = "", ceil( val_width / shp_w )
 		local Shmod = shape.size( shape.rectangle, shp_w, ceil( 1.8 * val_height ) )
 		local count, gradh = recall.countline, recall.gradienth
@@ -20533,7 +20777,7 @@
 	end --text.gradienth2( "&H00FFFF&", "&H0000FF&" )
 	
 	function text.gradientv( ... )
-		local shp_h = (tonumber( effect_val[ 1 ] ) > 0) and tonumber( effect_val[ 1 ] ) or 2
+		local shp_h = (tonumber( fx.offset[ 1 ] or 0 ) > 0) and tonumber( fx.offset[ 1 ] or 0 ) or 2
 		local Shape, cn = "", ceil( val_height / shp_h )
 		local gradv = table.gradient( { { cn } }, ... )
 		for i = 1, cn do
@@ -20543,7 +20787,7 @@
 	end --text.gradientv( "&H00FFFF&", "&H0000FF&" )
 	
 	function text.gradientangle( Angle, ... )
-		local shp_s = (tonumber( effect_val[ 1 ] ) > 0) and tonumber( effect_val[ 1 ] ) or 2
+		local shp_s = (tonumber( fx.offset[ 1 ] or 0 ) > 0) and tonumber( fx.offset[ 1 ] or 0 ) or 2
 		local Angle = Angle or 0
 		local shp_w = math.round( abs( val_width * cos( rad( Angle ) ) + val_height * sin( rad( Angle ) ) + 1 ) )
 		local shp_h = math.round( abs( val_width * sin( rad( Angle ) ) + val_height * cos( rad( Angle ) ) + 1 ) )
@@ -20652,8 +20896,424 @@
 		return format( "{\\1a&HFF&%s}%s", fxBord, val_text )
 	end --text.maskclip( )
 	
+	function text.filter( Text, Split, ... )
+		if type( Text ) == "function" then
+			Text = Text( )
+		end
+		if type( Split ) == "function" then
+			Split = Split( )
+		end
+		local Text = Text or val_text
+		effector.print_error( Text, "stringtable", "text.filter", 1 )
+		local filters = { ... }
+		if ...
+			and type( ... ) == "table" then
+			filters = ...
+		end
+		if #filters == 0 then
+			filters[ 1 ] = function( x, y )
+				return x, y
+			end
+		end
+		if type( Text ) == "table" then
+			for i = 1, #Text do
+				Text[ i ] = shape.filter3( Text[ i ], Split, ... )
+			end
+		else
+			Text = text.to_shape( Text, 1 )
+			if Split
+				and Split ~= 0 then
+				local Split = abs( Split )
+				effector.print_error( Split, "number", "text.filter", 2 )
+				Text = Yutils.shape.split( Text, Split )
+				Text = Yutils.shape.flatten( Text, Split )
+			end
+			shape.info( Text )
+			for i = 1, #filters do
+				if type( filters[ i ] ) == "table"
+					or type( filters[ i ] ) == "string" then
+					local do_shapefx, mode_fx = filters[ i ]
+					if type( filters[ i ] ) == "table" then
+						do_shapefx, mode_fx = filters[ i ][ 1 ], filters[ i ][ 2 ]
+					end
+					Text = shape.do_shape( Text, do_shapefx, mode_fx )
+				else
+					if type( filters[ i ] ) ~= "function" then
+						filters[ i ] = function( x, y )
+							return x, y
+						end
+					end
+					Pk = 0
+					Text = Yutils.shape.filter( Text,
+						function( x, y )
+							Cx = c_shape						-- coordenada "x" del centro de la texto
+							Cy = m_shape						-- coordenada "y" del centro de la texto
+							Do = math.distance( x, y )			-- distancia del punto al origen
+							Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la texto
+							Ao = math.angle( x, y )				-- ángulo del origen al punto
+							Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
+							Pn = n_points						-- cantidad total de puntos en la texto
+							Pk = Pk + 1							-- contador de los puntos de la texto
+							Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
+							My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
+							Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
+							return filters[ i ]( x, y )
+						end
+					)
+				end
+				shape.info( Text )
+			end
+		end
+		Text = shape.ASSDraw3( Text )
+		return Text
+	end --may 27th 2020
+	
+	function text.move( Text, Dx, Dy, Ox, Oy, Accel )
+		local Textm = Text or val_text
+		local function count_space_end( String )
+			--cuenta los espacios que haya al final del texto
+			local space, i = 0, 1
+			while String:sub( -i, -i ) == " " do
+				space = space + 1
+				i = i + 1
+			end
+			return space
+		end
+		local Off_x = Ox or 0 --\\fsp
+		local Off_y = Oy or 0 --\\fscy
+		local Ini_x = aegisub.width( "." )
+		local Tag_t = format( "{\\p0}\\N{\\r%s\\p1}%s", tags_style .. fx.add_tags, Textm )
+		local Tag_a = "\\p0\\r\\alpha255"
+		if table.type( { Textm } ) ~= "shape" then
+			Ini_x = aegisub.width( "." ) + count_space_end( Textm ) * aegisub.width( " " )
+			Tag_t = format( "{\\p0}\\N{\\r%s\\q2}%s", tags_style .. fx.add_tags, Textm )
+			Tag_a = "\\r\\alpha255"
+		end --table.type( { shape.circle } )
+		local Tag_x = Dx or linefx[ ii ].text--""
+		local Tag_y = Dy or ""
+		fx.add_tags = "" -->variable de Effector-3.6.lua
+		tags_style  = "" -->variable de Effector-3.6.lua
+		------------------------------------------------------------------
+		if Tag_x:match( "\\i?clip%b()" ) then
+			Tag_x = shape.displace( shape.ASSDraw3( Tag_x:match( "\\i?clip%b()" ) ), -fx.move_x1, -fx.move_y1 )
+		end
+		if table.type( { Tag_x } ) == "shape" then
+			--------------------------------------
+			local function cap_shp( Shape, Time_i, Time_f, Accel )
+				local parts, c = { }
+				local Shape = Shape or shape.circle
+				local algorithm = Accel or "%s"
+				local Time_i = Time_i or 0
+				local Time_f = Time_f or fx.dur
+				local Time = Time_f - Time_i
+				if type( algorithm ) == "number" then
+					algorithm = "%s ^ " .. algorithm
+				end
+				if Accel then
+					Shape = shape.redraw( Shape, 5, "line", true ) --secciona las rectas en partes de 5px aprox.
+				end
+				Shape = shape.redraw( Shape, 4.2, "bezier", true  ) --secciona las beziers en rectas de 5px aprox.
+				local shp_length = shape.length( Shape ) --longitud de la shape
+				for c in Shape:gmatch( "[lm]^*%s+%-?%d+[%.%d]*%s+%-?%d+[%-%.%d ]*" ) do
+					parts[ #parts + 1 ] = c
+				end
+				local segments = { [ 1 ] = parts[ 1 ] }
+				for i = 2, #parts do
+					if parts[ i ]:match( "l" ) then
+						segments[ #segments + 1 ] = parts[ i ]
+					end
+				end
+				local points = {
+					[ 1 ] = {
+						x = tonumber( segments[ 1 ]:match( "(%-?%d+[%.%d]*)%s+%-?%d+[%.%d]*" ) ),
+						y = tonumber( segments[ 1 ]:match( "%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*)" ) )
+					}
+				}
+				local t, l, x, y, d = 0, 0
+				for i = 2, #segments do
+					points[ #points + 1 ] = {
+						x = tonumber( segments[ i ]:match( "(%-?%d+[%.%d]*)%s+%-?%d+[%.%d]*" ) ),
+						y = tonumber( segments[ i ]:match( "%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*)" ) )
+					}
+					points[ #points ].d = math.distance( points[ #points - 1 ].x, points[ #points - 1 ].y, points[ #points ].x, points[ #points ].y )
+					l = l + points[ #points ].d
+					points[ #points ].t1 = Time_i + t
+					points[ #points ].t2 = Time_i + Time * math.format( algorithm, l / shp_length )
+					t = points[ #points ].t2
+					if points[ #points ].d == 0 then
+						points[ #points ] = nil
+					end
+				end
+				--info para text.move --
+				local off_x = points[ 1 ].x
+				local off_y = points[ 1 ].y
+				local transfos = { x = "", y = "" }
+				for i = 2, #points do
+					if points[ i ].x ~= points[ i - 1 ].x then
+						transfos.x = transfos.x .. format( "\\t(%s,%s,\\fsp%s)", points[ i ].t1, points[ i ].t2, points[ i ].x )
+					end
+					if points[ i ].y ~= points[ i - 1 ].y then
+						transfos.y = transfos.y .. format( "\\t(%s,%s,\\fscy%s)", points[ i ].t1, points[ i ].t2, points[ i ].y )
+					end
+				end
+				------------------------
+				return off_x, off_y, transfos.x, transfos.y
+			end
+			--------------------------------------
+			local accel = Accel or fx.offset[ 1 ]
+			if accel <= 0 then
+				accel = 1
+			end
+			Off_x, Off_y, Tag_x, Tag_y = cap_shp( Tag_x, fx.movet_i, fx.movet_f, accel )
+			--text.move( nil, shape.circle )
+		end
+		Off_y = 2 * Off_y --todos los valores en "y" deben duplicarse
+		------------------------------------------------------------------
+		if type( Tag_x ) == "number" then
+			Tag_x = format( "\\t(%s,%s,\\fsp%s)", fx.movet_i, fx.movet_f, Tag_x )
+		end
+		if type( Tag_y ) == "number" then
+			Tag_y = format( "\\t(%s,%s,\\fscy%s)", fx.movet_i, fx.movet_f, Tag_y )
+		end
+		------------------------------------------------------------------
+		local Mov_x = format( "%s\\fsp%s", Tag_a, -Ini_x - 2 * Off_x )
+		if type( Tag_x ) == "table" then
+			local transfo_cap_x = table.match( Tag_x, "\\t%(" )
+			if #transfo_cap_x > 0 then
+				Tag_x = table.concat( Tag_x )
+			elseif table.type( Tag_x ) == "number" then
+				Mov_x = format( "%s\\fsp%s", Tag_a, -Ini_x - 2 * Tag_x[ 1 ] )
+				if #Tag_x > 1 then
+					local dur = fx.dur / (#Tag_x - 1)
+					for i = 2, #Tag_x do
+						Mov_x = Mov_x .. format( "\\t(%s,%s,\\fsp%s)", (i - 2) * dur, (i - 1) * dur, -Ini_x - 2 * Tag_x[ i ] )
+					end
+				end
+				Tag_x = ""
+			elseif table.type( Tag_x ) == "table" then
+				Mov_x = format( "%s\\fsp%s", Tag_a, -Ini_x - 2 * Tag_x[ 1 ][ 1 ] )
+				if #Tag_x[ 1 ] > 1 then
+					for i = 2, #Tag_x[ 1 ] do
+						Mov_x = Mov_x .. format( "\\t(%s,%s,\\fsp%s)", Tag_x[ 2 ][ i - 1 ], Tag_x[ 2 ][ i ], -Ini_x - 2 * Tag_x[ 1 ][ i ] )
+					end
+				end
+				Tag_x = ""
+			end
+		else
+			Tag_x = Tag_x:gsub( "\\fsp(%-?%d+[%.%d]*)",
+				function( val )
+					local val = -Ini_x - 2 * tonumber( val )
+					return "\\fsp" .. val
+				end
+			)
+			:gsub( "\\fsp(R[%a]*%b())",
+				function( val )
+					local val = -Ini_x - 2 * string.toval( val )
+					return "\\fsp" .. val
+				end
+			)
+			:gsub( "\\fsp(%b())",
+				function( val )
+					local val = -Ini_x - 2 * string.toval( val )
+					return "\\fsp" .. val
+				end
+			)
+		end
+		local Mov_H = format( "{%s%s}.", Mov_x, Tag_x )
+		------------------------------------------------------------------
+		local Mov_y1 = format( "\\r\\fscy%s", (Off_y >= 0 ) and Off_y or 0 )
+		if type( Tag_y ) == "table" then
+			Tag_y = table.concat( Tag_y )
+		end
+		Tag_y = Tag_y:gsub( "\\fscy(R[%a]*%b())",
+			function( val )
+				return "\\fscy" .. string.toval( val )
+			end
+		)
+		:gsub( "\\fscy(%b())",
+			function( val )
+				return "\\fscy" .. string.toval( val )
+			end
+		)
+		:gsub( "\\fscy(%-?%d+[%.%d]*)",
+			function( val )
+				return "\\fscy" .. 2 * tonumber( val )
+			end
+		)
+		local valsy, t = { }
+		for t in Tag_y:gmatch( "\\t%b()" ) do
+			valsy[ #valsy + 1 ] = tonumber( t:match( "\\fscy(%-?%d+[%.%d]*)" ) )
+		end
+		valsy[ 0 ] = Off_y
+		local k, transfo = 1, { p = { }, n = { } }
+		local t1, t2, vy, Dy
+		for t in Tag_y:gmatch( "\\t%b()" ) do
+			t1 = tonumber( t:match( "\\t%([ ]*(%d+[%.%d ]*)%,[ ]*%d+[%.%d ]*%," ) )
+			t2 = tonumber( t:match( "\\t%([ ]*%d+[%.%d ]*%,[ ]*(%d+[%.%d ]*)%," ) )
+			vy = tonumber( t:match( "\\fscy(%-?%d+[%.%d]*)" ) )
+			if vy < 0 then
+				if vy * valsy[ k - 1 ] >= 0 then
+					transfo.n[ #transfo.n + 1 ] = t:gsub( "(\\fscy)%-(%d+[%.%d]*)", "%1%2" )
+				else
+					Dy = valsy[ k - 1 ] - vy
+					transfo.p[ #transfo.p + 1 ] = format( "\\t(%s,%s,\\fscy0)", t1, t1 - (t2 - t1) * vy / Dy )
+					transfo.n[ #transfo.n + 1 ] = format( "\\t(%s,%s,\\fscy%s)", t1 - (t2 - t1) * vy / Dy, t2, -vy )
+				end
+			else
+				if vy * valsy[ k - 1 ] >= 0 then
+					transfo.p[ #transfo.p + 1 ] = t
+				else
+					Dy = vy - valsy[ k - 1 ]
+					transfo.n[ #transfo.n + 1 ] = format( "\\t(%s,%s,\\fscy0)", t1, t1 + (t2 - t1) * vy / Dy )
+					transfo.p[ #transfo.p + 1 ] = format( "\\t(%s,%s,\\fscy%s)", t1 + (t2 - t1) * vy / Dy, t2, vy )
+				end
+			end
+			k = k + 1
+		end
+		local Mov_V1 = format( "{%s%s\\p1}m 0 0 m 0 100 ", Mov_y1, table.concat( transfo.p ) )
+		------------------------------------------------------------------
+		local Mov_y2 = format( "\\r\\fscy%s", (Off_y <= 0) and ((Off_y == 0) and 0 or -Off_y) or 0 )
+		local Mov_V2 = format( "\\N{%s%s\\p1}m 0 0 m 0 100 ", Mov_y2, table.concat( transfo.n ) )
+		------------------------------------------------------------------
+		return Mov_V1 .. Tag_t .. Mov_H .. Mov_V2 --may 31st 2020
+	end	--text.move( nil, tag.oscill( fx.dur, 2f, "\\fspRs( 10 )" ), tag.oscill( fx.dur, 2f, "\\fscyRs( 10 )" ) )
+	
+	function text.grid( Text, Filter, Align, Line )
+		if type( Text ) == "function" then
+			Text = Text( )
+		end
+		if type( Align ) == "function" then
+			Align = Align( )
+		end
+		local Text = Text or val_text
+		local Filter = Filter or function( ) return "" end
+		local Align = Align or 7 --alineación, en caso de ingresar imagen
+		local x_max, y_max = aegisub.width( Text ), aegisub.height( Text )
+		-----------------------------------
+		local function image_info( Image )
+			local get_info = image.to_pixels( Image, nil, true )
+			get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
+			local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
+			local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
+			local img_table, indx = { }, ""
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+				img_table[ indx ] = format( "%s%s",
+					get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
+					get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
+				)
+				img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
+			end
+			return img_table, an_x, an_y, get_info.width, get_info.height
+		end
+		local is_image, img_info
+		if type( Filter ) == "string" then --si es una imagen .bmp
+			is_image = true
+			img_info, xi, yi, wi, hi = image_info( Filter )
+			Filter = function( i )
+				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+				x1, y1 = tonumber( x1 ), tonumber( y1 )
+				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+				local k = format( "%s,%s", xr, yr )
+				return img_info[ i ] or img_info[ k ] or "\\r"
+			end
+		end
+		-----------------------------------
+		local function min_alpha( String )
+			--elige al alpha más transparente y elimina al resto :D
+			local alphas, a = { }
+			for a in String:gmatch( "\\1a&H(%x%x)&" ) do
+				alphas[ #alphas + 1 ] = a
+			end
+			if #alphas > 1 then
+				for i = 1, #alphas do
+					alphas[ i ] = tonumber( alphas[ i ], 16 )
+				end
+				table.sort( alphas, function( a, b ) return a < b end )
+				String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
+			end
+			return String
+		end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
+		-----------------------------------
+		local tbl = text.to_pixels( Text, nil, nil, nil, nil, { true } )
+		local x = table.op( tbl.x, "rank" )
+		local y = table.op( tbl.y, "rank" )
+		local tblx, str, c = { }
+		for i = 1, #tbl.x do
+			tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
+		end
+		local x_min, y_min = table.op( tbl.x, "min" ), table.op( tbl.y, "min" )
+		local x_max, y_max = x_min + x, y_min + y
+		local tbl_shp, id, is_shape = { }
+		for i = y_min, y_max do
+			tbl_shp[ i - y_min + 1 ] = ""
+			for k = x_min, x_max do
+				id = tostring( k ) .. "," .. tostring( i )
+				is_shape = format( "{\\p1\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
+				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. ( tblx[ id ] and is_shape or "{\\p1}m 0 0 l 1 1 " )
+			end
+			if not tbl_shp[ i - y_min + 1 ]:match( "1a" ) then
+				tbl_shp[ i - y_min + 1 ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
+			end
+			tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. "{\\p0}\\N"
+			while string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
+				str, c = string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 " )
+				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ]:gsub( str, format( "{\\p1}m 0 0 l %s 1 ", c ) )
+			end		
+		end
+		local text_px = table.concat( tbl_shp )
+		local k = 1
+		if is_image and Line then
+			text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = math.i( k, x_max )[ "1-->A" ]
+					py = math.i( k, x_max )[ "N,n" ]
+					cx = x_max / 2
+					cy = l.fontsize / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					capture = capture:gsub( "(%d+)(,%d+)",
+						function( x, y )
+							local x = tonumber( x )
+							x = floor( x + val_left - l.left )
+							return tostring( x ) .. y
+						end
+					)
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		else
+			text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = math.i( k, x_max )[ "1-->A" ]
+					py = math.i( k, x_max )[ "N,n" ]
+					cx = x_max / 2
+					cy = l.fontsize / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		end
+		local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
+		local shape_f = format( "{\\p1}m 0 0 l %s %s ", x, l.height - y_max - 1 )
+		text_px = shape_i .. text_px .. shape_f
+		return text_px --text.grid( )
+	end --may 14th 2020
+
 	-------------------------------------------------------------------------------------------------
-	-- Librería de Funciones "image" usando Yutils.lua by Youka -------------------------------------
+	-- Librería de Funciones "image" ----------------------------------------------------------------
 	function image.data( bmp_image, Return )
 		local bmp_color, bmp_alpha = { }, { }
 		local bmp_image = bmp_image or "test.bmp"
@@ -20696,6 +21356,32 @@
 		return format( "%s{\\bord0\\shad0\\fscx%s\\fscy%s\\p1}%s", bmp_tag, 100 * Size, 100 * Size, shape.pixel )
 	end --image.to_pixels( ) --image.to_pixels( "pngbar.png" )
 	
+	function image.grid( Image )
+		local Image = Image or "test.bmp"
+		local get_info = image.to_pixels( Image, nil, true )
+		get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
+		local img_table, indx = { }, ""
+		for i = 1, get_info.width * get_info.height do
+			indx = tostring( math.i( i, get_info.width )[ "1-->A" ] ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] )
+			img_table[ indx ] = format( "%s%s",
+				get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
+				get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
+			)
+			img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
+		end
+		local image_px, id = { }
+		for i = 1, get_info.height do
+			image_px[ i ] = "{\\p1}"
+			for k = 1, get_info.width do
+				id = tostring( k ) .. "," .. tostring( i )
+				image_px[ i ] = image_px[ i ] .. format( "{%s}m 0 0 l 0 1 l 1 1 l 1 0 ", img_table[ id ] )
+			end
+			image_px[ i ] = image_px[ i ] .. "{\\p0}\\N"
+		end
+		local image_pix = table.concat( image_px ):gsub( "(1c)&H(%x+)&", "%1%2" )
+		return image_pix --image.grid( )
+	end --may 14th 2020
+
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "aegisub" --------------------------------------------------------------
 	function aegisub.word( line_text, line_dur, ci_ )
@@ -21112,7 +21798,7 @@
 		File:close( )
 		return Lines_tbl
 	end --august 25th 2018
-			
+	
 	function file.gsub( File_lua, ... )
 		--modifica un archivo seleccionado usando string.gsub en sus líneas :D
 		local File_lua = File_lua or "my.lua"
@@ -21908,17 +22594,13 @@
 	end
 
 	function effector.effect_offset( )
-		effect_val = { }
-		for c in l_fx:gmatch( "%-?%d+[%.%d+]*" ) do
-			table.insert( effect_val, tonumber( c ) )
+		fx.offset = { }
+		local line = linefx[ ii ]
+		if pcall( loadstring( format( "return function( meta, line, x, y ) return { %s } end", l_fx ) ) ) then
+			local linefx_to_function = loadstring( format( "return function( meta, line, x, y ) return { %s } end", l_fx ) )( )
+			fx.offset = linefx_to_function( meta, line, x, y )
 		end
-		for i = 1, 64 do
-			effect_val[ i ] = effect_val[ i ] or 0
-		end
-		fx.offset_x = effect_val[ 1 ]
-		fx.offset_y = effect_val[ 2 ]
-		fx.offset_z = effect_val[ 3 ]
-	end
+	end --rewrite: may 31st 2020
 
 	function effector.decide( )
 		local Decide_No_1 = { 75, 97, 114, 97, 32, 69, 102, 102, 101, 99, 116, 111, 114 }

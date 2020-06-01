@@ -35,6 +35,7 @@
 	--===========================================================================================================================--
 	Path_Effector_newfx_lua = nil
 	--Path_Effector_newfx_lua = "C:\\Users\\HP4\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
+	Path_Effector_newfx_lua = "C:\\Users\\victo\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
 	--===========================================================================================================================--
 	leadin_fx, hilight_fx, leadout_fx = { }, { }, { }
 	shape_fx, transla_fx, function_fx = { }, { }, { }
@@ -189,9 +190,6 @@
 			text.style = ""
 			shape.style = ""
 		end
-		----------------------------
-		effector.effect_offset( )
-		----------------------------
 		fx.mode = "h"
 		if fx__.v_kanji then
 			fx.mode = "v"
@@ -921,6 +919,7 @@
 									--fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
+									effector.effect_offset( )
 									-----------------------------------------------
 									if pcall( loadstring( format( "return function( fx__, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) then
 										variable_ = loadstring( format( "return function( fx__, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -1200,7 +1199,6 @@
 													l.effect = effectboard or "Effector [fx]"
 													l.layer = fx.layer
 													l.actor = actorboard or actor_fx
-												--	print_ass( l.text )
 													subs.insert( #subs + Rline, l )
 													count_fx = count_fx + 1
 												elseif fx__.modify == false
@@ -1312,6 +1310,7 @@
 										--fxgroup = true
 										-----------------------------------------------
 										effector.default_val( )
+										effector.effect_offset( ) --may 31st 2020
 										-----------------------------------------------
 										if pcall( loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) == true then
 											variable_ = loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -1696,9 +1695,9 @@
 									module = 0
 									module1 = module
 									module2 = module1
-									--fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
+									effector.effect_offset( ) --may 31st 2020
 									-----------------------------------------------
 									if pcall( loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) == true then
 										variable_ = loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -1832,7 +1831,6 @@
 										--definir posición inicial--
 										fx.pos_x = fx.center_x
 										fx.pos_y = fx.center_y
-										--fx.pos_x, fx.pos_y = effector.knj( fx__.v_kanji, fx__.reverfx )
 										fx.off_x, fx.off_y = effector.modify_pos( )
 										--variables de posiciones--
 										fx.pos_x = fx.pos_x + fx.fun_x - fx.off_x
@@ -2097,6 +2095,7 @@
 								--fxgroup = true
 								-----------------------------------------------
 								effector.default_val( )
+								effector.effect_offset( ) --may 31st 2020
 								-----------------------------------------------
 								if pcall( loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) == true then
 									variable_ = loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -2428,6 +2427,7 @@
 									val_sn, val_wn = 1, 1
 									-----------------------------------------------
 									effector.default_val( )
+									effector.effect_offset( ) --may 31st 2020
 									-----------------------------------------------
 									if pcall( loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) == true then
 										variable_ = loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -2737,12 +2737,6 @@
 								char.duration = char.end_time - char.start_time
 								char.dur = char.duration
 								char.mid_time = char.start_time + char.dur / 2
-								--[[
-								char.widthmax = math.max( unpack( mmwth[ ii ].ch ) )
-								char.widthmin = math.min( unpack( mmwth[ ii ].ch ) )
-								char.durmax = math.max( unpack( mmdur[ ii ].ch ) )
-								char.durmin = math.min( unpack( mmdur[ ii ].ch ) )
-								--]]
 								-----------------------------------------------
 								effector.default_val2( )
 								-----------------------------------------------
@@ -2758,17 +2752,7 @@
 								kata_start, kata_end, kata_mid, kata_dur, kata_i, kata_n, kata_left, kata_center, kata_right, kata_bottom, kata_middle, kata_top, kata_width, kata_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								roma_start, roma_end, roma_mid, roma_dur, roma_i, roma_n, roma_left, roma_center, roma_right, roma_bottom, roma_middle, roma_top, roma_width, roma_height = val_start, val_end, val_mid, val_dur, val_i, val_n, val_left, val_center, val_right, val_bottom, val_middle, val_top, val_width, val_height
 								char_start, char_end, char_mid, char_dur, char_i, char_n, char_left, char_center, char_right, char_bottom, char_middle, char_top, char_width, char_height = char.start_time, char.end_time, char.mid_time, char.dur, char.i, char.n, char.left, char.center, char.right, char.bottom, char.middle, char.top, char.width, char.height
-								--[[-------------------------------------------------
-								wordchar, wordsyl, syl = { }, { }, word
-								wordchar.i, wordchar.n = aegisub.wordci( char.i )
-								wordsyl.i,  wordsyl.n  = aegisub.wordsi( syl.i )
-								val_si, val_wi = wordchar.i, wordchar.i
-								val_sn, val_wn = wordsyl.n, wordsyl.n
 								---------------------------------------------------
-								wordchar.start_time = char.start_time - word.start_time
-								wordchar.mid_time = char.mid_time - word.start_time
-								wordchar.end_time = char.end_time - word.start_time
-								--]]-------------------------------------------------
 								fx.replay_fx, J = 1, 1
 								maxJ = fx.replay_fx
 								fxgroup = true
@@ -2785,6 +2769,7 @@
 									--fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
+									effector.effect_offset( ) --may 31st 2020
 									-----------------------------------------------
 									if pcall( loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) == true then
 										variable_ = loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -3116,7 +3101,6 @@
 								wordchar.i, wordchar.n = aegisub.wordci( char.i )
 								wordsyl.i,  wordsyl.n  = aegisub.wordsi( syl.i )
 								val_si, val_wi = wordchar.i, wordchar.i
-								--val_sn, val_wn = wordsyl.n, wordsyl.n
 								val_sn, val_wn = wordchar.n, wordchar.n --fix: july 08 2018
 								---------------------------------------------------
 								wordchar.start_time = char.start_time - word.start_time
@@ -3136,9 +3120,9 @@
 									module = 0
 									module1 = module
 									module2 = module1
-									--fxgroup = true
 									-----------------------------------------------
 									effector.default_val( )
+									effector.effect_offset( ) --may 31st 2020
 									-----------------------------------------------
 									if pcall( loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) ) ) == true then
 										variable_ = loadstring( format( "return function( fx__, meta, line, x, y ) %s return \"\" end", tag.HTML_to_ass( tag.tonumber_variable( fx__.variable ) ) ) )( )
@@ -7481,7 +7465,7 @@
 	function_shape_width = effector.create_fx( "FTfx", "function_shape_width", "Line", true, false, "#FFFFFF", "#ADC4D6", "#6A8DD6", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "shape.width( shape.circle )", "", "hint = \"Esta función retorna el ancho total medido en pixeles de la shape ingresada.\"", "Lua", false )
 	function_table_view = effector.create_fx( "FTfx", "function_table_view", "Line", true, false, "#FFFFFF", "#ADC4D6", "#6A8DD6", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "table.view( my_table, \"my_name_table\" )", "", "my_table = {\n	[ 1 ] = { x = 3, y = 4, z = 5 },\n	[ 2 ] = { [ 1 ] = 6, [ 2 ] = 7 },\n	m = \"mode\",\n	[ \"ratio\" ] = 12\n}", "Lua", false )
 	function_text_bezier = effector.create_fx( "FTfx", "function_text_bezier", "Char", true, false, "#FFFFFF", "#ADC4D6", "#6A8DD6", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "text.bezier( mi_shape, mi_mode )", "mi_shape = \"m 56 268 b 424 378 460 205 628 230 827 258 827 391 1216 358 \";\nmi_mode = (line.i - 1)%4 + 1", "Lua", false )
-	function_text_bezier_move_mode = effector.create_fx( "FTfx", "function_text_bezier_move_mode", "Char", true, false, "#FFFFFF", "#ADC4D6", "#6A8DD6", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "text.bezier( mi_shape, R( 5, 6 ) )", "mi_shape = \"m 56 268 b 424 378 460 205 628 230 827 258 827 391 1216 358 \"", "Lua", false )
+	function_text_bezier_move_mode = effector.create_fx( "FTfx", "function_text_bezier_move_mode", "Char", true, false, "#FFFFFF", "#848484", "#454545", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "char.center", "char.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "char.text", "text.bezier( mi_shape, 5 )", "mi_shape = \"m 56 268 b 424 378 460 205 628 230 827 258 827 391 1216 358 \"", "Lua", false )
 	function_text_bord_to_shape = effector.create_fx( "FTfx", "function_text_bord_to_shape", "Line", true, false, "#FFFFFF", "#343434", "#000000", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "text.bord_to_shape( )", "", "", "Lua", false )
 	function_text_deformed = effector.create_fx( "FTfx", "function_text_deformed", "Line", true, false, "#FFFFFF", "#343434", "#000000", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "text.deformed( line.text_stripped, deformed, 16*rato )", "", "deformed = l.width/ 86r", "Lua", false )
 	function_text_do_shape = effector.create_fx( "FTfx", "function_text_do_shape", "Line", true, false, "#FFFFFF", "#343434", "#000000", "0", "0", "0", "l.start_time", "l.end_time", "", "", "", "", "line.center", "line.middle", "", "", "5", "0", "fx.pos_x", "fx.pos_y", "", "1", "", "text.do_shape( line.text_stripped, mi_shape, 1, mi_mode, true )", "", "mi_shape = \"m 332 326 b 128 73 844 75 610 284 372 498 1090 539 992 228 \";\nmi_mode = (line.i - 1)%4 + 1", "Lua", false )
