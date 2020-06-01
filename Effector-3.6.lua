@@ -35,7 +35,6 @@
 	--===========================================================================================================================--
 	Path_Effector_newfx_lua = nil
 	--Path_Effector_newfx_lua = "C:\\Users\\HP4\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
-	Path_Effector_newfx_lua = "C:\\Users\\victo\\Desktop\\Kara Effector 3.6\\Effector-newfx-3.6.lua"
 	--===========================================================================================================================--
 	leadin_fx, hilight_fx, leadout_fx = { }, { }, { }
 	shape_fx, transla_fx, function_fx = { }, { }, { }
