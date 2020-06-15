@@ -40,21 +40,19 @@
 		librería random
 		-	r( r_i, r_f, r_step )
 		-	random.color( H, S, V )
-		-	random.colorvc( H, S, V )
 		-	random.alpha( alpha_i, alpha_f )
-		-	random.alphava( alpha_i, alpha_f )
 		-	random.e( ... )
-		-	random.unique( table_or_number, index_r )
+		-	random.unique( Table, Index )
 		
 		librería table
-		<	table.view( Table, Table_name, indent )
+		<	table.view( Table, Name, indent )
 		-	table.inside( Table, e )
 		-	table.index( Table, e )
 			table.show( Table )
 			table.duplicate( Table )
 		-	table.compare( Table1, Table2 )
 			table.complete( Table, Start_time, End_time )
-		-	table.disorder( table_or_number )
+		-	table.disorder( Table )
 		-	table.make( objet, size, limit_i, limit_f, ... )
 		-	table.rmake( objet, size, limit_i, limit_f, ... )
 			table.concat1( Table, ... )
@@ -74,7 +72,7 @@
 		-	table.reverse( Table )
 		-	table.cyclic( Table )
 		+	table.set( color_masktable )
-		-	table.op( Table, mode, add )
+		-	table.op( Table, Mode, add )
 		-	table.gradient( Size, ... )
 			table.bigradient( gradient1, gradient2, Size )
 			table.mask( Color_or_Alpha, Maskfx, Mode, First )
@@ -89,6 +87,8 @@
 		-	table.unique( Table )
 			table.twin( ... )
 			table.type( Table )
+			table.ipairs( Table )
+			table.inpack( Table, Group )
 			
 		librería string
 		+	string.count( String, Capture )
@@ -134,7 +134,7 @@
 			math.bernstein( i, n, t )
 			math.confi_bezier( n, x, y, t, Return )
 		-	math.bezier( Return, ... )
-			math.bezier2( Shape, mode, Align_Shape, OffsetB, length )
+			math.bezier2( Shape, Mode, Align_Shape, OffsetB, length )
 			math.movebezier( Shapes, t1, t2 )
 			math.bezier2move( Shape, Mode, Accel )
 		+	math.circle( Shape )
@@ -160,6 +160,7 @@
 			math.clamp( Num, Min, Max )
 			math.clamp2( Num, Min, Max )
 			math.cubic( c1, c2, c3, c4 )
+			math.count( )
 		
 		librería tag
 		+	tag.redefine( String )
@@ -173,16 +174,11 @@
 		+	tag.do_alpha( String )
 		+	tag.HTML_to_ass( String )
 		+	tag.tonumber( String )
-		-	tag.set( times_set, events_set )
-		-	tag.movevc( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
-		-	tag.movevci( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
-		-	tag.only( condition, s_true, s_false )
-		<	tag.only2( Conditions, ... )
+		-	tag.set( Times, Events )
+		-	tag.only( Conditions, ... )
 		-	tag.oscill( dur, delay, ... )
 		<	tag.oscill2( Times, ... )
 		-	tag.glitter( dur, ExtraTags_i, ExtraTags_f )
-		<	tag.glitterx( dur, ExtraTags_i, ExtraTags_f )
-		<	tag.glittery( dur, ExtraTags_i, ExtraTags_f )
 		-	tag.clip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move )
 		-	tag.clip2( left_cx, top_cy, width_clip, height_clip, clip_move )
 		-	tag.iclip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move )
@@ -207,20 +203,10 @@
 		+	tag.v_dollar( String )
 		+	tag.coupling( String )
 		+	tag.operation( String )
-		+	tag.to_err( String )
 		+	tag.to_vsf( String )
-		+	tag.to_mod( String )
-			tag.colorchange( Color_or_Table, dur )
-			tag.colorchange1( Color_or_Table, dur )
-			tag.colorchange2( Color_or_Table, dur )
-			tag.colorchange3( Color_or_Table, dur )
-			tag.colorchange4( Color_or_Table, dur )
 		-	tag.ipol( Ipol_i, ... )
 		+	tag.temp2( my_temp )
 		+	tag.inbar( string_tags )
-		+	tag.adjust( t_adjust, adj_accel )
-		-	tag.val( val_tags )
-		-	tag.num( string_values, special_tag )
 		-	tag.module( ... )
 		-	tag.module1( ... )
 		-	tag.module2( ... )
@@ -235,78 +221,65 @@
 			color.ass( html_color )
 			color.ass2( Rnum, Gnum, Bnum )
 			color.ass3( Hnum, Snum, Vnum )
-		<	color.rgb( Color_or_table, Matrix_1x3, Multi )
-		<	color.hsv( Color_or_table, Matrix_1x3, Multi )
-			color.assF( color_or_table )
-		-	color.to_RGB( color_or_table )
-		-	color.to_HSV( color_or_table )
-		-	color.vc( color_or_table )
+		<	color.rgb( Color, Matrix_1x3, Multi )
+		<	color.hsv( Color, Matrix_1x3, Multi )
+			color.assF( Color )
+		-	color.to_RGB( Color )
+		-	color.to_HSV( Color )
+		-	color.vc( Color )
 		-	color.r( )
-		-	color.rc( CrC_color, ... )
-			color.rvc( CrVC_color, ... )
-		-	color.gradientv( ColorTop_or_table, ColorBottom_or_table )
-		-	color.gradienth( ColorLeft_or_table, ColorRight_or_table, algorithm )
-		-	color.vc_to_c( colorvc_or_table )
-		-	color.c_to_vc( colorc_or_table )
-		-	color.interpolate( color1_or_table, color2_or_table, Index_Ipol )
-		+	color.vector( color1, color2 )
-		-	color.delay( time_i, delay, color_i, color_f, ... )
-		-	color.movedelay( dur, delay, mode, ... )
-		-	color.set( Cset_times, Cset_colors, ... )
+		-	color.rc( Color, ... )
+		-	color.vc_to_c( Color )
+		-	color.interpolate( Color1, Color2, Index_Ipol )
+		-	color.set( Times, Colors, ... )
 		-	color.mask( Mode, Color, Mask )
 		-	color.movemask( Dur, Delay, Mode, Color, Mask )
-		-	color.setmovemask( delay, mode, t, colors )
+		-	color.setmovemask( delay, Mode, t, colors )
 		-	color.movemaskv( Dur, Delay, Mode, Color, Mask )
-		-	color.masktable( color_or_table )
-		-	color.module( color1_or_table, color2_or_table )
-		-	color.module1( color1_or_table, color2_or_table )
-		-	color.module2( color1_or_table, color2_or_table )
-		+	color.moduler( color1_or_table, color2_or_table )
+		-	color.module( Color1, Color2 )
+		-	color.module1( Color1, Color2 )
+		-	color.module2( Color1, Color2 )
+		+	color.moduler( Color1, Color2 )
 		-	color.ipol( ... )
 		-	color.loop( ... )
-			color.bigradient( Color_or_Table1, Color_or_Table2, Size_Table )
 		*	color.distance( CD_center, ... )
 		*	color.angle( CA_origin, ... )
-			color.from_error( color_or_table )
-		<	color.matrix( Color_or_table, ... )
+			color.from_error( Color )
+		<	color.matrix( Color, ... )
+			color.fromstyle( ColorAlpha )
+			color.val2ass( val_R, val_G, val_B )
+			color.ipolfx( Ipol, Color1, Color2 )
+			color.HSV_to_RGB( Hue, Saturation, Value )
+
 		
 		librería alpha
 			alpha.assF( alpha_or_table )
-		-	alpha.va( alpha_or_table )
 		-	alpha.r( )
-			alpha.ra( ArA_alpha, ... )
-			alpha.rva( ArCA_alpha, ... )
-		-	alpha.gradientv( AlphaTop_or_table, AlphaBottom_or_table )
-		-	alpha.gradienth( AlphaLeft_or_table, AlphaRight_or_table, algorithm )
-		-	alpha.va_to_a( alphava_or_table )
-		-	alpha.a_to_va( alphaa )
-		-	alpha.interpolate( alpha1_or_table, alpha2_or_table, Index_Ipol )
-		-	alpha.delay( time_i, delay, alpha_i, alpha_f, ... )
-		-	alpha.set( Aset_times, Aset_alphas, ... )
+		-	alpha.va_to_a( Alpha )
+		-	alpha.interpolate( Alpha1, Alpha2, Index_Ipol )
+		-	alpha.set( Times, Alphas, ... )
 		-	alpha.mask( Mode, Alpha, Mask )
 		-	alpha.movemask( Dur, Delay, Mode, Alpha, Mask )
 		-	alpha.movemaskv( Dur, Delay, Mode, Alpha, Mask )
-		-	alpha.masktable( alpha_or_table )
-		-	alpha.module( alpha1_or_table, alpha2_or_table )
-		-	alpha.module1( alpha1_or_table, alpha2_or_table )
-		-	alpha.module2( alpha1_or_table, alpha2_or_table )
-		+	alpha.moduler( alpha1_or_table, alpha2_or_table )		
+		-	alpha.module( Alpha1, Alpha2 )
+		-	alpha.module1( Alpha1, Alpha2 )
+		-	alpha.module2( Alpha1, Alpha2 )
+		+	alpha.moduler( Alpha1, Alpha2 )		
 		+	alpha.ipol( ... )
 		+	alpha.loop( ... )
-			alpha.bigradient( Alpha_or_Table1, Alpha_or_Table2, Size_Table )
 		*	alpha.distance( AD_center, ... )
 		*	alpha.angle( AA_origin, ... )
 			alpha.from_error( alpha_or_table )
+			alpha.fromstyle( ColorAlpha )
+			alpha.val2ass( val_A )
+			alpha.ipolfx( Ipol, Alpha1, Alpha2 )
 		
 		librería shape
 		+	shape.ASSDraw3( Shape )
 		-	shape.round( Shape )
 		-	shape.info( Shape )
 		-	shape.redraw( Shape, tract )
-		-	shape.modify( Shape, modify )
-		-	shape.filter( Shape, Filter )
-		-	shape.filter2( Shape, Filter, Split )
-		<	shape.filter3( Shape, Split, ... )
+		-	shape.filter( Shape, Split, ... )
 		-	shape.length( Shape )
 		-	shape.width( Shape )
 		-	shape.height( Shape )
@@ -335,10 +308,7 @@
 		<	shape.Omove( P, t1, t2, Dur, Accel )
 		+	shape.lineclip( Mode, Dur, Ini )
 		+	shape.setclip( Set_clips, Set_tagfx, Indx_line )
-		-	shape.animated( dur, frame_duration, frames, size_x, size_y )
-		-	shape.animated2( dur, frame_duration, ... )
-		-	shape.movevc( Shape, Return, width_vc, height_vc, posx, posy, Dx, Dy, time_vci, time_vcf )
-		-	shape.movevci( Shape, Return, width_vc, height_vc, posx, posy, Dx, Dy, time_vci, time_vcf )
+		-	shape.animated( dur, frame_duration, Shapes, Pscale, Random )
 		-	shape.divide( Shape, Mark )
 		-	shape.to_shape( Table_points )
 		-	shape.retire( Shape, Index_1, Index_2 )
@@ -371,7 +341,6 @@
 		<	shape.to_outline( Shape, Bord )
 		/	shape.point( Shape, Pixel )
 		<	shape.deformed( Shape, Deformed, Pixel, Axis )
-		+	shape.allin( Shape, Tags )
 		+	shape.fusion( Shapes, Tags )
 		-	shape.deformed2( Shape, Defor_x, Defor_y )
 		-	shape.filtershape( Shape, ... )
@@ -381,8 +350,8 @@
 			shape.cut( Tract, t )
 			shape.pointpos( Shape, P1, P2 )
 			shape.pos( Shape )
-			shape.grid( Shape, Filter, Align, Line )
-			shape.gridr( Width, Height, Mode, Filter, Align )
+			shape.grid( Shape, Filter, Align, Line, Lines )
+			shape.gridr( Width, Height, Mode, Filter, Align, Lines )
 		
 		librería graph
 			graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
@@ -419,7 +388,7 @@
 		+	text.char2byte( string_text )
 		+	text.byte2char( table_bytes )
 		-	text.inside( inside, Text )
-		-	text.bezier( Shape, mode, Accel, Offset_time )
+		-	text.bezier( Shape, Mode, Accel, Offset_time )
 		-	text.text2part( line_text_str, line_text_dur, line_text_left, parts )
 		-	text.to_shape( Text, Scale, Tags )
 		-	text.bord_to_shape( Text, Scale, Tags, Bord )
@@ -440,7 +409,7 @@
 		librería image
 		+	image.data( bmp_image, Return )
 		+	image.to_pixels( bmp_image, Size )
-			image.grid( Image )
+			image.grid( Image, Lines )
 		
 		librería aegisub
 		+	aegisub.word( line_text, line_dur, ci_ )
@@ -469,7 +438,6 @@
 		+	effector.keeptags( template_type, keeptags_type )
 		+	effector.pos( t_move, t_pos, t_time )
 		+	effector.knj( v_knj )
-		-	effector.offset_pos( string_inPos, offset_dx, offset_dy )
 		-	effector.import( Lua_file )
 		-	effector.addfx( Library_fx, Name_fx )
 		-	effector.savefx( New_fxname, File_fx )
@@ -597,7 +565,8 @@
 		if type( time_HMS ) == "function" then
 			time_HMS = time_HMS( )
 		end
-		local time_HMS = time_HMS or fx.offset.time_HMS or 0 --add: may 31st 2020
+		local time_HMS = fx.offset.time_HMS or time_HMS or 0 --add: may 31st 2020
+		local time_to_ms = time_HMS
 		if type( time_HMS ) == "string" then
 			if time_HMS:match( "%d+%:%d+%:%d+%.%d+" ) then
 				local H, M, S, ms = time_HMS:match( "(%d+)%:(%d+)%:(%d+)%.(%d+)" )
@@ -609,44 +578,23 @@
 				return H * 3600000 + M * 60000 + S * 1000 + ms
 			end
 			return tonumber( time_HMS )
-		elseif type( time_HMS ) == "table" then
-			if type( time_HMS[ 1 ] ) == "string" then
-				if time_HMS[ 1 ]:match( "%d+%:%d+%:%d+%.%d+" ) then
-					local H, M, S, ms = time_HMS[ 1 ]:match( "(%d+)%:(%d+)%:(%d+)%.(%d+)" )
-					if ms:len( ) == 2 then
-						ms = 10 * ms
-					elseif ms:len( ) == 1 then
-						ms = 100 * ms
-					end
-					time_HMS[ 1 ] = H * 3600000 + M * 60000 + S * 1000 + ms
-				else
-					time_HMS[ 1 ] = tonumber( time_HMS[ 1 ] )
-				end
+		elseif type( time_HMS ) == "number" then
+			return time_HMS
+		elseif type( time_HMS ) == "table" then --resursión
+			time_to_ms = { }
+			for i = 1, #time_HMS do
+				time_to_ms[ i ] = HMS_to_ms( time_HMS[ i ] )
 			end
-			if type( time_HMS[ 2 ] ) == "string" then
-				if time_HMS[ 2 ]:match( "%d+%:%d+%:%d+%.%d+" ) then
-					local H, M, S, ms = time_HMS[ 2 ]:match( "(%d+)%:(%d+)%:(%d+)%.(%d+)" )
-					if ms:len( ) == 2 then
-						ms = 10 * ms
-					elseif ms:len( ) == 1 then
-						ms = 100 * ms
-					end
-					time_HMS[ 2 ] = H * 3600000 + M * 60000 + S * 1000 + ms - time_HMS[ 1 ]
-				else
-					time_HMS[ 2 ] = tonumber( time_HMS[ 2 ] )
-				end
-			end
-			return { time_HMS[ 1 ], time_HMS[ 2 ] }
-		end
-		return time_HMS
-	end
-	
+		end --rewrite: june 14th 2020
+		return time_to_ms
+	end --HMS_to_ms( "0:00:02.325" )
+
 	function ms_to_HMS( time_ms )
 		--convierte el tiempo de ms a formato HMS
 		if type( time_ms ) == "function" then
 			time_ms = time_ms( )
 		end
-		local time_ms = time_ms or fx.offset.time_ms or 0 --add: may 31st 2020
+		local time_ms = fx.offset.time_ms or time_ms or 0 --add: may 31st 2020
 		local time_to_HMS
 		if type( time_ms ) == "table" then
 			local rec_table = { }
@@ -684,7 +632,7 @@
 		if type( Time ) == "function" then
 			Time = Time( )
 		end
-		local Time = Time or fx.offset.Time or 0 --add: may 31st 2020
+		local Time = fx.offset.Time or Time or 0 --add: may 31st 2020
 		local t_to_frame
 		if type( Time ) == "table" then
 			local rec_table = { }
@@ -712,7 +660,7 @@
 		if type( frames ) == "function" then
 			frames = frames( )
 		end
-		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
+		local frames = fx.offset.frames or frames or 0 --add: may 31st 2020
 		local f_to_ms
 		if type( frames ) == "table" then
 			local rec_table = { }
@@ -732,7 +680,7 @@
 		if type( frames ) == "function" then
 			frames = frames( )
 		end
-		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
+		local frames = fx.offset.frames or frames or 0 --add: may 31st 2020
 		local f_to_HMS
 		if type( frames ) == "table" then
 			local rec_table = { }
@@ -754,7 +702,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or fx.offset.Delay or 60 --add: may 31th 2020
+		local Delay = fx.offset.Delay or Delay or 60 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid1", 1 )
 		if val_i <= (val_n + 1) / 2 then
 			return Delay * (val_i - 1) - 200
@@ -769,7 +717,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or 60
+		local Delay = fx.offset.Delay or Delay or 60 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid2", 1 )
 		if val_i >= (val_n + 1) / 2 then
 			return Delay * (val_i - val_n - 1) - 200
@@ -781,7 +729,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or 40
+		local Delay = fx.offset.Delay or Delay or 40 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_li", 1 )
 		if Mode == "syl" then
 			return syl.start_time + Delay * (val_si - 1) - 200
@@ -795,7 +743,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or 40
+		local Delay = fx.offset.Delay or Delay or 40 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_lo", 1 )
 		if Mode == "syl" then
 			return syl.end_time + Delay * (val_si - val_sn - 1) + 200
@@ -811,7 +759,7 @@
 			Delay = Delay( )
 		end
 		local Mode = Mode or "li"
-		local Delay = Delay or 30
+		local Delay = fx.offset.Delay or Delay or 30 --add: may 31th 2020
 		local Loop = maxj
 		effector.print_error( Mode, "string", "time_loop1", 1 )
 		effector.print_error( Delay, "number", "time_loop1", 2 )
@@ -839,7 +787,7 @@
 			Delay = Delay( )
 		end
 		local Mode = Mode or "li"
-		local Delay = Delay or 30
+		local Delay = fx.offset.Delay or Delay or 30 --add: may 31th 2020
 		local Loop = maxJ
 		effector.print_error( Mode, "string", "time_loop2", 1 )
 		effector.print_error( Delay, "number", "time_loop2", 2 )
@@ -904,6 +852,9 @@
 		if type( V ) == "function" then
 			V = V( )
 		end
+		local H = fx.offset.H or H or nil
+		local S = fx.offset.S or S or nil
+		local V = fx.offset.V or V or nil --june 01st 2020
 		if type( H ) == "table" then
 			Hrc = R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
 		elseif type( H ) == "number" then
@@ -922,13 +873,6 @@
 		return color.HSV_to_RGB( Hrc, Src, Vrc )
 	end
 	
-	function random.colorvc( H, S, V )
-		return format( "(%s,%s,%s,%s)",
-			random.color( H, S, V ), random.color( H, S, V ),
-			random.color( H, S, V ), random.color( H, S, V )
-		)
-	end
-	
 	function random.alpha( alpha_i, alpha_f )
 		if type( alpha_i ) == "function" then
 			alpha_i = alpha_i( )
@@ -937,6 +881,8 @@
 			alpha_f = alpha_f( )
 		end
 		local ra_i, ra_f = 0, 255
+		local alpha_i = fx.offset.alpha_i or alpha_i or nil --june 01st 2020
+		local alpha_f = fx.offset.alpha_f or alpha_f or nil
 		if type( alpha_i ) == "string" then
 			ra_i = tonumber( alpha_i:match( "(%x%x)" ), 16 )
 		elseif type( alpha_i ) == "number" then
@@ -950,19 +896,6 @@
 		return alpha.val2ass( R( ra_f, ra_i ) )
 	end
 	
-	function random.alphava( Ai, Af )
-		if type( Ai ) == "function" then
-			Ai = Ai( )
-		end
-		if type( Af ) == "function" then
-			Af = Af( )
-		end
-		return format( "(%s,%s,%s,%s)",
-			random.alpha( Ai, Af ), random.alpha( Ai, Af ),
-			random.alpha( Ai, Af ), random.alpha( Ai, Af )
-		)
-	end
-
 	function random.e( ... )
 		-- retorma un elemento al azar de un listado de elementos o de una tabla
 		local Table_e = { ... }
@@ -977,29 +910,31 @@
 		return rand_e
 	end
 	
-	function random.unique( table_or_number, index_r ) --( table_or_number[, index_r] )
-		if type( table_or_number ) == "function" then
-			table_or_number = table_or_number( )
+	function random.unique( Table, Index ) --( Table[, Index] )
+		if type( Table ) == "function" then
+			Table = Table( )
 		end
-		if type( index_r ) == "function" then
-			index_r = index_r( )
+		if type( Index ) == "function" then
+			Index = Index( )
 		end
-		effector.print_error( table_or_number, "numbertable", "random.unique", 1 )
+		local Table = fx.offset.Table or Table
+		local Index = fx.offset.Index or Index --june 01st 2020
+		effector.print_error( Table, "numbertable", "random.unique", 1 )
 		local Table_u, Ind = recall.tableu, 1
-		if index_r == nil then
-			return table.disorder( table_or_number )
+		if Index == nil then
+			return table.disorder( Table )
 		end
-		if index_r == 1 then
-			Table_u = remember( "tableu", table.disorder( table_or_number ) )
+		if Index == 1 then
+			Table_u = remember( "tableu", table.disorder( Table ) )
 		end
-		effector.print_error( index_r, "number", "random.unique", 2 )
-		Ind = #Table_u - #Table_u * ceil( index_r / #Table_u ) + index_r
+		effector.print_error( Index, "number", "random.unique", 2 )
+		Ind = #Table_u - #Table_u * ceil( Index / #Table_u ) + Index
 		return Table_u[ Ind ]
 	end
 	
 	--------------------------------------------------------------------------------------------------
 	-- Ampliación de la Librería "table" -------------------------------------------------------------
-	function table.view( Table, Table_name, indent )
+	function table.view( Table, Name, indent )
 		--retorna en modo string el contenido completo de una tabla
 		if type( Table ) == "function" then
 			Table = Table( )
@@ -1028,26 +963,26 @@
 			end
 			return format( "%q", so )
 		end
-		local function addtocart( value, Table_name, indent, saved, field )
+		local function addtocart( value, Name, indent, saved, field )
 			indent = indent or ""
 			saved  = saved or { }
-			field  = field or Table_name
+			field  = field or Name
 			cart   = cart .. indent .. field
 			if type( value ) ~= "table" then
 				cart = cart .. " = " .. basicSerialize( value ) .. ";\n"
 			else
 				if saved[ value ] then
 					cart = cart .. " = {}; -- " .. saved[ value ] .. " (self reference)\n"
-					autoref = autoref ..  Table_name .. " = " .. saved[ value ] .. ";\n"
+					autoref = autoref ..  Name .. " = " .. saved[ value ] .. ";\n"
 				else
-					saved[ value ] = Table_name
+					saved[ value ] = Name
 					if isemptytable( value ) then
 						cart = cart .. " = {};\n"
 					else
 						cart = cart .. " = {\n"
 						for k, v in pairs( value ) do
 							k = basicSerialize( k )
-							local fname = format( "%s[ %s ]", Table_name, k )
+							local fname = format( "%s[ %s ]", Name, k )
 							field = format( "[ %s ]", k )
 							addtocart( v, fname, indent .. "	", saved, field )
 						end
@@ -1056,12 +991,12 @@
 				end
 			end
 		end
-		Table_name = Table_name or "table_unnamed"
+		Name = Name or "table_unnamed"
 		if type( Table ) ~= "table" then
-			return format( "%s = %s", Table_name, basicSerialize( Table ) )
+			return format( "%s = %s", Name, basicSerialize( Table ) )
 		end
 		cart, autoref = "", ""
-		addtocart( Table, Table_name, indent )
+		addtocart( Table, Name, indent )
 		return cart .. autoref
 	end
 	
@@ -1161,6 +1096,7 @@
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
+		local Table = fx.offset.Table or Table --june 01st 2020
 		effector.print_error( Table, "table", "table.show", 1 )
 		local t_show, t_show2 = "", ""
 		for i = 1, #Table do
@@ -1272,13 +1208,13 @@
 		return D_com
 	end
 	
-	function table.disorder( table_or_number )
+	function table.disorder( Table )
 		--desordena aleatoriamente el contenido de una tabla
-		if type( table_or_number ) == "function" then
-			table_or_number = table_or_number( )
+		if type( Table ) == "function" then
+			Table = Table( )
 		end
-		effector.print_error( table_or_number, "numbertable", "table.disorder", 1 )
-		local Table_dis = table_or_number
+		effector.print_error( Table, "numbertable", "table.disorder", 1 )
+		local Table_dis = Table
 		local newt, newtable, newt1, newtable1, table_n = { }, { }, { }, { }, { }
 		if type( Table_dis ) == "table" then
 			newt = table.duplicate( Table_dis )
@@ -1343,7 +1279,7 @@
 						t_make[ i ] = random.color( limit_i + Tm_n * (limit_f - limit_i) )
 					end
 				elseif objet == "alpha"
-					or objet == "alphaa"
+					or objet == "Alpha"
 					or objet == "alphava" then
 					t_make[ i ] = alpha.val2ass( 255 * Tm_n )
 					if type( limit_i ) == "string" then
@@ -1404,7 +1340,7 @@
 							t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. random.color( { limit_i, limit_f } )
 						end
 					elseif objet == "alpha"
-						or objet == "alphaa"
+						or objet == "Alpha"
 						or objet == "alphava" then
 						t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. random.alpha( )
 						if type( limit_i ) == "string" then
@@ -1878,7 +1814,7 @@
 		return table_mask_val_i
 	end
 	
-	function table.op( Table, mode, add )
+	function table.op( Table, Mode, add )
 		--realiza múltiples operaciones con los elementos de la tabla ingresada
 		if type( Table ) == "function" then
 			Table = Table( )
@@ -1886,15 +1822,15 @@
 		effector.print_error( Table, "table", "table.op", 1 )
 		local table_sum, table_average, table_concat = 0, 0, ""
 		local table_add, table_inverse, table_function = { }, { }, { }
-		if type( mode ) == "function" then
-			--retorna una tabla en donde a cada elemento se le aplica la función mode( val )
+		if type( Mode ) == "function" then
+			--retorna una tabla en donde a cada elemento se le aplica la función Mode( val )
 			for k, v in pairs( Table ) do
-				table_function[ k ] = mode( v )
+				table_function[ k ] = Mode( v )
 			end
 			return table_function --may 23rd 2018
-		elseif mode == "sum"
-			or mode == "suma"
-			or mode == nil then
+		elseif Mode == "sum"
+			or Mode == "suma"
+			or Mode == nil then
 			--retorna el valor de la suma de los elemente desde 1 hasta add o #Table
 			-------------------
 			local add = add or #Table
@@ -1906,15 +1842,15 @@
 				table_sum = table_sum + Table[ i ]
 			end
 			return table_sum
-		elseif mode == "pro"
-			or mode == "multi" then
+		elseif Mode == "pro"
+			or Mode == "multi" then
 			--retorna una tabla con cada elemento multiplicado por un mismo número
 			local table_pro = table.duplicate( Table )
 			for i = 1, #Table do
 				table_pro[ i ] = Table[ i ] * add
 			end
 			return table_pro
-		elseif mode == "concat" then
+		elseif Mode == "concat" then
 			--retorna un string equivalente a todos los elementos de la tabla concatenados
 			local con_add = ""
 			for i = 1, #Table do
@@ -1926,7 +1862,7 @@
 				table_concat = table_concat .. Table[ i ] .. con_add
 			end
 			return table_concat
-		elseif mode == "average" then
+		elseif Mode == "average" then
 			--retorna un número equivalente al promedio aritmético de los números de la tabla
 			for i = 1, #Table do
 				table_average = table_average + Table[ i ]
@@ -1935,7 +1871,7 @@
 				return table_average / #Table
 			end
 			return 0
-		elseif mode == "min" then
+		elseif Mode == "min" then
 			--retorna el mínimo valor de la tabla ingresada
 			local table_min = table.duplicate( Table )
 			table.sort( table_min, function( a, b ) return a < b end )
@@ -1943,7 +1879,7 @@
 				return table_min[ 1 ]
 			end
 			return 0
-		elseif mode == "max" then
+		elseif Mode == "max" then
 			--retorna el máximo valor de la tabla ingresada
 			local table_max = table.duplicate( Table )
 			table.sort( table_max, function( a, b ) return a < b end )
@@ -1951,7 +1887,7 @@
 				return table_max[ #table_max ]
 			end
 			return 0
-		elseif mode == "rank" then
+		elseif Mode == "rank" then
 			--retorna el rango de los valores de la tabla ingresada
 			local table_rank = table.duplicate( Table )
 			table.sort( table_rank, function( a, b ) return a < b end )
@@ -1959,21 +1895,21 @@
 				return table_rank[ #table_rank ] - table_rank[ 1 ]
 			end
 			return 0
-		elseif mode == "org" then
+		elseif Mode == "org" then
 			--retorna la tabla con los números organizados ascendentemente
 			local table_org = table.duplicate( Table )
 			table.sort( table_org, function( a, b ) return a < b end )
 			return table_org
-		elseif mode == "org2" then
+		elseif Mode == "org2" then
 			--retorna la tabla con los números organizados descendentemente
 			local table_org2 = table.duplicate( Table )
 			table.sort( table_org2, function( a, b ) return a > b end )
 			return table_org2
-		elseif mode == "round" then
+		elseif Mode == "round" then
 			--retorna la tabla con todos los números redondeados según el Argumento 3
 			local table_round = table.duplicate( Table )
 			return math.round( table_round, add )
-		elseif mode == "add" then
+		elseif Mode == "add" then
 			--retorna la tabla, y a cada uno de los elementos le suma un número
 			if type( add ) == "number" then
 				for i = 1, #Table do
@@ -1997,13 +1933,13 @@
 				end
 			end
 			return table_add
-		elseif mode == "inverse" then
+		elseif Mode == "inverse" then
 			--retorna la tabla con los elementos invertidos en el orden en que se ingresaron
 			for i = 1, #Table do
 				table_inverse[ i ] = Table[ #Table - i + 1 ]
 			end
 			return table_inverse
-		elseif mode == "idx" then --march 17th 2020
+		elseif Mode == "idx" then --march 17th 2020
 		--organiza por index los elementos de la tabla
 			local table_idx = { }
 			for k, v in pairs( Table ) do
@@ -2156,7 +2092,6 @@
 				table.insert( Hue[ k ], Hue[ k ][ i ] )
 			end
 			for i = 1, 12 * val_n + 1 do
-			--for i = 12 * val_n + 1, 1, -1 do
 				Mask1[ i ] = format( "%s(%s,%s,%s,%s)",
 					Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 2 ]
 				)
@@ -2189,7 +2124,7 @@
 			MaskT[ i ] = Hue[ i ][ val_i ]
 		end
 		return MaskT
-	end --table.mask( "&H00FFFF&", "&H000000&", "\\1vc" )
+	end --table.mask( "&H00FFFF&", "&H000000&", "\\1c" )
 	
 	table.recall = { }
 	function table.remember( table_ref, table_val )
@@ -2218,7 +2153,7 @@
 		end
 		local rand_e = T_o_N[ R( #T_o_N ) ]
 		if rand_e == table_random then
-			rand_e = table.random( T_o_N )
+			rand_e = T_o_N[ R( #T_o_N ) ]--table.random( T_o_N )
 		end
 		table_random = rand_e
 		return rand_e
@@ -2468,10 +2403,6 @@
 				end
 			end
 			---------------------------------------------
-			if fx.filter == "mod" 
-				and ipol_coloralpha == "coloralpha" then
-				max_loop = Size_ipol
-			end
 			for i = 1, max_loop do
 				--algoritmos de interpolación :D
 				ipol_i = Table_ipol[ floor( (i - 1) / (max_loop / (#Table_ipol - 1)) ) + 1 ]
@@ -2491,27 +2422,15 @@
 			ipol_f = Table_ipol[ floor( pct_ip ) + 1 ] or Table_ipol[ floor( pct_ip ) ]
 			ipols[ #ipols + 1 ] = ipol_function( ipol_i, ipol_f, math.clamp( math.format( algorithm_ipol, 1 ) ) )
 			--------------------------------------------
-			if fx.filter == "mod"
-				and ipol_coloralpha == "coloralpha" then
-				local coloralpha_ipos = { }
-				for i = 1, max_loop do
-					if fx__.v_kanji == false then
-						coloralpha_ipos[ i ] = format( "(%s,%s,%s,%s)", ipols[ i ], ipols[ i + 1 ], ipols[ i ], ipols[ i + 1 ] )
-					else
-						coloralpha_ipos[ i ] = format( "(%s,%s,%s,%s)", ipols[ i ], ipols[ i ], ipols[ i + 1 ], ipols[ i + 1 ] )
-					end --table.ipol( { "&HFF&", "&H00&" }, 10, "\\3a" )
-				end
-				return coloralpha_ipos
-			end --add: october 13th 2018
 			--concatena los valores con los Tags_ipol, si lo hay
 			if Tags_ipol then
 				return table.concat2( ipols, Tags_ipol )
 			end --add: december 05th 2018
-			---------------------------------------------
+			--------------------------------------------
 			return ipols --rewrite: october 11th 2018
 			--table.ipol( { 12, 31, 20, 13, 47 }, 16, "\\fscy" )
 		end
-		-------------------------------------------------------------
+		------------------------------------------------
 		-- determina si los elementos son tablas, clip's o shapes
 		local function type_table( Table )
 			if type( Table[ 1 ] ) == "table" then
@@ -2950,7 +2869,43 @@
 		end
 		return "empty"
 	end --august 03rd 2019
-
+	
+	function table.ipairs( Table )
+		--convierte una tabla no indexada en indexada :D
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
+		effector.print_error( Table, "table", "table.ipairs", 1 )
+		local Table_i = { }
+		for _, val in pairs( Table ) do
+			Table_i[ #Table_i + 1 ] = type( val ) ~= "table" and val or table.ipairs( val )
+		end
+		return Table_i --table.ipairs( tbldemo )
+	end --june 10th 2020
+	
+	function table.inpack( Table, Group )
+		--empaqueta los elementos de la tabla ingresada, en grupos
+		if type( Table ) == "function" then
+			Table = Table( )
+		end
+		if type( Group ) == "function" then
+			Group = Group( )
+		end
+		effector.print_error( Table, "table", "table.inpack", 1 )
+		local parts = Group or 2
+		if type( Group ) == "table" then
+			parts = ceil( #Table / Group[ 1 ] )
+		end
+		local inpacks = { }
+		for i = 1, ceil( #Table / parts ) do
+			inpacks[ i ] = { }
+			for k = 1, parts do
+				inpacks[ i ][ k ] = Table[ (i - 1) * parts + k ]
+			end
+		end
+		return inpacks
+	end --june 10th 2020
+	
 	--------------------------------------------------------------------------------------------------
 	-- Ampliación de la Librería "string" ------------------------------------------------------------
 	function string.count( String, Capture )
@@ -3138,7 +3093,7 @@
 				function( nocap_capture )
 					nocap_count = nocap_count + 1
 					return nocapture_tbl[ nocap_count ]
-				end
+				end --"\\[%d]*%a+[%(%-,%.%w &%x%)]*" captura un tag completo
 			)
 		end
 		return String
@@ -4666,7 +4621,7 @@
 		end
 	end
 
-	function math.bezier2( Shape, mode, Align_Shape, OffsetB, length )
+	function math.bezier2( Shape, Mode, Align_Shape, OffsetB, length )
 		local pyointa = { }
 		function pyointa.tangential2P( Pnts, t_ )
 			local tanVec, XY, dpos = { }, { }, { }
@@ -4901,12 +4856,12 @@
 			if OffsetB then
 				B_actor_offset = OffsetB
 			end
-			if mode == nil
-				or mode == 1 then -- modo por default (centro de la shape)
+			if Mode == nil
+				or Mode == 1 then -- modo por default (centro de la shape)
 				bezier_offset = (bezier_length - return_length) / 2 + B_actor_offset
-			elseif mode == 2 then -- desde la izquierda de la shape
+			elseif Mode == 2 then -- desde la izquierda de la shape
 				bezier_offset = B_actor_offset
-			elseif mode == 3 then -- desde la derecha de la shape
+			elseif Mode == 3 then -- desde la derecha de la shape
 				bezier_offset = bezier_length - return_length - B_actor_offset
 			end
 			-------------
@@ -4919,7 +4874,7 @@
 					return_length = math.round( bezier_length * ( 1 - 1 / max_n ), 2 )
 				end --pregunta si el primer y último punto de la shape son iguales
 				for i = 1, max_n do
-					if mode == 4 then -- justifica en toda la longitud de la shape
+					if Mode == 4 then -- justifica en toda la longitud de la shape
 						bezier_offset = (bezier_length - return_length) * (i - 1) / (max_n - 1)
 					end --math.shape( shape.circle, nil, nil, 20 )
 					bezier_PtNo, bezier_target_length = pyointa.length2PtNo( bezier_points, bezier_offset + (return_length - 0.0001) * (i - 1) / (max_n - 1), Bn )
@@ -4944,7 +4899,7 @@
 				return_length = math.round( bezier_length * ( 1 - 1 / maxj ), 2 )
 			end --pregunta si el primer y último punto de la shape son iguales
 			-------------
-			if mode == 4 then -- justifica en toda la longitud de la shape
+			if Mode == 4 then -- justifica en toda la longitud de la shape
 				bezier_offset = (bezier_length - return_length) * module
 			end
 			local bezier_target_length, bezier_angle = 0, 0
@@ -4991,19 +4946,19 @@
 		if OffsetB then
 			actor_offset = OffsetB
 		end
-		if mode == nil
-			or mode == 1 then -- modo por default (centro de la shape)
+		if Mode == nil
+			or Mode == 1 then -- modo por default (centro de la shape)
 			lineoffset = (Blength - l_width) / 2 + actor_offset
-		elseif mode == 2 then -- alinea el texto desde la izquierda
+		elseif Mode == 2 then -- alinea el texto desde la izquierda
 			lineoffset = actor_offset
-		elseif mode == 3 then -- alinea el texto desde la derecha
+		elseif Mode == 3 then -- alinea el texto desde la derecha
 			lineoffset = Blength - l_width - actor_offset
-		elseif mode == 4 then -- justifica el texto en toda la longitud de la shape, equidistantemente
+		elseif Mode == 4 then -- justifica el texto en toda la longitud de la shape, equidistantemente
 			lineoffset = (Blength - l_width) * (val_i - 1) / (val_n - 1)
 		end
 		targetLength, rot_Bezier = 0, 0
 		PtNo, targetLength = pyointa.length2PtNo( cont_point, lineoffset + val_center - l_left, nN )
-		if mode == 5 then -- para trazar una curva por medio de shapes
+		if Mode == 5 then -- para trazar una curva por medio de shapes
 			maxloop( (0.68 + offset_maxspace) * Blength )
 			PtNo, targetLength = pyointa.length2PtNo( cont_point, Blength * module , nN )
 		end
@@ -5024,7 +4979,7 @@
 		return format( "%s\\fr%s%s", PosBzr, bezier_angle, extra_tags or "" )
 	end
 	
-	function math.movebezier( Shapes, t1, t2, mode )
+	function math.movebezier( Shapes, t1, t2, Mode )
 		local MmBSh = Shapes
 		local t2 = t2 or fx.movet_f
 		local t1 = t1 or fx.movet_i
@@ -5034,7 +4989,7 @@
 		end
 		local MmBTb, MmBtm, MmBps, MmBfr, MmBco, MmBfx = { }, { }, { }, { }, { }, ""
 		for i = 1, #MmBSh do
-			MmBTb[ i ] = math.bezier2( MmBSh[ i ], mode )
+			MmBTb[ i ] = math.bezier2( MmBSh[ i ], Mode )
 		end
 		MmBtg = table.op( MmBTb, "concat" )
 		if #MmBSh > 1 then
@@ -6387,6 +6342,15 @@
 		end
 		return x
 	end --may 12th 2020
+	
+	function math.count( )
+		--genera un contador independiente a cada variable asignada :D
+		local i = 0
+		return function( )
+			i = i + 1
+			return i
+		end
+	end --june 10th 2020
 	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "tag" ------------------------------------------------------------------
@@ -8495,6 +8459,7 @@
 					[ 16 ] = ":do_shape",			[ 17 ] = ":to_shape",			[ 18 ] = ":bord_to_shape",
 					[ 19 ] = ":to_pixels",			[ 20 ] = ":to_clip",			[ 21 ] = ":bord_to_pixels",
 					[ 22 ] = ":move",				[ 23 ] = ":filter",				[ 24 ] = ":move",
+					[ 25 ] = ":grid",
 				}
 				local functions_fun = {
 					[ 01 ] = "text.upper",			[ 02 ] = "text.lower",			[ 03 ] = "text.tag",
@@ -8505,6 +8470,7 @@
 					[ 16 ] = "text.do_shape",		[ 17 ] = "text.to_shape",		[ 18 ] = "text.bord_to_shape",
 					[ 19 ] = "text.to_pixels",		[ 20 ] = "text.to_clip",		[ 21 ] = "text.bord_to_pixels",
 					[ 22 ] = "text.move",			[ 23 ] = "text.filter",			[ 24 ] = "text.move",
+					[ 25 ] = "text.grid",
 				}
 				local TextS = TextS:sub( 2, -2 )
 				if table.inside( functions_str, FunctionT ) then
@@ -8750,117 +8716,79 @@
 		return String
 	end -- April 11th 2018
 	
-	function tag.set( times_set, events_set )
-		if type( times_set ) == "table" then
-			times_set = times_set
-		else
-			times_set = { times_set }
+	function tag.set( Times, Events )
+		if type( Times ) == "function" then
+			Times = Times( )
 		end
-		if type( events_set ) == "table" then
-			events_set = events_set
-		else
-			events_set = { events_set }
-		end
-		effector.print_error( times_set, "table", "tag.set", 1 )
-		effector.print_error( events_set, "table", "tag.set", 2 )
-		local t_set = table.complete( times_set, fx.start_time, fx.end_time )
-		local t_st2 = table.duplicate( t_set )
-		local iSt, iEt = table.index( t_set, fx.start_time ), table.index( t_set, fx.end_time )
-		events_set[ 0 ] = ""
-		local i = iSt + 1
-		local Tag_fx = events_set[ i - 2 ]
-		for k = 1, #t_set do
-			if type( t_set[ k ] ) == "table" then
-				t_set[ k ] = t_set[ k ][ 1 ]
+		effector.print_error( Times, "table", "tag.set", 1 )
+		effector.print_error( Events, "stringtable", "tag.set", 2 )
+		local Times = HMS_to_ms( Times )
+		local event_tbl = { }
+		for i = 1, #Times do
+			if type( Events ) == "function" then
+				event_tbl[ i ] = Events( )
+			elseif type( Events ) == "table" then
+				if type( Events[ (i - 1) % #Events + 1 ] ) == "function" then
+					event_tbl[ i ] = Events[ (i - 1) % #Events + 1 ]( )
+				else
+					event_tbl[ i ] = Events[ (i - 1) % #Events + 1 ]
+				end
+			else
+				event_tbl[ i ] = Events
 			end
 		end
-		if iSt + 1 ~= iEt then
-			while t_set[ i ] < fx.end_time do
-				offset_t = 1
-				if type( t_st2[ i ] ) == "table" then
-					offset_t = t_st2[ i ][ 2 ]
+		for i = 1, #event_tbl do
+			event_tbl[ i ] = string.change( event_tbl[ i ], "\\[%d]*%a+[%(%-,%.%w &%x%)\\]*", nil, "\\t%b()",
+				function( cap )
+					return format( "\\t(0,1,%s)", cap )
 				end
-				t1 = t_set[ i ] - fx.start_time - frame_dur / 2
-				if t1 < 0 then
-					t1 = 0
-				end
-				t2 = t1 + offset_t
-				Tag_fx = Tag_fx .. format( "\\t(%s,%s,%s)", t1, t2, events_set[ i - 1 ] )
-				i = i + 1
-			end
+			)
+			:gsub( "\\t%b()",
+				function( tagst )
+					local time1, time2
+					tagst = tagst:gsub( "\\t%([ ]*(%d[%.%d ]*),[ ]*(%d[%.%d]*)",
+						function( t1, t2 )
+							time1 = tonumber( t1 ) + Times[ i ] - fx.start_time
+							time2 = tonumber( t2 ) + Times[ i ] - fx.start_time
+							return format( "\\t(%s,%s", time1, time2 )
+						end
+					)
+					if time2 <= 0 
+						or time1 >= fx.end_time then
+						return ""
+					end
+					return tagst
+				end --:match( "\\[%d]*%a+[%(%-,%.%w &%x%)]*" )
+			)
 		end
-		return Tag_fx
-	end
+		return table.concat( event_tbl )
+	end --rewrite: june 15th 2020
 
-	function tag.movevc( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
-		if type( Shape ) == "function" then
-			Shape = Shape( )
+	function tag.only( Conditions, ... )
+		if type( Conditions ) == "function" then
+			Conditions = Conditions( )
 		end
-		if type( posx ) == "function" then
-			posx = posx( )
-		end
-		if type( posy ) == "function" then
-			posy = posy( )
-		end
-		if type( Dx ) == "function" then
-			Dx = Dx( )
-		end
-		if type( Dy ) == "function" then
-			Dy = Dy( )
-		end
-		if type( time_vci ) == "function" then
-			time_vci = time_vci( )
-		end
-		if type( time_vcf ) == "function" then
-			time_vcf = time_vcf( )
-		end
-		local ti = time_vci or fx.movet_i
-		local tf = time_vcf or fx.movet_f
-		local DX = Dx or fx.move_x2 - fx.move_x1
-		local DY = Dy or fx.move_y2 - fx.move_y1
-		local PX = posx or fx.move_x1
-		local PY = posy or fx.move_y1
-		local Shape = shape.origin( shape.ASSDraw3( Shape ) )
-		effector.print_error( Shape, "shape", "tag.movevc", 1 )
-		effector.print_error( ti, "number", "tag.movevc", 2 )
-		effector.print_error( tf, "number", "tag.movevc", 3 )
-		effector.print_error( DX, "number", "tag.movevc", 4 )
-		effector.print_error( DY, "number", "tag.movevc", 5 )
-		effector.print_error( PX, "number", "tag.movevc", 6 )
-		effector.print_error( PY, "number", "tag.movevc", 7 )
-		shape.info( Shape )
-		local Tag_fx = format( "\\clip(%s)\\movevc(%s,%s,%s,%s,%s,%s)", Shape,
-			math.round( PX - w_shape / 2, 2 ), math.round( PY - h_shape / 2, 2 ),
-			math.round( PX - w_shape / 2 + DX, 2 ), math.round( PY - h_shape / 2 + DY, 2 ),
-			math.round( ti, 2 ), math.round( tf, 2 )
-		)
-		return Tag_fx
-	end
-	
-	function tag.movevci( Shape, posx, posy, Dx, Dy, time_vci, time_vcf )
-		local  Tag_movevci = tag.movevc( Shape, posx, posy, Dx, Dy, time_vci, time_vcf ):gsub( "clip", "iclip" )
-		return Tag_movevci
-	end
-
-	function tag.only( condition, s_true, s_false )
-		if condition then
-			return s_true
-		end
-		return s_false or ( (type( s_true ) == "number") and 0 or "" )
-	end
-	
-	function tag.only2( Conditions, ... )
+		local Conditions = Conditions or nil
 		local TrueExits = { ... }
 		if type( ... ) == "table" then
 			TrueExits = ...
 		end
-		for i = 1, #Conditions do
-			if Conditions[ i ] then
-				return TrueExits[ i ]
+		if type( Conditions ) == "table" then
+			for i = 1, #Conditions do
+				if Conditions[ i ] == true then
+					return TrueExits[ i ]
+				end
 			end
+			if #TrueExits > #Conditions then
+				return TrueExits[ #Conditions + 1 ]
+			end
+			return ( type( TrueExits[ #TrueExits ] ) == "number" ) and 0 or ""
 		end
-		return ( type( TrueExits[ #TrueExits ] ) == "number" ) and 0 or ""
-	end
+		if Conditions then
+			return TrueExits[ 1 ]
+		end
+		return TrueExits[ 2 ] or ( (type( TrueExits[ 1 ] ) == "number") and 0 or "" )
+	end --rewrite: june 14th 2020
 
 	function tag.oscill( DurTotal, DurDelay, ... )
 		--DurDelay = DurDelay, or: DurDelay = { DurDelay, accel }, or: DurDelay = function
@@ -9191,16 +9119,6 @@
 		return Tag_fx 
 	end
 	
-	function tag.glitterx( DurTotal, ExtraTags_i, ExtraTags_f )
-		local  tag_glitterx = tag.delete( tag.glitter( DurTotal, ExtraTags_i, ExtraTags_f ), "\\fscy" )
-		return tag_glitterx
-	end
-	
-	function tag.glittery( DurTotal, ExtraTags_i, ExtraTags_f )
-		local  tag_glittery = tag.delete( tag.glitter( DurTotal, ExtraTags_i, ExtraTags_f ), "\\fscx" )
-		return tag_glittery
-	end
-	
 	function tag.clip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move )
 		if left_cx then
 			if type( left_cx ) == "function" then
@@ -9238,56 +9156,56 @@
 			end
 			effector.print_error( clip_move, "stringtable", "tag.clip", 6 )
 		end
-		local left_x, top_y, clip_W, clip_H, size_W, size_H, mode
+		local left_x, top_y, clip_W, clip_H, size_W, size_H, Mode
 		local loop_W, loop_H = fx.loop_h, fx.loop_v
 		local offset = l.outline + l.shadow
 		if type( left_cx ) == "string" then
 			clip_move = left_cx
 			left_x, top_y  = fx.move_l1 - offset, fx.move_t1 - offset
 			clip_W, clip_H = val_width + 2 * offset, val_height + 2 * offset
-			mode = 79
+			Mode = 79
 		else
 			left_x = (left_cx or fx.move_l1) - offset
 			top_y = (top_cy or fx.move_t1) - offset
 			clip_W, clip_H = (width_clip or val_width) + 2 * offset, (height_clip or val_height) + 2 * offset
-			mode = Mode or 79
+			Mode = Mode or 79
 		end
 		size_W, size_H = clip_W / loop_W, clip_H / loop_H
 		local cx1, cx2, cy1, cy2
-		if table.inside( { 13, 17, 31, 39, 71, 79, 93, 97 }, mode ) == false then
-			mode = 79
+		if table.inside( { 13, 17, 31, 39, 71, 79, 93, 97 }, Mode ) == false then
+			Mode = 79
 		end
-		if mode == 17
-			or mode == 71 then
+		if Mode == 17
+			or Mode == 71 then
 			cx1 = left_x + (ceil( j / loop_H ) - 1) * size_W
 			cx2 = left_x + (ceil( j / loop_H ) - 0) * size_W
-		elseif mode == 13
-			or mode == 79 then
+		elseif Mode == 13
+			or Mode == 79 then
 			cx1 = left_x + ((j - 1) % loop_W + 0) * size_W
 			cx2 = left_x + ((j - 1) % loop_W + 1) * size_W
-		elseif mode == 39
-			or mode == 93 then
+		elseif Mode == 39
+			or Mode == 93 then
 			cx1 = left_x + clip_W - (ceil( j / loop_H ) - 0) * size_W
 			cx2 = left_x + clip_W - (ceil( j / loop_H ) - 1) * size_W
-		elseif mode == 31
-			or mode == 97 then
+		elseif Mode == 31
+			or Mode == 97 then
 			cx1 = left_x + clip_W - ((j - 1) % loop_W + 1) * size_W
 			cx2 = left_x + clip_W - ((j - 1) % loop_W + 0) * size_W
 		end
-		if mode == 79 or
-			mode == 97 then
+		if Mode == 79 or
+			Mode == 97 then
 			cy1 = top_y + (ceil( j / loop_W ) - 1) * size_H
 			cy2 = top_y + (ceil( j / loop_W ) - 0) * size_H
-		elseif mode == 71
-			or mode == 93 then
+		elseif Mode == 71
+			or Mode == 93 then
 			cy1 = top_y + ((j - 1) % loop_H + 0) * size_H
 			cy2 = top_y + ((j - 1) % loop_H + 1) * size_H
-		elseif mode == 13
-			or mode == 31 then
+		elseif Mode == 13
+			or Mode == 31 then
 			cy1 = top_y + clip_H - (ceil( j / loop_W ) - 0) * size_H
 			cy2 = top_y + clip_H - (ceil( j / loop_W ) - 1) * size_H
-		elseif mode == 17
-			or mode == 39 then
+		elseif Mode == 17
+			or Mode == 39 then
 			cy1 = top_y + clip_H - ((j - 1) % loop_H + 1) * size_H
 			cy2 = top_y + clip_H - ((j - 1) % loop_H + 0) * size_H
 		end
@@ -9716,7 +9634,7 @@
 			effector.print_error( Mode, "true", "tag.Rclip", 5 )
 		end
 		local offset = l.outline + l.shadow
-		local mode = Mode or 79
+		local Mode = Mode or 79
 		local left_x = (left_cx or fx.move_l1) - offset
 		local top_y = (top_cy or fx.move_t1) - offset
 		local clip_W, clip_H = (width_clip or val_width) + 2 * offset, (height_clip or val_height) + 2 * offset
@@ -9737,40 +9655,40 @@
 			pixelH[ loop_H - 1 ] = clip_H
 		end
 		local cx1, cx2, cy1, cy2
-		if table.inside( { 13, 17, 31, 39, 71, 79, 93, 97 }, mode ) == false then
-			mode = 79
+		if table.inside( { 13, 17, 31, 39, 71, 79, 93, 97 }, Mode ) == false then
+			Mode = 79
 		end
-		if mode == 17
-			or mode == 71 then
+		if Mode == 17
+			or Mode == 71 then
 			cx1 = left_x + pixelW[ ceil( j / loop_H ) - 2 ]
 			cx2 = left_x + pixelW[ ceil( j / loop_H ) - 1 ]
-		elseif mode == 13
-			or mode == 79 then
+		elseif Mode == 13
+			or Mode == 79 then
 			cx1 = left_x + pixelW[ (j - 1) % loop_W - 1 ]
 			cx2 = left_x + pixelW[ (j - 1) % loop_W - 0 ]
-		elseif mode == 39
-			or mode == 93 then
+		elseif Mode == 39
+			or Mode == 93 then
 			cx1 = left_x + clip_W - pixelW[ ceil( j / loop_H ) - 1 ]
 			cx2 = left_x + clip_W - pixelW[ ceil( j / loop_H ) - 2 ]
-		elseif mode == 31
-			or mode == 97 then
+		elseif Mode == 31
+			or Mode == 97 then
 			cx1 = left_x + clip_W - pixelW[ (j - 1) % loop_W - 0 ]
 			cx2 = left_x + clip_W - pixelW[ (j - 1) % loop_W - 1 ]
 		end
-		if mode == 79
-			or mode == 97 then
+		if Mode == 79
+			or Mode == 97 then
 			cy1 = top_y + pixelH[ ceil( j / loop_W ) - 2 ]
 			cy2 = top_y + pixelH[ ceil( j / loop_W ) - 1 ]
-		elseif mode == 71
-			or mode == 93 then
+		elseif Mode == 71
+			or Mode == 93 then
 			cy1 = top_y + pixelH[ (j - 1) % loop_H - 1 ]
 			cy2 = top_y + pixelH[ (j - 1) % loop_H - 0 ]
-		elseif mode == 13
-			or mode == 31 then
+		elseif Mode == 13
+			or Mode == 31 then
 			cy1 = top_y + clip_H - pixelH[ ceil( j / loop_W ) - 1 ]
 			cy2 = top_y + clip_H - pixelH[ ceil( j / loop_W ) - 2 ]
-		elseif mode == 17
-			or mode == 39 then
+		elseif Mode == 17
+			or Mode == 39 then
 			cy1 = top_y + clip_H - pixelH[ (j - 1) % loop_H - 0 ]
 			cy2 = top_y + clip_H - pixelH[ (j - 1) % loop_H - 1 ]
 		end
@@ -10098,38 +10016,30 @@
 		end
 		effector.print_error( String, "string", "tag.do_tag", 1 )
 		local func_tag = {
-			[ 001 ] = "\\tag.set%b()",			[ 002 ] = "\\tag.movevc%b()",		[ 003 ] = "\\tag.movevci%b()",
-			[ 004 ] = "\\tag.only%b()",			[ 005 ] = "\\tag.only2%b()",		[ 006 ] = "\\tag.oscill%b()",
-			[ 007 ] = "\\tag.oscill2%b()",		[ 008 ] = "\\tag.glitter%b()",		[ 009 ] = "\\tag.glitterx%b()",
-			[ 010 ] = "\\tag.glittery%b()",		[ 011 ] = "\\tag.clip%b()",			[ 012 ] = "\\tag.clip2%b()",
-			[ 013 ] = "\\tag.iclip%b()",		[ 014 ] = "\\tag.iclip2%b()",		[ 015 ] = "\\tag.moveclip%b()",
-			[ 016 ] = "\\tag.moveiclip%b()",	[ 017 ] = "\\tag.moveclip2%b()",	[ 018 ] = "\\tag.moveiclip2%b()",
-			[ 019 ] = "\\tag.Rclip%b()",		[ 020 ] = "\\tag.Riclip%b()",		[ 021 ] = "\\tag.moveRclip%b()",
-			[ 022 ] = "\\tag.moveRiclip%b()",	[ 023 ] = "\\tag.Pclip%b()",		[ 024 ] = "\\tag.Piclip%b()",
-			[ 025 ] = "\\tag.movePclip%b()",	[ 026 ] = "\\tag.movePiclip%b()",	[ 027 ] = "\\tag.colorchange%b()",
-			[ 028 ] = "\\tag.colorchange1%b()",	[ 029 ] = "\\tag.colorchange2%b()",	[ 030 ] = "\\tag.colorchange3%b()",
-			[ 031 ] = "\\tag.colorchange4%b()",	[ 032 ] = "\\tag.cyclic%b()",		[ 033 ] = "\\tag.sec%b()",
-			[ 034 ] = "\\shape.Lmove%b()",		[ 035 ] = "\\shape.Lmove2%b()",		[ 036 ] = "\\shape.Pmove%b()",
-			[ 037 ] = "\\shape.Smove%b()",		[ 038 ] = "\\shape.Rmove%b()",		[ 039 ] = "\\shape.Rmove2%b()",
-			[ 040 ] = "\\shape.Rmove3%b()",		[ 041 ] = "\\shape.Rmove4%b()",		[ 042 ] = "\\shape.Omove%b()",
-			[ 043 ] = "\\shape.movevc%b()",		[ 044 ] = "\\shape.movevci%b()",
+			[ 01 ] = "\\tag.set%b()",			[ 02 ] = "\\tag.only%b()",			[ 03 ] = "\\tag.oscill%b()",
+			[ 04 ] = "\\tag.oscill2%b()",		[ 05 ] = "\\tag.glitter%b()",		[ 06 ] = "\\tag.clip%b()",
+			[ 07 ] = "\\tag.clip2%b()",			[ 08 ] = "\\tag.iclip%b()",			[ 09 ] = "\\tag.iclip2%b()",
+			[ 10 ] = "\\tag.moveclip%b()",		[ 11 ] = "\\tag.moveiclip%b()",		[ 12 ] = "\\tag.moveclip2%b()",
+			[ 13 ] = "\\tag.moveiclip2%b()",	[ 14 ] = "\\tag.Rclip%b()",			[ 15 ] = "\\tag.Riclip%b()",
+			[ 16 ] = "\\tag.moveRclip%b()",		[ 17 ] = "\\tag.moveRiclip%b()",	[ 18 ] = "\\tag.Pclip%b()",
+			[ 19 ] = "\\tag.Piclip%b()",		[ 20 ] = "\\tag.movePclip%b()",		[ 21 ] = "\\tag.movePiclip%b()",
+			[ 22 ] = "\\tag.cyclic%b()",		[ 23 ] = "\\tag.sec%b()",			[ 24 ] = "\\shape.Lmove%b()",
+			[ 25 ] = "\\shape.Lmove2%b()",		[ 26 ] = "\\shape.Pmove%b()",		[ 27 ] = "\\shape.Smove%b()",
+			[ 28 ] = "\\shape.Rmove%b()",		[ 29 ] = "\\shape.Rmove2%b()",		[ 30 ] = "\\shape.Rmove3%b()",
+			[ 31 ] = "\\shape.Rmove4%b()",		[ 32 ] = "\\shape.Omove%b()",
 		}
 		local func_rep = {
-			[ 001 ] = tag.set,					[ 002 ] = tag.movevc,				[ 003 ] = tag.movevci,
-			[ 004 ] = tag.only,					[ 005 ] = tag.only2,				[ 006 ] = tag.oscill,
-			[ 007 ] = tag.oscill2,				[ 008 ] = tag.glitter,				[ 009 ] = tag.glitterx,
-			[ 010 ] = tag.glittery,				[ 011 ] = tag.clip,					[ 012 ] = tag.clip2,
-			[ 013 ] = tag.iclip,				[ 014 ] = tag.iclip2,				[ 015 ] = tag.moveclip,
-			[ 016 ] = tag.moveiclip,			[ 017 ] = tag.moveclip2,			[ 018 ] = tag.moveiclip2,
-			[ 019 ] = tag.Rclip,				[ 020 ] = tag.Riclip,				[ 021 ] = tag.moveRclip,
-			[ 022 ] = tag.moveRiclip,			[ 023 ] = tag.Pclip,				[ 024 ] = tag.Piclip,
-			[ 025 ] = tag.movePclip,			[ 026 ] = tag.movePiclip,			[ 027 ] = tag.colorchange,
-			[ 028 ] = tag.colorchange1,			[ 029 ] = tag.colorchange2,			[ 030 ] = tag.colorchange3,
-			[ 031 ] = tag.colorchange4,			[ 032 ] = tag.cyclic,				[ 033 ] = tag.sec,
-			[ 034 ] = shape.Lmove,				[ 035 ] = shape.Lmove2,				[ 036 ] = shape.Pmove,
-			[ 037 ] = shape.Smove,				[ 038 ] = shape.Rmove,				[ 039 ] = shape.Rmove2,
-			[ 040 ] = shape.Rmove3,				[ 041 ] = shape.Rmove4,				[ 042 ] = shape.Omove,
-			[ 043 ] = shape.movevc,				[ 044 ] = shape.movevci,
+			[ 01 ] = tag.set,					[ 02 ] = tag.only,					[ 03 ] = tag.oscill,
+			[ 04 ] = tag.oscill2,				[ 05 ] = tag.glitter,				[ 06 ] = tag.clip,
+			[ 07 ] = tag.clip2,					[ 08 ] = tag.iclip,					[ 09 ] = tag.iclip2,
+			[ 10 ] = tag.moveclip,				[ 11 ] = tag.moveiclip,				[ 12 ] = tag.moveclip2,
+			[ 13 ] = tag.moveiclip2,			[ 14 ] = tag.Rclip,					[ 15 ] = tag.Riclip,
+			[ 16 ] = tag.moveRclip,				[ 17 ] = tag.moveRiclip,			[ 18 ] = tag.Pclip,
+			[ 19 ] = tag.Piclip,				[ 20 ] = tag.movePclip,				[ 21 ] = tag.movePiclip,
+			[ 22 ] = tag.cyclic,				[ 23 ] = tag.sec,					[ 24 ] = shape.Lmove,
+			[ 25 ] = shape.Lmove2,				[ 26 ] = shape.Pmove,				[ 27 ] = shape.Smove,
+			[ 28 ] = shape.Rmove,				[ 29 ] = shape.Rmove2,				[ 30 ] = shape.Rmove3,
+			[ 31 ] = shape.Rmove4,				[ 32 ] = shape.Omove,
 		}
 		for i = 1, #func_tag do
 			String = String:gsub( func_tag[ i ],
@@ -10343,50 +10253,34 @@
 		return String
 	end
 
-	function tag.to_err( String )
-		local error_tags_vsf = {
-			[ 1 ] = "(\\[%d]*c)(%b())",
-			[ 2 ] = "(\\%da)(%b())",
-			[ 3 ] = "(\\alpha)(%b())",
-		}
-		local error_tags_mod = {
-			[ 1 ] = "(\\%dvc)(%&[Hh]^*%x+%&)",
-			[ 2 ] = "(\\%dva)(%&[Hh]^*%x+%&)",
-		}
-		local error_func_vsf = {
-			[ 1 ] = color.vc_to_c,
-			[ 2 ] = alpha.va_to_a,
-			[ 3 ] = alpha.va_to_a,
-		}
-		local error_func_mod = {
-			[ 1 ] = color.c_to_vc,
-			[ 2 ] = alpha.a_to_va,
-		}
-		for i = 1, #error_tags_vsf do
-			String = String:gsub( error_tags_vsf[ i ],
-				function( Tag, Capture )
-					local num = 0
-					Capture, num = Capture:gsub( "(%&[Hh]^*%x+%&)", "%1" )
-					if num == 4 then
-						Capture = Capture:sub( 2, -2 )
-						return Tag .. error_func_vsf[ i ]( Capture )
-					end
-					return Tag .. Capture
-				end
-			)
-		end
-		for i = 1, #error_tags_mod do
-			String = String:gsub( error_tags_mod[ i ],
-				function( Tag, Capture )
-					return Tag .. error_func_mod[ i ]( Capture )
-				end
-			)
-		end
-		return String
-	end
-	
 	function tag.to_vsf( String, Is_Table )
-		local String = tag.to_err( String )
+		local function from_error( String )
+			local error_tags_vsf = {
+				[ 1 ] = "(\\[%d]*c)(%b())",
+				[ 2 ] = "(\\%da)(%b())",
+				[ 3 ] = "(\\alpha)(%b())",
+			}
+			local error_func_vsf = {
+				[ 1 ] = color.vc_to_c,
+				[ 2 ] = alpha.va_to_a,
+				[ 3 ] = alpha.va_to_a,
+			}
+			for i = 1, #error_tags_vsf do
+				String = String:gsub( error_tags_vsf[ i ],
+					function( Tag, Capture )
+						local num = 0
+						Capture, num = Capture:gsub( "(%&[Hh]^*%x+%&)", "%1" )
+						if num == 4 then
+							Capture = Capture:sub( 2, -2 )
+							return Tag .. error_func_vsf[ i ]( Capture )
+						end
+						return Tag .. Capture
+					end
+				)
+			end
+			return String
+		end
+		local String = from_error( String )
 		String = String:gsub( "(\\%dv[ac]^*)(%b())",
 			function( tag_mod, coloralpha_mod )
 				if coloralpha_mod:match( "%([&Hh ]*%x+[& ]*,[&Hh ]*%x+[& ]*,[&Hh ]*%x+[& ]*,[&Hh ]*%x+[& ]*%)" ) then
@@ -10452,123 +10346,6 @@
 		end --add: january 23rd 2019
 		-------------------------------------------------------------
 		return tag.coupling( String )
-	end
-	
-	function tag.to_mod( String, Is_Table )
-		local String = tag.to_err( String )
-		String = String:gsub( "(\\[%d]*[ac]^*)([&H]*%x+[&]*)",
-			function( tag_vsf, coloralpha_vsf )
-				tag_vsf = tag_vsf:gsub( "(\\[%d]*)([ac]^*)",
-					function( tag_num, tag_ac )
-						return tag_num .. "v" .. tag_ac
-					end
-				)
-				return tag_vsf .. math.format( "(%s,%s,%s,%s)", coloralpha_vsf )
-			end
-		)
-		String = String:gsub( "\\alpha([&H]*%x+[&]*)",
-			function( alpha_vsf )
-				local alpha1 = math.format( "\\1va(%s,%s,%s,%s)", alpha_vsf )
-				local alpha3 = math.format( "\\3va(%s,%s,%s,%s)", alpha_vsf )
-				local alpha4 = math.format( "\\4va(%s,%s,%s,%s)", alpha_vsf )
-				return alpha1 .. alpha3 .. alpha4
-			end
-		)
-		if Is_Table == nil then
-			String = String:gsub( "%b{}",
-				function( capture )
-					local in_capture = capture:sub( 2, -2 )
-					in_capture = in_capture:gsub( "%b{}",
-						function( capture2 )
-							return capture2:sub( 2, -2 )
-						end
-					)
-					return "{" .. in_capture .. "}"
-				end
-			)
-			:gsub( "%b{}",
-				function( capture )
-					local in_capture = capture:sub( 2, -2 )
-					in_capture = in_capture:gsub( "{", "" ):gsub( "}", "" )
-					return "{" .. in_capture .. "}"
-				end
-			)
-		end
-		String = String:gsub( "\\vc", "\\1vc" ):gsub( "}{", "" ):gsub( "{}", "" )
-		:gsub( "{{", "{" ):gsub( "}}", "}" ):gsub( "}|{", "}{" )
-		:gsub( "m %-?%d+[%.%d]* %-?%d+[%.%-%dlb ]*",
-			function( cap_shape )
-				cap_shape = cap_shape:gsub( "%-?%d+[%.%d]*",
-					function( cap_number )
-						cap_number = math.round( tonumber( cap_number ) )
-						return cap_number
-					end
-				)
-				return cap_shape
-			end --shape.size( shape.circle, 77.3 )
-		)
-		:gsub( "\\t[cdefimrswx%d%-%~]*%(", "\\t%(" )
-		:gsub( "\\\\", "\\" )
-		:gsub( "%-?%d+%.%d+e%-?[0]*%d+", 0 ) --add: december 08th 2018
-		--:gsub( "8%.882e%-018", "0.01" ) --Rc( -0.07, 0.07 )
-		:gsub( "\"(&H%x+&)\"", "%1" ):gsub( "'(&H%x+&)'", "%1" )
-		-- cambia el \\tag-0 por \\tag0 -----------------------------
-		if String:match( "\\[%d]*%a+%-0[%.%d]*" )
-			and String:match( "\\[%d]*%a+(%-0[%.%d]*)" ) == "-0" then
-			String = String:gsub( "(\\[%d]*%a+)(%-0[%.%d]*)",
-				function( Tag, Zero )
-					if Zero == "-0" then
-						return Tag .. "0"
-					end
-				end
-			)
-		end --add: january 23rd 2019
-		-------------------------------------------------------------
-		return tag.coupling( String )
-	end
-	
-	function tag.colorchange( Color_or_Table, dur )
-		local colors = { Color_or_Table }
-		if type( Color_or_Table ) == "table" then
-			colors = Color_or_Table
-		end
-		colors = color.from_error( colors )
-		local t1, tc = 0, "\\1c"
-		local t2 = dur or fx.dur
-		if type( dur ) == "table" then
-			t1 = dur[ 1 ]
-			t2 = dur[ 2 ]
-		end
-		local i, tagfx, durt = 1, "", math.round( (t2 - t1) / #colors, 2 )
-		while i <= #colors do
-			if color.assF( colors[ i ] ):len( ) >= 15 then
-				tc = "\\1vc"
-			end
-			tagfx = tagfx .. format( "\\t(%s,%s,%s)",
-				t1 + durt * (i - 1), t1 + durt * i, tc .. color.assF( colors[ i ] )
-			)
-			i = i + 1
-		end
-		return tagfx
-	end
-	
-	function tag.colorchange1( Color_or_Table, dur )
-		return tag.colorchange( Color_or_Table, dur )
-	end
-	
-	function tag.colorchange2( Color_or_Table, dur )
-		local  color_chng2 = tag.colorchange( Color_or_Table, dur ):gsub( "\\1", "\\2" )
-		return color_chng2
-	end
-	
-	function tag.colorchange3( Color_or_Table, dur )
-		local  color_chng3 = tag.colorchange( Color_or_Table, dur ):gsub( "\\1", "\\3" )
-		return color_chng3
-	end
-	
-	function tag.colorchange4( Color_or_Table, dur )
-		local  color_chng4 = tag.colorchange( Color_or_Table, dur ):gsub( "\\1", "\\4" )
-		return color_chng4
 	end
 	
 	function tag.ipol( Ipol_i, ... )
@@ -10842,289 +10619,6 @@
 		return String
 	end
 
-	function tag.adjust( t_adjust, adj_accel )
-		local adj_cap1, adj_cap2, adj_cap3, adj_cap4 = { }, { }, { }, { }
-		for c in t_adjust:gmatch( "\\t%(%d+[%.%d]*%,%d+[%.%d]*" ) do
-			table.insert( adj_cap1, c )
-		end
-		for i = 1, #adj_cap1 do
-			for c in adj_cap1[ i ]:gmatch( "%d+[%.%d]*" ) do
-				table.insert( adj_cap2, c )
-			end
-		end
-		local max_time = adj_cap2[ #adj_cap2 ]
-		table.remove( adj_cap2, #adj_cap2 )
-		local adj_accel = adj_accel or 1
-		for i = 1, (#adj_cap2 + 1) / 2 do
-			adj_cap3[ i ] = adj_cap2[ 2 * i - 1 ]
-		end
-		table.insert( adj_cap3, max_time )
-		if #adj_cap3 > 1 then
-			adj_k = 1
-			for i = 1, #adj_cap3 do
-				adj_cap4[ i ] = adj_cap3[ 1 ] + (adj_cap3[ #adj_cap3 ] - adj_cap3[ 1 ]) * ((i - 1) / (#adj_cap3 - 1)) ^ adj_accel
-			end
-			t_adjust = t_adjust:gsub( "\\t%((%d+[%.%d]*)%,(%d+[%.%d]*)", 
-				function( A, B )
-					local adj_tag = format( "\\t(%s,%s",
-						math.round( adj_cap4[ adj_k ], 2 ), math.round( adj_cap4[ adj_k + 1 ], 2 )
-					)
-					adj_k = adj_k + 1
-					return adj_tag
-				end
-			)
-		end
-		return t_adjust
-	end
-	
-	function tag.val( val_tags )
-		tags_vals = {
-			---------------------------------------------------------------------------------------------------------------------
-			[ 01 ] = "\\i(%d+)",					[ 02 ] = "\\xshad(%-?%d+[%.%d]*)",		[ 03 ] = "\\fsp(%-?%d+[%.%d]*)",
-			[ 04 ] = "\\p(%d+)",					[ 05 ] = "\\b(%d+)",					[ 06 ] = "\\yshad(%-?%d+[%.%d]*)",
-			[ 07 ] = "\\fr(%-?%d+[%.%d]*)",			[ 08 ] = "\\an(%d+)",					[ 09 ] = "\\u(%d+)",
-			[ 10 ] = "\\be(%d+[%.%d]*)",			[ 11 ] = "\\frx(%-?%d+[%.%d]*)",		[ 12 ] = "\\a(%d+)",
-			[ 13 ] = "\\s(%d+)",					[ 14 ] = "\\blur(%d+[%.%d]*)",	 		[ 15 ] = "\\fry(%-?%d+[%.%d]*)",
-			[ 16 ] = "\\k(%d+)",					[ 17 ] = "\\bord(%d+[%.%d]*)",			[ 18 ] = "\\frz(%-?%d+[%.%d]*)",
-			[ 19 ] = "\\fax(%-?%d+[%.%d]*)",		[ 20 ] = "\\K(%d+)",					[ 21 ] = "\\xbord(%d+[%.%d]*)",
-			[ 22 ] = "\\fs(%d+[%.%d]*)",			[ 23 ] = "\\fay(%-?%d+[%.%d]*)",		[ 24 ] = "\\kf(%d+)",
-			[ 25 ] = "\\ybord(%d+[%.%d]*)",			[ 26 ] = "\\fscx(%d+[%.%d]*)",			[ 27 ] = "\\fe(%d+[%.%d]*)",
-			[ 28 ] = "\\ko(%d+)",					[ 29 ] = "\\shad(%-?%d+[%.%d]*)",		[ 30 ] = "\\fscy(%d+[%.%d]*)",
-			[ 31 ] = "\\q(%d+)",					[ 32 ] = "\\fsc(%d+[%.%d]*)",			[ 33 ] = "\\fsvp(%-?%d+[%.%d]*)",
-			[ 34 ] = "\\frs(%-?%d+[%.%d]*)",		[ 35 ] = "\\rnd(%-?%d+[%.%d]*)",		[ 36 ] = "\\rndx(%-?%d+[%.%d]*)",
-			[ 37 ] = "\\rndy(%-?%d+[%.%d]*)",		[ 38 ] = "\\rndz(%-?%d+[%.%d]*)",		[ 39 ] = "\\z(%-?%d+[%.%d]*)",
-			---------------------------------------------------------------------------------------------------------------------
-			[ 40 ] = "\\fn(%S+[ %S+]*)",			[ 41 ] = "\\r",							[ 42 ] = "\\n",
-			[ 43 ] = "\\N",							[ 44 ] = "\\c(&H[%x]*&?)",				[ 45 ] = "\\alpha(&H[%x]*&?)",
-			[ 46 ] = "\\1c(&H[%x]*&?)",				[ 47 ] = "\\1a(&H[%x]*&?)",				[ 48 ] = "\\1vc%b()",
-			[ 49 ] = "\\1va%b()",					[ 50 ] = "\\2c(&H[%x]*&?)",				[ 51 ] = "\\2a(&H[%x]*&?)",
-			[ 52 ] = "\\2vc%b()",					[ 53 ] = "\\2va%b()",					[ 54 ] = "\\3c(&H[%x]*&?)",
-			[ 55 ] = "\\3a(&H[%x]*&?)",				[ 56 ] = "\\3vc%b()",					[ 57 ] = "\\3va%b()",
-			[ 58 ] = "\\4c(&H[%x]*&?)",				[ 59 ] = "\\4a(&H[%x]*&?)",				[ 60 ] = "\\4vc%b()",
-			[ 61 ] = "\\4va%b()",					[ 62 ] = "\\1img%b()",					[ 63 ] = "\\2img%b()",
-			[ 64 ] = "\\3img%b()",					[ 65 ] = "\\4img%b()",
-			---------------------------------------------------------------------------------------------------------------------
-			[ 66 ] = "\\pos%b()",					[ 67 ] = "\\move%b()",					[ 68 ] = "\\moves3%b()",
-			[ 69 ] = "\\moves4%b()",				[ 70 ] = "\\jitter%b()",				[ 71 ] = "\\mover%b()",
-			[ 72 ] = "\\org%b()",					[ 73 ] = "\\distort%b()",				[ 74 ] = "\\fad%b()",
-			[ 75 ] = "\\fade%b()",					[ 76 ] = "\\movevc%b()",				[ 77 ] = "\\clip%b()",
-			[ 78 ] = "\\iclip%b()",					[ 79 ] = "\\t%b()",
-			---------------------------------------------------------------------------------------------------------------------
-		}
-		tags_tags = {
-			---------------------------------------------------------------------------------------------------------------------
-			[ 01 ] = "i",		[ 02 ] = "xshad",	[ 03 ] = "fsp",		[ 04 ] = "p",		[ 05 ] = "b",		[ 06 ] = "yshad",
-			[ 07 ] = "fr",		[ 08 ] = "an",		[ 09 ] = "u",		[ 10 ] = "be",		[ 11 ] = "frx",		[ 12 ] = "a",
-			[ 13 ] = "s",		[ 14 ] = "blur",	[ 15 ] = "fry",		[ 16 ] = "k",		[ 17 ] = "bord",	[ 18 ] = "frz",
-			[ 19 ] = "fax",		[ 20 ] = "K",		[ 21 ] = "xbord",	[ 22 ] = "fs",		[ 23 ] = "fay",		[ 24 ] = "kf",
-			[ 25 ] = "ybord",	[ 26 ] = "fscx",	[ 27 ] = "fe",		[ 28 ] = "ko",		[ 29 ] = "shad",	[ 30 ] = "fscy",
-			[ 31 ] = "q",		[ 32 ] = "fsc",		[ 33 ] = "fsvp",	[ 34 ] = "frs",		[ 35 ] = "rnd",		[ 36 ] = "rndx",
-			[ 37 ] = "rndy",	[ 38 ] = "rndz",	[ 39 ] = "z",
-			---------------------------------------------------------------------------------------------------------------------
-			[ 40 ] = "fn",		[ 41 ] = "r",		[ 42 ] = "n",		[ 43 ] = "N",		[ 44 ] = "c",		[ 45 ] = "alpha",
-			[ 46 ] = "1c",		[ 47 ] = "1a",		[ 48 ] = "1vc",		[ 49 ] = "1va",		[ 50 ] = "2c",		[ 51 ] = "2a",
-			[ 52 ] = "2vc",		[ 53 ] = "2va",		[ 54 ] = "3c",		[ 55 ] = "3a",		[ 56 ] = "3vc",		[ 57 ] = "3va",
-			[ 58 ] = "4c",		[ 59 ] = "4a",		[ 60 ] = "4vc",		[ 61 ] = "4va",		[ 62 ] = "1img",	[ 63 ] = "2img",
-			[ 64 ] = "3img",	[ 65 ] = "4img",
-			---------------------------------------------------------------------------------------------------------------------
-			[ 66 ] = "pos",		[ 67 ] = "move",	[ 68 ] = "moves3",	[ 69 ] = "moves4",	[ 70 ] = "jitter",	[ 71 ] = "mover",
-			[ 72 ] = "org",		[ 73 ] = "distort",	[ 74 ] = "fad",		[ 75 ] = "fade",	[ 76 ] = "movevc",	[ 77 ] = "clip",
-			[ 78 ] = "iclip",	[ 79 ] = "t",
-			---------------------------------------------------------------------------------------------------------------------
-		}
-		cap = { }
-		for i = 1, #tags_vals do
-			cap[ i ] = { }
-			for c in val_tags:gmatch( tags_vals[ i ] ) do
-				if c:match( "%-?%d+[%.%d]*" )
-					and c:gsub( "%-?%d+[%.%d]*", "" ) == "" then
-					c = tonumber( c )
-				end
-				table.insert( cap[ i ], c )
-			end
-		end
-		cap2 = table.duplicate( cap )
-		tag2 = { }
-		for k, v in ipairs( cap2 ) do
-			new_k = tags_tags[ k ]
-			tag2[ new_k ] = v
-		end
-		for i = 1, 65 do
-			new_i = tags_tags[ i ]
-			tag2[ new_i ] = tag2[ new_i ][ 1 ]
-		end
-		for i = 66, 76 do
-			new_i = tags_tags[ i ]
-			tag2[ new_i ] = { }
-			if cap2[ i ][ 1 ] then
-				for c in cap2[ i ][ 1 ]:gmatch( "%-?%d+[%.%d]*" ) do
-					table.insert( tag2[ new_i ], tonumber( c ) )
-				end
-			end
-		end
-		-- \pos(x,y) -------------------------
-		tag2.pos.x = tag2.pos[ 1 ] or fx.move_x1
-		tag2.pos.y = tag2.pos[ 2 ] or fx.move_y1
-		-- \move(x1,y1,x2,y2,t1,t2) -------------
-		tag2.move.x1 = tag2.move[ 1 ] or fx.move_x1
-		tag2.move.x2 = tag2.move[ 3 ] or fx.move_x2
-		tag2.move.y1 = tag2.move[ 2 ] or fx.move_y1
-		tag2.move.y2 = tag2.move[ 4 ] or fx.move_y2
-		tag2.move.t1 = tag2.move[ 5 ] or fx.movet_i
-		tag2.move.t2 = tag2.move[ 6 ] or fx.movet_f
-		-- \moves3(x1,y1,x2,y2,x3,y3,t1,t2) ---------
-		tag2.moves3.x1 = tag2.moves3[ 1 ] or fx.move_x1
-		tag2.moves3.x2 = tag2.moves3[ 3 ] or fx.move_x2
-		tag2.moves3.x3 = tag2.moves3[ 5 ] or fx.move_x3
-		tag2.moves3.y1 = tag2.moves3[ 2 ] or fx.move_y1
-		tag2.moves3.y2 = tag2.moves3[ 4 ] or fx.move_y2
-		tag2.moves3.y3 = tag2.moves3[ 6 ] or fx.move_y3
-		tag2.moves3.t1 = tag2.moves3[ 7 ] or fx.movet_i
-		tag2.moves3.t2 = tag2.moves3[ 8 ] or fx.movet_f
-		-- \moves4(x1,y1,x2,y2,x3,y3,x4,y4,t1,t2) ---
-		tag2.moves4.x1 = tag2.moves4[ 1 ] or fx.move_x1
-		tag2.moves4.x2 = tag2.moves4[ 3 ] or fx.move_x2
-		tag2.moves4.x3 = tag2.moves4[ 5 ] or fx.move_x3
-		tag2.moves4.x4 = tag2.moves4[ 7 ] or fx.move_x4
-		tag2.moves4.y1 = tag2.moves4[ 2 ] or fx.move_y1
-		tag2.moves4.y2 = tag2.moves4[ 4 ] or fx.move_y2
-		tag2.moves4.y3 = tag2.moves4[ 6 ] or fx.move_y3
-		tag2.moves4.y4 = tag2.moves4[ 8 ] or fx.move_y4
-		tag2.moves4.t1 = tag2.moves4[ 9 ] or fx.movet_i
-		tag2.moves4.t2 = tag2.moves4[ 10 ] or fx.movet_f
-		-- \jitter(x1,y1,x2,y2,x3,y3,t1,t2) ---------
-		tag2.jitter.x1 = tag2.jitter[ 1 ] or 0
-		tag2.jitter.x2 = tag2.jitter[ 3 ] or 0
-		tag2.jitter.y1 = tag2.jitter[ 2 ] or 0
-		tag2.jitter.y2 = tag2.jitter[ 4 ] or 0
-		tag2.jitter.t1 = tag2.jitter[ 5 ] or 0
-		tag2.jitter.t2 = tag2.jitter[ 6 ] or 0
-		-- \mover(x1,y1,x2,y2,a1,a2,r1,r2,t1,t2) --
-		tag2.mover.x1 = tag2.mover[ 1 ] or fx.move_x1
-		tag2.mover.x2 = tag2.mover[ 3 ] or fx.move_x2
-		tag2.mover.y1 = tag2.mover[ 2 ] or fx.move_y1
-		tag2.mover.y2 = tag2.mover[ 4 ] or fx.move_y2
-		tag2.mover.a1 = tag2.mover[ 5 ] or fx.angle1
-		tag2.mover.a2 = tag2.mover[ 6 ] or fx.angle2
-		tag2.mover.r1 = tag2.mover[ 7 ] or fx.radius1
-		tag2.mover.r2 = tag2.mover[ 8 ] or fx.radius1
-		tag2.mover.t1 = tag2.mover[ 9 ] or fx.movet_i
-		tag2.mover.t2 = tag2.mover[ 10 ] or fx.movet_f
-		-- \org(x,y) -------------------------------
-		tag2.org.x = tag2.org[ 1 ] or fx.move_x1
-		tag2.org.y = tag2.org[ 2 ] or fx.move_y1
-		-- \distort(x1,y1,x2,y2,x3,y3) -------
-		tag2.distort.x1 = tag2.distort[ 1 ] or 0
-		tag2.distort.x2 = tag2.distort[ 3 ] or 0
-		tag2.distort.x3 = tag2.distort[ 5 ] or 0
-		tag2.distort.y1 = tag2.distort[ 2 ] or 0
-		tag2.distort.y2 = tag2.distort[ 4 ] or 0
-		tag2.distort.y3 = tag2.distort[ 6 ] or 0
-		-- \fad(a1,a2) -----------------------
-		tag2.fad.a1 = tag2.fad[ 1 ] or 0
-		tag2.fad.a2 = tag2.fad[ 2 ] or 0
-		-- \fade(a1,a2,a3,t1,t2,t3,t4) --
-		tag2.fade.a1 = tag2.fade[ 1 ] or 0
-		tag2.fade.a2 = tag2.fade[ 2 ] or 0
-		tag2.fade.a3 = tag2.fade[ 3 ] or 0
-		tag2.fade.t1 = tag2.fade[ 4 ] or 0
-		tag2.fade.t2 = tag2.fade[ 5 ] or 0
-		tag2.fade.t3 = tag2.fade[ 6 ] or 0
-		tag2.fade.t4 = tag2.fade[ 7 ] or 0
-		-- \movevc(x1,y1,x2,y2,t1,t2) ---------------
-		tag2.movevc.x1 = tag2.movevc[ 1 ] or fx.move_x1
-		tag2.movevc.x2 = tag2.movevc[ 3 ] or fx.move_x2
-		tag2.movevc.y1 = tag2.movevc[ 2 ] or fx.move_y1
-		tag2.movevc.y2 = tag2.movevc[ 4 ] or fx.move_y2
-		tag2.movevc.t1 = tag2.movevc[ 5 ] or fx.movet_i
-		tag2.movevc.t2 = tag2.movevc[ 6 ] or fx.movet_f
-		-- \clip(x1,y1,x2,y2) or \clip( shape ) -----
-		if cap2[ 77 ][ 1 ] then
-			tag2.clip = { }
-			if cap2[ 77 ][ 1 ]:match( "m %-?%d+[%.%d]*" ) then
-				tag2.clip.shape = cap2[ 77 ][ 1 ]:match( "[mlb]* %-?%d+[%.%d]* [%-%.%d mlb]*" )
-				tag2.clip.x1 = fx.move_x1
-				tag2.clip.x2 = fx.move_x2
-				tag2.clip.y1 = fx.move_y1
-				tag2.clip.y2 = fx.move_y2
-			else
-				tag2.clip.shape = ""
-				clip_parameters = { }
-				for c in cap2[ 77 ][ 1 ]:gmatch( "%-?%d+[%.%d]*" ) do
-					table.insert( clip_parameters, c )
-				end
-				tag2.clip.x1 = clip_parameters[ 1 ]
-				tag2.clip.x2 = clip_parameters[ 3 ]
-				tag2.clip.y1 = clip_parameters[ 2 ]
-				tag2.clip.y2 = clip_parameters[ 4 ]
-			end
-		else
-			tag2.clip.x1 = fx.move_x1
-			tag2.clip.x2 = fx.move_x2
-			tag2.clip.y1 = fx.move_y1
-			tag2.clip.y2 = fx.move_y2
-		end
-		-- \iclip(x1,y1,x2,y2) or \iclip( shape ) -----
-		if cap2[ 78 ][ 1 ] then
-			tag2.iclip = { }
-			if cap2[ 78 ][ 1 ]:match( "m %-?%d+[%.%d]*" ) then
-				tag2.iclip.shape = cap2[ 77 ][ 1 ]:match( "[mlb]* %-?%d+[%.%d]* [%-%.%d mlb]*" )
-				tag2.iclip.x1 = fx.move_x1
-				tag2.iclip.x2 = fx.move_x2
-				tag2.iclip.y1 = fx.move_y1
-				tag2.iclip.y2 = fx.move_y2
-			else
-				tag2.iclip.shape = shape.ASSDraw3( cap2[ 78 ][ 1 ] )
-				iclip_parameters = { }
-				for c in cap2[ 77 ][ 1 ]:gmatch( "%-?%d+[%.%d]*" ) do
-					table.insert( iclip_parameters, c )
-				end
-				tag2.iclip.x1 = iclip_parameters[ 1 ]
-				tag2.iclip.x2 = iclip_parameters[ 3 ]
-				tag2.iclip.y1 = iclip_parameters[ 2 ]
-				tag2.iclip.y2 = iclip_parameters[ 4 ]
-			end
-		else
-			tag2.iclip.x1 = fx.move_x1
-			tag2.iclip.x2 = fx.move_x2
-			tag2.iclip.y1 = fx.move_y1
-			tag2.iclip.y2 = fx.move_y2
-		end
-		-- \t(\tags) or \t(a,\tags) or \t(t1,t2,a,\tags)--
-		if cap2[ 79 ][ 1 ] then
-			if cap2[ 79 ][ 1 ]:match( "%b(\\" ) then
-				t_parameters = { }
-				for c in cap2[ 79 ][ 1 ]:match( "%b(\\" ):gmatch( "%-?%d+[%.%d]" ) do
-					table.insert( t_parameters, c )
-				end
-				if #t_parameters == 1 then
-					tag2.t.t1 = fx.movet_i
-					tag2.t.t2 = fx.movet_f
-					tag2.t.a  = t_parameters[ 1 ]
-				else
-					tag2.t.t1 = t_parameters[ 1 ]
-					tag2.t.t2 = t_parameters[ 2 ]
-					tag2.t.a  = t_parameters[ 3 ] or 1
-				end
-			end
-		else
-			tag2.t.t1 = fx.movet_i
-			tag2.t.t2 = fx.movet_f
-			tag2.t.a  = 1
-		end
-		return val_tags
-	end
-	
-	function tag.num( string_values, special_tag )
-		local tagnum_val = { }
-		local tagnum_str = string_values or ""
-		local tagnum_stg = special_tag or ""
-		for c in tagnum_str:gmatch( tagnum_stg .. "%-?%d+[%.%d]*" ) do
-			table.insert( tagnum_val, tonumber( c ) )
-		end
-		return tagnum_val
-	end
-	
 	function tag.module( ... )
 		local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
 		for i = 1, #txt_tag do
@@ -11507,16 +11001,27 @@
 	--------------------------------------------------------------------------------------------------
 	-- Librería de funciones "color" -----------------------------------------------------------------
 	function color.ass( html_color )
+		--convierte un color de formato HTML a formato .ass
 		if type( html_color ) == "function" then
 			html_color = html_color( )
 		end
 		local html_color = html_color or "#FFFFFF"
-		effector.print_error( html_color, "color", "color.ass", 1 )
-		local r_ass, g_ass, b_ass = html_color:match( "(%x%x)(%x%x)(%x%x)" )
-		return color.val2ass( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
+		local colorfx
+		if type( html_color ) == "table" then
+			colorfx = { }
+			for i = 1, #html_color do
+				colorfx[ i ] = color.ass( html_color[ i ] )
+			end --recursividad: june 03rd 2020
+		else --color.ass( { "#FFFFFF", "#FF0000" } )
+			effector.print_error( html_color, "color", "color.ass", 1 )
+			local r_ass, g_ass, b_ass = html_color:match( "(%x%x)(%x%x)(%x%x)" )
+			colorfx = color.val2ass( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
+		end
+		return colorfx
 	end
 	
 	function color.ass2( Rnum, Gnum, Bnum )
+		--convierte tres números en base decimal en un color en formato .ass
 		if type( Rnum ) == "function" then
 			Rnum = Rnum( )
 		end
@@ -11541,9 +11046,10 @@
 		Gnum = math.i( Gnum, 0, 255 )[ "A-->B-->A" ]
 		Bnum = math.i( Bnum, 0, 255 )[ "A-->B-->A" ]
 		return color.val2ass( Rnum, Gnum, Bnum )
-	end --"\\c" .. color.ass2( 255, 0, 0 )
+	end --"\\1c" .. color.ass2( 255, 0, 0 )
 	
 	function color.ass3( Hnum, Snum, Vnum )
+		--convierte tres números (H, S, V) en un color en formato.ass
 		if type( Hnum ) == "function" then
 			Hnum = Hnum( )
 		end
@@ -11568,16 +11074,17 @@
 		Snum = (100 * Snum) % 101
 		Vnum = (100 * Vnum) % 101
 		return color.HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 )
-	end --"\\c" .. color.ass3( 15 * val_i, 1, 1 )
+	end --"\\1c" .. color.ass3( 15 * val_i, 1, 1 )
 	
-	function color.rgb( Color_or_table, Matrix13, Multi )
-		if type( Color_or_table ) == "function" then
-			Color_or_table = Color_or_table( )
+	function color.rgb( Color, Matrix13, Multi )
+		--suma o multiplica una matriz 1x3 a los tres valores RGB de un color
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
 		if type( Matrix13 ) == "function" then
 			Matrix13 = Matrix13( )
 		end
-		local colorass = Color_or_table or text.color1
+		local colorass = Color or text.color1
 		local matrixsm = Matrix13 or { 0, 0, 0 }
 		effector.print_error( colorass, "color", "color.rgb", 1 )
 		effector.print_error( matrixsm, "table", "color.rgb", 2 )
@@ -11601,16 +11108,17 @@
 			return color.ass2( rgb_table[ 1 ] * matrixsm[ 1 ], rgb_table[ 2 ] * matrixsm[ 2 ], rgb_table[ 3 ] * matrixsm[ 3 ] )
 		end
 		return color.ass2( unpack( math.matrix_sum( rgb_table, Matrix13 ) ) )
-	end --"\\c" .. color.rgb( nil, { 0, 50 * syl.i, 23 * syl.i } )
+	end --"\\1c" .. color.rgb( nil, { 0, 50 * syl.i, 23 * syl.i } )
 	
-	function color.hsv( Color_or_table, Matrix13, Multi )
-		if type( Color_or_table ) == "function" then
-			Color_or_table = Color_or_table( )
+	function color.hsv( Color, Matrix13, Multi )
+		--suma o multiplica una matriz 1x3 a los tres valores HSV de un color
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
 		if type( Matrix13 ) == "function" then
 			Matrix13 = Matrix13( )
 		end
-		local colorass = Color_or_table or text.color1
+		local colorass = Color or text.color1
 		local matrixsm = Matrix13 or { 0, 0, 0 }
 		effector.print_error( colorass, "color", "color.hsv", 1 )
 		effector.print_error( matrixsm, "table", "color.hsv", 2 )
@@ -11634,17 +11142,18 @@
 			return color.ass3( hsv_table[ 1 ] * matrixsm[ 1 ], hsv_table[ 2 ] * matrixsm[ 2 ], hsv_table[ 3 ] * matrixsm[ 3 ] )
 		end
 		return color.ass3( unpack( math.matrix_sum( hsv_table, Matrix13 ) ) )
-	end --"\\c" .. color.hsv( nil, { 17 * val_i, 1, 0 } )
+	end --"\\1c" .. color.hsv( nil, { 17 * val_i, 1, 0 } )
 	
-	function color.assF( color_or_table )
-		if type( color_or_table ) == "function" then
-			color_or_table = color_or_table( )
+	function color.assF( Color )
+		--le da formato .ass al color
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local color_or_table = color_or_table or text.color1
-		effector.print_error( color_or_table, "color", "color.assF", 1 )
-		local cF, tcF = { color_or_table }, { }
-		if type( color_or_table ) == "table" then
-			cF = color_or_table
+		local Color = Color or text.color1
+		effector.print_error( Color, "color", "color.assF", 1 )
+		local cF, tcF = { Color }, { }
+		if type( Color ) == "table" then
+			cF = Color
 		end
 		for i = 1, #cF do
 			if cF[ i ]:len( ) < 15 then
@@ -11665,15 +11174,16 @@
 		return cF
 	end
 	
-	function color.to_RGB( color_or_table )
-		if type( color_or_table ) == "function" then
-			color_or_table = color_or_table( )
+	function color.to_RGB( Color )
+		--retorna una tabla con los valores RGB del color ingresado
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local color_or_table = color.from_error( color_or_table or text.color1 )
-		effector.print_error( color_or_table, "color", "color.to_RGB", 1 )
-		local C_ass, RGB_table, _c = { color_or_table }, { }, color.vc_to_c
-		if type( color_or_table ) == "table" then
-			C_ass = color_or_table
+		local Color = color.from_error( Color or text.color1 )
+		effector.print_error( Color, "color", "color.to_RGB", 1 )
+		local C_ass, RGB_table, _c = { Color }, { }, color.vc_to_c
+		if type( Color ) == "table" then
+			C_ass = Color
 		end
 		for i = 1, #C_ass do
 			local b_RGB, g_RGB, r_RGB = _c( C_ass[ i ] ):match( "(%x%x)(%x%x)(%x%x)" )
@@ -11685,15 +11195,16 @@
 		return RGB_table
 	end
 	
-	function color.to_HSV( color_or_table )
-		if type( color_or_table ) == "function" then
-			color_or_table = color_or_table( )
+	function color.to_HSV( Color )
+		--retorna una tabla con los valores HSV del color ingresado
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local color_or_table = color.from_error( color_or_table or text.color1 )
-		effector.print_error( color_or_table, "color", "color.to_HSV", 1 )
-		local c_ass, HSV_table, H, S, V, Cmin, Cmax, Dt = { color_or_table }, { }, 0, 0, 0, 0, 1, 1
-		if type( color_or_table ) == "table" then
-			c_ass = color_or_table
+		local Color = color.from_error( Color or text.color1 )
+		effector.print_error( Color, "color", "color.to_HSV", 1 )
+		local c_ass, HSV_table, H, S, V, Cmin, Cmax, Dt = { Color }, { }, 0, 0, 0, 0, 1, 1
+		if type( Color ) == "table" then
+			c_ass = Color
 		end
 		for i = 1, #c_ass do
 			local Red, Green, Blue = unpack( color.to_RGB( c_ass[ i ] ) )
@@ -11717,15 +11228,16 @@
 		return HSV_table
 	end
 	
-	function color.vc( color_or_table )
-		if type( color_or_table ) == "function" then
-			color_or_table = color_or_table( )
+	function color.vc( Color )
+		--convierte el color en formato vsfMOD
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local color_or_table = color.from_error( color_or_table or text.color1 )
-		effector.print_error( color_or_table, "color", "color.vc", 1 )
-		local vc, cvc_t = { color_or_table }, { }
-		if type( color_or_table ) == "table" then
-			vc = color_or_table
+		local Color = color.from_error( Color or text.color1 )
+		effector.print_error( Color, "color", "color.vc", 1 )
+		local vc, cvc_t = { Color }, { }
+		if type( Color ) == "table" then
+			vc = Color
 		end
 		for i = 1, #vc do
 			if vc[ i ]:len( ) < 15 then
@@ -11741,20 +11253,22 @@
 	end
 	
 	function color.r( )
+		--genera un color random
 		return color.HSV_to_RGB( Rc( 360 ), Rc( 0, 1 ), Rc( 0, 1 ) )
 	end
 
-	function color.rc( colorRC, ... )
-		if type( colorRC ) == "function" then
-			colorRC = colorRC( )
+	function color.rc( Color, ... )
+		--genera un color random a partir de un color base y cualesquieras otros que se ingresen
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local colorRC = color.from_error( colorRC or text.color1 )
-		effector.print_error( colorRC, "color", "color.rc", 1 )
+		local Color = color.from_error( Color or text.color1 )
+		effector.print_error( Color, "color", "color.rc", 1 )
 		local RCtable, i_c, _c = { }, color.ipolfx, color.vc_to_c
-		local RCcolor = { colorRC }
+		local RCcolor = { Color }
 		local RCmask = color.from_error( ... or { "&H6E6E6E&", "&H000000&" } )
-		if type( colorRC ) == "table" then
-			RCcolor = colorRC
+		if type( Color ) == "table" then
+			RCcolor = Color
 		end
 		if type( RCmask ) ~= "table" then
 			RCmask = { RCmask }
@@ -11772,111 +11286,15 @@
 		return RCtable
 	end
 	
-	function color.rvc( colorRVC, ... )
-		if type( colorRVC ) == "function" then
-			colorRVC = colorRVC( )
+	function color.vc_to_c( Color )
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local colorRVC = color.from_error( colorRVC or text.color1 )
-		effector.print_error( colorRVC, "color", "color.rvc", 1 )
-		local RVCtable, RVCcolor = { }, { colorRVC }
-		if type( colorRVC ) == "table" then
-			RVCcolor = colorRVC
-		end
-		for i = 1, #RVCcolor do
-			RVCtable[ i ] = format( "(%s,%s,%s,%s)",
-				color.rc( RVCcolor[ i ], ... ), color.rc( RVCcolor[ i ], ... ),
-				color.rc( RVCcolor[ i ], ... ), color.rc( RVCcolor[ i ], ... )
-			)
-		end
-		if #RVCcolor == 1 then
-			return RVCtable[ 1 ]
-		end
-		return RVCtable
-	end
-	
-	function color.gradientv( ColorTop_or_table, ColorBottom_or_table )
-		if type( ColorTop_or_table ) == "function" then
-			ColorTop_or_table = ColorTop_or_table( )
-		end
-		if type( ColorBottom_or_table ) == "function" then
-			ColorBottom_or_table = ColorBottom_or_table( )
-		end
-		local ColorBottom_or_table = color.from_error( ColorBottom_or_table or text.color2 )
-		local ColorTop_or_table = color.from_error( ColorTop_or_table or text.color1 )
-		effector.print_error( ColorTop_or_table, "color", "color.gradientv", 1 )
-		effector.print_error( ColorBottom_or_table, "color", "color.gradientv", 2 )
-		local Cv_table, _c = { }, color.vc_to_c
-		local CT, CB = { ColorTop_or_table }, { ColorBottom_or_table }
-		if type( ColorTop_or_table ) == "table" then
-			CT = ColorTop_or_table
-		end
-		if type( ColorBottom_or_table ) == "table" then
-			CB = ColorBottom_or_table
-		end
-		for i = 1, #CT do
-			for k = 1, #CB do
-				table.insert( Cv_table,
-					format( "(%s,%s,%s,%s)",
-						_c( CT[ i ] ), _c( CT[ i ] ), _c( CB[ k ] ), _c( CB[ k ] )
-					)
-				)
-			end
-		end
-		if #Cv_table == 1 then
-			return Cv_table[ 1 ]
-		end
-		return Cv_table
-	end
-	
-	function color.gradienth( ColorLeft_or_table, ColorRight_or_table, algorithm )
-		if type( ColorLeft_or_table ) == "function" then
-			ColorLeft_or_table = ColorLeft_or_table( )
-		end
-		if type( ColorRight_or_table ) == "function" then
-			ColorRight_or_table = ColorRight_or_table( )
-		end
-		if type( algorithm ) == "function" then
-			algorithm = algorithm( )
-		end
-		--example algorithm: "1 - abs(2*%s - 1)"
-		local Al = algorithm or "%s"
-		local ColorRight_or_table = color.from_error( ColorRight_or_table or text.color2 )
-		local ColorLeft_or_table = color.from_error( ColorLeft_or_table or text.color1 )
-		effector.print_error( ColorLeft_or_table, "color", "color.gradienth", 1 )
-		effector.print_error( ColorRight_or_table, "color", "color.gradienth", 2 )
-		effector.print_error( Al, "string", "color.gradienth", 3 )
-		local Ch_table, _c, i_c = { }, color.vc_to_c, color.ipolfx
-		local CL, CR = { ColorLeft_or_table }, { ColorRight_or_table }
-		local v1 = math.format( Al, 2 * (val_i - 1) / (2 * val_n - 1) )
-		local v2 = math.format( Al, (2 * val_i - 1) / (2 * val_n - 1) )
-		if type( ColorLeft_or_table ) == "table" then
-			CL = ColorLeft_or_table
-		end
-		if type( ColorRight_or_table ) == "table" then
-			CR = ColorRight_or_table
-		end
-		for i = 1, #CL do
-			for k = 1, #CR do
-				Cx1 = i_c( v1, _c( CL[ i ] ), _c( CR[ k ] ) )
-				Cx2 = i_c( v2, _c( CL[ i ] ), _c( CR[ k ] ) )
-				table.insert( Ch_table, format( "(%s,%s,%s,%s)", Cx1, Cx2, Cx1, Cx2 ) )
-			end
-		end
-		if #Ch_table == 1 then
-			return Ch_table[ 1 ]
-		end
-		return Ch_table
-	end
-	
-	function color.vc_to_c( colorvc_or_table )
-		if type( colorvc_or_table ) == "function" then
-			colorvc_or_table = colorvc_or_table( )
-		end
-		local colorvc_or_table = color.from_error( colorvc_or_table or text.color1 )
-		effector.print_error( colorvc_or_table, "color", "color.vc_to_c", 1 )
-		local colorvc, VC2Ccolors, i_c = { colorvc_or_table }, { }, color.ipolfx
-		if type( colorvc_or_table ) == "table" then
-			colorvc = colorvc_or_table
+		local Color = color.from_error( Color or text.color1 )
+		effector.print_error( Color, "color", "color.vc_to_c", 1 )
+		local colorvc, VC2Ccolors, i_c = { Color }, { }, color.ipolfx
+		if type( Color ) == "table" then
+			colorvc = Color
 		end
 		for k = 1, #colorvc do
 			VC2Ccolors = { }
@@ -11895,38 +11313,29 @@
 		return colorvc
 	end
 	
-	function color.c_to_vc( colorc_or_table )
-		if type( colorc_or_table ) == "function" then
-			colorc_or_table = colorc_or_table( )
+	function color.interpolate( Color1, Color2, Index_Ipol )
+		if type( Color1 ) == "function" then
+			Color1 = Color1( )
 		end
-		local colorc_or_table = color.from_error( colorc_or_table or text.color1 )
-		effector.print_error( colorc_or_table, "color", "color.c_to_vc", 1 )
-		return color.vc( colorc_or_table )
-	end
-	
-	function color.interpolate( color1_or_table, color2_or_table, Index_Ipol )
-		if type( color1_or_table ) == "function" then
-			color1_or_table = color1_or_table( )
-		end
-		if type( color2_or_table ) == "function" then
-			color2_or_table = color2_or_table( )
+		if type( Color2 ) == "function" then
+			Color2 = Color2( )
 		end
 		if type( Index_Ipol ) == "function" then
 			Index_Ipol = Index_Ipol( )
 		end
 		local II = Index_Ipol or 0.5
-		local color1_or_table = color.from_error( color1_or_table or text.color1 )
-		local color2_or_table = color.from_error( color2_or_table or text.color2 )
-		effector.print_error( color1_or_table, "color", "color.interpolate", 1 )
-		effector.print_error( color2_or_table, "color", "color.interpolate", 2 )
+		local Color1 = color.from_error( Color1 or text.color1 )
+		local Color2 = color.from_error( Color2 or text.color2 )
+		effector.print_error( Color1, "color", "color.interpolate", 1 )
+		effector.print_error( Color2, "color", "color.interpolate", 2 )
 		effector.print_error( II, "number", "color.interpolate", 3 )
 		local Ci_table, _c, i_c = { }, color.vc_to_c, color.ipolfx
-		local C1, C2 = { color1_or_table }, { color2_or_table }
-		if type( color1_or_table ) == "table" then
-			C1 = color1_or_table
+		local C1, C2 = { Color1 }, { Color2 }
+		if type( Color1 ) == "table" then
+			C1 = Color1
 		end
-		if type( color2_or_table ) == "table" then
-			C2 = color2_or_table
+		if type( Color2 ) == "table" then
+			C2 = Color2
 		end
 		local color1_vc, color2_vc
 		for i = 1, #C1 do
@@ -11959,273 +11368,77 @@
 		return Ci_table
 	end
 	
-	function color.vector( color1, color2 )
-		if type( color1 ) == "function" then
-			color1 = color1( )
+	function color.set( Times, Colors, ... )
+		-- ... = \\1c, \\3c or \\4c
+		if type( Times ) == "function" then
+			Times = Times( )
 		end
-		if type( color2 ) == "function" then
-			color2 = color2( )
+		if type( Colors ) == "function" then
+			Colors = Colors( )
 		end
-		local color2 = color.from_error( color2 or text.color2 )
-		local color1 = color.from_error( color1 or text.color1 )
-		effector.print_error( color1, "color", "color.vector", 1 )
-		effector.print_error( color2, "color", "color.vector", 2 )
-		local cv_index, C1, C2 = table.disorder( 4 ), color.vc_to_c( color1 ), color.vc_to_c( color2 )
-		local Cfx = {
-			[ 1 ] = { C1, C1, C2, C1 },
-			[ 2 ] = { C2, C1, C1, C1 },
-			[ 3 ] = { C1, C1, C1, C2 },
-			[ 4 ] = { C1, C2, C1, C1 }
-		}
-		local cv_table = {
-			[ 0 ] = { C1, C1, C1, C1 },
-			[ 1 ] = Cfx[ cv_index[ 1 ] ],
-			[ 2 ] = Cfx[ cv_index[ 2 ] ],
-			[ 3 ] = Cfx[ cv_index[ 3 ] ],
-			[ 4 ] = { C2, C2, C2, C2 },
-		}
-		for i = 1, 4 do
-			if cv_table[ 1 ][ i ] == cv_table[ 2 ][ i ] then
-				cv_table[ 2 ][ i ] = C1
-			else
-				cv_table[ 2 ][ i ] = C2
+		local Concats = { ... }
+		local Colors = color.from_error( Colors or { text.color2 } )
+		local Times = Times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
+		effector.print_error( Times, "table", "color.set", 1 )
+		effector.print_error( Colors, "table", "color.set", 2 )
+		Times = table.complete( Times, fx.start_time, fx.end_time )
+		-----------------------------------------------------------
+		local indx_i, indx_f = table.index( Times, fx.start_time ), table.index( Times, fx.end_time )
+		local Times_aux = table.duplicate( Times )
+		Colors[ 0 ] = text.color1
+		if #Colors >= #Times - 1 then
+			Colors[ 0 ] = Colors[ #Times - 1 ]
+		end
+		local i = indx_i + 1
+		local event, t1, t2, Offset, Accel, Colorset = "", 0, 1, 1, 1, table.duplicate( Colors )
+		for i = 0, #Colorset do
+			if type( Colorset[ i ] ) == "table" then
+				Colors[ i ] = Colorset[ i ][ (val_i - 1) % #Colors[ i ] + 1 ]
+			elseif type( Colorset[ i ] ) == "function" then
+				Colors[ i ] = Colorset[ i ]( )
 			end
 		end
-		for i = 1, 4 do
-			if cv_table[ 2 ][ i ] == cv_table[ 3 ][ i ] then
-				cv_table[ 3 ][ i ] = C1
-			else
-				cv_table[ 3 ][ i ] = C2
-			end
-		end
-		for i = 1, 4 do
-			cv_table[ i ] = format( "(%s)", table.show( cv_table[ i ] ) )
-		end
-		return cv_table
-	end
-	
-	function color.delay( time_i, delay, color_i, color_f, ... )
-		if type( time_i ) == "function" then
-			time_i = time_i( )
-		end
-		if type( delay ) == "function" then
-			delay = delay( )
-		end
-		if type( color_i ) == "function" then
-			color_i = color_i( )
-		end
-		if type( color_f ) == "function" then
-			color_f = color_f( )
-		end
-		local color_f = color.from_error( color_f or text.color2 )
-		local color_i = color.from_error( color_i or text.color1 )
-		local delay = delay or 800
-		local time_i = time_i or 0
-		effector.print_error( time_i, "number", "color.delay", 1 )
-		effector.print_error( delay, "number", "color.delay", 2 )
-		effector.print_error( color_i, "color", "color.delay", 3 )
-		effector.print_error( color_f, "color", "color.delay", 4 )
-		local e_concat, ti, cd_index, _c = { ... }, time_i, table.disorder( 4 ), color.vc_to_c
-		local vcl, Ci, Cf, Tag_fx, Ax, event = { }, _c( color_i ), _c( color_f ), "", "", ""
-		local Cfx = {
-			[ 1 ] = { Ci, Ci, Cf, Ci },
-			[ 2 ] = { Cf, Ci, Ci, Ci },
-			[ 3 ] = { Ci, Ci, Ci, Cf },
-			[ 4 ] = { Ci, Cf, Ci, Ci },
-		}
-		local X = {
-			[ 0 ] = { Ci, Ci, Ci, Ci },
-			[ 1 ] = Cfx[ cd_index[ 1 ] ],
-			[ 2 ] = Cfx[ cd_index[ 2 ] ],
-			[ 3 ] = Cfx[ cd_index[ 3 ] ],
-			[ 4 ] = { Cf, Cf, Cf, Cf },
-		}
-		for i = 1, 4 do
-			if X[ 1 ][ i ] == X[ 2 ][ i ] then
-				X[ 2 ][ i ] = Ci
-			else
-				X[ 2 ][ i ] = Cf
-			end
-		end
-		for i = 1, 4 do
-			if X[ 2 ][ i ] == X[ 3 ][ i ] then
-				X[ 3 ][ i ] = Ci
-			else
-				X[ 3 ][ i ] = Cf
-			end
-		end
-		if #e_concat == 0
-			or e_concat == nil then
-			Tag_fx = format( "\\1vc(%s)\\3vc(%s)\\4vc(%s)",
-				table.show( X[ 0 ] ), table.show( X[ 0 ] ), table.show( X[ 0 ] )
-			)
-			for i = 1, 4 do
-				Ax = table.show( X[ i ] )
-				Tag_fx = Tag_fx .. format( "\\t(%s,%s,\\1vc(%s)\\3vc(%s)\\4vc(%s))",
-					ti + delay * (i - 1) / 4, ti + delay * i / 4, Ax, Ax, Ax
-				)
-			end
+		local Tags = ""
+		if #Concats == 0 then
+			Tags = "\\1c" .. Colors[ i - 2 ]
 		else
-			for i = 1, #e_concat do
-				vcl[ i ] = e_concat[ i ]
-			end
-			for i = 1, #e_concat do
-				Tag_fx = Tag_fx .. format( "%s(%s)", vcl[ i ], table.show( X[ 0 ] ) )
-			end
-			for i = 1, 4 do
-				Ax = table.show( X[ i ] )
-				event = ""
-				for k = 1, #e_concat do
-					event = event .. format( "%s(%s)", vcl[ k ], Ax )
+			for k = 1, #Concats do
+				if i - 2 == 0
+					and Concats[ k ]:match( "\\%d+c" ) then
+					Colors[ 0 ] = "TC" .. Concats[ k ]:match( "\\(%d)[%d]*c" )
 				end
-				Tag_fx = Tag_fx .. format( "\\t(%s,%s,%s)",
-					ti + delay * (i - 1) / 4, ti + delay  *  i / 4, event
-				)
+				Tags = Tags .. Concats[ k ] .. Colors[ i - 2 ]
 			end
 		end
-		return Tag_fx
-	end
-	
-	function color.movedelay( dur, delay, mode, ... )
-		if type( dur ) == "function" then
-			dur = dur( )
-		end
-		if type( delay ) == "function" then
-			delay = delay( )
-		end
-		if type( mode ) == "function" then
-			mode = mode( )
-		end
-		local colors = color.from_error( ... or text.color2 )
-		local mode = mode or 1
-		local delay = delay or 360
-		local dur = dur or fx.dur
-		effector.print_error( dur, "number", "color.movedelay", 1 )
-		effector.print_error( delay, "number", "color.movedelay", 2 )
-		effector.print_error( mode, "numberstring", "color.movedelay", 3 )
-		local CFX, CdFX, N, Tag_fx, dt, _c = { colors }, { }, { }, "", delay, color.vc_to_c
-		local V, I, Ind = 1, 1, 1
-		if type( colors ) == "table" then
-			CFX = colors
-		end
-		if #CFX == 1 then
-			CFX[ 2 ] = text.color1
-		end
-		for i = 1, #CFX - 1 do
-			table.inserttable( CdFX, color.vector( _c( CFX[ i ] ), _c( CFX[ i + 1 ] ) ) )
-		end
-		for c_mov in tostring( mode ):gmatch( "%d" ) do
-			table.insert( N, c_mov )
-		end
-		if #N == 0 then
-			N = { [ 1 ] = 1 }
-		end
-		for i = 1, #N do
-			N[ i ] = format( "\\%svc", N[ i ] )
-		end
-		CdFX = table.concat2( CdFX, N )
-		local i = 0
-		while dur > 0 do
-			V = #CdFX - 1
-			I = i + 1
-			Ind = (V - V * ceil( I / V ) + I) * (-1) ^ (ceil( I / V ) + 1) + (V + 2) * (1 + (-1) ^ ceil( I / V )) / 2
-			Tag_fx = Tag_fx .. format( "\\t(%s,%s,%s)",
-				math.round( dt * i , 2 ), math.round( dt * (i + 1), 2 ), CdFX[ Ind ]
-			)
-			i = i + 1
-			dur = dur - dt
-		end
-		return Tag_fx
-	end
-
-	function color.set( Cset_times, Cset_colors, ... )
-		-- ... = \\1vc, \\3vc, \\4vc, \\1c, \\3c or \\4c
-		if type( Cset_times ) == "function" then
-			Cset_times = Cset_times( )
-		end
-		if type( Cset_colors ) == "function" then
-			Cset_colors = Cset_colors( )
-		end
-		local e_concat = { ... }
-		local Cset_colors = color.from_error( Cset_colors or { text.color2 } )
-		local Cset_times = Cset_times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
-		effector.print_error( Cset_times, "table", "color.set", 1 )
-		effector.print_error( Cset_colors, "table", "color.set", 2 )
-		local Cset_c = Cset_colors
-		Cset_times = table.complete( Cset_times, fx.start_time, fx.end_time )
-		local iSt, iEt = table.index( Cset_times, fx.start_time ), table.index( Cset_times, fx.end_time )
-		local t_t = table.duplicate( Cset_times )
-		if #Cset_c >= #Cset_times - 1 then
-			Cset_c[ 0 ] = Cset_c[ #Cset_times - 1 ]
-		else
-			Cset_c[ 0 ] = text.color1
-		end
-		local i = iSt + 1
-		local Tag_fx, event, t1, t2, offset_t, c_set = "", "", 0, 1, 1, table.duplicate( Cset_c )
-		for i = 0, #c_set do
-			if type( c_set[ i ] ) == "table" then
-				Cset_c[ i ] = c_set[ i ][ (val_i - 1) % #Cset_c[ i ] + 1 ]
-			elseif type( c_set[ i ] ) == "function" then
-				Cset_c[ i ] = c_set[ i ]( )
+		for i = 1, #Times do
+			if type( Times[ i ] ) == "table" then
+				Times[ i ] = Times[ i ][ 1 ]
 			end
 		end
-		if #e_concat == 0 then
-			Tag_fx = "\\1c" .. Cset_c[ i - 2 ]
-		else
-			for k = 1, #e_concat do
-				if i - 2 == 0 then
-					if e_concat[ k ] == "\\1c"
-						or e_concat[ k ] == "\\1vc" then
-						Cset_c[ 0 ] = text.color1
-						if #Cset_c >= #Cset_times - 1 then
-							Cset_c[ 0 ] = Cset_c[ #Cset_times - 1 ]
-						end
-					elseif e_concat[ k ] == "\\3c"
-						or e_concat[ k ] == "\\3vc" then
-						Cset_c[ 0 ] = text.color3
-						if #Cset_c >= #Cset_times - 1 then
-							Cset_c[ 0 ] = Cset_c[ #Cset_times - 1 ]
-						end
-					elseif e_concat[ k ] == "\\4c"
-						or e_concat[ k ] == "\\4vc" then
-						Cset_c[ 0 ] = text.color4
-						if #Cset_c >= #Cset_times - 1 then
-							Cset_c[ 0 ] = Cset_c[ #Cset_times - 1 ]
-						end
-					end
+		if indx_i + 1 ~= indx_f then
+			while Times[ i ] < fx.end_time do
+				if type( Times_aux[ i ] ) == "table" then
+					Offset = Times_aux[ i ][ 2 ]
+					Accel = Times_aux[ i ][ 3 ] or 1
 				end
-				Tag_fx = Tag_fx .. e_concat[ k ] .. Cset_c[ i - 2 ]
-			end
-		end
-		for i = 1, #Cset_times do
-			if type( Cset_times[ i ] ) == "table" then
-				Cset_times[ i ] = Cset_times[ i ][ 1 ]
-			end
-		end
-		if iSt + 1 ~= iEt then
-			while Cset_times[ i ] < fx.end_time do
-				if type( t_t[ i ] ) == "table" then
-					offset_t = t_t[ i ][ 2 ]
-				end
-				t1 = Cset_times[ i ] - fx.start_time - frame_dur / 2
-				if t1 < 0 then
-					t1 = 0
-				end
-				t2 = t1 + offset_t
-				if #e_concat == 0 then
-					Tag_fx = Tag_fx .. format( "\\t(%s,%s,\\1vc%s)", t1, t2, Cset_c[ i - 1 ] )
+				t1 = math.clamp( Times[ i ] - fx.start_time - frame_dur / 2, 0, math.huge )
+				t2 = t1 + Offset
+				Accel = tostring( Accel ) .. ","
+				if #Concats == 0 then
+					Tags = Tags .. format( "\\t(%s,%s,%s\\1c%s)", t1, t2, Accel, Colors[ i - 1 ] )
 				else
 					event = ""
-					for k = 1, #e_concat do
-						event = event .. e_concat[ k ] .. Cset_c[ i - 1 ]
+					for k = 1, #Concats do
+						event = event .. Concats[ k ] .. Colors[ i - 1 ]
 					end
-					Tag_fx = Tag_fx .. format( "\\t(%s,%s,%s)", t1, t2, event )
+					Tags = Tags .. format( "\\t(%s,%s,%s%s)", t1, t2, Accel, event )
 				end
+				Offset, Accel = 1, 1
 				i = i + 1
 			end
 		end
-		return Tag_fx
-	end
+		return Tags
+	end --mod: june 03rd 2020
 
 	function color.mask( Mode, Color, Mask )
 		if type( Mode ) == "function" then
@@ -12238,7 +11451,7 @@
 			Mask = Mask( )
 		end
 		return table.mask( Color, Mask, Mode )
-		--se puede usar: color.mask( mode, table, mask )[ valor ]
+		--se puede usar: color.mask( Mode, table, mask )[ valor ]
 	end
 	
 	function color.movemask( Dur, Delay, Mode, Color, Mask )
@@ -12267,13 +11480,13 @@
 		return CmMtb[ val_i ] .. tag.oscill( Dur, Delay, CmMtb )
 	end --color.movemask( fx.dur, 300, "\\1c", "&H0000FF&" )
 
-	function color.setmovemask( delay, mode, t, colors, Mask )
-		--mode: "\\1c", "\\3c", "\\4c", "\\1vc", "\\3vc" or "\\4vc"
+	function color.setmovemask( delay, Mode, t, colors, Mask )
+		--Mode: "\\1c", "\\3c", "\\4c", "\\1vc", "\\3vc" or "\\4vc"
 		if type( delay ) == "function" then
 			delay = delay( )
 		end
-		if type( mode ) == "function" then
-			mode = mode( )
+		if type( Mode ) == "function" then
+			Mode = Mode( )
 		end
 		if type( t ) == "function" then
 			t = t( )
@@ -12283,7 +11496,7 @@
 		end
 		local colors = color.from_error( colors or { text.color2 } )
 		local t = t or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
-		local mode = mode or "\\1vc"
+		local Mode = Mode or "\\1vc"
 		local delay = delay or 420
 		t = table.complete( t, fx.start_time, fx.end_time )
 		if #colors >= #t - 1 then
@@ -12326,9 +11539,9 @@
 				t_set[ i ] = 0
 			end
 			Tag2 = Tag2 .. format( "\\t(%s,%s,%s)",
-				t_set[ i ], t_set[ i ] + 1, mode .. colors[ Ind2 + i - 1 ][ (val_i - 2) % val_n + 1 ]
+				t_set[ i ], t_set[ i ] + 1, Mode .. colors[ Ind2 + i - 1 ][ (val_i - 2) % val_n + 1 ]
 			)
-			Tag2 = Tag2 .. tag.oscill( { t_set[ i ], t_set[ i + 1 ], val_i }, delay, table.concat1( colors[ Ind2 + i - 1 ], mode ) )
+			Tag2 = Tag2 .. tag.oscill( { t_set[ i ], t_set[ i + 1 ], val_i }, delay, table.concat1( colors[ Ind2 + i - 1 ], Mode ) )
 		end
 		return Tag2
 	end
@@ -12361,67 +11574,20 @@
 		return CmMvtb[ 1 ] .. tag.oscill( Dur, Delay, CmMvtb )
 	end
 
-	function color.masktable( color_or_table, Size )
-		if type( color_or_table ) == "function" then
-			color_or_table = color_or_table( )
-		end
-		if type( Size ) == "function" then
-			Size = Size( )
-		end
-		local color_or_table = color.from_error( color_or_table or text.color1 )
-		local Ct, tone, TT_cmask
-		local T_cmask = recall.cmaskt
-		local Size = Size or val_n
-		if val_i == 1 then
-			Ct = color_or_table
-			T_cmask = remember( "cmaskt", { } )
-			tone, TT_cmask = { }, { }
-			if type( Ct ) ~= "table" then
-				for i = 1, 2 * (Size + 1) do
-					tone[ i ] = color.interpolate( Ct, "&H000000&", Rc( 0, 0.8 ) )
-				end
-				for k = 1, Size do
-					T_cmask[ k ] = format( "(%s,%s,%s,%s)",
-						tone[ 2 * k - 1 ], tone[ 2 * k + 1 ],
-						tone[ 2 * k - 0 ], tone[ 2 * k + 2 ]
-					)
-				end
-			else
-				for i = 1, #Ct do
-					tone[ i ], T_cmask[i] = { }, { }
-					for k = 1, 2 * (Size + 1) do
-						tone[ i ][ k ] = color.interpolate( Ct[ i ], "&H000000&", Rc( 0, 0.8 ) )
-					end
-					for h = 1, Size do
-						T_cmask[ i ][ h ] = format( "(%s,%s,%s,%s)",
-							tone[ i ][ 2 * h - 1 ], tone[ i ][ 2 * h + 1 ],
-							tone[ i ][ 2 * h - 0 ], tone[ i ][ 2 * h + 2 ]
-						)
-					end
-				end
-				for i = 1, #Ct do
-					TT_cmask[ i ] = T_cmask[ i ]
-				end
-				T_cmask = TT_cmask
-			end
-		end
-		return T_cmask
-	end
-	
-	function color.module( color1_or_table, color2_or_table )
-		return color.interpolate( color1_or_table, color2_or_table, module )
+	function color.module( Color1, Color2 )
+		return color.interpolate( Color1, Color2, module )
 	end
 
-	function color.module1( color1_or_table, color2_or_table )
-		return color.interpolate( color1_or_table, color2_or_table, module1 )
+	function color.module1( Color1, Color2 )
+		return color.interpolate( Color1, Color2, module1 )
 	end
 
-	function color.module2( color1_or_table, color2_or_table )
-		return color.interpolate( color1_or_table, color2_or_table, module2 )
+	function color.module2( Color1, Color2 )
+		return color.interpolate( Color1, Color2, module2 )
 	end
 	
-	function color.moduler( color1_or_table, color2_or_table )
-		return color.interpolate( color1_or_table, color2_or_table, moduler )
+	function color.moduler( Color1, Color2 )
+		return color.interpolate( Color1, Color2, moduler )
 	end
 	
 	function color.ipol( ... )
@@ -12438,9 +11604,6 @@
 		if val_n == 1 then
 			return colors_tbl[ 1 ]
 		end
-		if fx.filter == "mod" then
-			max_ipol = val_n
-		end
 		if val_i == 1 then
 			color_ipol = remember( "c_ipol", { } )
 			for i = 1, max_ipol do
@@ -12450,12 +11613,6 @@
 				color_ipol[ i ] = color.interpolate( ipol_i, ipol_f, pct_ip )
 			end
 			color_ipol[ #color_ipol + 1 ] = colors_tbl[ #colors_tbl ]
-		end
-		if fx.filter == "mod" then
-			if fx__.v_kanji == false then
-				return format( "(%s,%s,%s,%s)", color_ipol[ val_i ], color_ipol[ val_i + 1 ], color_ipol[ val_i ], color_ipol[ val_i + 1 ] )
-			end
-			return format( "(%s,%s,%s,%s)", color_ipol[ val_i ], color_ipol[ val_i ], color_ipol[ val_i + 1 ], color_ipol[ val_i + 1 ] )
 		end
 		return color_ipol[ val_i ] --rewrite: october 11th 2018
 	end --color.ipol( "&H00FF00&", "&HFF0000&", "&H0000FF&" )
@@ -12474,9 +11631,6 @@
 		if maxj == 1 then
 			return colors_tbl[ 1 ]
 		end
-		if fx.filter == "mod" then
-			max_loop = maxj
-		end
 		if j == 1 then
 			color_loop = remember( "c_loop", { } )
 			for i = 1, max_loop do
@@ -12487,20 +11641,9 @@
 			end
 			color_loop[ #color_loop + 1 ] = colors_tbl[ #colors_tbl ]
 		end
-		if fx.filter == "mod" then
-			if fx__.v_kanji == false then
-				return format( "(%s,%s,%s,%s)", color_loop[ j ], color_loop[ j + 1 ], color_loop[ j ], color_loop[ j + 1 ] )
-			end
-			return format( "(%s,%s,%s,%s)", color_loop[ j ], color_loop[ j ], color_loop[ j + 1 ], color_loop[ j + 1 ] )
-		end
 		return color_loop[ j ] --rewrite: october 11th 2018
 	end --color.loop( "&H00FF00&", "&HFF0000&", "&H0000FF&" )
 
-	function color.bigradient( Color_or_Table1, Color_or_Table2, Size_Table )
-		local  CbGgt = table.bigradient( Color_or_Table1, Color_or_Table2, Size_Table )
-		return CbGgt[ (val_i - 1) % #CbGgt + 1 ]
-	end
-	
 	function color.distance( CD_center, ... )
 		--CD_center = {center_x, center_y[, radius_min[, radius_max[, center_ref_x, center_ref_y]]]}
 		local CD_max_dis, CD_radius_min, CD_radius_max, CD_radius_dis, CD_gradient
@@ -12580,32 +11723,32 @@
 		)
 	end
 	
-	function color.from_error( color_or_table )
-		if type( color_or_table ) == "string" then
-			if color_or_table:match( "#%x%x%x%x%x%x" ) then
-				color_or_table = color_or_table:gsub( "#%x%x%x%x%x%x",
+	function color.from_error( Color )
+		if type( Color ) == "string" then
+			if Color:match( "#%x%x%x%x%x%x" ) then
+				Color = Color:gsub( "#%x%x%x%x%x%x",
 					function( HTML_color )
 						return color.ass( HTML_color )
 					end
 				)
 			else
-				color_or_table = color_or_table:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
+				Color = Color:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
 					function( ASS_color )
 						return format( "&H%s&", ASS_color )
 					end
 				)
 			end
-		elseif type( color_or_table ) == "table" then
-			for k, valor in pairs( color_or_table ) do
+		elseif type( Color ) == "table" then
+			for k, valor in pairs( Color ) do
 				if type( valor ) == "string" then
 					if valor:match( "#%x%x%x%x%x%x" ) then
-						color_or_table[ k ] = valor:gsub( "#%x%x%x%x%x%x",
+						Color[ k ] = valor:gsub( "#%x%x%x%x%x%x",
 							function( HTML_color )
 								return color.ass( HTML_color )
 							end
 						)
 					else
-						color_or_table[ k ] = valor:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
+						Color[ k ] = valor:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
 							function( ASS_color )
 								return format( "&H%s&", ASS_color )
 							end
@@ -12614,7 +11757,7 @@
 				end
 			end
 		end
-		return color_or_table
+		return Color
 	end
 	
 	function color.to_HTML( ASScolor )
@@ -12626,11 +11769,11 @@
 		return format( "#%s%s%s", Rhtml, Ghtml, Bhtml )
 	end
 
-	function color.matrix( Color_or_table, ... )
-		if type( Color_or_table ) == "function" then
-			Color_or_table = Color_or_table( )
+	function color.matrix( Color, ... )
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local Colorx = Color_or_table or text.color1
+		local Colorx = Color or text.color1
 		effector.print_error( Colorx, "color", "color.matrix", 1 )
 		local Matrixes = { ... }
 		if #Matrixes == 0 then
@@ -12828,165 +11971,19 @@
 		return aF
 	end
 	
-	function alpha.va( alpha_or_table )
-		if type( alpha_or_table ) == "function" then
-			alpha_or_table = alpha_or_table( )
-		end
-		local alpha_or_table = alpha.from_error( alpha_or_table or text.alpha1 )
-		effector.print_error( alpha_or_table, "alpha", "alpha.va", 1 )
-		local vA, ava_t = { alpha_or_table }, { }
-		if type( alpha_or_table ) == "table" then
-			vA = alpha_or_table
-		end
-		for i = 1, #vA do
-			if type( vA[ i ] ) == "number"
-				or vA[ i ]:len( ) < 7 then
-				ava_t[ i ] = math.format( "(%s,%s,%s,%s)", alpha.assF( vA[ i ] ) )
-			else
-				ava_t[ i ] = alpha.assF( vA[ i ] )
-			end
-		end
-		if #ava_t == 1 then
-			return ava_t[ 1 ]
-		end
-		return ava_t
-	end
-
 	function alpha.r( )
 		return alpha.val2ass( R( 0, 255 ) )
 	end
 	
-	function alpha.ra( ArA_alpha, ... )
-		if type( ArA_alpha ) == "function" then
-			ArA_alpha = ArA_alpha( )
+	function alpha.va_to_a( Alpha )
+		if type( Alpha ) == "function" then
+			Alpha = Alpha( )
 		end
-		local ArA_alpha = alpha.from_error( ArA_alpha or text.alpha1 )
-		local ArAmsk = alpha.from_error( ... or { "&HFF&", "&H00&" } )
-		effector.print_error( ArA_alpha, "alpha", "alpha.ra", 1 )
-		effector.print_error( ArAmsk, "alpha", "alpha.ra", 2 )
-		local ArAalp, ArAtbl, i_a, _a = { ArA_alpha }, { }, alpha.ipolfx, alpha.va_to_a
-		if type( ArA_alpha ) == "table" then
-			ArAalp = ArA_alpha
-		end
-		if type( ArAmsk ) ~= "table" then
-			ArAmsk = { ArAmsk }
-		end
-		if #ArAmsk == 1 then
-			ArAmsk[ 2 ] = ArAmsk[ 1 ]
-		end
-		for i = 1, #ArAalp do
-			ArAmsk = table.disorder( ArAmsk )
-			ArAtbl[ i ] = i_a( Rc( 0.2, 1 ), i_a( R( 2 ) - 1, ArAmsk[ 1 ], ArAmsk[ 2 ] ), _a( ArAalp[ i ] ) )
-		end
-		if #ArAalp == 1 then
-			return ArAtbl[ 1 ]
-		end
-		return ArAtbl
-	end
-	
-	function alpha.rva( ArCA_alpha, ... )
-		if type( ArCA_alpha ) == "function" then
-			ArCA_alpha = ArCA_alpha( )
-		end
-		local ArCA_alpha = alpha.from_error( ArCA_alpha or text.alpha1 )
-		effector.print_error( ArCA_alpha, "alpha", "alpha.rva", 1 )
-		local ArCAalp, ArCAtbl = { ArCA_alpha }, { }
-		if type( ArCA_alpha ) == "table" then
-			ArCAalp = ArCA_alpha
-		end
-		for i = 1, #ArCAalp do
-			ArCAtbl[ i ] = format( "(%s,%s,%s,%s)",
-				alpha.ra( ArCAalp[ i ], ... ), alpha.ra( ArCAalp[ i ], ... ),
-				alpha.ra( ArCAalp[ i ], ... ), alpha.ra( ArCAalp[ i ], ... )
-			)
-		end
-		if #ArCAalp == 1 then
-			return ArCAtbl[ 1 ]
-		end
-		return ArCAtbl
-	end
-	
-	function alpha.gradientv( AlphaTop_or_table, AlphaBottom_or_table )
-		if type( AlphaTop_or_table ) == "function" then
-			AlphaTop_or_table = AlphaTop_or_table( )
-		end
-		if type( AlphaBottom_or_table ) == "function" then
-			AlphaBottom_or_table = AlphaBottom_or_table( )
-		end
-		local AlphaTop_or_table = alpha.from_error( AlphaTop_or_table or text.alpha1 )
-		local AlphaBottom_or_table = alpha.from_error( AlphaBottom_or_table or "&HFF&" )
-		effector.print_error( AlphaTop_or_table, "alpha", "alpha.gradientv", 1 )
-		effector.print_error( AlphaBottom_or_table, "alpha", "alpha.gradientv", 2 )
-		local Av_table, _a = { }, alpha.va_to_a
-		local AT, AB = { AlphaTop_or_table }, { AlphaBottom_or_table }
-		if type( AlphaTop_or_table ) == "table" then
-			AT = AlphaTop_or_table
-		end
-		if type( AlphaBottom_or_table ) == "table" then
-			AB = AlphaBottom_or_table
-		end
-		for i = 1, #AT do
-			for k = 1, #AB do
-				table.insert( Av_table, format( "(%s,%s,%s,%s)",
-					_a( AT[ i ] ), _a( AT[ i ] ), _a( AB[ k ] ), _a( AB[ k ] ) )
-				)
-			end
-		end
-		if #Av_table == 1 then
-			return Av_table[ 1 ]
-		end
-		return Av_table
-	end
-	
-	function alpha.gradienth( AlphaLeft_or_table, AlphaRight_or_table, algorithm )
-		--example algorithm: "1 - abs(2 * %s - 1)"
-		if type( AlphaLeft_or_table ) == "function" then
-			AlphaLeft_or_table = AlphaLeft_or_table( )
-		end
-		if type( AlphaRight_or_table ) == "function" then
-			AlphaRight_or_table = AlphaRight_or_table( )
-		end
-		if type( algorithm ) == "function" then
-			algorithm = algorithm( )
-		end
-		local AlphaLeft_or_table = alpha.from_error( AlphaLeft_or_table or text.alpha1 )
-		local AlphaRight_or_table = alpha.from_error( AlphaRight_or_table or "&HFF&" )
-		local algorithm = algorithm or "%s"
-		effector.print_error( AlphaLeft_or_table, "alpha", "alpha.gradienth", 1 )
-		effector.print_error( AlphaRight_or_table, "alpha", "alpha.gradienth", 2 )
-		effector.print_error( algorithm, "string", "alpha.gradienth", 3 )
-		local Ah_table, _a, i_a = { }, alpha.va_to_a, alpha.ipolfx
-		local AL, AR = { AlphaLeft_or_table }, { AlphaRight_or_table }
-		local v1 = math.format( algorithm, 2 * (val_i - 1) / (2 * val_n - 1) )
-		local v2 = math.format( algorithm, (2 * val_i - 1) / (2 * val_n - 1) )
-		if type( AlphaLeft_or_table ) == "table" then
-			AL = AlphaLeft_or_table
-		end
-		if type( AlphaRight_or_table ) == "table" then
-			AR = AlphaRight_or_table
-		end
-		for i = 1, #AL do
-			for k = 1, #AR do
-				Ax1 = i_a( v1, _a( AL[ i ] ), _a( AR[ k ] ) )
-				Ax2 = i_a( v2, _a( AL[ i ] ), _a( AR[ k ] ) )
-				table.insert( Ah_table, format( "(%s,%s,%s,%s)", Ax1, Ax2, Ax1, Ax2 ) )
-			end
-		end
-		if #Ah_table == 1 then
-			return Ah_table[ 1 ]
-		end
-		return Ah_table
-	end
-	
-	function alpha.va_to_a( alphava_or_table )
-		if type( alphava_or_table ) == "function" then
-			alphava_or_table = alphava_or_table( )
-		end
-		local alphava_or_table = alpha.from_error( alphava_or_table or text.alpha1 )
-		effector.print_error( alphava_or_table, "alpha", "alpha.va_to_a", 1 )
-		local alphava, alphas, i_a = alphava_or_table, { }, alpha.ipolfx
-		if type( alphava_or_table ) ~= "table" then
-			alphava = { alphava_or_table }
+		local Alpha = alpha.from_error( Alpha or text.alpha1 )
+		effector.print_error( Alpha, "alpha", "alpha.va_to_a", 1 )
+		local alphava, alphas, i_a = Alpha, { }, alpha.ipolfx
+		if type( Alpha ) ~= "table" then
+			alphava = { Alpha }
 		end
 		for k = 1, #alphava do
 			if type( alphava[ k ] ) == "string"
@@ -13006,38 +12003,29 @@
 		return alphava
 	end
 	
-	function alpha.a_to_va( alphaa )
-		if type( alphaa ) == "function" then
-			alphaa = alphaa( )
+	function alpha.interpolate( Alpha1, Alpha2, Index_Ipol )
+		if type( Alpha1 ) == "function" then
+			Alpha1 = Alpha1( )
 		end
-		local alphaa = alpha.from_error( alphaa or text.alpha1 )
-		effector.print_error( alphaa, "alpha", "alpha.a_to_va", 1 )
-		return alpha.va( alphaa )
-	end
-	
-	function alpha.interpolate( alpha1_or_table, alpha2_or_table, Index_Ipol )
-		if type( alpha1_or_table ) == "function" then
-			alpha1_or_table = alpha1_or_table( )
-		end
-		if type( alpha2_or_table ) == "function" then
-			alpha2_or_table = alpha2_or_table( )
+		if type( Alpha2 ) == "function" then
+			Alpha2 = Alpha2( )
 		end
 		if type( Index_Ipol ) == "function" then
 			Index_Ipol = Index_Ipol( )
 		end
 		local II = Index_Ipol or 0.5
-		local alpha1_or_table = alpha.from_error( alpha1_or_table or "&HFF&" )
-		local alpha2_or_table = alpha.from_error( alpha2_or_table or text.alpha1 )
-		effector.print_error( alpha1_or_table, "alpha", "alpha.interpolate", 1 )
-		effector.print_error( alpha2_or_table, "alpha", "alpha.interpolate", 2 )
+		local Alpha1 = alpha.from_error( Alpha1 or "&HFF&" )
+		local Alpha2 = alpha.from_error( Alpha2 or text.alpha1 )
+		effector.print_error( Alpha1, "alpha", "alpha.interpolate", 1 )
+		effector.print_error( Alpha2, "alpha", "alpha.interpolate", 2 )
 		effector.print_error( II, "number", "alpha.interpolate", 3 )
 		local Ai_table, _a, i_a = { }, alpha.va_to_a, alpha.ipolfx
-		local A1, A2 = { alpha1_or_table }, { alpha2_or_table }
-		if type( alpha1_or_table ) == "table" then
-			A1 = alpha1_or_table
+		local A1, A2 = { Alpha1 }, { Alpha2 }
+		if type( Alpha1 ) == "table" then
+			A1 = Alpha1
 		end
-		if type( alpha2_or_table ) == "table" then
-			A2 = alpha2_or_table
+		if type( Alpha2 ) == "table" then
+			A2 = Alpha2
 		end
 		local alpha1_va, alpha2_va
 		for i = 1, #A1 do
@@ -13076,175 +12064,78 @@
 		return Ai_table
 	end
 	
-	function alpha.delay( time_i, delay, alpha_i, alpha_f, ... )
-		if type( time_i ) == "function" then
-			time_i = time_i( )
+	function alpha.set( Times, Alphas, ... )
+		-- ... = \\1a, \\3a or \\4a
+		if type( Times ) == "function" then
+			Times = Times( )
 		end
-		if type( delay ) == "function" then
-			delay = delay( )
+		if type( Alphas ) == "function" then
+			Alphas = Alphas( )
 		end
-		if type( alpha_i ) == "function" then
-			alpha_i = alpha_i( )
+		local Concats = { ... }
+		local Alphas = alpha.from_error( Alphas or { text.alpha2 } )
+		local Times = Times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
+		effector.print_error( Times, "table", "alpha.set", 1 )
+		effector.print_error( Alphas, "table", "alpha.set", 2 )
+		Times = table.complete( Times, fx.start_time, fx.end_time )
+		-----------------------------------------------------------
+		local indx_i, indx_f = table.index( Times, fx.start_time ), table.index( Times, fx.end_time )
+		local Times_aux = table.duplicate( Times )
+		Alphas[ 0 ] = text.alpha1
+		if #Alphas >= #Times - 1 then
+			Alphas[ 0 ] = Alphas[ #Times - 1 ]
 		end
-		if type( alpha_f ) == "function" then
-			alpha_f = alpha_f( )
-		end
-		local time_i = time_i or 0
-		local delay = delay or 640
-		local alpha_i = alpha.from_error( alpha_i or "&HFF&" )
-		local alpha_f = alpha.from_error( alpha_f or text.alpha1 )
-		effector.print_error( time_i, "number", "alpha.delay", 1 )
-		effector.print_error( delay, "number", "alpha.delay", 2 )
-		effector.print_error( alpha_i, "alpha", "alpha.delay", 3 )
-		effector.print_error( alpha_f, "alpha", "alpha.delay", 4 )
-		local e_concat, Tag_fx, event, ti, AD_val, index = { ... }, "", "", time_i, { }, table.disorder( 4 )
-		local Ai, Af = alpha.assF( alpha_i ), alpha.assF( alpha_f )
-		local Afx = {
-			[ 1 ] = { Ai, Ai, Af, Ai },
-			[ 2 ] = { Af, Ai, Ai, Ai },
-			[ 3 ] = { Ai, Ai, Ai, Af },
-			[ 4 ] = { Ai, Af, Ai, Ai },
-		}
-		local X = {
-			[ 0 ] = { Ai, Ai, Ai, Ai },
-			[ 1 ] = Afx[ index[ 1 ] ],
-			[ 2 ] = Afx[ index[ 2 ] ],
-			[ 3 ] = Afx[ index[ 3 ] ],
-			[ 4 ] = { Af, Af, Af, Af },
-		}
-		for i = 1, 4 do
-			if X[ 1 ][ i ] == X[ 2 ][ i ] then
-				X[ 2 ][ i ] = Ai
-			else
-				X[ 2 ][ i ] = Af
+		local i = indx_i + 1
+		local event, t1, t2, Offset, Accel, Alphaset = "", 0, 1, 1, 1, table.duplicate( Alphas )
+		for i = 0, #Alphaset do
+			if type( Alphaset[ i ] ) == "table" then
+				Alphas[ i ] = Alphaset[ i ][ (val_i - 1) % #Alphas[ i ] + 1 ]
+			elseif type( Alphaset[ i ] ) == "function" then
+				Alphas[ i ] = Alphaset[ i ]( )
 			end
 		end
-		for i = 1, 4 do
-			if X[ 2 ][ i ] == X[ 3 ][ i ] then
-				X[ 3 ][ i ] = Ai
-			else
-				X[ 3 ][ i ] = Af
-			end
-		end
-		local Ax
-		if #e_concat == 0
-			or e_concat == nil then
-			Tag_fx = format( "\\1va(%s)\\3va(%s)\\4va(%s)",
-				table.show( X[ 0 ] ), table.show( X[ 0 ] ), table.show( X[ 0 ] )
-			)
-			for i = 1, 4 do
-				Ax = table.show( X[ i ] )
-				Tag_fx = Tag_fx .. format( "\\t(%s,%s,\\1va(%s)\\3va(%s)\\4va(%s))",
-					ti + delay * (i - 1) / 4, ti + delay * i / 4, Ax, Ax, Ax
-				)
-			end
+		local Tags = ""
+		if #Concats == 0 then
+			Tags = "\\1a" .. Alphas[ i - 2 ]
 		else
-			for i = 1, #e_concat do
-				AD_val[ i ] = e_concat[ i ]
-			end
-			for i = 1, #e_concat do
-				Tag_fx = Tag_fx .. format( "%s(%s)", AD_val[ i ], table.show( X[ 0 ] ) )
-			end
-			for i = 1, 4 do
-				Ax = table.show( X[ i ] )
-				event = ""
-				for k = 1, #e_concat do
-					event = event .. format( "%s(%s)", AD_val[ k ], Ax )
+			for k = 1, #Concats do
+				if i - 2 == 0
+					and Concats[ k ]:match( "\\%d+a" ) then
+					Alphas[ 0 ] = "TA" .. Concats[ k ]:match( "\\(%d)[%d]*a" )
 				end
-				Tag_fx = Tag_fx .. format( "\\t(%s,%s,%s)",
-					ti + delay * (i - 1) / 4, ti + delay * i / 4, event
-				)
+				Tags = Tags .. Concats[ k ] .. Alphas[ i - 2 ]
 			end
 		end
-		return Tag_fx
-	end
-	
-	function alpha.set( Aset_times, Aset_alphas, ... ) --... = \\1va, \\3va, \\4va, \\1a, \\3a or \\4a
-		if type( Aset_times ) == "function" then
-			Aset_times = Aset_times( )
-		end
-		if type( Aset_alphas ) == "function" then
-			Aset_alphas = Aset_alphas( )
-		end
-		local Aset_times = Aset_times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
-		local Aset_alphas = alpha.from_error( Aset_alphas or { "&H86&" } )
-		local e_concat = { ... }
-		effector.print_error( Aset_times, "table", "alpha.set", 1 )
-		effector.print_error( Aset_alphas, "table", "alpha.set", 2 )
-		local Aset_a = Aset_alphas
-		Aset_times = table.complete( Aset_times, fx.start_time, fx.end_time )
-		local iSt, iEt = table.index( Aset_times, fx.start_time ), table.index( Aset_times, fx.end_time )
-		local t_t = table.duplicate( Aset_times )
-		if #Aset_a >= #Aset_times - 1 then
-			Aset_a[ 0 ] = Aset_a[ #Aset_times - 1 ]
-		else
-			Aset_a[ 0 ] = text.alpha1
-		end
-		local i = iSt + 1
-		local Tag_fx, event, t1, t2, offset_t, c_set = "", "", 0, 1, 1, table.duplicate( Aset_a )
-		for i = 0, #c_set do
-			if type( c_set[ i ] ) == "table" then
-				Aset_a[ i ] = c_set[ i ][ (val_i - 1) % #Aset_a[ i ] + 1 ]
+		for i = 1, #Times do
+			if type( Times[ i ] ) == "table" then
+				Times[ i ] = Times[ i ][ 1 ]
 			end
 		end
-		if #e_concat == 0 then
-			Tag_fx = "\\1a" .. Aset_a[ i - 2 ]
-		else
-			for k = 1, #e_concat do
-				if i - 2 == 0 then
-					if e_concat[ k ] == "\\1a"
-						or e_concat[ k ] == "\\1va" then
-						Aset_a[ 0 ] = text.alpha1
-						if #Aset_a >= #Aset_times - 1 then
-							Aset_a[ 0 ] = Aset_a[ #Aset_times - 1 ]
-						end
-					elseif e_concat[ k ] == "\\3a"
-						or e_concat[ k ] == "\\3va" then
-						Aset_a[ 0 ] = text.alpha3
-						if #Aset_a >= #Aset_times - 1 then
-							Aset_a[ 0 ] = Aset_a[ #Aset_times - 1 ]
-						end
-					elseif e_concat[ k ] == "\\4a"
-						or e_concat[ k ] == "\\4va" then
-						Aset_a[ 0 ] = text.alpha4
-						if #Aset_a >= #Aset_times - 1 then
-							Aset_a[ 0 ] = Aset_a[ #Aset_times - 1 ]
-						end
-					end
+		if indx_i + 1 ~= indx_f then
+			while Times[ i ] < fx.end_time do
+				if type( Times_aux[ i ] ) == "table" then
+					Offset = Times_aux[ i ][ 2 ]
+					Accel = Times_aux[ i ][ 3 ] or 1
 				end
-				Tag_fx = Tag_fx .. e_concat[ k ] .. Aset_a[ i - 2 ]
-			end
-		end
-		for i = 1, #Aset_times do
-			if type( Aset_times[ i ] ) == "table" then
-				Aset_times[ i ] = Aset_times[ i ][ 1 ]
-			end
-		end
-		if iSt + 1 ~= iEt then
-			while Aset_times[ i ] < fx.end_time do
-				if type( t_t[ i ] ) == "table" then
-					offset_t = t_t[ i ][ 2 ]
-				end
-				t1 = Aset_times[ i ] - fx.start_time - frame_dur / 2
-				if t1 < 0 then
-					t1 = 0
-				end
-				t2 = t1 + offset_t
-				if #e_concat == 0 then
-					Tag_fx = Tag_fx .. format( "\\t(%s,%s,\\1va%s)", t1, t2, Aset_a[ i - 1 ] )
+				t1 = math.clamp( Times[ i ] - fx.start_time - frame_dur / 2, 0, math.huge )
+				t2 = t1 + Offset
+				Accel = tostring( Accel ) .. ","
+				if #Concats == 0 then
+					Tags = Tags .. format( "\\t(%s,%s,%s\\1a%s)", t1, t2, Accel, Alphas[ i - 1 ] )
 				else
 					event = ""
-					for k = 1, #e_concat do
-						event = event .. e_concat[ k ] .. Aset_a[ i - 1 ]
+					for k = 1, #Concats do
+						event = event .. Concats[ k ] .. Alphas[ i - 1 ]
 					end
-					Tag_fx = Tag_fx .. format( "\\t(%s,%s,%s)", t1, t2, event )
+					Tags = Tags .. format( "\\t(%s,%s,%s%s)", t1, t2, Accel, event )
 				end
+				Offset, Accel = 1, 1
 				i = i + 1
 			end
 		end
-		return Tag_fx
-	end
-	
+		return Tags
+	end --mod: june 14th 2020
+
 	function alpha.mask( Mode, Alpha, Mask )
 		return table.mask( Alpha, Mask, Mode )
 	end
@@ -13272,62 +12163,20 @@
 		return AmMvtb[ 1 ] .. tag.oscill( Dur, Delay, AmMvtb )
 	end
 	
-	function alpha.masktable( alpha_or_table, Size )
-		local alpha_or_table = alpha.from_error( alpha_or_table or text.alpha1 )
-		local At, tone_a, TT_amask
-		local T_amask = recall.amaskt
-		local Size = Size or val_n
-		if val_i == 1 then
-			At = alpha_or_table
-			T_amask = remember( "amaskt", { } )
-			tone_a, TT_amask = { }, { }
-			if type( At ) ~= "table" then
-				for i = 1, 2 * (Size + 1) do
-					tone_a[ i ] = alpha.ra( At )
-				end
-				for k = 1, Size do
-					T_amask[ k ] = format( "(%s,%s,%s,%s)",
-						tone_a[ 2 * k - 1 ], tone_a[ 2 * k + 1 ],
-						tone_a[ 2 * k - 0 ], tone_a[ 2 * k + 2 ]
-					)
-				end
-			else
-				for i = 1, #At do
-					tone_a[ i ] = { }
-					T_amask[ i ] = { }
-					for k = 1, 2 * (Size + 1) do
-						tone_a[ i ][ k ] = alpha.ra( At[ i ] )
-					end
-					for h = 1, Size do
-						T_amask[ i ][ h ] = format( "(%s,%s,%s,%s)",
-							tone_a[ i ][ 2 * h - 1 ], tone_a[ i ][ 2 * h + 1 ],
-							tone_a[ i ][ 2 * h - 0 ], tone_a[ i ][ 2 * h + 2 ]
-						)
-					end
-				end
-				for i = 1, #At do
-					TT_amask[ i ] = T_amask[ i ]
-				end
-				T_amask = TT_amask
-			end
-		end
-		return T_amask
-	end
-	
-	function alpha.module( alpha1_or_table, alpha2_or_table )
-		return alpha.interpolate( alpha1_or_table, alpha2_or_table, module )
+	function alpha.module( Alpha1, Alpha2 )
+		return alpha.interpolate( Alpha1, Alpha2, module )
 	end
 
-	function alpha.module1( alpha1_or_table, alpha2_or_table )
-		return alpha.interpolate( alpha1_or_table, alpha2_or_table, module1 )
+	function alpha.module1( Alpha1, Alpha2 )
+		return alpha.interpolate( Alpha1, Alpha2, module1 )
 	end
 
-	function alpha.module2( alpha1_or_table, alpha2_or_table )
-		return alpha.interpolate( alpha1_or_table, alpha2_or_table, module2 )
+	function alpha.module2( Alpha1, Alpha2 )
+		return alpha.interpolate( Alpha1, Alpha2, module2 )
 	end
 	
-	function alpha.moduler( alpha1_or_table, alpha2_or_table )
-		return alpha.interpolate( alpha1_or_table, alpha2_or_table, moduler )
+	function alpha.moduler( Alpha1, Alpha2 )
+		return alpha.interpolate( Alpha1, Alpha2, moduler )
 	end
 	
 	function alpha.ipol( ... )
@@ -13344,9 +12193,6 @@
 		if val_n == 1 then
 			return alphas_tbl[ 1 ]
 		end
-		if fx.filter == "mod" then
-			max_ipol = val_n
-		end
 		if val_i == 1 then
 			alpha_ipol = remember( "a_ipol", { } )
 			for i = 1, max_ipol do
@@ -13356,12 +12202,6 @@
 				alpha_ipol[ i ] = alpha.interpolate( ipol_i, ipol_f, pct_ip )
 			end
 			alpha_ipol[ #alpha_ipol + 1 ] = alphas_tbl[ #alphas_tbl ]
-		end
-		if fx.filter == "mod" then
-			if fx__.v_kanji == false then
-				return format( "(%s,%s,%s,%s)", alpha_ipol[ val_i ], alpha_ipol[ val_i + 1 ], alpha_ipol[ val_i ], alpha_ipol[ val_i + 1 ] )
-			end
-			return format( "(%s,%s,%s,%s)", alpha_ipol[ val_i ], alpha_ipol[ val_i ], alpha_ipol[ val_i + 1 ], alpha_ipol[ val_i + 1 ] )
 		end
 		return alpha_ipol[ val_i ] --rewrite: october 11th 2018
 	end --alpha.ipol( "&HFF&", "&H88&", "&H00&" )
@@ -13380,9 +12220,6 @@
 		if maxj == 1 then
 			return alphas_tbl[ 1 ]
 		end
-		if fx.filter == "mod" then
-			max_loop = maxj
-		end
 		if j == 1 then
 			alpha_loop = remember( "a_loop", { } )
 			for i = 1, max_loop do
@@ -13393,22 +12230,9 @@
 			end
 			alpha_loop[ #alpha_loop + 1 ] = alphas_tbl[ #alphas_tbl ]
 		end
-		if fx.filter == "mod" then
-			if fx__.v_kanji == false then
-				return format( "(%s,%s,%s,%s)", alpha_loop[ j ], alpha_loop[ j + 1 ], alpha_loop[ j ], alpha_loop[ j + 1 ] )
-			end
-			return format( "(%s,%s,%s,%s)", alpha_loop[ j ], alpha_loop[ j ], alpha_loop[ j + 1 ], alpha_loop[ j + 1 ] )
-		end
 		return alpha_loop[ j ] --rewrite: october 11th 2018
 	end --alpha.loop( "&HFF&", "&H88&", "&H00&" )
 
-	function alpha.bigradient( Alpha_or_Table1, Alpha_or_Table2, Size_Table )
-		local Alpha1 = alpha.from_error( Alpha_or_Table1 or text.alpha1 )
-		local Alpha2 = alpha.from_error( Alpha_or_Table2 or text.alpha2 )
-		local bigrad = table.bigradient( Alpha1, Alpha2, Size_Table )
-		return bigrad[ (val_i - 1) % #bigrad + 1 ]
-	end
-	
 	function alpha.distance( AD_center, ... )
 		--AD_center = {center_x, center_y[, radius_min[, radius_max[, center_ref_x, center_ref_y]]]}
 		local AD_max_dis, AD_radius_min, AD_radius_max, AD_radius_dis, AD_gradient
@@ -13587,9 +12411,6 @@
 			Round = Round( )
 		end
 		local Round = Round or 2 -- cifras decimales a redondear los números en la shape
-		if fx.filter == "mod" then
-			Round = 0
-		end -- cifras redondeadas si se elije el VSFilterMod
 		local Shape = Shape or nil
 		if not Shape
 			and linefx[ ii ].text:match( "\\i?clip%b()" ) then
@@ -13827,145 +12648,15 @@
 		return Shape --shape.redraw( shape.circle, 3 )
 	end --rewrite: march 30th 2020
 
-	function shape.modify( Shape, modify )
-		--le aplica un "filtro" (función) a los valores numéricos de la Shape
+	function shape.filter( Shape, Split, ... )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		local modify = modify or function( x, y )
-			return x, y
-		end
-		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.modify", 1 )
-		effector.print_error( modify, "function", "shape.modify", 2 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.modify( Shape[ i ], modify )
-			end
-		else --recursividad: september 08th 2019
-			shape.info( Shape )
-			Pk = 0
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
-				function( x, y )
-					Cx = c_shape						-- coordenada "x" del centro de la shape
-					Cy = m_shape						-- coordenada "y" del centro de la shape
-					Do = math.distance( x, y )			-- distancia del punto al origen
-					Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
-					Ao = math.angle( x, y )				-- ángulo del origen al punto
-					Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
-					Pn = n_points						-- cantidad total de puntos en la shape
-					Pk = Pk + 1							-- contador de los puntos de la shape
-					Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
-					My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
-					Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
-					local mod_x, mod_y = modify( x, y )
-					if mod_y then
-						return format( "%s %s", modify( x, y ) )
-					end
-					return modify( x, y )
-				end
-			)
-			Shape = shape.ASSDraw3( Shape )
-		end --shape.modify( { shape.circle, shape.rectangle }, function( x, y ) x = 1.5 * x + w_shape return x, y end )[ j ]
-		return Shape
-	end --shape.modify( shape.circle, function( x, y ) x = 1.5 * x + w_shape return x, y end )
-
-	function shape.filter( Shape, Filter )
-		--le aplica un "filtro" (función) a los valores numéricos de la Shape
-		--requiere "Yutils.lua"
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		local Filter = Filter or function( x, y )
-			return x, y
+		if type( Split ) == "function" then
+			Split = Split( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.filter", 1 )
-		effector.print_error( Filter, "function", "shape.filter", 2 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.filter( Shape[ i ], Filter )
-			end
-		else --recursividad: september 08th 2019
-			shape.info( Shape )
-			Pk = 0
-			Shape = Yutils.shape.filter( Shape,
-				function( x, y )
-					Cx = c_shape						-- coordenada "x" del centro de la shape
-					Cy = m_shape						-- coordenada "y" del centro de la shape
-					Do = math.distance( x, y )			-- distancia del punto al origen
-					Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
-					Ao = math.angle( x, y )				-- ángulo del origen al punto
-					Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
-					Pn = n_points						-- cantidad total de puntos en la shape
-					Pk = Pk + 1							-- contador de los puntos de la shape
-					Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
-					My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
-					Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
-					return Filter( x, y )
-				end
-			)
-			Shape = shape.ASSDraw3( Shape )
-		end
-		return Shape
-	end
-	
-	function shape.filter2( Shape, Filter, Split )
-		--require "Yutils.lua"
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		if type( Split ) == "function" then
-			Split = Split( )
-		end
-		local Split = Split or 2 * ratio
-		local Filter = Filter or function( x, y )
-			return x, y
-		end
-		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.filter2", 1 )
-		effector.print_error( Filter, "function", "shape.filter2", 2 )
-		effector.print_error( Split, "number", "shape.filter2", 3 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.filter2( Shape[ i ], Filter, Split )
-			end
-		else --recursividad: september 09th 2019
-			Shape = Yutils.shape.split( Shape, Split )		--secciona rectas
-			Shape = Yutils.shape.flatten( Shape, Split )	--secciona beziers
-			shape.info( Shape )
-			Pk = 0
-			Shape = Yutils.shape.filter( Shape,
-				function( x, y )
-					Cx = c_shape						-- coordenada "x" del centro de la shape
-					Cy = m_shape						-- coordenada "y" del centro de la shape
-					Do = math.distance( x, y )			-- distancia del punto al origen
-					Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
-					Ao = math.angle( x, y )				-- ángulo del origen al punto
-					Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
-					Pn = n_points						-- cantidad total de puntos en la shape
-					Pk = Pk + 1							-- contador de los puntos de la shape
-					Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
-					My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
-					Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
-					return Filter( x, y )
-				end
-			)
-		end
-		Shape = shape.ASSDraw3( Shape )
-		return Shape
-	end --shape.filter2( shape.circle, function( x, y ) x = x + Rcs( 4 ) y = y + Rcs( 4 ) return x, y end, 5 )
-	
-	function shape.filter3( Shape, Split, ... )
-		--require "Yutils.lua"
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		if type( Split ) == "function" then
-			Split = Split( )
-		end
-		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.filter3", 1 )
 		local filters = { ... }
 		if ...
 			and type( ... ) == "table" then
@@ -13978,13 +12669,13 @@
 		end
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
-				Shape[ i ] = shape.filter3( Shape[ i ], Split, ... )
+				Shape[ i ] = shape.filter( Shape[ i ], Split, ... )
 			end
 		else --recursividad: september 08th 2019
 			if Split
 				and Split ~= 0 then
 				local Split3 = abs( Split )
-				effector.print_error( Split3, "number", "shape.filter3", 2 )
+				effector.print_error( Split3, "number", "shape.filter", 2 )
 				Shape = Yutils.shape.split( Shape, Split3 )
 				Shape = Yutils.shape.flatten( Shape, Split3 )
 			end
@@ -15948,44 +14639,7 @@
 		return setclip2( Clips, Tags, Index )
 	end --shape.setclip( {"\\clip(m 180 618 l 216 664 602 664 536 620)", "\\clip(812,660,1020,698)"}, {"\\1c&H0000FF&", "\\1c&FF0000&"} )
 	
-	function shape.animated( dur, frame_duration, frames, size_x, size_y )
-		if type( dur ) == "function" then
-			dur = dur( )
-		end
-		if type( frame_duration ) == "function" then
-			frame_duration = frame_duration( )
-		end
-		if type( frames ) == "function" then
-			frames = frames( )
-		end
-		if type( size_x ) == "function" then
-			size_x = size_x( )
-		end
-		if type( size_y ) == "function" then
-			size_y = size_y( )
-		end
-		effector.print_error( dur, "number", "shape.animated", 1 )
-		effector.print_error( frame_duration, "number", "shape.animated", 2 )
-		effector.print_error( frames, "table", "shape.animated", 3 )
-		effector.print_error( size_x, "number", "shape.animated", 4 )
-		effector.print_error( size_y, "number", "shape.animated", 5 )
-		local t_dur, f_dur = dur, frame_duration
-		local Tag_fx, i = "\\bord0\\shad0\\fscx0\\fscy100", 0
-		local t1, t2, t3, t4
-		maxloop( #frames )
-		while t_dur > 0 do
-			t1 = f_dur * (#frames * i + j - 1)
-			t2 = f_dur * (#frames * i + j - 1) + 1
-			t3 = f_dur * (#frames * i + j - 0)
-			t4 = f_dur * (#frames * i + j - 0) + 1
-			Tag_fx = Tag_fx .. format( "\\t(%s,%s,\\fscx100)\\t(%s,%s,\\fscx0)", t1, t2, t3, t4 )
-			i = i + 1
-			t_dur = t_dur - #frames * f_dur
-		end
-		return format( "{%s\\1img(%s,0,0)\\p1}%s", Tag_fx, frames[ j ], shape.size( shape.rectangle, size_x, size_y ) )
-	end
-	
-	function shape.animated2( dur, frame_duration, Shapes, Pscale, Random )
+	function shape.animated( dur, frame_duration, Shapes, Pscale, Random )
 		if type( dur ) == "function" then
 			dur = dur( )
 		end
@@ -15996,10 +14650,10 @@
 			Shapes = Shapes( )
 		end
 		local prop = Pscale or "\\p1"
-		effector.print_error( dur, "number", "shape.animated2", 1 )
-		effector.print_error( frame_duration, "number", "shape.animated2", 2 )
-		effector.print_error( Shapes, "table", "shape.animated2", 3 )
-		effector.print_error( prop, "numberstring", "shape.animated2", 4 )
+		effector.print_error( dur, "number", "shape.animated", 1 )
+		effector.print_error( frame_duration, "number", "shape.animated", 2 )
+		effector.print_error( Shapes, "table", "shape.animated", 3 )
+		effector.print_error( prop, "numberstring", "shape.animated", 4 )
 		if type( prop ) == "number" then
 			prop = format( "\\p%d", math.round( math.log( prop, 2 ) + 1 ) )
 		end
@@ -16063,114 +14717,8 @@
 			return format( "{%s%s}%s", Tag_fx, prop, Shapes[ J ] )
 		end
 	end
+	shape.animated2 = shape.animated
 	
-	function shape.movevc( Shape, Return, width_vc, height_vc, posx, posy, Dx, Dy, time_vci, time_vcf )
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		if type( width_vc ) == "function" then
-			width_vc = width_vc( )
-		end
-		if type( height_vc ) == "function" then
-			height_vc = height_vc( )
-		end
-		if type( posx ) == "function" then
-			posx = posx( )
-		end
-		if type( posy ) == "function" then
-			posy = posy( )
-		end
-		if type( Dx ) == "function" then
-			Dx = Dx( )
-		end
-		if type( Dy ) == "function" then
-			Dy = Dy( )
-		end
-		if type( time_vci ) == "function" then
-			time_vci = time_vci( )
-		end
-		if type( time_vcf ) == "function" then
-			time_vcf = time_vcf( )
-		end
-		effector.print_error( Shape, "shape", "shape.movevc", 1 )
-		if ( width_vc and width_vc <= 0 )
-			or width_vc == "default" then
-			width_vc = val_width
-		end
-		if ( height_vc and height_vc <= 0 )
-			or height_vc == "default" then
-			height_vc = val_height
-		end
-		local Shpfx = recall.Sh1
-		local SmvcW, SmvcH, Smark, ShmVC = recall.ShW, recall.ShH, recall.Mrk, recall.Svc
-		local SVCti, SVCtf, SVCdx, SVCdy = recall.Sti, recall.Stf, recall.Sdx, recall.Sdy
-		local SVCpx, SVCpy = recall.Spx, recall.Spy
-		if j == 1 then
-			Shpfx = remember( "Sh1", shape.origin( Shape ) )
-			SmvcW = remember( "ShW", abs( width_vc or val_width ) )
-			SmvcH = remember( "ShH", abs( height_vc or val_height ) )
-			Shpfx = shape.size( Shpfx, SmvcW, SmvcH )
-			shape.info( Shpfx )
-			Smark = remember( "Mrk", format( "m %d %d m 0 0 ", SmvcW, SmvcH ) )
-			ShmVC = remember( "Svc", table.concat2( shape.divide( Shpfx ), Smark ) )
-		end
-		if Return == "loops" or Return == "loop" then
-			return #ShmVC
-		end
-		if Return == "shape" then
-			return ShmVC[ j ]
-		end
-		if j == 1 then
-			SVCti = remember( "Sti", (time_vci or fx.movet_i) )
-			SVCtf = remember( "Stf", (time_vcf or fx.movet_f) )
-			SVCdx = remember( "Sdx", (Dx or fx.move_x2 - fx.move_x1) )
-			SVCdy = remember( "Sdy", (Dy or fx.move_y2 - fx.move_y1) )
-			SVCpx = remember( "Spx", (posx or fx.move_x1) )
-			SVCpy = remember( "Spy", (posy or fx.move_y1) )
-		end
-		local Tag_fx = ""
-		maxloop( #ShmVC )
-		if Return == "tag"
-			or Return == nil then
-			Tag_fx = format( "\\clip(%s)\\movevc(%s,%s,%s,%s,%s,%s)", ShmVC[ j ],
-				math.round( SVCpx - SmvcW / 2, 2 ), math.round( SVCpy - SmvcH / 2, 2 ),
-				math.round( SVCpx - SmvcW / 2 + SVCdx, 2 ), math.round( SVCpy - SmvcH / 2 + SVCdy, 2 ),
-				math.round( SVCti, 2 ), math.round( SVCtf, 2 )
-			)
-			return Tag_fx
-		end
-	end
-	
-	function shape.movevci( Shape, Return, width_vc, height_vc, posx, posy, Dx, Dy, time_vci, time_vcf )
-		effector.print_error( Shape, "shape", "shape.movevci", 1 )
-		if width_vc then
-			effector.print_error( width_vc, "numberstring", "shape.movevci", 3 )
-		end
-		if height_vc then
-			effector.print_error( height_vc, "numberstring", "shape.movevci", 4 )
-		end
-		if posx then
-			effector.print_error( posx, "number", "shape.movevci", 5 )
-		end
-		if posy then
-			effector.print_error( posy, "number", "shape.movevci", 6 )
-		end
-		if Dx then
-			effector.print_error( Dx, "number", "shape.movevci", 7 )
-		end
-		if Dy then
-			effector.print_error( Dy, "number", "shape.movevci", 8 )
-		end
-		if time_vci then
-			effector.print_error( time_vci, "number", "shape.movevci", 9 )
-		end
-		if time_vcf then
-			effector.print_error( time_vcf, "number", "shape.movevci", 10 )
-		end
-		local  tag_Smvci = shape.movevc( Shape, Return, width_vc, height_vc, posx, posy, Dx, Dy, time_vci, time_vcf ):gsub( "clip", "iclip" )
-		return tag_Smvci
-	end
-
 	function shape.divide( Shape, Mark )
 		-- retorna una tabla con las shapes que conforman una shape
 		-- si se quiere, retorna cada una de esas shapes con un marco
@@ -17540,7 +16088,7 @@
 		effector.print_error( Shape2, "shape", "shape.do_shape", 2 )
 		effector.print_error( Mode,  "number", "shape.do_shape", 3 )
 		effector.print_error( Split, "number", "shape.do_shape", 4 )
-		local Shape1 = shape.filter2( Shape1, nil, Split )
+		local Shape1 = shape.filter( Shape1, Split, nil )
 		local Ratio = math.round( shape.width( Shape1 ) / shape.length( Shape2 ), 3 )
 		local Filter
 		if type( Mode ) == "function" then
@@ -17683,69 +16231,8 @@
 			end
 			return x, y
 		end
-		return format( "{\\p1}%s", shape.origin( shape.filter2( Shape, shape_filter, 2 ) ) )
+		return format( "{\\p1}%s", shape.origin( shape.filter( Shape, 2, shape_filter ) ) )
 	end --shape.deformed( shape.rectangle, 8, 5, "y" )
-	
-	function shape.allin( Shape, Tags )
-		-- organiza la shape o la tabla de shapes ---------
-		local Shape = Shape or { shape.circle }
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		if type( Shape ) == "string" then
-			Shape = shape.divide( Shape )
-		end
-		Shape = table.reverse( Shape )
-		---------------------------------------------------
-		-- organiza la tabla de tags para las shapes ------
-		local Tags = Tags or { "\\1c" .. shape.color1 }
-		if type( Tags ) == "function" then
-			Tags = Tags( )
-		end
-		Tags = table.reverse( Tags )
-		---------------------------------------------------
-		effector.print_error( Shape, "stringtable", "shape.allin", 1 )
-		effector.print_error( Tags, "table", "shape.allin", 2 )
-		-- obtiene la info de cada shape y crea un marco --
-		local min_x_shape, min_y_shape = { }, { }
-		for i = 1, #Shape do
-			shape.info( Shape[ i ] )
-			min_x_shape[ i ] = minx
-			min_y_shape[ i ] = miny
-		end
-		local min_x = table.op( min_x_shape, "min" )
-		local min_y = table.op( min_y_shape, "min" )
-		for i = 1, #Shape do
-			Shape[ i ] = shape.displace( Shape[ i ], -min_x, -min_y )
-		end
-		local max_x_shape, max_y_shape = { }, { }
-		for i = 1, #Shape do
-			shape.info( Shape[ i ] )
-			max_x_shape[ i ] = maxx
-			max_y_shape[ i ] = maxy
-		end
-		local mark_x = table.op( max_x_shape, "max" )
-		local mark_y = table.op( max_y_shape, "max" )
-		local mark_shape = format( "m 0 0 l %s 0 m 0 %s l %s %s ", mark_x, mark_y, mark_x, mark_y )
-		--fix: december 11th 2018
-		--local mark_shape = format( "m %s %s m 0 0 ", mark_x, mark_y )
-		---------------------------------------------------
-		-- desplaza cada shape y le agrega los tags -------
-		for i = 1, #Shape do
-			Shape[ i ] = shape.displace( mark_shape .. Shape[ i ], mark_x * ( i - 0.5 - #Shape / 2 ) )
-			Shape[ i ] = format( "{%s}", Tags[ math.i( i, #Tags )[ "1-->A" ] ] ) .. Shape[ i ]
-		end
-		---------------------------------------------------
-		-- reune todas las shapes en una sola -------------
-		local shape_allin = ""
-		for i = 1, #Shape do
-			shape_allin = shape_allin .. Shape[ #Shape - i + 1 ]
-		end
-		---------------------------------------------------
-		return shape_allin
-		-- colors = table.concat1( table.gradient( 24, "&H0000FF&", "&H00FFFF&", "&H00FF00&", "&HFF00FF&", "&H0000FF&" ), "\\1c" )
-		-- shape.allin( shape.array( shape.size( shape.rectangle, 20, 4 ), 20, "radial", 24 ), colors )
-	end
 	
 	function shape.fusion( Shapes, Tags )
 		if type( Shapes ) == "function" then
@@ -18386,7 +16873,7 @@
 		return format( "{%s}", pixel_pos ) .. shape.origin( Shapes[ j ] )
 	end --may 21st 2020
 	
-	function shape.grid( Shape, Filter, Align, Line )
+	function shape.grid( Shape, Filter, Align, Line, Lines )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -18398,124 +16885,174 @@
 		local Align = Align or 7					--alineación, en caso de ingresar imagen
 		local x_max, y_max = shape.width( Shape ), shape.height( Shape )
 		-----------------------------------
-		local function image_info( Image )
-			local get_info = image.to_pixels( Image, nil, true )
-			get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
-			local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
-			local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
-			local img_table, indx = { }, ""
-			for i = 1, get_info.width * get_info.height do
-				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
-				img_table[ indx ] = format( "%s%s",
-					get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
-					get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
-				)
-				img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
-			end
-			return img_table, an_x, an_y, get_info.width, get_info.height
-		end
-		local is_image, img_info
-		if type( Filter ) == "string" then			--si es una imagen .bmp
-			is_image = true
-			img_info, xi, yi, wi, hi = image_info( Filter )
-			Filter = function( i )
-				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-				x1, y1 = tonumber( x1 ), tonumber( y1 )
-				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-				local k = format( "%s,%s", xr, yr )
-				return img_info[ i ] or img_info[ k ] or "\\r"
-			end
-		end
-		-----------------------------------
-		local function min_alpha( String )
-			--elige al alpha más transparente y elimina al resto :D
-			local alphas, a = { }
-			for a in String:gmatch( "\\1a&H(%x%x)&" ) do
-				alphas[ #alphas + 1 ] = a
-			end
-			if #alphas > 1 then
-				for i = 1, #alphas do
-					alphas[ i ] = tonumber( alphas[ i ], 16 )
-				end
-				table.sort( alphas, function( a, b ) return a < b end )
-				String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
-			end
-			return String
-		end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
-		-----------------------------------
-		local tbl = shape.to_pixels( Shape, nil, nil, nil, { true } )
-		local tblx, str, c = { }
-		for i = 1, #tbl.x do
-			tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
-		end
-		local tbl_shp, id, is_shape = { }
-		for i = 1, y_max do
-			tbl_shp[ i ] = "{\\p1}"
-			for k = 1, x_max do
-				id = tostring( k ) .. "," .. tostring( i )
-				is_shape = format( "{\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
-				tbl_shp[ i ] = tbl_shp[ i ] .. ( tblx[ id ] and is_shape or "{\\x}m 0 0 l 1 1 " )
-			end
-			if not tbl_shp[ i ]:match( "1a" ) then
-				tbl_shp[ i ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
-			end
-			tbl_shp[ i ] = tbl_shp[ i ] .. "{\\p0}\\N"
-			while string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
-				str, c = string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 " )
-				tbl_shp[ i ] = tbl_shp[ i ]:gsub( str, format( "{\\x}m 0 0 l %s 1 ", c ) )
-			end		
-		end
-		local shape_px = table.concat( tbl_shp )
-		local k = 1
-		if is_image and Line then
-			shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-				function( isalpha, capture )
-					px = math.i( k, x_max )[ "1-->A" ]
-					py = math.i( k, x_max )[ "N,n" ]
-					cx = x_max / 2
-					cy = l.fontsize / 2
-					rx = floor( px + val_left - l.left )
-					d = math.distance( cx, cy, px, py )
-					a = math.angle( cx, cy, px, py )
-					i = k
-					n = #tbl.x
-					k = k + 1
-					capture = capture:gsub( "(%d+)(,%d+)",
-						function( x, y )
-							local x = tonumber( x )
-							x = floor( x + val_left - l.left )
-							return tostring( x ) .. y
+		local shape_px = recall.shapefx
+		local lines_shp = recall.L_shapes
+		local Reduc = recall.reduce
+		if j == 1 then
+			-------------------------------
+			Reduc = remember( "reduce", function( String )
+					--reduce los colores y alphas repetidos
+					local coloralpha, c, a = { }
+					for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
+						coloralpha[ #coloralpha + 1 ] = { c, a }
+					end
+					String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
+						function( c, a )
+							return "cfx" .. "afx"
+						end
+					):gsub( "(cfx)(afx)",
+						function( c, a )
+							return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
+						end, 1
+					)
+					local i = math.count( )
+					String = String:gsub( "(cfx)(afx)",
+						function( c, a )
+							local k, c, a = i( ) + 1
+							c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
+							a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
+							return c .. a == "" and "\\x" or c .. a
 						end
 					)
-					local replaces = min_alpha( isalpha .. Filter( capture ) )
-					return replaces
-				end
+					return String
+				end --june 13th 2020
 			)
-		else
-			shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-				function( isalpha, capture )
-					px = math.i( k, x_max )[ "1-->A" ]
-					py = math.i( k, x_max )[ "N,n" ]
-					cx = x_max / 2
-					cy = l.fontsize / 2
-					rx = floor( px + val_left - l.left )
-					d = math.distance( cx, cy, px, py )
-					a = math.angle( cx, cy, px, py )
-					i = k
-					n = #tbl.x
-					k = k + 1
-					local replaces = min_alpha( isalpha .. Filter( capture ) )
-					return replaces
+			-------------------------------
+			local function image_info( Image )
+				local get_info = image.to_pixels( Image, nil, true )
+				local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
+				local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
+				local img_table, indx = { }, ""
+				for i = 1, get_info.width * get_info.height do
+					indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+					img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
 				end
-			)
+				return img_table, an_x, an_y, get_info.width, get_info.height
+			end
+			local is_image, img_info
+			if type( Filter ) == "string" then			--si es una imagen .bmp
+				is_image = true
+				img_info, xi, yi, wi, hi = image_info( Filter )
+				Filter = function( i )
+					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+					x1, y1 = tonumber( x1 ), tonumber( y1 )
+					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+					local k = format( "%s,%s", xr, yr )
+					return img_info[ i ] or img_info[ k ] or "\\r"
+				end
+			end
+			-----------------------------------
+			local function min_alpha( String )
+				--elige al alpha más transparente y elimina al resto :D
+				local alphas, a = { }
+				for a in String:gmatch( "\\1a&H(%x%x)&" ) do
+					alphas[ #alphas + 1 ] = a
+				end
+				if #alphas > 1 then
+					for i = 1, #alphas do
+						alphas[ i ] = tonumber( alphas[ i ], 16 )
+					end
+					table.sort( alphas, function( a, b ) return a < b end )
+					String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
+				end
+				return String
+			end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
+			-----------------------------------
+			local tbl = shape.to_pixels( Shape, nil, nil, nil, { true } )
+			local tblx, str, c = { }
+			for i = 1, #tbl.x do
+				tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
+			end
+			local tbl_shp, id, is_shape = { }
+			for i = 1, y_max do
+				tbl_shp[ i ] = "{\\p1}"
+				for k = 1, x_max do
+					id = tostring( k ) .. "," .. tostring( i )
+					is_shape = format( "{\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
+					tbl_shp[ i ] = tbl_shp[ i ] .. ( tblx[ id ] and is_shape or "{\\x}m 0 0 l 1 1 " )
+				end
+				if not tbl_shp[ i ]:match( "1a" ) then
+					tbl_shp[ i ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
+				end
+				tbl_shp[ i ] = tbl_shp[ i ] .. "{\\p0}\\N"
+				while string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
+					str, c = string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 " )
+					tbl_shp[ i ] = tbl_shp[ i ]:gsub( str, format( "{\\x}m 0 0 l %s 1 ", c ) )
+				end		
+			end
+			shape_px = table.concat( tbl_shp )
+			local k = 1
+			if is_image and Line then
+				shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+					function( isalpha, capture )
+						px = math.i( k, x_max )[ "1-->A" ]
+						py = math.i( k, x_max )[ "N,n" ]
+						cx = x_max / 2
+						cy = l.fontsize / 2
+						rx = floor( px + val_left - l.left )
+						d = math.distance( cx, cy, px, py )
+						a = math.angle( cx, cy, px, py )
+						i = k
+						n = #tbl.x
+						k = k + 1
+						capture = capture:gsub( "(%d+)(,%d+)",
+							function( x, y )
+								local x = tonumber( x )
+								x = floor( x + val_left - l.left )
+								return tostring( x ) .. y
+							end
+						)
+						local replaces = min_alpha( isalpha .. Filter( capture ) )
+						return replaces
+					end
+				)
+			else
+				shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+					function( isalpha, capture )
+						px = math.i( k, x_max )[ "1-->A" ]
+						py = math.i( k, x_max )[ "N,n" ]
+						cx = x_max / 2
+						cy = l.fontsize / 2
+						rx = floor( px + val_left - l.left )
+						d = math.distance( cx, cy, px, py )
+						a = math.angle( cx, cy, px, py )
+						i = k
+						n = #tbl.x
+						k = k + 1
+						local replaces = min_alpha( isalpha .. Filter( capture ) )
+						return replaces
+					end
+				)
+			end
+			shape_px = shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" )
+			shape_px = remember( "shapefx", shape_px )
+			if Lines then
+				local Lshp, l = { }
+				local parts = Lines
+				for l in shape_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+					Lshp[ #Lshp + 1 ] = "{\\p1}" .. Reduc( l ):gsub( "(1c)&H(%x+)&", "%1%2" )
+				end
+				if type( Lines ) == "table" then
+					parts = ceil( #Lshp / Lines[ 1 ] )
+				end
+				lines_shp = table.inpack( Lshp, parts )
+				for i = 1, #lines_shp do
+					lines_shp[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
+						(i - 1) * parts, table.concat( lines_shp[ i ] ), #Lshp - i * parts
+					)
+				end
+				lines_shp = remember( "L_shapes", lines_shp )
+			end
 		end
-		shape_px = shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" ):gsub( "(1c)&H(%x+)&", "%1%2" )
+		if Lines then
+			return lines_shp
+		end
+		shape_px = shape_px:gsub( "(1c)&H(%x+)&", "%1%2" )
 		return shape_px --shape.grid( )
 	end --may 14th 2020
 	
-	function shape.gridr( Width, Height, Mode, Filter, Align )
-		--shape.gridr( 50, 50, nil, "test.bmp" )
+	function shape.gridr( Width, Height, Mode, Filter, Align, Lines )
 		if type( Width ) == "function" then
 			Width = Width( )
 		end
@@ -18533,75 +17070,145 @@
 		local Align = Align or 7					--alineación, en caso de ingresar imagen
 		local Filter = Filter or function( i ) return "\\x" end
 		----------------------------------
-		local function image_info( Image )
-			local get_info = image.to_pixels( Image, nil, true )
-			get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
-			local img_table, indx = { }, ""
-			local an_x = floor( ((Align - 1) % 3) * (Width - get_info.width) / 2 )
-			local an_y = floor( (3 - ceil( Align / 3 ) ) * (Height - get_info.height) / 2 )
-			for i = 1, get_info.width * get_info.height do
-				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
-				img_table[ indx ] = format( "%s%s",
-					get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
-					get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
-				)
-				img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
+		local Shape = recall.shp_gridr
+		local Reduc = recall.reduce
+		local lines_img = recall.L_images
+		if j == 1 then
+			-------------------------------
+			Reduc = remember( "reduce", function( String )
+					--reduce los colores y alphas repetidos
+					local coloralpha, c, a = { }
+					for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
+						coloralpha[ #coloralpha + 1 ] = { c, a }
+					end
+					String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
+						function( c, a )
+							return "cfx" .. "afx"
+						end
+					):gsub( "(cfx)(afx)",
+						function( c, a )
+							return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
+						end, 1
+					)
+					local i = math.count( )
+					String = String:gsub( "(cfx)(afx)",
+						function( c, a )
+							local k, c, a = i( ) + 1
+							c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
+							a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
+							return c .. a == "" and "\\x" or c .. a
+						end
+					)
+					return String
+				end --june 13th 2020
+			)
+			-------------------------------
+			local function image_info( Image )
+				local get_info = image.to_pixels( Image, nil, true )
+				local img_table, indx = { }, ""
+				local an_x = floor( ((Align - 1) % 3) * (Width - get_info.width) / 2 )
+				local an_y = floor( (3 - ceil( Align / 3 ) ) * (Height - get_info.height) / 2 )
+				for i = 1, get_info.width * get_info.height do
+					indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+					img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+				end
+				return img_table, an_x, an_y, get_info.width, get_info.height
 			end
-			return img_table, an_x, an_y, get_info.width, get_info.height
-		end
-		if type( Filter ) == "string" then			--si es una imagen .bmp
-			local img_info, xi, yi, wi, hi = image_info( Filter )
-			Filter = function( i )
-				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-				x1, y1 = tonumber( x1 ), tonumber( y1 )
-				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-				local k = format( "%s,%s", xr, yr )
-				return img_info[ i ] or img_info[ k ] or "\\r"
+			if type( Filter ) == "string" then			--si es una imagen .bmp
+				local img_info, xi, yi, wi, hi = image_info( Filter )
+				Filter = function( i )
+					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+					x1, y1 = tonumber( x1 ), tonumber( y1 )
+					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+					local k = format( "%s,%s", xr, yr )
+					return img_info[ i ] or img_info[ k ] or "\\r"
+				end
 			end
-		end
-		----------------------------------
-		local Shape, mx = ""
-		if Mode == "h" then --barras horizontales
-			for i = 1, Height do
-				Shape = Shape .. format( "{\\p1\\pix}m 0 0 l 0 1 l %s 1 l %s 0 {\\p0}\\N", Width, Width )
+			----------------------------------
+			Shape = ""
+			local mx, maxn
+			if Mode == "h" then --barras horizontales
+				for i = 1, Height do
+					Shape = Shape .. format( "{\\p1\\pix}m 0 0 l 0 1 l %s 1 l %s 0 {\\p0}\\N", Width, Width )
+				end
+				mx, maxn = 1, Height
+			elseif Mode == "v" then --barras verticales
+				Shape = "{\\p1}"
+				for i = 1, Width do
+					Shape = Shape .. format( "{\\pix}m 0 0 l 0 %s l 1 %s l 1 0 ", Height, Height )
+				end
+				maxn = Width
+			else --cuadrícula
+				Shape = "{\\p1}"
+				for i = 1, Width do
+					Shape = Shape .. "{\\pix}m 0 0 l 0 1 l 1 1 l 1 0 "
+				end
+				Shape = Shape .. "{\\p0}\\N"
+				local shp = Shape
+				for i = 1, Height - 1 do
+					Shape = Shape .. shp
+				end
+				maxn = Width * Height
 			end
-			mx = 1
-		elseif Mode == "v" then --barras verticales
-			Shape = "{\\p1}"
-			for i = 1, Width do
-				Shape = Shape .. format( "{\\pix}m 0 0 l 0 %s l 1 %s l 1 0 ", Height, Height )
+			local k = 1
+			Shape = Shape:gsub( "\\pix",
+				function( capture )
+					px = mx or math.i( k, Width )[ "1-->A" ]
+					py = mx and k or math.i( k, Width )[ "N,n" ]
+					id = format( "%s,%s", px, py )
+					cx = Width / 2
+					cy = Height / 2
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = maxn
+					k = k + 1
+					return Filter( id )
+				end
+			)
+			local str, c
+			while string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 ", true )[ 2 ] > 1 do
+				str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
+				Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
 			end
-		else --cuadrícula
-			Shape = "{\\p1}"
-			for i = 1, Width do
-				Shape = Shape .. "{\\pix}m 0 0 l 0 1 l 1 1 l 1 0 "
+			Shape = remember( "shp_gridr", Shape )
+			if Lines then
+				local Lshp, l = { }
+				local parts = Lines
+				if Shape:match( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) then
+					for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+						Lshp[ #Lshp + 1 ] = "{\\p1}" .. Reduc( l ):gsub( "(1c)&H(%x+)&", "%1%2" )
+					end
+					if type( Lines ) == "table" then
+						parts = ceil( #Lshp / Lines[ 1 ] )
+					end
+					lines_img = table.inpack( Lshp, parts )
+					for i = 1, #lines_img do
+						lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
+							(i - 1) * parts, table.concat( lines_img[ i ] ), #Lshp - i * parts
+						)
+					end
+				else
+					for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H\\]*" ) do
+					--	Lshp[ #Lshp + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
+						Lshp[ #Lshp + 1 ] = l:gsub( "(1c)&H(%x+)&", "%1%2" )
+					end
+					if type( Lines ) == "table" then
+						parts = ceil( #Lshp / Lines[ 1 ] )
+					end
+					lines_img = table.inpack( Lshp, parts )
+					for i = 1, #lines_img do
+						lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l %s 1 %s{\\x}m 0 0 l %s 1 ",
+							(i - 1) * parts, table.concat( lines_img[ i ] ), #Lshp - i * parts
+						)
+					end
+				end
+				lines_img = remember( "L_images", lines_img )
 			end
-			Shape = Shape .. "{\\p0}\\N"
-			local shp = Shape
-			for i = 1, Height - 1 do
-				Shape = Shape .. shp
-			end
-		end
-		local k = 1
-		Shape = Shape:gsub( "\\pix",
-			function( capture )
-				px = mx or math.i( k, Width )[ "1-->A" ]
-				py = mx and k or math.i( k, Width )[ "N,n" ]
-				id = format( "%s,%s", px, py )
-				cx = Width / 2
-				cy = Height / 2
-				d = math.distance( cx, cy, px, py )
-				a = math.angle( cx, cy, px, py )
-				i = k
-				k = k + 1
-				return Filter( id )
-			end
-		)
-		local str, c
-		while string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 ", true )[ 2 ] > 1 do
-			str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
-			Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
+		end --shape.gridr( 50, 50, nil, "test.bmp" )
+		if Lines then
+			return lines_img
 		end
 		Shape = Shape:gsub( "(1c)&H(%x+)&", "%1%2" )
 		return Shape --shape.gridr( )
@@ -19481,9 +18088,6 @@
 			if max_ipol == 0 then
 				return copy_tbl[ 1 ]
 			end
-			if fx.filter == "mod" then
-				max_ipol = count_n
-			end
 			local function ipol_number( val_1, val_2, pct_ipol )
 				return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 			end
@@ -19504,17 +18108,6 @@
 			end --text.tag( { "\\fscy", 100, 200, 50 } ) = text.tag( "\\fscy{ 100, 200, 50 }" )
 			tags_ipol[ #tags_ipol + 1 ] = copy_tbl[ #copy_tbl ]
 			---------------------------------------------------
-			if fx.filter == "mod" then
-				if tag_into:match( "\\c" )
-					or tag_into:match( "\\alpha" )
-					or tag_into:match( "\\%d[%d]*v?[ac]^*" ) then
-					if fx__.v_kanji == false then
-						return format( "(%s,%s,%s,%s)", tags_ipol[ count_i ], tags_ipol[ count_i + 1 ], tags_ipol[ count_i ], tags_ipol[ count_i + 1 ] )
-					end
-					return format( "(%s,%s,%s,%s)", tags_ipol[ count_i ], tags_ipol[ count_i ], tags_ipol[ count_i + 1 ], tags_ipol[ count_i + 1 ] )
-				end
-				return tags_ipol[ count_i ]
-			end
 			return tags_ipol[ count_i ] --rewrite: october 13th 2018
 		end
 		---------------------------------------------------------------
@@ -20276,17 +18869,17 @@
 		return false
 	end --text.inside( "-fx" )
 	
-	function text.bezier( Shape, mode, Accel, Offset_time )
+	function text.bezier( Shape, Mode, Accel, Offset_time )
 		if Shape == nil then
 			Shape = shape.displace( format( "m 0 0 l %d 0", l_width ), l_left, l_middle )
 			if linefx[ ii ].text:match( "\\i?clip%b()" ) then
 				Shape = linefx[ ii ].text:match( "\\i?clip%b()" )
 			end
 		end
-		local mode = mode or fx.offset.mode or 2
-		mode = ceil( abs( mode ) )
+		local Mode = fx.offset.Mode or Mode or 2
+		Mode = ceil( abs( Mode ) )
 		if type( Shape ) == "string" then
-			if l_actor:match( "circle" )
+			if l_effect:match( "circle" )
 				and Shape:match( "\\i?clip%b()" ) then
 				local center_x, center_y, Radius = math.circle( Shape )
 				local Coor = { }
@@ -20297,29 +18890,29 @@
 				local angle = math.angle( center_x, center_y, ang_x, ang_y )
 				local shape_crc = shape.centerpos( shape.size( shape.circle, 2 * (Radius + (fx.offset[ 1 ] or 0)) ) )
 				shape_crc = shape.displace( shape.rotate( shape_crc, angle - 90 + (fx.offset[ 2 ] or 0) ), center_x, center_y )
-				if l_actor:match( "icircle" ) then
+				if l_effect:match( "icircle" ) then
 					shape_crc = shape.reverse( shape_crc )
 				end
-				if mode >= 5 then
-					mode = (mode - 1) % 5 - 3
-					return math.bezier2move( shape_crc, mode, Accel, Offset_time )
+				if Mode >= 5 then
+					Mode = (Mode - 1) % 5 - 3
+					return math.bezier2move( shape_crc, Mode, Accel, Offset_time )
 					--modo 5 = 1
 					--modo 6 o más = 2
 				end
-				return math.bezier2( shape_crc, mode )
+				return math.bezier2( shape_crc, Mode )
 			end
-			if mode >= 5 then
-				mode = (mode - 1) % 5 - 3
-				return math.bezier2move( Shape, mode, Accel, Offset_time )
+			if Mode >= 5 then
+				Mode = (Mode - 1) % 5 - 3
+				return math.bezier2move( Shape, Mode, Accel, Offset_time )
 			end
-			return math.bezier2( Shape, mode )
+			return math.bezier2( Shape, Mode )
 		elseif type( Shape ) == "table" then
 			local t1 = Aceel
 			local t2 = Offset_time
-			if mode >= 5 then
-				mode = (mode - 1) % 5 + 1
+			if Mode >= 5 then
+				Mode = (Mode - 1) % 5 + 1
 			end
-			return math.movebezier( Shape, t1, t2, mode )
+			return math.movebezier( Shape, t1, t2, Mode )
 		end		
 	end --text.bezier( )
 	
@@ -20436,7 +19029,7 @@
 		local Shape = Shape or format( "m %s %s l %s %s", val_left, val_bottom, val_right, val_bottom )
 		Shape = shape.ratio( Shape, text_scale )
 		shape.info( Shape )
-		local text_shape = shape.filter2( text.to_shape( Text, text_scale, nil, true ), nil, Split * text_scale )
+		local text_shape = shape.filter( text.to_shape( Text, text_scale, nil, true ), Split * text_scale, nil )
 		if text_shape ~= "" then
 			local Ratio = math.round( (text_scale * aegisub.width( Text )) / shape.length( Shape ), 3 )
 			local Mode = Mode or 1
@@ -20506,7 +19099,7 @@
 				end
 				return x, y
 			end
-			local text_shp2 = shape.filter2( text_shp1, text_fltr, 6 )
+			local text_shp2 = shape.filter( text_shp1, 6, text_fltr )
 			return format( "{\\p1%s}%s", extra_tags or "", text_shp2 )
 		end
 		return ""
@@ -20917,7 +19510,7 @@
 		end
 		if type( Text ) == "table" then
 			for i = 1, #Text do
-				Text[ i ] = shape.filter3( Text[ i ], Split, ... )
+				Text[ i ] = shape.filter( Text[ i ], Split, ... )
 			end
 		else
 			Text = text.to_shape( Text, 1 )
@@ -21190,125 +19783,158 @@
 		local Align = Align or 7 --alineación, en caso de ingresar imagen
 		local x_max, y_max = aegisub.width( Text ), aegisub.height( Text )
 		-----------------------------------
-		local function image_info( Image )
-			local get_info = image.to_pixels( Image, nil, true )
-			get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
-			local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
-			local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
-			local img_table, indx = { }, ""
-			for i = 1, get_info.width * get_info.height do
-				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
-				img_table[ indx ] = format( "%s%s",
-					get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
-					get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
-				)
-				img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
-			end
-			return img_table, an_x, an_y, get_info.width, get_info.height
-		end
-		local is_image, img_info
-		if type( Filter ) == "string" then --si es una imagen .bmp
-			is_image = true
-			img_info, xi, yi, wi, hi = image_info( Filter )
-			Filter = function( i )
-				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-				x1, y1 = tonumber( x1 ), tonumber( y1 )
-				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-				local k = format( "%s,%s", xr, yr )
-				return img_info[ i ] or img_info[ k ] or "\\r"
-			end
-		end
-		-----------------------------------
-		local function min_alpha( String )
-			--elige al alpha más transparente y elimina al resto :D
-			local alphas, a = { }
-			for a in String:gmatch( "\\1a&H(%x%x)&" ) do
-				alphas[ #alphas + 1 ] = a
-			end
-			if #alphas > 1 then
-				for i = 1, #alphas do
-					alphas[ i ] = tonumber( alphas[ i ], 16 )
-				end
-				table.sort( alphas, function( a, b ) return a < b end )
-				String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
-			end
-			return String
-		end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
-		-----------------------------------
-		local tbl = text.to_pixels( Text, nil, nil, nil, nil, { true } )
-		local x = table.op( tbl.x, "rank" )
-		local y = table.op( tbl.y, "rank" )
-		local tblx, str, c = { }
-		for i = 1, #tbl.x do
-			tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
-		end
-		local x_min, y_min = table.op( tbl.x, "min" ), table.op( tbl.y, "min" )
-		local x_max, y_max = x_min + x, y_min + y
-		local tbl_shp, id, is_shape = { }
-		for i = y_min, y_max do
-			tbl_shp[ i - y_min + 1 ] = ""
-			for k = x_min, x_max do
-				id = tostring( k ) .. "," .. tostring( i )
-				is_shape = format( "{\\p1\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
-				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. ( tblx[ id ] and is_shape or "{\\p1}m 0 0 l 1 1 " )
-			end
-			if not tbl_shp[ i - y_min + 1 ]:match( "1a" ) then
-				tbl_shp[ i - y_min + 1 ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
-			end
-			tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. "{\\p0}\\N"
-			while string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
-				str, c = string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 " )
-				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ]:gsub( str, format( "{\\p1}m 0 0 l %s 1 ", c ) )
-			end		
-		end
-		local text_px = table.concat( tbl_shp )
-		local k = 1
-		if is_image and Line then
-			text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-				function( isalpha, capture )
-					px = math.i( k, x_max )[ "1-->A" ]
-					py = math.i( k, x_max )[ "N,n" ]
-					cx = x_max / 2
-					cy = l.fontsize / 2
-					rx = floor( px + val_left - l.left )
-					d = math.distance( cx, cy, px, py )
-					a = math.angle( cx, cy, px, py )
-					i = k
-					n = #tbl.x
-					k = k + 1
-					capture = capture:gsub( "(%d+)(,%d+)",
-						function( x, y )
-							local x = tonumber( x )
-							x = floor( x + val_left - l.left )
-							return tostring( x ) .. y
+		local text_px = recall.textpixel
+		local Reduc = recall.reduce
+		if j == 1 then
+			-------------------------------
+			Reduc = remember( "reduce", function( String )
+					--reduce los colores y alphas repetidos
+					local coloralpha, c, a = { }
+					for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
+						coloralpha[ #coloralpha + 1 ] = { c, a }
+					end
+					String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
+						function( c, a )
+							return "cfx" .. "afx"
+						end
+					):gsub( "(cfx)(afx)",
+						function( c, a )
+							return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
+						end, 1
+					)
+					local i = math.count( )
+					String = String:gsub( "(cfx)(afx)",
+						function( c, a )
+							local k, c, a = i( ) + 1
+							c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
+							a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
+							return c .. a == "" and "\\x" or c .. a
 						end
 					)
-					local replaces = min_alpha( isalpha .. Filter( capture ) )
-					return replaces
-				end
+					return String
+				end --june 13th 2020
 			)
-		else
-			text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-				function( isalpha, capture )
-					px = math.i( k, x_max )[ "1-->A" ]
-					py = math.i( k, x_max )[ "N,n" ]
-					cx = x_max / 2
-					cy = l.fontsize / 2
-					rx = floor( px + val_left - l.left )
-					d = math.distance( cx, cy, px, py )
-					a = math.angle( cx, cy, px, py )
-					i = k
-					n = #tbl.x
-					k = k + 1
-					local replaces = min_alpha( isalpha .. Filter( capture ) )
-					return replaces
+			-------------------------------
+			local function image_info( Image )
+				local get_info = image.to_pixels( Image, nil, true )
+				local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
+				local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
+				local img_table, indx = { }, ""
+				for i = 1, get_info.width * get_info.height do
+					indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+					img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
 				end
-			)
+				return img_table, an_x, an_y, get_info.width, get_info.height
+			end
+			local is_image, img_info
+			if type( Filter ) == "string" then --si es una imagen .bmp
+				is_image = true
+				img_info, xi, yi, wi, hi = image_info( Filter )
+				Filter = function( i )
+					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+					x1, y1 = tonumber( x1 ), tonumber( y1 )
+					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+					local k = format( "%s,%s", xr, yr )
+					return img_info[ i ] or img_info[ k ] or "\\r"
+				end
+			end
+			-----------------------------------
+			local function min_alpha( String )
+				--elige al alpha más transparente y elimina al resto :D
+				local alphas, a = { }
+				for a in String:gmatch( "\\1a&H(%x%x)&" ) do
+					alphas[ #alphas + 1 ] = a
+				end
+				if #alphas > 1 then
+					for i = 1, #alphas do
+						alphas[ i ] = tonumber( alphas[ i ], 16 )
+					end
+					table.sort( alphas, function( a, b ) return a < b end )
+					String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
+				end
+				return String
+			end
+			-----------------------------------
+			local tbl = text.to_pixels( Text, nil, nil, nil, nil, { true } )
+			local x = table.op( tbl.x, "rank" )
+			local y = table.op( tbl.y, "rank" )
+			local tblx, str, c = { }
+			for i = 1, #tbl.x do
+				tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
+			end
+			local x_min, y_min = table.op( tbl.x, "min" ), table.op( tbl.y, "min" )
+			local x_max, y_max = x_min + x, y_min + y
+			local tbl_shp, id, is_shape = { }
+			for i = y_min, y_max do
+				tbl_shp[ i - y_min + 1 ] = ""
+				for k = x_min, x_max do
+					id = tostring( k ) .. "," .. tostring( i )
+					is_shape = format( "{\\p1\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
+					tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. ( tblx[ id ] and is_shape or "{\\p1}m 0 0 l 1 1 " )
+				end
+				if not tbl_shp[ i - y_min + 1 ]:match( "1a" ) then
+					tbl_shp[ i - y_min + 1 ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
+				end
+				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. "{\\p0}\\N"
+				while string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
+					str, c = string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 " )
+					tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ]:gsub( str, format( "{\\p1}m 0 0 l %s 1 ", c ) )
+				end		
+			end
+			text_px = table.concat( tbl_shp )
+			local k = 1
+			if is_image and Line then
+				text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+					function( isalpha, capture )
+						px = math.i( k, x_max )[ "1-->A" ]
+						py = math.i( k, x_max )[ "N,n" ]
+						cx = x_max / 2
+						cy = l.fontsize / 2
+						rx = floor( px + val_left - l.left )
+						d = math.distance( cx, cy, px, py )
+						a = math.angle( cx, cy, px, py )
+						i = k
+						n = #tbl.x
+						k = k + 1
+						capture = capture:gsub( "(%d+)(,%d+)",
+							function( x, y )
+								local x = tonumber( x )
+								x = floor( x + val_left - l.left )
+								return tostring( x ) .. y
+							end
+						)
+						local replaces = min_alpha( isalpha .. Filter( capture ) )
+						return replaces
+					end
+				)
+			else
+				text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+					function( isalpha, capture )
+						px = math.i( k, x_max )[ "1-->A" ]
+						py = math.i( k, x_max )[ "N,n" ]
+						cx = x_max / 2
+						cy = l.fontsize / 2
+						rx = floor( px + val_left - l.left )
+						d = math.distance( cx, cy, px, py )
+						a = math.angle( cx, cy, px, py )
+						i = k
+						n = #tbl.x
+						k = k + 1
+						local replaces = min_alpha( isalpha .. Filter( capture ) )
+						return replaces
+					end
+				)
+			end
+			local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
+			local shape_f = format( "{\\p1}m 0 0 l %s %s ", x, l.height - y_max - 1 )
+			text_px = shape_i .. text_px .. shape_f
+			local textlines, l = { }
+			for l in text_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+				textlines[ #textlines + 1 ] = "{\\p1}" .. Reduc( l:gsub( "(\\1a&H%x+&)(\\1c&H%x+&)", "%2%1" ) ):gsub( "(1c)&H(%x+)&", "%1%2" )
+			end
+			text_px = remember( "textpixel", table.concat( textlines ):gsub( "{\\p1}{\\p1}", "{\\p1}" ):gsub( "\\p1\\", "\\" ) )
 		end
-		local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
-		local shape_f = format( "{\\p1}m 0 0 l %s %s ", x, l.height - y_max - 1 )
-		text_px = shape_i .. text_px .. shape_f
 		return text_px --text.grid( )
 	end --may 14th 2020
 
@@ -21356,29 +19982,73 @@
 		return format( "%s{\\bord0\\shad0\\fscx%s\\fscy%s\\p1}%s", bmp_tag, 100 * Size, 100 * Size, shape.pixel )
 	end --image.to_pixels( ) --image.to_pixels( "pngbar.png" )
 	
-	function image.grid( Image )
+	function image.grid( Image, Lines )
 		local Image = Image or "test.bmp"
 		local get_info = image.to_pixels( Image, nil, true )
-		get_info.color[ 0 ], get_info.alpha[ 0 ] = "", ""
-		local img_table, indx = { }, ""
-		for i = 1, get_info.width * get_info.height do
-			indx = tostring( math.i( i, get_info.width )[ "1-->A" ] ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] )
-			img_table[ indx ] = format( "%s%s",
-				get_info.color[ i ] == get_info.color[ i - 1 ] and "" or "\\1c" .. get_info.color[ i ],
-				get_info.alpha[ i ] == get_info.alpha[ i - 1 ] and "" or "\\1a" .. get_info.alpha[ i ]
-			)
-			img_table[ indx ] = img_table[ indx ] == "" and "\\x" or img_table[ indx ]
-		end
-		local image_px, id = { }
-		for i = 1, get_info.height do
-			image_px[ i ] = "{\\p1}"
-			for k = 1, get_info.width do
-				id = tostring( k ) .. "," .. tostring( i )
-				image_px[ i ] = image_px[ i ] .. format( "{%s}m 0 0 l 0 1 l 1 1 l 1 0 ", img_table[ id ] )
+		local img_table, indx = recall.image_tbl, ""
+		local image_px, id = recall.image_lin, ""
+		local lines_img = recall.Limages
+		if j == 1 then
+			-------------------------------
+			local function reduce( String )
+				--reduce los colores y alphas repetidos
+				local coloralpha, c, a = { }
+				for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
+					coloralpha[ #coloralpha + 1 ] = { c, a }
+				end
+				String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
+					function( c, a )
+						return "cfx" .. "afx"
+					end
+				):gsub( "(cfx)(afx)",
+					function( c, a )
+						return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
+					end, 1
+				)
+				local i = math.count( )
+				String = String:gsub( "(cfx)(afx)",
+					function( c, a )
+						local k, c, a = i( ) + 1
+						c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
+						a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
+						return c .. a == "" and "\\x" or c .. a
+					end
+				)
+				return String
+			end --june 13th 2020
+			-------------------------------
+			img_table = remember( "image_tbl", { } )
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] )
+				img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
 			end
-			image_px[ i ] = image_px[ i ] .. "{\\p0}\\N"
+			image_px = remember( "image_lin", { } )
+			for i = 1, get_info.height do
+				image_px[ i ] = "{\\p1}"
+				for k = 1, get_info.width do
+					id = tostring( k ) .. "," .. tostring( i )
+					image_px[ i ] = image_px[ i ] .. format( "{%s}m 0 0 l 0 1 l 1 1 l 1 0 ", img_table[ id ] )
+				end
+				image_px[ i ] = reduce( image_px[ i ] ):gsub( "(1c)&H(%x+)&", "%1%2" ) .. "{\\p0}\\N"
+			end
+			if Lines then
+				local parts = Lines
+				if type( Lines ) == "table" then
+					parts = ceil( #image_px / Lines[ 1 ] )
+				end
+				lines_img = table.inpack( image_px, parts )
+				for i = 1, #lines_img do
+					lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
+						(i - 1) * parts, table.concat( lines_img[ i ] ), #image_px - i * parts
+					)
+				end
+				lines_img = remember( "Limages", lines_img )
+			end
 		end
-		local image_pix = table.concat( image_px ):gsub( "(1c)&H(%x+)&", "%1%2" )
+		if Lines then
+			return lines_img
+		end
+		local image_pix = table.concat( image_px )
 		return image_pix --image.grid( )
 	end --may 14th 2020
 
@@ -21910,7 +20580,7 @@
 		[ 19 ] = { name = "linecomment";		class = "checkbox"; x = 0; y = 16;	height = 1; width = 1;	label = "Line Comment";			hint = "Comment the Lines of Karaoke.";		value = true },
 		[ 20 ] = { name = "saveconfiguration";	class = "checkbox"; x = 0; y = 17;	height = 1; width = 1;	label = "Save Configuration";	hint = "Save the Configuration of Text.";	value = true },
 		[ 23 ] = {								class = "label";	x = 0; y = 3;	height = 1; width = 1;	label = "                     Using Tags Filter:" },
-		[ 24 ] = { name = "tags_filter";		class = "dropdown";	x = 1; y = 3;	height = 1; width = 4;	hint  = "Select the Filter to be used for the Tags Colors and Alpha of Text.";	items = { "XY-VSFilter", "VSFilterMod", "No Tags Color and Alpha", "No Tags Color and Alpha [VSFilterMod]" };	value = "XY-VSFilter" },
+		[ 24 ] = { name = "tags_filter";		class = "dropdown";	x = 1; y = 3;	height = 1; width = 4;	hint  = "Select the Filter to be used for the Tags Colors and Alpha of Text.";	items = { "XY-VSFilter", "No Tags Color and Alpha" };	value = "XY-VSFilter" },
 		[ 25 ] = {								class = "label";	x = 0; y = 9;	height = 1; width = 1;	label = "Kara Effector " .. script_version .. script_update },
 		[ 26 ] = {								class = "label";	x = 0; y = 10;	height = 1; width = 1;	label = Effector_Lib_modified },
 		[ 27 ] = {								class = "label";	x = 0; y = 11;	height = 1; width = 1;	label = "(c) Vict8r Kara" },
@@ -22004,12 +20674,12 @@
 	
 	-- Hints ----------------------------
 	effector.GUI_modify[ 29 ].hint = "Effect Type to Apply at Line Effect"
-	effector.GUI_modify[ 32 ].hint = "shape.color1 or SC1: Primary Color Shape"
-	effector.GUI_modify[ 33 ].hint = "shape.color3 or SC3: Border Color Shape"
-	effector.GUI_modify[ 34 ].hint = "shape.color4 or SC4: Shadow Color Shape"
-	effector.GUI_modify[ 35 ].hint = "shape.alpha1 or SA1: Primary Alpha Shape"
-	effector.GUI_modify[ 36 ].hint = "shape.alpha3 or SA3: Border Alpha Shape"
-	effector.GUI_modify[ 37 ].hint = "shape.alpha4 or SA4: Shadow Alpha Shape"
+	effector.GUI_modify[ 32 ].hint = "shape.color1 or SC1: Primary Color Shape \\1c"
+	effector.GUI_modify[ 33 ].hint = "shape.color3 or SC3: Border Color Shape \\3c"
+	effector.GUI_modify[ 34 ].hint = "shape.color4 or SC4: Shadow Color Shape \\4c"
+	effector.GUI_modify[ 35 ].hint = "shape.alpha1 or SA1: Primary Alpha Shape \\1a"
+	effector.GUI_modify[ 36 ].hint = "shape.alpha3 or SA3: Border Alpha Shape \\3a"
+	effector.GUI_modify[ 37 ].hint = "shape.alpha4 or SA4: Shadow Alpha Shape \\4a"
 	effector.GUI_modify[ 38 ].hint = "fx.start_time: Is the Start Time Line Effect"
 	effector.GUI_modify[ 39 ].hint = "fx.end_time: Is the End Time Line Effect\nfx.dur = fx.end_time - fx.start_time"
 	effector.GUI_modify[ 40 ].hint = "fx.fun_x: Parametric Function Equation for X, example: x( s ) = 3 * sin(s + 1)"
@@ -22177,24 +20847,24 @@
 	
 	function table.inbox2( table_data )
 		table__ = { }
-		table__.effect		= table_data[ 01 ].label				table__.t_type		= table_data[ 29 ].value
-		table__.noblank		= table_data[ 30 ].value				table__.v_kanji		= table_data[ 31 ].value
-		table__.color1		= table_data[ 32 ].value				table__.color3		= table_data[ 33 ].value
-		table__.color4		= table_data[ 34 ].value				table__.alpha1		= table_data[ 35 ].value
-		table__.alpha3		= table_data[ 36 ].value				table__.alpha4		= table_data[ 37 ].value
-		table__.start_t		= table_data[ 38 ].text					table__.end_t		= table_data[ 39 ].text
-		table__.fun_x		= table_data[ 40 ].text					table__.fun_y		= table_data[ 41 ].text
-		table__.s_i			= table_data[ 42 ].text					table__.s_f			= table_data[ 43 ].text
-		table__.center_x	= table_data[ 44 ].text					table__.center_y	= table_data[ 45 ].text
-		table__.scale_x		= table_data[ 46 ].text					table__.scale_y		= table_data[ 47 ].text
-		table__.align		= table_data[ 48 ].text					table__.layer		= table_data[ 49 ].text
-		table__.move_x		= table_data[ 50 ].text					table__.move_y		= table_data[ 51 ].text
-		table__.move_t		= table_data[ 52 ].text					table__.loops		= table_data[ 53 ].text
-		table__.size		= table_data[ 54 ].text					table__.returnfx	= table_data[ 55 ].text
-		table__.addtag		= table_data[ 56 ].text					table__.variable	= table_data[ 57 ].text
-		table__.namefx		= table_data[ 62 ].text					table__.folderfx	= table_data[ 63 ].value
-		table__.language	= table_data[ 66 ].value or "Lua"		table__.modify		= table_data[ 67 ].value or false
-		table__.keeptagsfx	= table_data[ 69 ].value				table__.reverfx		= table_data[ 70 ].value or false
+		table__.effect		= table_data[ 01 ].label			table__.t_type		= table_data[ 29 ].value
+		table__.noblank		= table_data[ 30 ].value			table__.v_kanji		= table_data[ 31 ].value
+		table__.color1		= table_data[ 32 ].value			table__.color3		= table_data[ 33 ].value
+		table__.color4		= table_data[ 34 ].value			table__.alpha1		= table_data[ 35 ].value
+		table__.alpha3		= table_data[ 36 ].value			table__.alpha4		= table_data[ 37 ].value
+		table__.start_t		= table_data[ 38 ].text				table__.end_t		= table_data[ 39 ].text
+		table__.fun_x		= table_data[ 40 ].text				table__.fun_y		= table_data[ 41 ].text
+		table__.s_i			= table_data[ 42 ].text				table__.s_f			= table_data[ 43 ].text
+		table__.center_x	= table_data[ 44 ].text				table__.center_y	= table_data[ 45 ].text
+		table__.scale_x		= table_data[ 46 ].text				table__.scale_y		= table_data[ 47 ].text
+		table__.align		= table_data[ 48 ].text				table__.layer		= table_data[ 49 ].text
+		table__.move_x		= table_data[ 50 ].text				table__.move_y		= table_data[ 51 ].text
+		table__.move_t		= table_data[ 52 ].text				table__.loops		= table_data[ 53 ].text
+		table__.size		= table_data[ 54 ].text				table__.returnfx	= table_data[ 55 ].text
+		table__.addtag		= table_data[ 56 ].text				table__.variable	= table_data[ 57 ].text
+		table__.namefx		= table_data[ 62 ].text				table__.folderfx	= table_data[ 63 ].value
+		table__.language	= table_data[ 66 ].value or "Lua"	table__.modify		= table_data[ 67 ].value or false
+		table__.keeptagsfx	= table_data[ 69 ].value			table__.reverfx		= table_data[ 70 ].value or false
 		return table__
 	end
 	---------------------------------------------------------
@@ -22312,20 +20982,8 @@
 		local pos, options_pos, options_pdy, offset_posx
 		if t_move == 1 then
 			pos = format( "\\pos(%s,%s)", t_pos[ 1 ], t_pos[ 2 ] )
-		elseif t_move == 2 then
+		elseif t_move >= 2 then
 			pos = format( "\\move(%s,%s,%s,%s)", t_pos[ 1 ], t_pos[ 2 ], t_pos[ 3 ], tostring( t_pos[ 4 ] ) .. t_time )
-		elseif t_move == 3 then
-			pos = format( "\\moves3(%s,%s,%s,%s,%s,%s)", t_pos[ 1 ], t_pos[ 2 ], t_pos[ 3 ], t_pos[ 4 ],
-				t_pos[ 5 ], tostring( t_pos[ 6 ] ) .. t_time
-			)
-		elseif t_move == 4 then
-			pos = format( "\\moves4(%s,%s,%s,%s,%s,%s,%s,%s)", t_pos[ 1 ], t_pos[ 2 ], t_pos[ 3 ], t_pos[ 4 ],
-				t_pos[ 5 ], t_pos[ 6 ], t_pos[ 7 ], tostring( t_pos[ 8 ] ) .. t_time
-			)
-		elseif t_move == 6 then
-			pos = format( "\\mover(%s,%s,%s,%s,%s,%s,%s,%s)", t_pos[ 1 ], t_pos[ 2 ], t_pos[ 3 ], t_pos[ 4 ],
-				t_pos[ 9 ], t_pos[ 10 ], t_pos[ 11 ], tostring( t_pos[ 12 ] ) .. t_time
-			)
 		else
 			pos = ""
 		end
@@ -22372,109 +21030,6 @@
 			pos_knjy = options_py[ ceil( l.align / 3 ) ]
 		end
 		return pos_knjx + pos_rever_x, pos_knjy
-	end
-
-	function effector.offset_pos( string_inPos, offset_dx, offset_dy )
-		local offset_dx = offset_dx or 0
-		local offset_dy = offset_dy or 0
-		local cap_pos, cap_tag = { }, { }
-		local pos_cap = {
-			[ 1 ] = "\\pos%b()",
-			[ 2 ] = "\\org%b()",
-			[ 3 ] = "\\move%b()",
-			[ 4 ] = "\\movevc%b()",
-			[ 5 ] = "\\moves3%b()",
-			[ 6 ] = "\\moves4%b()",
-			[ 7 ] = "\\mover%b()",
-		}
-		for i = 1, #pos_cap do
-			for oC in string_inPos:gmatch( pos_cap[ i ] ) do
-				table.insert( cap_pos, oC )
-			end
-		end
-		if #cap_pos > 0 then
-			for i = 2, #cap_pos + 1 do
-				cap_tag[ i - 1 ] = { [ 1 ] = cap_pos[ i - 1 ]:match( "\\(%w+)" ) }
-				cap_pos[ i - 1 ] = cap_pos[ i - 1 ]:gsub( "\\%w+", "" )
-				for oCC in cap_pos[ i - 1 ]:gmatch( "%-?%d+[%.%d+]*" ) do
-					table.insert( cap_tag[ i - 1 ], tonumber( oCC ) )
-				end
-			end
-		end
-		for i = 1, #cap_tag do
-			if cap_tag[ i ][ 1 ] == "pos"
-				or cap_tag[ i ][ 1 ] == "org" then
-				string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-					format( "\\%s(%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy )
-				)
-			elseif cap_tag[ i ][ 1 ] == "move"
-				or cap_tag[ i ][ 1 ] == "movevc" then
-				if #cap_tag[ i ] == 5 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ] + offset_dy
-						)
-					)
-				elseif #cap_tag[ i ] == 7 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ] + offset_dy, cap_tag[ i ][ 6 ], cap_tag[ i ][ 7 ]
-						)
-					)
-				else --\\movevc(x,y)
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy )
-					)
-				end
-			elseif cap_tag[ i ][ 1 ] == "moves3" then
-				if #cap_tag[ i ] == 7 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ] + offset_dy, cap_tag[ i ][ 6 ] + offset_dx, cap_tag[ i ][ 7 ] + offset_dy
-						)
-					)
-				elseif #cap_tag[ i ] == 9 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ] + offset_dy, cap_tag[ i ][ 6 ] + offset_dx, cap_tag[ i ][ 7 ] + offset_dy,
-							cap_tag[ i ][ 8 ], cap_tag[ i ][ 9 ]
-						)
-					)
-				end
-			elseif cap_tag[ i ][ 1 ] == "moves4" then
-				if #cap_tag[ i ] == 9 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ] + offset_dy, cap_tag[ i ][ 6 ] + offset_dx, cap_tag[ i ][ 7 ] + offset_dy,
-							cap_tag[ i ][ 8 ] + offset_dx, cap_tag[ i ][ 9 ] + offset_dy
-						)
-					)
-				elseif #cap_tag[ i ] == 11 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ] + offset_dy, cap_tag[ i ][ 6 ] + offset_dx, cap_tag[ i ][ 7 ] + offset_dy,
-							cap_tag[ i ][ 8 ] + offset_dx, cap_tag[ i ][ 9 ] + offset_dy, cap_tag[ i ][ 10 ], cap_tag[ i ][ 11 ]
-						)
-					)
-				end
-			elseif cap_tag[ i ][ 1 ] == "mover" then
-				if #cap_tag[ i ] == 9 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ], cap_tag[ i ][ 6 ], cap_tag[ i ][ 7 ], cap_tag[ i ][ 8 ], cap_tag[ i ][ 9 ]
-						)
-					)
-				elseif #cap_tag[ i ] == 11 then
-					string_inPos = string_inPos:gsub( "\\" .. cap_tag[ i ][ 1 ] .. "%b()",
-						format( "\\%s(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", cap_tag[ i ][ 1 ], cap_tag[ i ][ 2 ] + offset_dx, cap_tag[ i ][ 3 ] + offset_dy,
-							cap_tag[ i ][ 4 ] + offset_dx, cap_tag[ i ][ 5 ], cap_tag[ i ][ 6 ], cap_tag[ i ][ 7 ], cap_tag[ i ][ 8 ], cap_tag[ i ][ 9 ],
-							cap_tag[ i ][ 10 ], cap_tag[ i ][ 11 ]
-						)
-					)
-				end
-			end
-		end
-		return string_inPos
 	end
 
 	function effector.import( Lua_file )
@@ -22550,23 +21105,10 @@
 		local newpos = format( "\\pos(%s,%s)",
 			math.round( posx + fx.move_x1 - fx.pos_x, 3 ), math.round( posy + fx.move_y1 - fx.pos_y, 3 )
 		)
-		if Nmove == 2 then
+		if Nmove >= 2 then
 			newpos = format( "\\move(%s,%s,%s,%s)",
 				math.round( posx + fx.move_x1 - fx.pos_x, 3 ), math.round( posy + fx.move_y1 - fx.pos_y, 3 ),
 				math.round( posx + fx.move_x2 - fx.pos_x, 3 ), math.round( posy + fx.move_y2 - fx.pos_y, 3 ) .. tags_times
-			)
-		elseif Nmove == 3 then
-			newpos = format( "\\moves3(%s,%s,%s,%s,%s,%s)",
-				math.round( posx + fx.move_x1 - fx.pos_x, 3 ), math.round( posy + fx.move_y1 - fx.pos_y, 3 ),
-				math.round( posx + fx.move_x2 - fx.pos_x, 3 ), math.round( posy + fx.move_y2 - fx.pos_y, 3 ),
-				math.round( posx + fx.move_x3 - fx.pos_x, 3 ), math.round( posy + fx.move_y3 - fx.pos_y, 3 ) .. tags_times
-			)
-		elseif Nmove == 4 then
-			newpos = format( "\\moves4(%s,%s,%s,%s,%s,%s,%s,%s)",
-				math.round( posx + fx.move_x1 - fx.pos_x, 3 ), math.round( posy + fx.move_y1 - fx.pos_y, 3 ),
-				math.round( posx + fx.move_x2 - fx.pos_x, 3 ), math.round( posy + fx.move_y2 - fx.pos_y, 3 ),
-				math.round( posx + fx.move_x3 - fx.pos_x, 3 ), math.round( posy + fx.move_y3 - fx.pos_y, 3 ),
-				math.round( posx + fx.move_x4 - fx.pos_x, 3 ), math.round( posy + fx.move_y4 - fx.pos_y, 3 ) .. tags_times
 			)
 		end
 		--fx.pos_x, fx.pos_y = posx, posy
@@ -22596,8 +21138,8 @@
 	function effector.effect_offset( )
 		fx.offset = { }
 		local line = linefx[ ii ]
-		if pcall( loadstring( format( "return function( meta, line, x, y ) return { %s } end", l_fx ) ) ) then
-			local linefx_to_function = loadstring( format( "return function( meta, line, x, y ) return { %s } end", l_fx ) )( )
+		if pcall( loadstring( format( "return function( meta, line, x, y ) return { %s } end", l_actor ) ) ) then
+			local linefx_to_function = loadstring( format( "return function( meta, line, x, y ) return { %s } end", l_actor ) )( )
 			fx.offset = linefx_to_function( meta, line, x, y )
 		end
 	end --rewrite: may 31st 2020
@@ -23158,10 +21700,10 @@
 	function effector.preprosses_macro( subtitles, sett, fx__, selected_lines )
 		local subs = { }
 		if sett.line_style == "Selected Lines" then
-			--líneas seleccionadas (no comentadas)
+			--líneas seleccionadas
 			for _, i in ipairs( selected_lines ) do
 				if subtitles[ i ].class == "dialogue"
-					and not subtitles[ i ].comment
+					--and not subtitles[ i ].comment --june 02nd 2020
 					and subtitles[ i ].effect ~= "Effector [fx]"
 					and subtitles[ i ].effect ~= "fx" then
 					table.insert( subs, i )
