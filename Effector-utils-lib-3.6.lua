@@ -8753,8 +8753,7 @@
 							return format( "\\t(%s,%s", time1, time2 )
 						end
 					)
-					if time2 <= 0 
-						or time1 >= fx.end_time then
+					if time1 >= fx.end_time then
 						return ""
 					end
 					return tagst
