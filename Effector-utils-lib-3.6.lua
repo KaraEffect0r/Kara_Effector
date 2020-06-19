@@ -194,8 +194,6 @@
 		+	tag.to_vsf( String )
 		-	tag.ipol( Ipol_i, ... )
 		+	tag.temp2( my_temp )
-		+	tag.inbar( string_tags )
-			tag.delete( String, ... )
 		+	tag.delete_in_return( return_fx )
 		+	tag.cyclic( Dur, Dur_tr, Delay, Fad_i, Fad_f, tags_ini, tags_fin )
 		<	tag.sec( Dur, Dur_tr, tags_ini, tags_fin )
@@ -1949,9 +1947,12 @@
 				T_o_N[ i ] = i
 			end
 		end
+		if #T_o_N == 1 then
+			return T_o_N[ 1 ]
+		end --add: june 18th 2020
 		local rand_e = T_o_N[ R( #T_o_N ) ]
 		if rand_e == table_random then
-			rand_e = T_o_N[ R( #T_o_N ) ]--table.random( T_o_N )
+			rand_e = T_o_N[ R( #T_o_N ) ]
 		end
 		table_random = rand_e
 		return rand_e
@@ -8134,52 +8135,6 @@
 			[ 4 ] = "\\3a",		[ 5 ] = "\\4a",		[ 6 ] = "\\1va",
 			[ 7 ] = "\\2va",	[ 8 ] = "\\3va",	[ 9 ] = "\\4va",
 		}
-		---------------------------------
-		local function tag_xipol1( values )
-			if #values == 1 then
-				values[ 2 ] = values[ 1 ]
-			end
-			local vals_xipol1 = recall.ipolx1
-			local max_loop = maxj - 1
-			local ipol_i, ipol_f, pct_ip
-			if maxj == 1 then
-				return values[ 1 ]
-			end
-			if j == 1 then
-				vals_xipol1 = remember( "ipolx1", { } )
-				for i = 1, max_loop do
-					ipol_i = values[ floor( (i - 1) / (max_loop / (#values - 1)) ) + 1 ]
-					ipol_f = values[ floor( (i - 1) / (max_loop / (#values - 1)) ) + 2 ]
-					pct_ip = floor( (i - 1) % (max_loop / (#values - 1)) ) / (max_loop / (#values - 1))
-					vals_xipol1[ i ] = ipol_i + (ipol_f - ipol_i) * pct_ip
-				end
-				vals_xipol1[ #vals_xipol1 + 1 ] = values[ #values ]
-			end
-			return vals_xipol1[ j ]
-		end
-		---------------------------------
-		local function tag_xipol2( values )
-			if #values == 1 then
-				values[ 2 ] = values[ 1 ]
-			end
-			local vals_xipol2 = recall.ipolx2
-			local max_loop = val_n - 1
-			local ipol_i, ipol_f, pct_ip
-			if val_n == 1 then
-				return values[ 1 ]
-			end
-			if val_i == 1 then
-				vals_xipol2 = remember( "ipolx2", { } )
-				for i = 1, max_loop do
-					ipol_i = values[ floor( (i - 1) / (max_loop / (#values - 1)) ) + 1 ]
-					ipol_f = values[ floor( (i - 1) / (max_loop / (#values - 1)) ) + 2 ]
-					pct_ip = floor( (i - 1) % (max_loop / (#values - 1)) ) / (max_loop / (#values - 1))
-					vals_xipol2[ i ] = ipol_i + (ipol_f - ipol_i) * pct_ip
-				end
-				vals_xipol2[ #vals_xipol2 + 1 ] = values[ #values ]
-			end
-			return vals_xipol2[ val_i ]
-		end
 		-------------------------------------------------------------------------
 		String = String:gsub( "%.line", ".LINE" ) --> var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
@@ -8224,12 +8179,12 @@
 										end
 										return tag_module( tbl_ipol )
 									end
-									return format( "%s%s", tags_capture, tag_xipol1( tbl_ipol ) )
+									return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
 								end
 								if table.inside( tags_color, tags_capture ) then
-									return format( "%s%s", tags_capture, table.ipol( module1, tbl_ipol ) )
+									return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
 								elseif table.inside( tags_alpha, tags_capture ) then
-									return format( "%s%s", tags_capture, table.ipol( module1, tbl_ipol ) )
+									return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
 								end
 								if #tbl_ipol < 3 then
 									table.insert( tbl_ipol, 1, tags_capture )
@@ -8250,7 +8205,7 @@
 									end
 									return tag_module1( tbl_ipol )
 								end
-								return format( "%s%s", tags_capture, tag_xipol2( tbl_ipol ) )
+								return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
 							end
 						end
 					end
@@ -9961,7 +9916,7 @@
 		end
 		---------------------------------------------
 		local Ipol_i = Ipol_i or 0.5
-		if tostring( Ipol_i ) == "nan" then --0 / 0
+		if tostring( Ipol_i ) == "nan" then -- #/0 división por cero :D
 			return valors[ 1 ]
 		end --add: june 16th 2020
 		effector.print_error( Ipol_i, "number", "tag.ipol", 1 )
@@ -10133,106 +10088,24 @@
 			temp_line = temp_line .. format( "{%s%s}%s", tags_style, dollar_to_val, temp_text )
 		end
 		if my_temp_bar ~= "" then
-			return format( "{%s}%s", tag.inbar( my_temp_bar ), temp_line )
+			local function tag_inbar( String )
+				local String = tag.v_dollar( String )
+				String = String:gsub( "%b||",
+					function( capture )
+						local capture = capture:gsub( "%|", "" )
+						if capture ~= string.toval( capture ) then
+							return string.toval( capture )
+						end
+						return "|" .. capture .. "|"
+					end
+				)
+				return String
+			end
+			return format( "{%s}%s", tag_inbar( my_temp_bar ), temp_line )
 		end
 		return temp_line
 	end
 
-	function tag.inbar( String )
-		local String = tag.v_dollar( String )
-		String = String:gsub( "%b||",
-			function( capture )
-				local capture = capture:gsub( "%|", "" )
-				if capture ~= string.toval( capture ) then
-					return string.toval( capture )
-				end
-				return "|" .. capture .. "|"
-			end
-		)
-		return String
-	end
-
-	function tag.delete( String, ... )
-		local str_delete = ""
-		local tag_delete = ...
-		local tbl_delete = { tag_delete }
-		if tag_delete == nil then
-			str_delete = String:gsub( "%b{}", "" )
-			return str_delete
-		end
-		if type( tag_delete ) == "table" then
-			tbl_delete = tag_delete
-		end
-		local tags_name = {
-			---------------------------------------------------------------------------------------------
-			[ 01 ] = "\\i",			[ 02 ] = "\\xshad",		[ 03 ] = "\\fsp",		[ 04 ] = "\\p",
-			[ 05 ] = "\\b",			[ 06 ] = "\\yshad",		[ 07 ] = "\\fr",		[ 08 ] = "\\an",
-			[ 09 ] = "\\u",			[ 10 ] = "\\be",		[ 11 ] = "\\frx",		[ 12 ] = "\\a",
-			[ 13 ] = "\\s",			[ 14 ] = "\\blur",		[ 15 ] = "\\fry",		[ 16 ] = "\\k",
-			[ 17 ] = "\\bord",		[ 18 ] = "\\frz",		[ 19 ] = "\\fax",		[ 20 ] = "\\K",
-			[ 21 ] = "\\xbord",		[ 22 ] = "\\fs",		[ 23 ] = "\\fay",		[ 24 ] = "\\kf",
-			[ 25 ] = "\\ybord",		[ 26 ] = "\\fscx",		[ 27 ] = "\\fe",		[ 28 ] = "\\ko",
-			[ 29 ] = "\\shad",		[ 30 ] = "\\fscy",		[ 31 ] = "\\q",			[ 32 ] = "\\fsc",
-			[ 33 ] = "\\fsvp",		[ 34 ] = "\\frs",		[ 35 ] = "\\rnd",		[ 36 ] = "\\rndx",
-			[ 37 ] = "\\rndy",		[ 38 ] = "\\rndz",		[ 39 ] = "\\z",
-			---------------------------------------------------------------------------------------------
-			[ 40 ] = "\\fn",		[ 41 ] = "\\r",			[ 42 ] = "\\n",			[ 43 ] = "\\N",
-			[ 44 ] = "\\c",			[ 45 ] = "\\alpha",
-			[ 46 ] = "\\1c",		[ 47 ] = "\\1a",		[ 48 ] = "\\1vc",		[ 49 ] = "\\1va",
-			[ 50 ] = "\\2c",		[ 51 ] = "\\2a",		[ 52 ] = "\\2vc",		[ 53 ] = "\\2va",
-			[ 54 ] = "\\3c",		[ 55 ] = "\\3a",		[ 56 ] = "\\3vc",		[ 57 ] = "\\3va",
-			[ 58 ] = "\\4c",		[ 59 ] = "\\4a",		[ 60 ] = "\\4vc",		[ 61 ] = "\\4va",
-			[ 62 ] = "\\1img",		[ 63 ] = "\\2img",		[ 64 ] = "\\3img",		[ 65 ] = "\\4img",
-			---------------------------------------------------------------------------------------------
-			[ 66 ] = "\\pos",		[ 67 ] = "\\move",		[ 68 ] = "\\moves",		[ 69 ] = "\\moves4",
-			[ 70 ] = "\\jitter",	[ 71 ] = "\\mover",		[ 72 ] = "\\org",		[ 73 ] = "\\distort",
-			[ 74 ] = "\\fad",		[ 75 ] = "\\fade",		[ 76 ] = "\\movevc",	[ 77 ] = "\\clip",
-			[ 78 ] = "\\iclip",		[ 79 ] = "\\t"
-			---------------------------------------------------------------------------------------------
-		}
-		local tags_vals = {
-			--------------------------------------------------------------------------------------------------------
-			[ 01 ] = "\\i%d+",					[ 02 ] = "\\xshad%-?%d+[%.%d]*",	[ 03 ] = "\\fsp%-?%d+[%.%d]*",
-			[ 04 ] = "\\p%d+",					[ 05 ] = "\\b%d+",					[ 06 ] = "\\yshad%-?%d+[%.%d]*",
-			[ 07 ] = "\\fr%-?%d+[%.%d]*",		[ 08 ] = "\\an%d+",					[ 09 ] = "\\u%d+",
-			[ 10 ] = "\\be%d+[%.%d]*",			[ 11 ] = "\\frx%-?%d+[%.%d]*",		[ 12 ] = "\\a%d+",
-			[ 13 ] = "\\s%d+",					[ 14 ] = "\\blur%d+[%.%d]*",		[ 15 ] = "\\fry%-?%d+[%.%d]*",
-			[ 16 ] = "\\k%d+",					[ 17 ] = "\\bord%d+[%.%d]*",		[ 18 ] = "\\frz%-?%d+[%.%d]*",
-			[ 19 ] = "\\fax%-?%d+[%.%d]*",		[ 20 ] = "\\K%d+",					[ 21 ] = "\\xbord%d+[%.%d]*",
-			[ 22 ] = "\\fs%d+[%.%d]*",			[ 23 ] = "\\fay%-?%d+[%.%d]*",		[ 24 ] = "\\kf%d+",
-			[ 25 ] = "\\ybord%d+[%.%d]*",		[ 26 ] = "\\fscx%d+[%.%d]*",		[ 27 ] = "\\fe%d+[%.%d]*",
-			[ 28 ] = "\\ko%d+",					[ 29 ] = "\\shad%-?%d+[%.%d]*",		[ 30 ] = "\\fscy%d+[%.%d]*",
-			[ 31 ] = "\\q%d+",					[ 32 ] = "\\fsc%d+[%.%d]*",			[ 33 ] = "\\fsvp%-?%d+[%.%d]*",
-			[ 34 ] = "\\frs%-?%d+[%.%d]*",		[ 35 ] = "\\rnd%-?%d+[%.%d]*",		[ 36 ] = "\\rndx%-?%d+[%.%d]*",
-			[ 37 ] = "\\rndy%-?%d+[%.%d]*",		[ 38 ] = "\\rndz%-?%d+[%.%d]*",		[ 39 ] = "\\z%-?%d+[%.%d]*",
-			--------------------------------------------------------------------------------------------------------
-			[ 40 ] = "\\fn%w+[ %w+]*",			[ 41 ] = "\\r",						[ 42 ] = "\\n",
-			[ 43 ] = "\\N",						[ 44 ] = "\\c[&H%x%#]*",			[ 45 ] = "\\alpha[&H%x%#]*",
-			[ 46 ] = "\\1c[&H%x%#]*",			[ 47 ] = "\\1a[&H%x%#]*",			[ 48 ] = "\\1vc%b()",
-			[ 49 ] = "\\1va%b()",				[ 50 ] = "\\2c[&H%x%#]*",			[ 51 ] = "\\2a[&H%x%#]*",
-			[ 52 ] = "\\2vc%b()",				[ 53 ] = "\\2va%b()",				[ 54 ] = "\\3c[&H%x%#]*",
-			[ 55 ] = "\\3a[&H%x%#]*",			[ 56 ] = "\\3vc%b()",				[ 57 ] = "\\3va%b()",
-			[ 58 ] = "\\4c[&H%x%#]*",			[ 59 ] = "\\4a[&H%x%#]*",			[ 60 ] = "\\4vc%b()",
-			[ 61 ] = "\\4va%b()",				[ 62 ] = "\\1img%b()",				[ 63 ] = "\\2img%b()",
-			[ 64 ] = "\\3img%b()",				[ 65 ] = "\\4img%b()",
-			--------------------------------------------------------------------------------------------------------
-			[ 66 ] = "\\pos%b()",				[ 67 ] = "\\move%b()",				[ 68 ] = "\\moves3%b()",
-			[ 69 ] = "\\moves4%b()",			[ 70 ] = "\\jitter%b()",			[ 71 ] = "\\mover%b()",
-			[ 72 ] = "\\org%b()",				[ 73 ] = "\\distort%b()",			[ 74 ] = "\\fad%b()",
-			[ 75 ] = "\\fade%b()",				[ 76 ] = "\\movevc%b()",			[ 77 ] = "\\clip%b()",
-			[ 78 ] = "\\iclip%b()",				[ 79 ] = "\\t%b()"
-			--------------------------------------------------------------------------------------------------------
-		}
-		local n
-		for i = 1, #tbl_delete do
-			if table.inside( tags_name, tbl_delete[ i ] ) then
-				n = table.index( tags_name, tbl_delete[ i ] )
-				String = String:gsub( tags_vals[ n ], "" )
-			end
-		end
-		return String
-	end
-	
 	function tag.delete_in_return( return_fx )
 		local return_kefx = return_fx or ""
 		local delete_tags = { --si algunos de estos tags se colocan en Return[fx]
