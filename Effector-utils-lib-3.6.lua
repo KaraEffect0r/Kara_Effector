@@ -5,7 +5,7 @@
 	Effector_Lib_authors  = "Itachi Akatsuki & Vict8r"
 	Effector_Lib_testers  = "NatsuoKE & Vict8r"
 	Effector_Lib_version  = "3.6"
-	Effector_Lib_modified = "October 07th 2019"
+	Effector_Lib_modified = "June 16th 2020"
 	-- functions abbreviations -------------------------------------------------------------------------------
 	sin = math.sin			asin = math.asin		log   = math.log10			pi = math.pi
 	cos = math.cos			acos = math.acos		ceil  = math.ceil			ln = math.log
@@ -36,6 +36,8 @@
 		-	time_mid2( Delay )
 		-	time_li( Delay )
 		-	time_lo( Delay )
+			time_loop1( Mode, Delay )
+			time_loop2( Mode, Delay )
 		
 		librería random
 		-	r( r_i, r_f, r_step )
@@ -45,16 +47,12 @@
 		-	random.unique( Table, Index )
 		
 		librería table
-		<	table.view( Table, Name, indent )
+		-	table.view( Table, Name, indent )
 		-	table.inside( Table, e )
 		-	table.index( Table, e )
-			table.show( Table )
 			table.duplicate( Table )
 		-	table.compare( Table1, Table2 )
-			table.complete( Table, Start_time, End_time )
 		-	table.disorder( Table )
-		-	table.make( objet, size, limit_i, limit_f, ... )
-		-	table.rmake( objet, size, limit_i, limit_f, ... )
 			table.concat1( Table, ... )
 			table.concat2( Table, ... )
 		-	table.concat3( ... )
@@ -98,6 +96,9 @@
 		+	string.cap( String, Capture, Extra_Capture, Filter )
 		+	string.parts( String, Parts )
 			string.match2( String, Capture, Table )
+			string.newmatch( String, ... )
+			string.moveclip( String, ... )
+			string.replace( String, ... )
 		
 		librería math
 		-	math.R( Rand_i, Rand_f )
@@ -181,22 +182,9 @@
 		-	tag.glitter( dur, ExtraTags_i, ExtraTags_f )
 		-	tag.clip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move )
 		-	tag.clip2( left_cx, top_cy, width_clip, height_clip, clip_move )
-		-	tag.iclip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move )
-		-	tag.iclip2( left_cx, top_cy, width_clip, height_clip, clip_move )
-		/	tag.moveclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		/	tag.moveiclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		/	tag.moveclip2( left_cx, top_cy, width_clip, height_clip )
-		/	tag.moveiclip2( left_cx, top_cy, width_clip, height_clip )
 		*	tag.Rclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		*	tag.Riclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		*	tag.moveRclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		*	tag.moveRiclip( left_cx, top_cy, width_clip, height_clip, Mode )
 		+	tag.Pclip( size_clip, left_cx, top_cy, width_clip, height_clip )
-		+	tag.Piclip( size_clip, left_cx, top_cy, width_clip, height_clip )
-		+	tag.movePclip( size_clip, left_cx, top_cy, width_clip, height_clip )
-		+	tag.movePiclip( size_clip, left_cx, top_cy, width_clip, height_clip )
 		-	tag.clip_shape( Shapes, Center_x, Center_y )
-		-	tag.iclip_shape( Shapes, Center_x, Center_y )
 		+	tag.do_tag( String )
 		+	tag.to_Auto4( String )
 		+	tag.to_temp( String )
@@ -207,10 +195,6 @@
 		-	tag.ipol( Ipol_i, ... )
 		+	tag.temp2( my_temp )
 		+	tag.inbar( string_tags )
-		-	tag.module( ... )
-		-	tag.module1( ... )
-		-	tag.module2( ... )
-		-	tag.moduler( ... )
 			tag.delete( String, ... )
 		+	tag.delete_in_return( return_fx )
 		+	tag.cyclic( Dur, Dur_tr, Delay, Fad_i, Fad_f, tags_ini, tags_fin )
@@ -232,18 +216,6 @@
 		-	color.vc_to_c( Color )
 		-	color.interpolate( Color1, Color2, Index_Ipol )
 		-	color.set( Times, Colors, ... )
-		-	color.mask( Mode, Color, Mask )
-		-	color.movemask( Dur, Delay, Mode, Color, Mask )
-		-	color.setmovemask( delay, Mode, t, colors )
-		-	color.movemaskv( Dur, Delay, Mode, Color, Mask )
-		-	color.module( Color1, Color2 )
-		-	color.module1( Color1, Color2 )
-		-	color.module2( Color1, Color2 )
-		+	color.moduler( Color1, Color2 )
-		-	color.ipol( ... )
-		-	color.loop( ... )
-		*	color.distance( CD_center, ... )
-		*	color.angle( CA_origin, ... )
 			color.from_error( Color )
 		<	color.matrix( Color, ... )
 			color.fromstyle( ColorAlpha )
@@ -253,23 +225,12 @@
 
 		
 		librería alpha
-			alpha.assF( alpha_or_table )
+			alpha.assF( Alpha )
 		-	alpha.r( )
 		-	alpha.va_to_a( Alpha )
 		-	alpha.interpolate( Alpha1, Alpha2, Index_Ipol )
 		-	alpha.set( Times, Alphas, ... )
-		-	alpha.mask( Mode, Alpha, Mask )
-		-	alpha.movemask( Dur, Delay, Mode, Alpha, Mask )
-		-	alpha.movemaskv( Dur, Delay, Mode, Alpha, Mask )
-		-	alpha.module( Alpha1, Alpha2 )
-		-	alpha.module1( Alpha1, Alpha2 )
-		-	alpha.module2( Alpha1, Alpha2 )
-		+	alpha.moduler( Alpha1, Alpha2 )		
-		+	alpha.ipol( ... )
-		+	alpha.loop( ... )
-		*	alpha.distance( AD_center, ... )
-		*	alpha.angle( AA_origin, ... )
-			alpha.from_error( alpha_or_table )
+			alpha.from_error( Alpha )
 			alpha.fromstyle( ColorAlpha )
 			alpha.val2ass( val_A )
 			alpha.ipolfx( Ipol, Alpha1, Alpha2 )
@@ -297,15 +258,14 @@
 		-	shape.ratio( Shape, Ratiox, Ratioy, Mode )
 		-	shape.size( Shape, SizeX, SizeY, Mode )
 		-	shape.array( Shape, loops, Angle_or_mode, Dxy )
-		-	shape.Lmove( x1, y1, x2, y2, t1, t2, Accel )
-		-	shape.Lmove2( Coor, Times )
-		-	shape.Pmove( F_x, F_y, domainF, t1, t2, Accel, offset_t )
-		-	shape.Smove( Shape, t1, t2, offset_t, Relative )
-		-	shape.Rmove( Rx, Ry, t1, t2, Accel, offset_t )
-		<	shape.Rmove2( Rx, Ry, t, Accel )
-		<	shape.Rmove3( Rx, Ry, t, Accel, offset_t )
-		<	shape.Rmove4( Rx, Ry, t1, t2, Accel, offset_t, move4 )
-		<	shape.Omove( P, t1, t2, Dur, Accel )
+		-	shape.lmove( Coor, Times, Times2, Accel )
+		-	shape.pmove( F_x, F_y, domainF, t1, t2, Accel, offset_t )
+		-	shape.smove( Shape, t1, t2, offset_t, Relative )
+		-	shape.rmove( Rx, Ry, t1, t2, Accel, offset_t )
+		<	shape.rmove2( Rx, Ry, t, Accel )
+		<	shape.rmove3( Rx, Ry, t, Accel, offset_t )
+		<	shape.rmove4( Rx, Ry, t1, t2, Accel, offset_t, move4 )
+		<	shape.omove( P, t1, t2, Dur, Accel )
 		+	shape.lineclip( Mode, Dur, Ini )
 		+	shape.setclip( Set_clips, Set_tagfx, Indx_line )
 		-	shape.animated( dur, frame_duration, Shapes, Pscale, Random )
@@ -565,7 +525,7 @@
 		if type( time_HMS ) == "function" then
 			time_HMS = time_HMS( )
 		end
-		local time_HMS = fx.offset.time_HMS or time_HMS or 0 --add: may 31st 2020
+		local time_HMS = time_HMS or fx.offset.time_HMS or 0 --add: may 31st 2020
 		local time_to_ms = time_HMS
 		if type( time_HMS ) == "string" then
 			if time_HMS:match( "%d+%:%d+%:%d+%.%d+" ) then
@@ -594,7 +554,7 @@
 		if type( time_ms ) == "function" then
 			time_ms = time_ms( )
 		end
-		local time_ms = fx.offset.time_ms or time_ms or 0 --add: may 31st 2020
+		local time_ms = time_ms or fx.offset.time_ms or 0 --add: may 31st 2020
 		local time_to_HMS
 		if type( time_ms ) == "table" then
 			local rec_table = { }
@@ -632,7 +592,7 @@
 		if type( Time ) == "function" then
 			Time = Time( )
 		end
-		local Time = fx.offset.Time or Time or 0 --add: may 31st 2020
+		local Time = Time or fx.offset.Time or 0 --add: may 31st 2020
 		local t_to_frame
 		if type( Time ) == "table" then
 			local rec_table = { }
@@ -660,7 +620,7 @@
 		if type( frames ) == "function" then
 			frames = frames( )
 		end
-		local frames = fx.offset.frames or frames or 0 --add: may 31st 2020
+		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
 		local f_to_ms
 		if type( frames ) == "table" then
 			local rec_table = { }
@@ -680,7 +640,7 @@
 		if type( frames ) == "function" then
 			frames = frames( )
 		end
-		local frames = fx.offset.frames or frames or 0 --add: may 31st 2020
+		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
 		local f_to_HMS
 		if type( frames ) == "table" then
 			local rec_table = { }
@@ -702,7 +662,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = fx.offset.Delay or Delay or 60 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 60 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid1", 1 )
 		if val_i <= (val_n + 1) / 2 then
 			return Delay * (val_i - 1) - 200
@@ -717,7 +677,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = fx.offset.Delay or Delay or 60 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 60 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid2", 1 )
 		if val_i >= (val_n + 1) / 2 then
 			return Delay * (val_i - val_n - 1) - 200
@@ -729,7 +689,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = fx.offset.Delay or Delay or 40 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 40 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_li", 1 )
 		if Mode == "syl" then
 			return syl.start_time + Delay * (val_si - 1) - 200
@@ -743,7 +703,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = fx.offset.Delay or Delay or 40 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 40 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_lo", 1 )
 		if Mode == "syl" then
 			return syl.end_time + Delay * (val_si - val_sn - 1) + 200
@@ -759,7 +719,7 @@
 			Delay = Delay( )
 		end
 		local Mode = Mode or "li"
-		local Delay = fx.offset.Delay or Delay or 30 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 30 --add: may 31th 2020
 		local Loop = maxj
 		effector.print_error( Mode, "string", "time_loop1", 1 )
 		effector.print_error( Delay, "number", "time_loop1", 2 )
@@ -787,7 +747,7 @@
 			Delay = Delay( )
 		end
 		local Mode = Mode or "li"
-		local Delay = fx.offset.Delay or Delay or 30 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 30 --add: may 31th 2020
 		local Loop = maxJ
 		effector.print_error( Mode, "string", "time_loop2", 1 )
 		effector.print_error( Delay, "number", "time_loop2", 2 )
@@ -852,9 +812,9 @@
 		if type( V ) == "function" then
 			V = V( )
 		end
-		local H = fx.offset.H or H or nil
-		local S = fx.offset.S or S or nil
-		local V = fx.offset.V or V or nil --june 01st 2020
+		local H = H or fx.offset.H or nil
+		local S = S or fx.offset.S or nil
+		local V = V or fx.offset.V or nil --june 01st 2020
 		if type( H ) == "table" then
 			Hrc = R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
 		elseif type( H ) == "number" then
@@ -881,8 +841,8 @@
 			alpha_f = alpha_f( )
 		end
 		local ra_i, ra_f = 0, 255
-		local alpha_i = fx.offset.alpha_i or alpha_i or nil --june 01st 2020
-		local alpha_f = fx.offset.alpha_f or alpha_f or nil
+		local alpha_i = alpha_i or fx.offset.alpha_i or nil --june 01st 2020
+		local alpha_f = alpha_f or fx.offset.alpha_f or nil
 		if type( alpha_i ) == "string" then
 			ra_i = tonumber( alpha_i:match( "(%x%x)" ), 16 )
 		elseif type( alpha_i ) == "number" then
@@ -917,8 +877,8 @@
 		if type( Index ) == "function" then
 			Index = Index( )
 		end
-		local Table = fx.offset.Table or Table
-		local Index = fx.offset.Index or Index --june 01st 2020
+		local Table = Table or fx.offset.Table
+		local Index = Index or fx.offset.Index --june 01st 2020
 		effector.print_error( Table, "numbertable", "random.unique", 1 )
 		local Table_u, Ind = recall.tableu, 1
 		if Index == nil then
@@ -1091,27 +1051,6 @@
 		return e
 	end --mod: march 18th 2020
 	
-	function table.show( Table )		-- only for indexed table
-		--retorna el contenido de una tabla separados por comas (,)
-		if type( Table ) == "function" then
-			Table = Table( )
-		end
-		local Table = fx.offset.Table or Table --june 01st 2020
-		effector.print_error( Table, "table", "table.show", 1 )
-		local t_show, t_show2 = "", ""
-		for i = 1, #Table do
-			if type( Table[ i ] ) == "table" then
-				t_show2 = ""
-				for k = 1, #Table[ i ] do
-					t_show2 = format( "%s%s,", t_show2, Table[ i ][ k ] )
-				end
-				Table[ i ] = format( "(%s)", t_show2:sub( 1, -2 ) )
-			end
-			t_show = format( "%s%s,", t_show, Table[ i ] )
-		end
-		return t_show:sub( 1, -2 )
-	end
-
 	function table.duplicate( Table )
 		--duplica completamente el contenido de una tabla
 		if type( Table ) == "function" then
@@ -1172,42 +1111,6 @@
 		return true
 	end
 
-	function table.complete( Table, Start_time, End_time )
-		--ingresa el tiempo inicial y final de una línea kara
-		--en una tabla de tiempos y los ordena ascendentemente
-		if type( Table ) == "function" then
-			Table = Table( )
-		end
-		local End_time = End_time or fx.end_time
-		local Start_time = Start_time or fx.start_time
-		effector.print_error( Table, "table", "table.complete", 1 )
-		effector.print_error( Start_time, "number", "table.complete", 2 )
-		effector.print_error( End_time, "number", "table.complete", 3 )
-		local Table_com = table.duplicate( Table )
-		for i = 1, #Table_com do
-			Table_com[ i ] = HMS_to_ms( Table_com[ i ] )
-		end
-		table.insert( Table_com, Start_time )
-		table.insert( Table_com, End_time )
-		local B_com, nB, vB = table.duplicate( Table_com ), { }, { }
-		for i = 1, #B_com do
-			if type( B_com[ i ] ) == "table" then
-				B_com[ i ] = B_com[ i ][ 1 ]
-				table.insert( nB, i )
-				table.insert( vB, B_com[ i ] )
-			end
-		end
-		local C_com = table.duplicate( B_com )
-		table.sort( C_com, function( a, b ) return a < b end )
-		local D_com = table.duplicate( C_com )
-		for i = 1, #D_com do
-			if table.inside( vB, D_com[ i ] ) == true then
-				D_com[ i ] = Table_com[ nB[ table.index( vB, D_com[ i ] ) ] ]
-			end
-		end
-		return D_com
-	end
-	
 	function table.disorder( Table )
 		--desordena aleatoriamente el contenido de una tabla
 		if type( Table ) == "function" then
@@ -1237,130 +1140,6 @@
 			return newtable1
 		end
 		return Table_dis
-	end
-	
-	function table.make( objet, size, limit_i, limit_f, ... )
-		--crea una tabla de diferentes objetos por valores predeterminados ordenados
-		local t_make, Tme_concat, Tm_n = { }, { [ 1 ] = "" }, 0.5
-		local i_c, i_a, _c, _a = color.ipolfx, alpha.ipolfx, color.vc_to_c, alpha.va_to_a
-		if ... then
-			Tme_concat = { ... }
-			if type( ... ) == "table" then
-				Tme_concat = ...
-			end
-		end
-		if type( size ) == "function" then
-			size = size( )
-		end
-		if type( limit_i ) == "function" then
-			limit_i = limit_i( )
-		end
-		if type( limit_f ) == "function" then
-			limit_f = limit_f( )
-		end
-		if type( limit_i ) ~= "table" then 
-			for i = 1, size do
-				Tm_n = (i - 1) / (size - 1)
-				if size == 1 then
-					Tm_n = 0.5
-				end
-				if objet == "number" then
-					t_make[ i ] = math.round( size * Tm_n, 2 )
-					if limit_i then
-						t_make[ i ] = math.round( limit_i + Tm_n * (limit_f - limit_i), 2 )
-					end
-				elseif objet == "color"
-					or objet == "colorc"
-					or objet == "colorvc" then
-					t_make[ i ] = random.color( 360 * Tm_n )
-					if type( limit_i ) == "string" then
-						t_make[ i ] = i_c( Tm_n, _c( limit_i ), _c( limit_f ) )
-					elseif type( limit_i ) == "number" then
-						t_make[ i ] = random.color( limit_i + Tm_n * (limit_f - limit_i) )
-					end
-				elseif objet == "alpha"
-					or objet == "Alpha"
-					or objet == "alphava" then
-					t_make[ i ] = alpha.val2ass( 255 * Tm_n )
-					if type( limit_i ) == "string" then
-						t_make[ i ] = i_a( Tm_n, _a( limit_i ), _a( limit_f ))
-					elseif type( limit_i ) == "number" then
-						t_make[ i ] = alpha.val2ass( limit_i + Tm_n * (limit_f - limit_i) )
-					end
-				else
-					t_make[ i ] = objet .. size
-					if limit_i then
-						t_make[ i ] = objet .. math.round( limit_i + Tm_n * (limit_f - limit_i), 2 )
-					end
-				end
-			end
-		else
-			Tme_concat = limit_f
-			t_make = table.gradient( size, limit_i )
-		end
-		t_make = table.concat2( t_make, Tme_concat or "" )
-		return t_make
-	end
-	
-	function table.rmake( objet, size, limit_i, limit_f, ... )
-		--crea una tabla de diferentes objetos por valores predeterminados aleatoreamente
-		local t_rmake, Trme_concat = { }, { [ 1 ] = "" }
-		local i_c, i_a, _c, _a = color.ipolfx, alpha.ipolfx, color.vc_to_c, alpha.va_to_a
-		if ... then
-			Trme_concat = { ... }
-			if type( ... ) == "table" then
-				Trme_concat = ...
-			end
-		end
-		if type( size ) == "function" then
-			size = size( )
-		end
-		if type( limit_i ) == "function" then
-			limit_i = limit_i( )
-		end
-		if type( limit_f ) == "function" then
-			limit_f = limit_f( )
-		end
-		if type( limit_i ) ~= "table" then 
-			for i = 1, size do
-				t_rmake[ i ] = ""
-				for k = 1, #Trme_concat do
-					if objet == "number" then
-						t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. R( size )
-						if limit_i then
-							t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. Rc( limit_i, limit_f )
-						end
-					elseif objet == "color"
-						or objet == "colorc"
-						or objet == "colorvc" then
-						t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. random.color( )
-						if type( limit_i ) == "string" then
-							t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. i_c( R( ), _c( limit_i ), _c( limit_f ) )
-						elseif type( limit_i ) == "number" then
-							t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. random.color( { limit_i, limit_f } )
-						end
-					elseif objet == "alpha"
-						or objet == "Alpha"
-						or objet == "alphava" then
-						t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. random.alpha( )
-						if type( limit_i ) == "string" then
-							t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. i_a( R( ), _a( limit_i ), _a( limit_f ) )
-						elseif type( limit_i ) == "number" then
-							t_rmake[ i ] = t_rmake[ i ] .. Trme_concat[ k ] .. random.alpha( limit_i, limit_f )
-						end
-					else
-						t_rmake[ i ] = objet .. Rc( size )
-						if limit_i then
-							t_rmake[ i ] = objet .. math.round( R( limit_i, limit_f ), 2 )
-						end
-					end
-				end
-			end
-		else
-			Trme_concat = limit_f
-			t_rmake = table.concat2( table.disorder( table.gradient( size, limit_i ) ), Trme_concat or "" )
-		end
-		return t_rmake
 	end
 	
 	function table.concat1( Table, ... )
@@ -1479,8 +1258,9 @@
 		--Filter = function( k, v ) if k % 2 == 1 then return true end return false end
 	end --december 13th 2018
 
-	function table.replay( Len, ... )	-->Len = 3; t = {a, b, c} -->return {a,b,c, a,b,c, a,b,c}
-		--replica n cantidad de veces a los elementos de una tabla, o los elementos ingresados
+	function table.replay( Len, ... )
+		-->Len = 3; t = { a, b, c } -->return { a, b, c, a, b, c, a, b, c }
+		--replica n cantidad de veces los elementos de una tabla, o los elementos ingresados
 		if type( Len ) == "function" then
 			Len = Len( )
 		end
@@ -1493,7 +1273,7 @@
 		end
 		for i = 1, Len do
 			for k = 1, #e_val do
-				if type( e_val[ k ] ) == "function" then --add: may 23rd 2018
+				if type( e_val[ k ] ) == "function" then
 					Table[ #Table + 1 ] = e_val[ k ]( )
 				else
 					Table[ #Table + 1 ] = e_val[ k ]
@@ -1898,12 +1678,30 @@
 		elseif Mode == "org" then
 			--retorna la tabla con los números organizados ascendentemente
 			local table_org = table.duplicate( Table )
-			table.sort( table_org, function( a, b ) return a < b end )
+			--table.sort( table_org, function( a, b ) return a < b end )
+			table.sort( table_org, function( a, b )
+				if type( a ) == "table" then
+					a = a[ 1 ]
+				end
+				if type( b ) == "table" then
+					b = b[ 1 ]
+				end
+				return a < b end
+			) --mod: june 18th 2020
 			return table_org
 		elseif Mode == "org2" then
 			--retorna la tabla con los números organizados descendentemente
 			local table_org2 = table.duplicate( Table )
-			table.sort( table_org2, function( a, b ) return a > b end )
+			--table.sort( table_org2, function( a, b ) return a > b end )
+			table.sort( table_org2, function( a, b )
+				if type( a ) == "table" then
+					a = a[ 1 ]
+				end
+				if type( b ) == "table" then
+					b = b[ 1 ]
+				end
+				return a > b end
+			) --mod: june 18th 2020
 			return table_org2
 		elseif Mode == "round" then
 			--retorna la tabla con todos los números redondeados según el Argumento 3
@@ -2109,7 +1907,7 @@
 			end
 			for i = 1, 12 * val_n + 1 do
 				Hue[ k ][ i ] = Mask1[ i ]
-			end --color.movemask( fx.dur, 220, "\\1c", table.make( "color", syl.n, 15, 90 )[ syl.i ], "&H000000&" )
+			end
 		end
 		if First == 1 then
 			return Mask2
@@ -2413,8 +2211,8 @@
 			--------------------------------------------
 			if algorithm_ipol:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then --si el algoritmo es una shape
 				pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * #Table_ipol
-				--tag.loop( { 0, 100 }, shape.trajectory( ) )
-				--tag.loop( { 0, 100 }, shape.circle .. shape.displace( shape.circle, 100 ) )
+				--table.ipol( { 0, 100 }, 50, nil, shape.trajectory( ) )
+				--table.ipol( { 0, 100 }, 40, nil, shape.circle .. shape.displace( shape.circle, 100 ) )
 			else -- si el algoritmo es un módulo de varianza enre 0 y 1
 				pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
 			end --fixed: january 28th 2020
@@ -2968,7 +2766,7 @@
 			-- march 15th 2018 ----------------------
 			String = String:gsub( "%.line", ".LINE" )
 			String = String:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-			:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+			:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_count" )
 			:gsub( "line%.", "linefx[  ii  ]." )
 			:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
 			:gsub( "%.LINE", ".line" )
@@ -2981,7 +2779,7 @@
 						return str_to_val
 					end
 					String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-					:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+					:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 					:gsub( "linefx%[  ii  %]%.", "line." )
 					:gsub( "\"(&H%x+&)\"", "%1" )--> deja al string tal cual
 					--fix: may 11th 2018 --> modify the String before to return
@@ -2989,7 +2787,7 @@
 				end --string.toval( "line.nil + 2" )
 			end
 			String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-			:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+			:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 			:gsub( "linefx%[  ii  %]%.", "line." )
 			:gsub( "\"(&H%x+&)\"", "%1" )--> deja al string tal cual
 			--fix: may 11th 2018 --> modify the String before to return
@@ -3283,6 +3081,96 @@
 		end
 		return match_multi, i --string.match2( "frsfxfxfx456tr", "fx" )
 	end	--may 15th 2020
+	
+	function string.newmatch( String, ... )
+		--realiza capturas múltiples hasta que ya no encuentre conicidencias
+		local Captures = { ... }
+		if type( ... ) == "table" then
+			Captures = ...
+		end
+		local i, newcaps = 1
+		local capture = Captures[ 1 ]
+		while String:match( capture ) do
+			newcaps = { String:match( capture ) }
+			capture = capture .. (Captures[ i + 1 ] or "")
+			if not Captures[ i + 1 ] then
+				break
+			end
+			i = i + 1
+		end --string.newmatch( "\\1a&HFF&\\t(45,50,\\blur4)\\xshad-3.4", "\\[%d]*%a[%-%.%w&]*" )
+		return unpack( newcaps )
+	end --june 15th 2020
+
+	function string.replace( String, ... )
+		--genera remplazos por medio de capturas (modificación de string.gsub) las capturas son válidas de
+		--forma consecutiva, hasta que la concatenación de las mismas ya no exista como una captura válida
+		local Captures = { ... }
+		if type( ... ) == "table" then
+			Captures = ...
+		end
+		local Filter = ""
+		if #Captures > 1 then
+			Filter = Captures[ #Captures ]
+			table.remove( Captures, #Captures )
+		end
+		local i = 0
+		local newcap = ""
+		while i < #Captures do
+			newcap = newcap .. Captures[ i + 1 ]
+			i = i + 1
+			if String == String:gsub( newcap, Filter ) then
+				break
+			end
+		end
+		if i == 1 then
+			String = String:gsub( newcap, Filter )
+			return String
+		end
+		local new_capture = ""
+		for k = 1, i - 1 do
+			new_capture = new_capture .. Captures[ k ]
+		end
+		String = String:gsub( new_capture, Filter )
+		return String--string.replace( "x(34,54,\\1a&HFF&)(8)(0)(9)", "x%b()", "%b()", "%b()", "%d+", "%b()", "yes " )
+	end --june 16th 2020
+	
+	function string.moveclip( String, ... )
+		--hace que un \\i?clip se mueva acorde a las distancias y tiempo del \\move del KE o con configuraciones asignadas
+		local function new_clips( String, ... )
+			if not String:match( "\\i?clip%([ ]*%-?%d[%.%d ]*,[ ]*%-?%d[%.%d ]*,[ ]*%-?%d[%.%d ]*,[ ]*%-?%d[%.%d ]*%)" ) then
+				return ""
+			end
+			local moves = ...
+			if not moves then
+				moves = { }
+			end
+			local Configs = { moves }
+			if table.type( Configs ) == "table"
+				and #Configs == 1 then
+				Configs = moves
+			end --solución (...) :D
+			local newclip = ""
+			if table.type( Configs ) == "table" then
+				for i = 1, #Configs do
+					newclip = newclip .. new_clips( String, Configs[ i ] )
+				end
+			else
+				Configs = Configs or { [ 5 ] = 1 }
+				if #Configs == 1 then
+					Configs = { [ 5 ] = Configs[ 1 ] } --Accel
+				end
+				local Tag, x1, y1, x2, y2 = String:match( "\\(i?clip)%([ ]*(%-?%d[%.%d ]*),[ ]*(%-?%d[%.%d ]*),[ ]*(%-?%d[%.%d ]*),[ ]*(%-?%d[%.%d ]*)%)" )
+				x1, y1, x2, y2 = tonumber( x1 ), tonumber( y1 ), tonumber( x2 ), tonumber( y2 )
+				local Dx = Configs[ 1 ] or fx.move_l2 - fx.move_l1
+				local Dy = Configs[ 2 ] or fx.move_t2 - fx.move_t1
+				local t1 = Configs[ 3 ] or fx.movet_i
+				local t2 = Configs[ 4 ] or fx.movet_f
+				newclip = format( "\\t(%s,%s,%s,\\%s(%s,%s,%s,%s))", t1, t2, (Configs[ 5 ] or 1), Tag, x1 + Dx, y1 + Dy, x2 + Dx, y2 + Dy )
+			end --tag.clip( ):moveclip( )
+			return newclip --tag.clip( ):moveclip( 1.5 )
+		end --tag.clip( ):moveclip( { -200, 0, 0, 1400 }, { 0, 0, 1400, 2800 } )
+		return String .. new_clips( String, ... )
+	end --june 17th 2020
 
 	--------------------------------------------------------------------------------------------------
 	-- Ampliación de la Librería "math" --------------------------------------------------------------
@@ -3960,7 +3848,7 @@
 		local str_mathformat
 		str_mathf = str_mathf:gsub( "%.line", ".LINE" ) -->save the var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_count" )
 		:gsub( "line%.", "linefx[  ii  ]." )
 		:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
 		:gsub( "%.LINE", ".line" )
@@ -3972,14 +3860,14 @@
 					return str_mathformat
 				end
 				str_mathf = str_mathf:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-				:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+				:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 				:gsub( "linefx%[  ii  %]%.", "line." )
 				:gsub( "\"(&H%x+&)\"", "%1" )
 				return str_mathf
 			end --math.format( "%s + %s * line.i + 2", 5, 7 )
 		end
 		str_mathf = str_mathf:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-		:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+		:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 		:gsub( "linefx%[  ii  %]%.", "line." )
 		:gsub( "\"(&H%x+&)\"", "%1" )
 		--rewrite: january 17th 2019
@@ -7050,7 +6938,7 @@
 		------------------------------------------------------------------------------------------
 		Text = Text:gsub( "%.line", ".LINE" ) --> var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_count" )
 		:gsub( "line%.", "linefx[  ii  ]." )
 		:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
 		:gsub( "%.LINE", ".line" ) --add: january 18th 2019
@@ -7116,7 +7004,7 @@
 		end
 		---------------------------------------------------------------------
 		Text = Text:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-		:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n")
+		:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n")
 		:gsub( "linefx%[  ii  %]%.", "line." )
 		:gsub( "\"(&H%x+&)\"", "%1" )
 		--"\\t(100,800,\\frxyoR( 10 * line.i, 77 ))"
@@ -7643,7 +7531,7 @@
 		-------------------------------------------------------------------------
 		String = String:gsub( "%.line", ".LINE" ) --> var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_count" )
 		:gsub( "line%.", "linefx[  ii  ]." ) --"\\td(0,500,\\frRs( meta.res_x ))( 100 * line.i )"
 		:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
 		:gsub( "%.LINE", ".line" ) --add: january 18th 2019
@@ -7866,7 +7754,7 @@
 		String = String:gsub( "%-%)", "%)" )
 		-------------------------------------------------------------------------
 		String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-		:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+		:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 		:gsub( "linefx%[  ii  %]%.", "line." )
 		:gsub( "\"(&H%x+&)\"", "%1" ) --add: january 18th 2019
 		-------------------------------------------------------------------------
@@ -8295,7 +8183,7 @@
 		-------------------------------------------------------------------------
 		String = String:gsub( "%.line", ".LINE" ) --> var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_count" )
 		:gsub( "line%.", "linefx[  ii  ]." )
 		:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
 		:gsub( "%.LINE", ".line" ) --add: january 18th 2019
@@ -8313,24 +8201,54 @@
 							if tbl_ipol then
 								if capture:match( "(\\%w+%-)%b{}" ) then
 									if table.inside( tags_color, tags_capture ) then
-										return format( "%s%s", tags_capture, color.loop( tbl_ipol ) )
+										return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
 									elseif table.inside( tags_alpha, tags_capture ) then
-										return format( "%s%s", tags_capture, alpha.loop( tbl_ipol ) )
+										return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
 									end
 									if #tbl_ipol < 3 then
 										table.insert( tbl_ipol, 1, tags_capture )
-										return tag.module( tbl_ipol )
+										local function tag_module( ... )
+											local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
+											for i = 1, #txt_tag do
+												if type( txt_tag[ i ] ) == "table" then
+													txt_val = math.round( tag.ipol( module, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
+													txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
+												else
+													txt_2tg[ i ] = txt_tag[ i ]
+												end
+											end
+											for i = 1, #txt_2tg do
+												txt_str = txt_str .. txt_2tg[ i ]
+											end
+											return txt_str
+										end
+										return tag_module( tbl_ipol )
 									end
 									return format( "%s%s", tags_capture, tag_xipol1( tbl_ipol ) )
 								end
 								if table.inside( tags_color, tags_capture ) then
-									return format( "%s%s", tags_capture, color.ipol( tbl_ipol ) )
+									return format( "%s%s", tags_capture, table.ipol( module1, tbl_ipol ) )
 								elseif table.inside( tags_alpha, tags_capture ) then
-									return format( "%s%s", tags_capture, alpha.ipol( tbl_ipol ) )
+									return format( "%s%s", tags_capture, table.ipol( module1, tbl_ipol ) )
 								end
 								if #tbl_ipol < 3 then
 									table.insert( tbl_ipol, 1, tags_capture )
-									return tag.module1( tbl_ipol )
+									local function tag_module1( ... )
+										local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
+										for i = 1, #txt_tag do
+											if type( txt_tag[ i ] ) == "table" then
+												txt_val = math.round( tag.ipol( module1, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
+												txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
+											else
+												txt_2tg[ i ] = txt_tag[ i ]
+											end
+										end
+										for i = 1, #txt_2tg do
+											txt_str = txt_str .. txt_2tg[ i ]
+										end
+										return txt_str
+									end
+									return tag_module1( tbl_ipol )
 								end
 								return format( "%s%s", tags_capture, tag_xipol2( tbl_ipol ) )
 							end
@@ -8343,7 +8261,7 @@
 		)
 		-------------------------------------------------------------------------
 		String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-		:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+		:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 		:gsub( "linefx%[  ii  %]%.", "line." )
 		:gsub( "\"(&H%x+&)\"", "%1" ) --add: january 18th 2019
 		-------------------------------------------------------------------------
@@ -8555,7 +8473,7 @@
 		-------------------------------------------------------------------------
 		String = String:gsub( "%.line", ".LINE" ) --> var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
-		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_counter" )
+		:gsub( "line%.i", "l_counter" ):gsub( "line%.n", "maxil_count" )
 		:gsub( "line%.", "linefx[  ii  ]." )
 		:gsub( "(&H%x+&)", "\"" .. "%1" .. "\"" )
 		:gsub( "%.LINE", ".line" ) --add: january 18th 2019
@@ -8687,7 +8605,7 @@
 		end --px45d100 = math.polar( 45, 100, "x" )
 		-------------------------------------------------------------------------
 		String = String:gsub( "xres", "meta.res_x" ):gsub( "yres", "meta.res_y" )
-		:gsub( "l_counter", "line.i" ):gsub( "maxil_counter", "line.n" )
+		:gsub( "l_counter", "line.i" ):gsub( "maxil_count", "line.n" )
 		:gsub( "linefx%[  ii  %]%.", "line." )
 		:gsub( "\"(&H%x+&)\"", "%1" ) --add: january 18th 2019
 		-------------------------------------------------------------------------
@@ -8716,13 +8634,18 @@
 		return String
 	end -- April 11th 2018
 	
-	function tag.set( Times, Events )
+	function tag.set( Times, Events, Tags )
 		if type( Times ) == "function" then
 			Times = Times( )
 		end
 		effector.print_error( Times, "table", "tag.set", 1 )
 		effector.print_error( Events, "stringtable", "tag.set", 2 )
 		local Times = HMS_to_ms( Times )
+		local Events = Events
+		if type( Events ) == "table"
+			and Tags then
+			Events = table.concat2( Events, Tags )
+		end
 		local event_tbl = { }
 		for i = 1, #Times do
 			if type( Events ) == "function" then
@@ -8793,32 +8716,38 @@
 		--DurDelay = DurDelay, or: DurDelay = { DurDelay, accel }, or: DurDelay = function
 		--DurDelay = { DurDelay, accel, dilatation }, or: DurDelay = { { DurDelay, Dur_trans }, accel, dilatation }
 		--DurDelay = { { DurDelay, Dur_trans }, accel, dilatation, offset_time }
+		------------------------------------------------------------------------
 		effector.print_error( DurTotal, "numbertablefunction", "tag.oscill", 1 )
 		effector.print_error( DurDelay, "numbertablefunction", "tag.oscill", 2 )
-		local time_ini, index_ii, time_tot, dur_tag1 = 0, 0, DurTotal, DurDelay
+		local time_ini, time_fin, time_tot = 0, DurTotal
+		local index_ii, dur_del1, dur_del2 = 1, DurDelay
 		local accel, dilat, offset_t, time_off, Tags = 1, 0, 0, 0, { ... }
+		------------------------------------------------------------------------
 		if type( DurTotal ) == "table"
 			and type( DurTotal[ 1 ] ) ~= "table" then
-			time_ini =  DurTotal[ 1 ] or 0
-			time_tot = (DurTotal[ 2 ] or fx.dur) - time_ini
-			index_ii = (DurTotal[ 3 ] or 1) - 1
+			time_ini = DurTotal[ 1 ] or 0			--tiempo de inicio
+			time_fin = DurTotal[ 2 ] or fx.dur		--tiempo final
+			index_ii = DurTotal[ 3 ] or 1			--índice en caso de table
 		elseif type( DurTotal ) == "function" then
-			time_ini =  DurTotal( )[ 1 ] or 0
-			time_tot = (DurTotal( )[ 2 ] or fx.dur) - time_ini
-			index_ii = (DurTotal( )[ 3 ] or 1) - 1
-		end
-		----------------------------------------------------------
-		local time_fin
+			time_ini = DurTotal( )[ 1 ] or 0		--tiempo de inicio
+			time_fin = DurTotal( )[ 2 ] or fx.dur	--tiempo final
+			index_ii = DurTotal( )[ 3 ] or 1		--índice en caso de table
+		end --tag.oscill( 800, { {200, 5 } }, "\\1cR( )" )
+		--colores = table.ipol( { shape.color1, shape.color3, shape.color1 }, char.n, "\\1c" )
+		--colores[ char.i ], tag_oscill( { 0, fx.dur, char.i + 1 }, 1f, colores )
+		------------------------------------------------------------------------
 		if retime_mode then
-			time_ini, time_fin = retimettag( retime_mode, time_ini, time_tot )
-			time_tot = time_fin - time_ini
+			time_ini, time_fin = retimettag( retime_mode, time_ini, time_fin )
 		end --september 09th 2017
-		----------------------------------------------------------
-		local time_tot2 = time_tot
+		time_tot = time_fin - time_ini				--tiempo total
+		------------------------------------------------------------------------
 		if type( DurDelay ) == "table" then
-			dur_tag1 = DurDelay[ 1 ]
+			dur_del1 = DurDelay[ 1 ]
 			if type( DurDelay[ 1 ] ) == "table" then
-				dur_tag1 = DurDelay[ 1 ][ 1 ]
+				dur_del1 = DurDelay[ 1 ][ 1 ]
+				if DurDelay[ 1 ][ 2 ] then
+					dur_del2 = DurDelay[ 1 ][ 2 ]
+				end
 			end
 			if DurDelay[ 2 ] then
 				accel = DurDelay[ 2 ]
@@ -8831,93 +8760,90 @@
 				--tiempo que hay entre cada conjunto de tags oscills :D
 			end --august 22nd 2016
 		end
-		---------------------------------
+		------------------------------------------------------------------------
 		if type( ... ) == "function" then
 			Tags = Tags[ 1 ]( )
 			if type( Tags ) ~= "table" then
 				Tags = { Tags }
 			end
-		end --tag.oscill( fx.dur, 1000, function( ) return "\\blurR( 4 )" end )
-		-- add: july 24th 2018 --------
+		end --tag.oscill( fx.dur, 400, function( ) return "\\blurR( 4 )" end )
 		if type( ... ) == "table" then
 			Tags = ...
 		end
-		-------------------------------
+		------------------------------------------------------------------------
 		local time_i, time_f, tags_fx = 0, 1, ""
 		local indicator, tag_osc = 1, ""
 		if type( DurDelay ) == "number" then
-			dur_tag1 = dur_tag1 - dilat
+			dur_del1 = dur_del1 - dilat
 		elseif type( DurDelay ) == "function" then
-			dur_tag1 = 0
+			dur_del1 = 0
 		end
+		if not dur_del2 then
+			dur_del2 = dur_del1
+		end
+		------------------------------------------------------------------------
+		if floor( time_tot / dur_del1 ) * dur_del1 + dur_del2 ~= time_tot then
+			time_tot = floor( time_tot / dur_del1 ) * dur_del1 + dur_del2
+		end --ajusta los tiempos para que las tranformaciones sean exactas
+		local time_tot2 = time_tot
 		local dur_func, dur_tag2 = 0, 0
-		-------------------------------
+		------------------------------------------------------------------------
 		if type( DurTotal ) == "table"
 			and type( DurTotal[ 1 ] ) == "table" then
 			local multi_oscill = { }
 			for i = 1, #DurTotal do
 				multi_oscill[ i ] = tag.oscill( DurTotal[ i ], DurDelay, ... )
-			end
+			end --recursión
 			return table.concat( multi_oscill ) --january 25th 2020
 		end --tag.oscill( { { 0, 500 }, { fx.dur - 500, fx.dur } }, 100, "\\1cR( )" )
-		-------------------------------
+		------------------------------------------------------------------------
 		i = 0
 		while time_tot > 0 do
+			time_i = math.round( dur_del1 * i + time_ini + time_off, 2 )
+			time_f = math.round( (dur_del1 + dilat) * (i + 1) + time_ini + time_off, 2 )
+			if type( DurDelay ) == "table" and
+				type( DurDelay[ 1 ] ) == "table" then
+				time_f = time_i + dur_del2
+			end
 			if type( DurDelay ) == "function" then
 				dur_func = DurDelay( i )
 				time_i = math.round( dur_tag2 + time_ini + time_off, 2 )
 				time_f = math.round( time_i + dur_func, 2 )
-			else
-				time_i = math.round( dur_tag1 * i + time_ini + time_off, 2 )
-				if type( DurDelay ) == "table" and
-					type( DurDelay[ 1 ] ) == "table" then
-					time_f = time_i + (DurDelay[ 1 ][ 2 ] or 0)
-				else
-					time_f = math.round( (dur_tag1 + dilat) * (i + 1) + time_ini + time_off, 2 )
-				end
 			end
-			indicator = #Tags - #Tags * ceil( (i + 1 + index_ii) / #Tags ) + i + 1 + index_ii
-			if type( Tags[ indicator ] ) == "function" then
-				tag_osc = Tags[ indicator ]( i )
-			else
-				if Tags[ indicator ]:gsub( "%b[]", "" ) == "" then
-					Tags[ indicator ] = Tags[ indicator ]:sub( 2, -2 )
-					local line = linefx[ ii ]
-					func_oscll = loadstring(
-						format( "return function( meta, line, x, y ) return %s end", Tags[ indicator ] )
-					)( )
-					Tags[ indicator ] = func_oscll( meta, line, x, y )
-				end
-				tag_osc = Tags[ indicator ]
-			end
-			-- january 15th 2020 ------------------------------------------------------------
+			---------------------------------------------------------------------------
+			indicator = #Tags - #Tags * ceil( (i + index_ii) / #Tags ) + i + index_ii
+			tag_osc = Tags[ indicator ]
+			---------------------------------------------------------------------------
 			if oscill_random then
 				tag_osc = table.random( Tags )
 				if type( tag_osc ) == "function" then
 					tag_osc = tag_osc( i )
 				end
 			end --tag.oscill( fx.dur, 1000, { "\\blur1", "\\blur2", "\\blur3" } )
-			---------------------------------------------------------------------------------
-			if oscill_default
-				and time_tot - dur_tag1 <= 0 then
-				--hace que los tags de la última transfo retornen a sus valores por default
-				tag_osc = tag.default( tag_osc )
+			if type( Tags[ indicator ] ) == "function" then
+				tag_osc = Tags[ indicator ]( i )
 			end
-			-- oscill_default = true <-- en la celda variables
-			-- tag.oscill( { 0, 400 }, 80, "\\fscxyrRc( 0.75, 1.25 )" )
-			---------------------------------------------------------------------------------
-			if time_tot - dur_tag1 <= 0 then
+			---------------------------------------------------------------------------
+			if oscill_default
+				and time_tot - dur_del1 <= 0 then
+				--hace que los tags de la último \\t retornen a sus valores por default
+				tag_osc = tag.default( tag_osc )
+				-- oscill_default = true <-- en la celda variables
+				-- tag.oscill( { 0, 400 }, 80, "\\fscxyrRc( 0.75, 1.25 )" )
+			end
+			---------------------------------------------------------------------------
+			if time_tot - dur_del1 <= 0 then
 				time_f = time_ini + time_tot2
 				--hace que la última transfo termine en su tiempo exacto
 			end --add: august 05th 2018
-			---------------------------------------------------------------------------------
+			---------------------------------------------------------------------------
 			tags_fx = tags_fx .. format( "\\t(%s,%s,%s,%s)", time_i, time_f, accel, tag_osc )
 			tags_fx = tags_fx:gsub( "\\t%(%d+[%.%d]*%,%d+[%.%d]*%,[%d%.%,]*%)", "" )
 			if type( DurDelay ) == "function" then
 				dur_tag2 = dur_tag2 + dur_func
-				dur_tag1 = dur_func
+				dur_del1 = dur_func
 			else
-				dur_tag1 = dur_tag1 + dilat
+				dur_del1 = dur_del1 + dilat
 			end
 			if (i + 1) % #Tags == 0 then
 				if type( offset_t ) == "number" then
@@ -8928,9 +8854,10 @@
 				--tag.oscill( { R( 800 ), fx.dur }, { { 100, 0 }, 1, 0, mydur }, "\\alpha255", "\\alpha0" )
 				--mydur = function( ) return R( 500, 2000, 20 ) end
 			end --august 22nd 2016
-			time_tot = math.round( time_tot - dur_tag1, 2 ) -- april 13th 2018
+			time_tot = math.round( time_tot - dur_del1, 2 ) -- april 13th 2018
 			i = i + 1
 		end
+		-------------------------------------------------------------------------------
 		tags_fx = tags_fx:gsub( "\\t%b()",
 			function( capture )
 				if type( tonumber( capture:match( "\\t%((%d+[%.%d]*)" ) ) ) == "number"
@@ -8940,6 +8867,7 @@
 				return capture
 			end
 		) --august 22nd 2016
+		-------------------------------------------------------------------------------
 		tags_fx = tags_fx:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 		tags_fx = string.i( tags_fx )
 		return tags_fx
@@ -9291,7 +9219,7 @@
 			)
 		end
 		return clips_tag
-	end --tag.clip( syl.left, syl.top, syl.width, syl.height, 79, "shape.Rmove( 0.4 * line.height )" )
+	end --tag.clip( syl.left, syl.top, syl.width, syl.height, 79, "shape.rmove( 0.4 * line.height )" )
 
 	function tag.clip2( left_cx, top_cy, width_clip, height_clip, clip_move )
 		if left_cx then
@@ -9420,186 +9348,7 @@
 			)
 		end
 		return clips_tag
-	end --tag.clip2( syl.left, syl.top, syl.width, syl.height, "shape.Rmove( 0.4 * line.height)" )
-	
-	function tag.iclip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move )
-		if left_cx then
-			effector.print_error( left_cx, "numberstringtable", "tag.iclip", 1 )
-		end
-		if top_cy then
-			effector.print_error( top_cy, "number", "tag.iclip", 2 )
-		end
-		if width_clip then
-			effector.print_error( width_clip, "number", "tag.iclip", 3 )
-		end
-		if height_clip then
-			effector.print_error( height_clip, "number", "tag.iclip", 4 )
-		end
-		if Mode then
-			effector.print_error( Mode, "true", "tag.iclip", 5 )
-		end
-		if clip_move then
-			effector.print_error( clip_move, "stringtable", "tag.iclip", 6 )
-		end
-		local  Tag_iclip = tag.clip( left_cx, top_cy, width_clip, height_clip, Mode, clip_move ):gsub( "clip", "iclip" )
-		return Tag_iclip
-	end
-	
-	function tag.iclip2( left_cx, top_cy, width_clip, height_clip, clip_move )
-		if left_cx then
-			effector.print_error( left_cx, "numberstringtable", "tag.iclip2", 1 )
-		end
-		if top_cy then
-			effector.print_error( top_cy, "number", "tag.iclip2", 2 )
-		end
-		if width_clip then
-			effector.print_error( width_clip, "number", "tag.iclip2", 3 )
-		end
-		if height_clip then
-			effector.print_error( height_clip, "number", "tag.iclip2", 4 )
-		end
-		if clip_move then
-			effector.print_error( clip_move, "stringtable", "tag.iclip2", 5 )
-		end
-		local  Tag_clip2 = tag.clip2( left_cx, top_cy, width_clip, height_clip, clip_move ):gsub( "clip", "iclip" )
-		return Tag_clip2
-	end
-	
-	function tag.moveclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "numberstringtable", "tag.moveclip", 1 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.moveclip", 2 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.moveclip", 3 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.moveclip", 4 )
-		end
-		if Mode then
-			if type( Mode ) == "function" then
-				Mode = Mode( )
-			end
-			effector.print_error( Mode, "true", "tag.moveclip", 5 )
-		end
-		local left_x = left_cx or fx.move_l1
-		local top_y  = top_cy or fx.move_t1
-		local TmCdx, TmCdy = fx.move_l2 - fx.move_l1, fx.move_t2 - fx.move_t1
-		local TmCc1 = tag.clip( left_x, top_y, width_clip, height_clip, Mode )
-		local TmCc2 = tag.clip( left_x + TmCdx, top_y + TmCdy, width_clip, height_clip, Mode )
-		return format( "%s\\t(%s,%s,%s)", TmCc1, fx.movet_i, fx.movet_f, TmCc2 )
-	end
-	
-	function tag.moveiclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "numberstringtable", "tag.moveiclip", 1 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.moveiclip", 2 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.moveiclip", 3 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.moveiclip", 4 )
-		end
-		if Mode then
-			if type( Mode ) == "function" then
-				Mode = Mode( )
-			end
-			effector.print_error( Mode, "true", "tag.moveiclip", 5 )
-		end
-		local  Tag_moveiclip = tag.moveclip( left_cx, top_cy, width_clip, height_clip, Mode ):gsub( "clip", "iclip" )
-		return Tag_moveiclip
-	end
-	
-	function tag.moveclip2( left_cx, top_cy, width_clip, height_clip )
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "numberstringtable", "tag.moveclip2", 1 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.moveclip2", 2 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.moveclip2", 3 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.moveclip2", 4 )
-		end
-		local left_x = left_cx or fx.move_l1
-		local top_y  = top_cy or fx.move_t1
-		local TmC2dx, TmC2dy = fx.move_l2 - fx.move_l1, fx.move_t2 - fx.move_t1
-		local TmC2c1 = tag.clip2( left_x, top_y, width_clip, height_clip )
-		local TmC2c2 = tag.clip2( left_x + TmC2dx, top_y + TmC2dy, width_clip, height_clip )
-		return format( "%s\\t(%s,%s,%s)", TmC2c1, fx.movet_i, fx.movet_f, TmC2c2 )
-	end
-	
-	function tag.moveiclip2( left_cx, top_cy, width_clip, height_clip )
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "numberstringtable", "tag.moveiclip2", 1 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.moveiclip2", 2 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.moveiclip2", 3 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.moveiclip2", 4 )
-		end
-		local  Tag_moveiclip2 = tag.moveclip2( left_cx, top_cy, width_clip, height_clip ):gsub( "clip", "iclip" )
-		return Tag_moveiclip2
-	end
+	end --tag.clip2( syl.left, syl.top, syl.width, syl.height, "shape.rmove( 0.4 * line.height)" )
 	
 	function tag.Rclip( left_cx, top_cy, width_clip, height_clip, Mode )
 		if left_cx then
@@ -9696,100 +9445,6 @@
 		)
 	end
 
-	function tag.Riclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		if left_cx then
-			effector.print_error( left_cx, "numberstringtable", "tag.Riclip", 1 )
-		end
-		if top_cy then
-			effector.print_error( top_cy, "number", "tag.Riclip", 2 )
-		end
-		if width_clip then
-			effector.print_error( width_clip, "number", "tag.Riclip", 3 )
-		end
-		if height_clip then
-			effector.print_error( height_clip, "number", "tag.Riclip", 4 )
-		end
-		if Mode then
-			effector.print_error( Mode, "true", "tag.Riclip", 5 )
-		end
-		local  Tag_Riclip = tag.Rclip( left_cx, top_cy, width_clip, height_clip, Mode ):gsub( "clip", "iclip" )
-		return Tag_Riclip
-	end
-	
-	function tag.moveRclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "numberstringtable", "tag.moveRclip", 1 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.moveRclip", 2 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.moveRclip", 3 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.moveRclip", 4 )
-		end
-		if Mode then
-			if type( Mode ) == "function" then
-				Mode = Mode( )
-			end
-			effector.print_error( Mode, "true", "tag.moveRclip", 5 )
-		end
-		local left_x = left_cx or fx.move_l1
-		local top_y  = top_cy or fx.move_t1
-		local TmRCdx, TmRCdy = fx.move_l2 - fx.move_l1, fx.move_t2 - fx.move_t1
-		local TmRCc1 = tag.Rclip( left_x, top_y, width_clip, height_clip, Mode )
-		local TmRCc2 = tag.Rclip( left_x + TmRCdx, top_y + TmRCdy, width_clip, height_clip, Mode )
-		return format( "%s\\t(%s,%s,%s)", TmRCc1, fx.movet_i, fx.movet_f, TmRCc2 )
-	end
-
-	function tag.moveRiclip( left_cx, top_cy, width_clip, height_clip, Mode )
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "numberstringtable", "tag.moveRiclip", 1 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.moveRiclip", 2 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.moveRiclip", 3 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.moveRiclip", 4 )
-		end
-		if Mode then
-			if type( Mode ) == "function" then
-				Mode = Mode( )
-			end
-			effector.print_error( Mode, "true", "tag.moveRiclip", 5 )
-		end
-		local  Tag_moveRiclip = tag.moveRclip( left_cx, top_cy, width_clip, height_clip, Mode ):gsub( "clip", "iclip" )
-		return Tag_moveRiclip
-	end
-	
 	function tag.Pclip( size_clip, left_cx, top_cy, width_clip, height_clip ) --Rectangular Perimeter Clip
 		if size_clip then
 			if type( size_clip ) == "function" then
@@ -9871,100 +9526,6 @@
 		)
 	end --tag.Pclip( { syl.width/6, syl.height/4 }, syl.left, syl.top, syl.width, syl.height )
 
-	function tag.Piclip( size_clip, left_cx, top_cy, width_clip, height_clip )
-		if size_clip then
-			effector.print_error( size_clip, "table", "tag.Piclip", 1 )
-		end
-		if left_cx then
-			effector.print_error( left_cx, "number", "tag.Piclip", 2 )
-		end
-		if top_cy then
-			effector.print_error( top_cy, "number", "tag.Piclip", 3 )
-		end
-		if width_clip then
-			effector.print_error( width_clip, "number", "tag.Piclip", 4 )
-		end
-		if height_clip then
-			effector.print_error( height_clip, "number", "tag.Piclip", 5 )
-		end
-		local  Tag_Piclip = tag.Pclip( size_clip, left_cx, top_cy, width_clip, height_clip ):gsub( "clip", "iclip" )
-		return Tag_Piclip
-	end
-	
-	function tag.movePclip( size_clip, left_cx, top_cy, width_clip, height_clip )
-		if size_clip then
-			if type( size_clip ) == "function" then
-				size_clip = size_clip( )
-			end
-			effector.print_error( size_clip, "table", "tag.movePclip", 1 )
-		end
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "number", "tag.movePclip", 2 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.movePclip", 3 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.movePclip", 4 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.movePclip", 5 )
-		end
-		local left_x = left_cx or fx.move_l1
-		local top_y  = top_cy or fx.move_t1
-		local TmPCdx, TmPCdy = fx.move_l2 - fx.move_l1, fx.move_t2 - fx.move_t1
-		local TmPCc1 = tag.Pclip( size_clip, left_x, top_y, width_clip, height_clip )
-		local TmPCc2 = tag.Pclip( size_clip, left_x + TmPCdx, top_y + TmPCdy, width_clip, height_clip )
-		return format( "%s\\t(%s,%s,%s)", TmPCc1, fx.movet_i, fx.movet_f, TmPCc2 )
-	end
-
-	function tag.movePiclip( size_clip, left_x, top_y, width_clip, height_clip )
-		if size_clip then
-			if type( size_clip ) == "function" then
-				size_clip = size_clip( )
-			end
-			effector.print_error( size_clip, "table", "tag.movePiclip", 1 )
-		end
-		if left_cx then
-			if type( left_cx ) == "function" then
-				left_cx = left_cx( )
-			end
-			effector.print_error( left_cx, "number", "tag.movePiclip", 2 )
-		end
-		if top_cy then
-			if type( top_cy ) == "function" then
-				top_cy = top_cy( )
-			end
-			effector.print_error( top_cy, "number", "tag.movePiclip", 3 )
-		end
-		if width_clip then
-			if type( width_clip ) == "function" then
-				width_clip = width_clip( )
-			end
-			effector.print_error( width_clip, "number", "tag.movePiclip", 4 )
-		end
-		if height_clip then
-			if type( height_clip ) == "function" then
-				height_clip = height_clip( )
-			end
-			effector.print_error( height_clip, "number", "tag.movePiclip", 5 )
-		end
-		local  Tag_movePiclip = tag.movePclip( size_clip, left_x, top_y, width_clip, height_clip ):gsub( "clip", "iclip" )
-		return Tag_movePiclip
-	end
-	
 	function tag.clip_shape( Shapes, Center_x, Center_y )
 		if type( Shapes ) == "function" then
 			Shapes = Shapes( )
@@ -9987,28 +9548,6 @@
 		return format( "\\clip(%s)", Shp_tbl[ (j - 1) % #Shp_tbl + 1 ] )
 	end --Add: august 04th 2018
 
-	function tag.iclip_shape( Shapes, Center_x, Center_y )
-		if type( Shapes ) == "function" then
-			Shapes = Shapes( )
-		end
-		if type( Center_x ) == "function" then
-			Center_x = Center_x( )
-		end
-		if type( Shapes ) == "function" then
-			Center_y = Center_y( )
-		end
-		local Center_x = Center_x or 0
-		local Center_y = Center_y or 0
-		effector.print_error( Shapes, "shape", "tag.iclip_shape", 1 )
-		effector.print_error( Center_x, "number", "tag.iclip_shape", 2 )
-		effector.print_error( Center_y, "number", "tag.iclip_shape", 3 )
-		local Shp_tbl = recall.shpx
-		if j == 1 then
-			Shp_tbl = remember( "shpx", shape.divide( shape.centerpos( Shapes, fx.pos_x + Center_x, fx.pos_y + Center_y ) ) )
-		end
-		return format( "\\iclip(%s)", Shp_tbl[ (j - 1) % #Shp_tbl + 1 ] )
-	end --Add: august 04th 2018
-	
 	function tag.do_tag( String )
 		if type( String ) == "function" then
 			String = String( )
@@ -10017,28 +9556,20 @@
 		local func_tag = {
 			[ 01 ] = "\\tag.set%b()",			[ 02 ] = "\\tag.only%b()",			[ 03 ] = "\\tag.oscill%b()",
 			[ 04 ] = "\\tag.oscill2%b()",		[ 05 ] = "\\tag.glitter%b()",		[ 06 ] = "\\tag.clip%b()",
-			[ 07 ] = "\\tag.clip2%b()",			[ 08 ] = "\\tag.iclip%b()",			[ 09 ] = "\\tag.iclip2%b()",
-			[ 10 ] = "\\tag.moveclip%b()",		[ 11 ] = "\\tag.moveiclip%b()",		[ 12 ] = "\\tag.moveclip2%b()",
-			[ 13 ] = "\\tag.moveiclip2%b()",	[ 14 ] = "\\tag.Rclip%b()",			[ 15 ] = "\\tag.Riclip%b()",
-			[ 16 ] = "\\tag.moveRclip%b()",		[ 17 ] = "\\tag.moveRiclip%b()",	[ 18 ] = "\\tag.Pclip%b()",
-			[ 19 ] = "\\tag.Piclip%b()",		[ 20 ] = "\\tag.movePclip%b()",		[ 21 ] = "\\tag.movePiclip%b()",
-			[ 22 ] = "\\tag.cyclic%b()",		[ 23 ] = "\\tag.sec%b()",			[ 24 ] = "\\shape.Lmove%b()",
-			[ 25 ] = "\\shape.Lmove2%b()",		[ 26 ] = "\\shape.Pmove%b()",		[ 27 ] = "\\shape.Smove%b()",
-			[ 28 ] = "\\shape.Rmove%b()",		[ 29 ] = "\\shape.Rmove2%b()",		[ 30 ] = "\\shape.Rmove3%b()",
-			[ 31 ] = "\\shape.Rmove4%b()",		[ 32 ] = "\\shape.Omove%b()",
+			[ 07 ] = "\\tag.clip2%b()",			[ 08 ] = "\\tag.Rclip%b()",			[ 09 ] = "\\tag.Pclip%b()",
+			[ 10 ] = "\\tag.clip_shape%b()",	[ 11 ] = "\\tag.cyclic%b()",		[ 12 ] = "\\tag.sec%b()",
+			[ 13 ] = "\\shape.lmove%b()",		[ 14 ] = "\\shape.pmove%b()",		[ 15 ] = "\\shape.smove%b()",
+			[ 16 ] = "\\shape.rmove%b()",		[ 17 ] = "\\shape.rmove2%b()",		[ 18 ] = "\\shape.rmove3%b()",
+			[ 19 ] = "\\shape.rmove4%b()",		[ 20 ] = "\\shape.omove%b()",
 		}
 		local func_rep = {
 			[ 01 ] = tag.set,					[ 02 ] = tag.only,					[ 03 ] = tag.oscill,
 			[ 04 ] = tag.oscill2,				[ 05 ] = tag.glitter,				[ 06 ] = tag.clip,
-			[ 07 ] = tag.clip2,					[ 08 ] = tag.iclip,					[ 09 ] = tag.iclip2,
-			[ 10 ] = tag.moveclip,				[ 11 ] = tag.moveiclip,				[ 12 ] = tag.moveclip2,
-			[ 13 ] = tag.moveiclip2,			[ 14 ] = tag.Rclip,					[ 15 ] = tag.Riclip,
-			[ 16 ] = tag.moveRclip,				[ 17 ] = tag.moveRiclip,			[ 18 ] = tag.Pclip,
-			[ 19 ] = tag.Piclip,				[ 20 ] = tag.movePclip,				[ 21 ] = tag.movePiclip,
-			[ 22 ] = tag.cyclic,				[ 23 ] = tag.sec,					[ 24 ] = shape.Lmove,
-			[ 25 ] = shape.Lmove2,				[ 26 ] = shape.Pmove,				[ 27 ] = shape.Smove,
-			[ 28 ] = shape.Rmove,				[ 29 ] = shape.Rmove2,				[ 30 ] = shape.Rmove3,
-			[ 31 ] = shape.Rmove4,				[ 32 ] = shape.Omove,
+			[ 07 ] = tag.clip2,					[ 08 ] = tag.Rclip,					[ 09 ] = tag.Pclip,
+			[ 10 ] = tag.clip_shape,			[ 11 ] = tag.cyclic,				[ 12 ] = tag.sec,
+			[ 13 ] = shape.lmove,				[ 14 ] = shape.pmove,				[ 15 ] = shape.smove,
+			[ 16 ] = shape.rmove,				[ 17 ] = shape.rmove2,				[ 18 ] = shape.rmove3,
+			[ 19 ] = shape.rmove4,				[ 20 ] = shape.omove,
 		}
 		for i = 1, #func_tag do
 			String = String:gsub( func_tag[ i ],
@@ -10430,6 +9961,9 @@
 		end
 		---------------------------------------------
 		local Ipol_i = Ipol_i or 0.5
+		if tostring( Ipol_i ) == "nan" then --0 / 0
+			return valors[ 1 ]
+		end --add: june 16th 2020
 		effector.print_error( Ipol_i, "number", "tag.ipol", 1 )
 		Ipol_i = math.clamp( Ipol_i ) * (#valors - 1)
 		local valor_i = valors[ floor( Ipol_i ) + 1 ]
@@ -10618,70 +10152,6 @@
 		return String
 	end
 
-	function tag.module( ... )
-		local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
-		for i = 1, #txt_tag do
-			if type( txt_tag[ i ] ) == "table" then
-				txt_val = math.round( tag.ipol( module, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
-				txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
-			else
-				txt_2tg[ i ] = txt_tag[ i ]
-			end
-		end
-		for i = 1, #txt_2tg do
-			txt_str = txt_str .. txt_2tg[ i ]
-		end
-		return txt_str
-	end
-
-	function tag.module1( ... )
-		local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
-		for i = 1, #txt_tag do
-			if type( txt_tag[ i ] ) == "table" then
-				txt_val = math.round( tag.ipol( module1, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
-				txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
-			else
-				txt_2tg[ i ] = txt_tag[ i ]
-			end
-		end
-		for i = 1, #txt_2tg do
-			txt_str = txt_str .. txt_2tg[ i ]
-		end
-		return txt_str
-	end
-
-	function tag.module2( ... )
-		local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
-		for i = 1, #txt_tag do
-			if type( txt_tag[ i ] ) == "table" then
-				txt_val = math.round( tag.ipol( module2, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
-				txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
-			else
-				txt_2tg[ i ] = txt_tag[ i ]
-			end
-		end
-		for i = 1, #txt_2tg do
-			txt_str = txt_str .. txt_2tg[ i ]
-		end
-		return txt_str
-	end
-	
-	function tag.moduler( ... )
-		local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
-		for i = 1, #txt_tag do
-			if type( txt_tag[ i ] ) == "table" then
-				txt_val = math.round( tag.ipol( moduler, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
-				txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
-			else
-				txt_2tg[ i ] = txt_tag[ i ]
-			end
-		end
-		for i = 1, #txt_2tg do
-			txt_str = txt_str .. txt_2tg[ i ]
-		end
-		return txt_str
-	end
-	
 	function tag.delete( String, ... )
 		local str_delete = ""
 		local tag_delete = ...
@@ -11380,7 +10850,13 @@
 		local Times = Times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
 		effector.print_error( Times, "table", "color.set", 1 )
 		effector.print_error( Colors, "table", "color.set", 2 )
-		Times = table.complete( Times, fx.start_time, fx.end_time )
+		local function table_complete( Table )
+			local Table = HMS_to_ms( Table )	--convierte los tiempos a milisegundos (ms)
+			Table[ #Table + 1 ] = fx.start_time	--ingresa el tiempo inicial de la línea fx
+			Table[ #Table + 1 ] = fx.end_time	--ingresa el tiempo final de la línea fx
+			return table.op( Table, "org" )		--organiza todos los tiempos ascendentemente
+		end
+		Times = table_complete( Times )
 		-----------------------------------------------------------
 		local indx_i, indx_f = table.index( Times, fx.start_time ), table.index( Times, fx.end_time )
 		local Times_aux = table.duplicate( Times )
@@ -11439,289 +10915,6 @@
 		return Tags
 	end --mod: june 03rd 2020
 
-	function color.mask( Mode, Color, Mask )
-		if type( Mode ) == "function" then
-			Mode = Mode( )
-		end
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		if type( Mask ) == "function" then
-			Mask = Mask( )
-		end
-		return table.mask( Color, Mask, Mode )
-		--se puede usar: color.mask( Mode, table, mask )[ valor ]
-	end
-	
-	function color.movemask( Dur, Delay, Mode, Color, Mask )
-		--Example: color.movemask( fx.dur, 220, "\\1c", table.make( "color", syl.n, 15, 90 )[ syl.i ], "&H000000&" )
-		if type( Dur ) == "function" then
-			Dur = Dur( )
-		end
-		if type( Delay ) == "function" then
-			Delay = Delay( )
-		end
-		if type( Mode ) == "function" then
-			Mode = Mode( )
-		end
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		if type( Mask ) == "function" then
-			Mask = Mask( )
-		end
-		if type( Dur ) == "table" then
-			table.insert( Dur, val_i + 1 )
-		else
-			Dur = { 0, Dur, val_i + 1 }
-		end
-		local CmMtb = table.mask( Color, Mask, Mode, true )
-		return CmMtb[ val_i ] .. tag.oscill( Dur, Delay, CmMtb )
-	end --color.movemask( fx.dur, 300, "\\1c", "&H0000FF&" )
-
-	function color.setmovemask( delay, Mode, t, colors, Mask )
-		--Mode: "\\1c", "\\3c", "\\4c", "\\1vc", "\\3vc" or "\\4vc"
-		if type( delay ) == "function" then
-			delay = delay( )
-		end
-		if type( Mode ) == "function" then
-			Mode = Mode( )
-		end
-		if type( t ) == "function" then
-			t = t( )
-		end
-		if type( colors ) == "function" then
-			colors = colors( )
-		end
-		local colors = color.from_error( colors or { text.color2 } )
-		local t = t or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
-		local Mode = Mode or "\\1vc"
-		local delay = delay or 420
-		t = table.complete( t, fx.start_time, fx.end_time )
-		if #colors >= #t - 1 then
-			table.insert( colors, 1, colors[ #t - 1 ] )
-		else
-			table.insert( colors, 1, text.color1 )
-		end
-		function color.masktable2( color_table )
-			local TT_cmask = recall.Tmsk
-			if val_i == 1 then
-				TT_cmask = remember( "Tmsk", { } )
-				local Ct, ton2, T_cmask = color_table, { }, { }
-				for i = 1, #Ct do
-					ton2[ i ], T_cmask[ i ] = { }, { }
-					for k = 1, 2 * (val_n + 1) do
-						ton2[ i ][ k ] = color.rc( Ct[ i ], Mask )
-					end
-					ton2[ i ][ 1 ] = ton2[ i ][ 2 * (val_n + 1) - 2 ]
-					ton2[ i ][ 3 ] = ton2[ i ][ 2 * (val_n + 1) - 0 ]
-					for h = 1, val_n do
-						T_cmask[ i ][ h ] = format( "(%s,%s,%s,%s)",
-							ton2[ i ][ 2 * h - 1 ], ton2[ i ][ 2 * h + 1 ],
-							ton2[ i ][ 2 * h - 0 ], ton2[ i ][ 2 * h + 2 ]
-						)
-					end
-				end
-				for i = 1, #Ct do
-					TT_cmask[ i ] = T_cmask[ i ]
-				end
-			end
-			return TT_cmask
-		end
-		colors = color.masktable2( colors )
-		local Ind2, Tag2, t_set = table.index( t, fx.start_time ), "", { }
-		for i = table.index( t, fx.start_time ), table.index( t, fx.end_time ) do
-			t_set[ #t_set + 1 ] = t[ i ] - fx.start_time - frame_dur / 2
-		end
-		for i = 1, #t_set - 1 do
-			if t_set[ i ] < 0 then
-				t_set[ i ] = 0
-			end
-			Tag2 = Tag2 .. format( "\\t(%s,%s,%s)",
-				t_set[ i ], t_set[ i ] + 1, Mode .. colors[ Ind2 + i - 1 ][ (val_i - 2) % val_n + 1 ]
-			)
-			Tag2 = Tag2 .. tag.oscill( { t_set[ i ], t_set[ i + 1 ], val_i }, delay, table.concat1( colors[ Ind2 + i - 1 ], Mode ) )
-		end
-		return Tag2
-	end
-	
-	function color.movemaskv( Dur, Delay, Mode, Color, Mask )
-		if type( Dur ) == "function" then
-			Dur = Dur( )
-		end
-		if type( Delay ) == "function" then
-			Delay = Delay( )
-		end
-		if type( Mode ) == "function" then
-			Mode = Mode( )
-		end
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		if type( Mask ) == "function" then
-			Mask = Mask( )
-		end
-		if type( Dur ) == "table" then
-			table.insert( Dur, val_i + 1 )
-		else
-			Dur = { 0, Dur, 2 }
-		end
-		local CmMvTB, CmMvtb = table.mask( Color, Mask, Mode, true ), { }
-		for i = 1, 12 do
-			CmMvtb[ i ] = CmMvTB[ val_i + (i - 1) * val_n ]
-		end
-		return CmMvtb[ 1 ] .. tag.oscill( Dur, Delay, CmMvtb )
-	end
-
-	function color.module( Color1, Color2 )
-		return color.interpolate( Color1, Color2, module )
-	end
-
-	function color.module1( Color1, Color2 )
-		return color.interpolate( Color1, Color2, module1 )
-	end
-
-	function color.module2( Color1, Color2 )
-		return color.interpolate( Color1, Color2, module2 )
-	end
-	
-	function color.moduler( Color1, Color2 )
-		return color.interpolate( Color1, Color2, moduler )
-	end
-	
-	function color.ipol( ... )
-		local colors_tbl = { ... }
-		if type( ... ) == "table" then
-			colors_tbl = ... 
-		end
-		if #colors_tbl == 1 then
-			colors_tbl[ 2 ] = text.color1
-		end
-		local color_ipol = recall.c_ipol
-		local max_ipol = val_n - 1
-		local ipol_i, ipol_f, pct_ip
-		if val_n == 1 then
-			return colors_tbl[ 1 ]
-		end
-		if val_i == 1 then
-			color_ipol = remember( "c_ipol", { } )
-			for i = 1, max_ipol do
-				ipol_i = colors_tbl[ floor( (i - 1) / (max_ipol / (#colors_tbl - 1)) ) + 1 ]
-				ipol_f = colors_tbl[ floor( (i - 1) / (max_ipol / (#colors_tbl - 1)) ) + 2 ]
-				pct_ip = floor( (i - 1) % (max_ipol / (#colors_tbl - 1)) ) / (max_ipol / (#colors_tbl - 1))
-				color_ipol[ i ] = color.interpolate( ipol_i, ipol_f, pct_ip )
-			end
-			color_ipol[ #color_ipol + 1 ] = colors_tbl[ #colors_tbl ]
-		end
-		return color_ipol[ val_i ] --rewrite: october 11th 2018
-	end --color.ipol( "&H00FF00&", "&HFF0000&", "&H0000FF&" )
-
-	function color.loop( ... )
-		local colors_tbl = { ... }
-		if type( ... ) == "table" then
-			colors_tbl = ... 
-		end
-		if #colors_tbl == 1 then
-			colors_tbl[ 2 ] = text.color1
-		end
-		local color_loop = recall.c_loop
-		local max_loop = maxj - 1
-		local ipol_i, ipol_f, pct_ip
-		if maxj == 1 then
-			return colors_tbl[ 1 ]
-		end
-		if j == 1 then
-			color_loop = remember( "c_loop", { } )
-			for i = 1, max_loop do
-				ipol_i = colors_tbl[ floor( (i - 1) / (max_loop / (#colors_tbl - 1)) ) + 1 ]
-				ipol_f = colors_tbl[ floor( (i - 1) / (max_loop / (#colors_tbl - 1)) ) + 2 ]
-				pct_ip = floor( (i - 1) % (max_loop / (#colors_tbl - 1)) ) / (max_loop / (#colors_tbl - 1))
-				color_loop[ i ] = color.interpolate( ipol_i, ipol_f, pct_ip )
-			end
-			color_loop[ #color_loop + 1 ] = colors_tbl[ #colors_tbl ]
-		end
-		return color_loop[ j ] --rewrite: october 11th 2018
-	end --color.loop( "&H00FF00&", "&HFF0000&", "&H0000FF&" )
-
-	function color.distance( CD_center, ... )
-		--CD_center = {center_x, center_y[, radius_min[, radius_max[, center_ref_x, center_ref_y]]]}
-		local CD_max_dis, CD_radius_min, CD_radius_max, CD_radius_dis, CD_gradient
-		local dtc_col = recall.CD_col
-		if val_i == 1
-			and j == 1 then
-			CD_max_dis = {
-				[ 1 ] = math.distance( CD_center[ 1 ], CD_center[ 2 ], 0, 0 ),
-				[ 2 ] = math.distance( CD_center[ 1 ], CD_center[ 2 ], xres, 0 ),
-				[ 3 ] = math.distance( CD_center[ 1 ], CD_center[ 2 ], 0, yres ),
-				[ 4 ] = math.distance( CD_center[ 1 ], CD_center[ 2 ], xres, yres )
-			}
-			CD_radius_min = CD_center[ 3 ] or 0
-			CD_radius_max = CD_center[ 4 ] or math.max( unpack( CD_max_dis ) )
-			CD_radius_dis = CD_radius_max - CD_radius_min
-			CD_gradient = table.gradient( 360, ... )
-			dtc_col = remember( "CD_col",
-				function( AdD_x, AdD_y )
-					local dc_dis = math.distance( CD_center[ 1 ], CD_center[ 2 ], AdD_x, AdD_y ) - CD_radius_min
-					if ceil( dc_dis ) <= 0 then
-						return color.vc_to_c( CD_gradient[ 1 ] )
-					elseif ceil( dc_dis ) >= CD_radius_dis then
-						return color.vc_to_c( CD_gradient[ 360 ] )
-					end
-					return color.vc_to_c( CD_gradient[ ceil( 360 * dc_dis / CD_radius_dis ) ] )
-				end
-			)
-		end
-		if CD_center[ 7 ] then
-			return format( "(%s,%s,%s,%s)",
-				dtc_col( CD_center[ 5 ] - val_width / 2, CD_center[ 6 ] - val_height / 2 ), 
-				dtc_col( CD_center[ 5 ] + val_width / 2, CD_center[ 6 ] - val_height / 2 ),
-				dtc_col( CD_center[ 5 ] - val_width / 2, CD_center[ 6 ] + val_height / 2 ), 
-				dtc_col( CD_center[ 5 ] + val_width / 2, CD_center[ 6 ] + val_height / 2 )
-			)
-		elseif CD_center[ 6 ] then
-			return format( "(%s,%s,%s,%s)",
-				dtc_col( CD_center[ 5 ], CD_center[ 6 ] ), dtc_col( CD_center[ 5 ], CD_center[ 6 ] ),
-				dtc_col( CD_center[ 5 ], CD_center[ 6 ] ), dtc_col( CD_center[ 5 ], CD_center[ 6 ] )
-			)
-		end
-		return format( "(%s,%s,%s,%s)",
-			dtc_col( val_left, val_top ), dtc_col( val_right, val_top ),
-			dtc_col( val_left, val_bottom ), dtc_col( val_right, val_bottom )
-		)
-	end
-
-	function color.angle( CA_origin, ... )
-		--CA_origin = { origin_x, origin_y[, pos_ref_x, pos_ref_y] }
-		local ang_col, CA_gradient = recall.c_ang
-		if val_i == 1
-			and j == 1 then
-			CA_gradient = table.gradient( 360, ... )
-			ang_col = remember( "c_ang",
-				function( adD_x, adD_y )
-					local ca_ang = math.angle( CA_origin[ 1 ], CA_origin[ 2 ], adD_x, adD_y ) % 361
-					return color.vc_to_c( CA_gradient[ ceil( ca_ang ) ] )
-				end
-			)
-		end 
-		if CA_origin[ 5 ] then
-			return format( "(%s,%s,%s,%s)",
-				ang_col( CA_origin[ 3 ] - val_width / 2, CA_origin[ 4 ] - val_height / 2 ),
-				ang_col( CA_origin[ 3 ] + val_width / 2, CA_origin[ 4 ] - val_height / 2 ),
-				ang_col( CA_origin[ 3 ] - val_width / 2, CA_origin[ 4 ] + val_height / 2 ),
-				ang_col( CA_origin[ 3 ] + val_width / 2, CA_origin[ 4 ] + val_height / 2 )
-			)
-		elseif CA_origin[ 4 ] then
-			return format( "(%s,%s,%s,%s)",
-				ang_col( CA_origin[ 3 ], CA_origin[ 4 ] ), ang_col( CA_origin[ 3 ], CA_origin[ 4 ] ),
-				ang_col( CA_origin[ 3 ], CA_origin[ 4 ] ), ang_col( CA_origin[ 3 ], CA_origin[ 4 ] )
-			)
-		end
-		return format( "(%s,%s,%s,%s)",
-			ang_col( val_left, val_top ), ang_col( val_right, val_top ),
-			ang_col( val_left, val_bottom ), ang_col( val_right, val_bottom )
-		)
-	end
-	
 	function color.from_error( Color )
 		if type( Color ) == "string" then
 			if Color:match( "#%x%x%x%x%x%x" ) then
@@ -11936,15 +11129,15 @@
 
 	--------------------------------------------------------------------------------------------------
 	--Librería de las Funciones alpha ----------------------------------------------------------------
-	function alpha.assF( alpha_or_table )
-		if type( alpha_or_table ) == "function" then
-			alpha_or_table = alpha_or_table( )
+	function alpha.assF( Alpha )
+		if type( Alpha ) == "function" then
+			Alpha = Alpha( )
 		end
-		local alpha_or_table = alpha_or_table or text.alpha1
-		local aF, taF = { alpha_or_table }, { }
-		effector.print_error( alpha_or_table, "alpha", "alpha.assF", 1 )
-		if type( alpha_or_table ) == "table" then
-			aF = alpha_or_table
+		local Alpha = Alpha or text.alpha1
+		local aF, taF = { Alpha }, { }
+		effector.print_error( Alpha, "alpha", "alpha.assF", 1 )
+		if type( Alpha ) == "table" then
+			aF = Alpha
 		end
 		for i = 1, #aF do
 			taF = { }
@@ -12076,7 +11269,13 @@
 		local Times = Times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
 		effector.print_error( Times, "table", "alpha.set", 1 )
 		effector.print_error( Alphas, "table", "alpha.set", 2 )
-		Times = table.complete( Times, fx.start_time, fx.end_time )
+		local function table_complete( Table )
+			local Table = HMS_to_ms( Table )	--convierte los tiempos a milisegundos (ms)
+			Table[ #Table + 1 ] = fx.start_time	--ingresa el tiempo inicial de la línea fx
+			Table[ #Table + 1 ] = fx.end_time	--ingresa el tiempo final de la línea fx
+			return table.op( Table, "org" )		--organiza todos los tiempos ascendentemente
+		end
+		Times = table_complete( Times )
 		-----------------------------------------------------------
 		local indx_i, indx_f = table.index( Times, fx.start_time ), table.index( Times, fx.end_time )
 		local Times_aux = table.duplicate( Times )
@@ -12135,179 +11334,17 @@
 		return Tags
 	end --mod: june 14th 2020
 
-	function alpha.mask( Mode, Alpha, Mask )
-		return table.mask( Alpha, Mask, Mode )
-	end
-	
-	function alpha.movemask( Dur, Delay, Mode, Alpha, Mask )
-		if type( Dur ) == "table" then
-			table.insert( Dur, val_i + 1 )
-		else
-			Dur = { 0, Dur, val_i + 1 }
-		end
-		local  AmMtb = table.mask( Alpha, Mask, Mode, true )
-		return AmMtb[ val_i ] .. tag.oscill( Dur, Delay, AmMtb )
-	end
-	
-	function alpha.movemaskv( Dur, Delay, Mode, Alpha, Mask )
-		if type( Dur ) == "table" then
-			table.insert( Dur, val_i + 1 )
-		else
-			Dur = { 0, Dur, 2 }
-		end
-		local AmMvTB, AmMvtb = table.mask( Alpha, Mask, Mode, true ), { }
-		for i = 1, 12 do
-			AmMvtb[ i ] = AmMvTB[ val_i + (i - 1) * val_n ]
-		end
-		return AmMvtb[ 1 ] .. tag.oscill( Dur, Delay, AmMvtb )
-	end
-	
-	function alpha.module( Alpha1, Alpha2 )
-		return alpha.interpolate( Alpha1, Alpha2, module )
-	end
-
-	function alpha.module1( Alpha1, Alpha2 )
-		return alpha.interpolate( Alpha1, Alpha2, module1 )
-	end
-
-	function alpha.module2( Alpha1, Alpha2 )
-		return alpha.interpolate( Alpha1, Alpha2, module2 )
-	end
-	
-	function alpha.moduler( Alpha1, Alpha2 )
-		return alpha.interpolate( Alpha1, Alpha2, moduler )
-	end
-	
-	function alpha.ipol( ... )
-		local alphas_tbl = { ... }
-		if type( ... ) == "table" then
-			alphas_tbl = ... 
-		end
-		if #alphas_tbl == 1 then
-			alphas_tbl[ 2 ] = text.alpha1
-		end
-		local alpha_ipol = recall.a_ipol
-		local max_ipol = val_n - 1
-		local ipol_i, ipol_f, pct_ip
-		if val_n == 1 then
-			return alphas_tbl[ 1 ]
-		end
-		if val_i == 1 then
-			alpha_ipol = remember( "a_ipol", { } )
-			for i = 1, max_ipol do
-				ipol_i = alphas_tbl[ floor( (i - 1) / (max_ipol / (#alphas_tbl - 1)) ) + 1 ]
-				ipol_f = alphas_tbl[ floor( (i - 1) / (max_ipol / (#alphas_tbl - 1)) ) + 2 ]
-				pct_ip = floor( (i - 1) % (max_ipol / (#alphas_tbl - 1)) ) / (max_ipol / (#alphas_tbl - 1))
-				alpha_ipol[ i ] = alpha.interpolate( ipol_i, ipol_f, pct_ip )
-			end
-			alpha_ipol[ #alpha_ipol + 1 ] = alphas_tbl[ #alphas_tbl ]
-		end
-		return alpha_ipol[ val_i ] --rewrite: october 11th 2018
-	end --alpha.ipol( "&HFF&", "&H88&", "&H00&" )
-
-	function alpha.loop( ... )
-		local alphas_tbl = { ... }
-		if type( ... ) == "table" then
-			alphas_tbl = ... 
-		end
-		if #alphas_tbl == 1 then
-			alphas_tbl[ 2 ] = text.alpha1
-		end
-		local alpha_loop = recall.a_loop
-		local max_loop = maxj - 1
-		local ipol_i, ipol_f, pct_ip
-		if maxj == 1 then
-			return alphas_tbl[ 1 ]
-		end
-		if j == 1 then
-			alpha_loop = remember( "a_loop", { } )
-			for i = 1, max_loop do
-				ipol_i = alphas_tbl[ floor( (i - 1) / (max_loop / (#alphas_tbl - 1)) ) + 1 ]
-				ipol_f = alphas_tbl[ floor( (i - 1) / (max_loop / (#alphas_tbl - 1)) ) + 2 ]
-				pct_ip = floor( (i - 1) % (max_loop / (#alphas_tbl - 1)) ) / (max_loop / (#alphas_tbl - 1))
-				alpha_loop[ i ] = alpha.interpolate( ipol_i, ipol_f, pct_ip )
-			end
-			alpha_loop[ #alpha_loop + 1 ] = alphas_tbl[ #alphas_tbl ]
-		end
-		return alpha_loop[ j ] --rewrite: october 11th 2018
-	end --alpha.loop( "&HFF&", "&H88&", "&H00&" )
-
-	function alpha.distance( AD_center, ... )
-		--AD_center = {center_x, center_y[, radius_min[, radius_max[, center_ref_x, center_ref_y]]]}
-		local AD_max_dis, AD_radius_min, AD_radius_max, AD_radius_dis, AD_gradient
-		local dtc_alp = recall.AC_alp
-		if val_i == 1
-			and j == 1 then
-			AD_max_dis = {
-				[ 1 ] = math.distance( AD_center[ 1 ], AD_center[ 2 ], 0, 0 ),
-				[ 2 ] = math.distance( AD_center[ 1 ], AD_center[ 2 ], xres, 0 ),
-				[ 3 ] = math.distance( AD_center[ 1 ], AD_center[ 2 ], 0, yres ),
-				[ 4 ] = math.distance( AD_center[ 1 ], AD_center[ 2 ], xres, yres )
-			}
-			AD_radius_min = AD_center[ 3 ] or 0
-			AD_radius_max = AD_center[ 4 ] or math.max( unpack( AD_max_dis ) )
-			AD_radius_dis = AD_radius_max - AD_radius_min
-			AD_gradient = table.gradient( 86, ... )
-			dtc_alp = remember( "AC_alp",
-				function( AdD_x, AdD_y )
-					local ad_dis = math.distance( AD_center[ 1 ], AD_center[ 2 ], AdD_x, AdD_y ) - AD_radius_min
-					if ceil( ad_dis ) <= 0 then
-						return alpha.va_to_a( AD_gradient[ 1 ] )
-					elseif ceil( ad_dis ) >= AD_radius_dis then
-						return alpha.va_to_a( AD_gradient[ 86 ] )
-					end
-					return alpha.va_to_a( AD_gradient[ ceil( 86 * ad_dis / AD_radius_dis ) ] )
-				end
-			)
-		end
-		if AD_center[ 5 ] then
-			return format( "(%s,%s,%s,%s)",
-				dtc_alp( AD_center[ 5 ], AD_center[ 6 ] ), dtc_alp( AD_center[ 5 ], AD_center[ 6 ] ),
-				dtc_alp( AD_center[ 5 ], AD_center[ 6 ] ), dtc_alp( AD_center[ 5 ], AD_center[ 6 ] )
-			)
-		end
-		return format( "(%s,%s,%s,%s)",
-			dtc_alp( val_left, val_top ), dtc_alp( val_right, val_top ),
-			dtc_alp( val_left, val_bottom ), dtc_alp( val_right, val_bottom )
-		)
-	end
-
-	function alpha.angle( AA_origin, ... )
-		--AA_origin = { origin_x, origin_y[, pos_ref_x, pos_ref_y] }
-		local ang_alp, AA_gradient = recall.a_ang
-		if val_i == 1
-			and j == 1 then
-			AA_gradient = table.gradient( 86, ... )
-			ang_alp = remember( "a_ang",
-				function( adD_x, adD_y )
-					local aa_ang = math.angle( AA_origin[ 1 ], AA_origin[ 2 ], adD_x, adD_y ) % 87
-					return alpha.va_to_a( AA_gradient[ ceil( aa_ang ) ] )
-				end
-			)
-		end 
-		if AA_origin[ 3 ] then
-			return format( "(%s,%s,%s,%s)",
-				ang_alp( AA_origin[ 3 ], AA_origin[ 4 ] ), ang_alp( AA_origin[ 3 ], AA_origin[ 4 ] ),
-				ang_alp( AA_origin[ 3 ], AA_origin[ 4 ] ), ang_alp( AA_origin[ 3 ], AA_origin[ 4 ] )
-			)
-		end
-		return format( "(%s,%s,%s,%s)",
-			ang_alp( val_left, val_top ), ang_alp( val_right, val_top ),
-			ang_alp( val_left, val_bottom ), ang_alp( val_right, val_bottom )
-		)
-	end
-	
-	function alpha.from_error( alpha_or_table )
-		if type( alpha_or_table ) == "string" then
-			alpha_or_table = alpha_or_table:gsub( "[%#%&Hh]*(%x%x)[%&]*",
+	function alpha.from_error( Alpha )
+		if type( Alpha ) == "string" then
+			Alpha = Alpha:gsub( "[%#%&Hh]*(%x%x)[%&]*",
 				function( ASS_alpha )
 					return format( "&H%s&", ASS_alpha )
 				end
 			)
-		elseif type( alpha_or_table ) == "table" then
-			for k, valor in pairs( alpha_or_table ) do
+		elseif type( Alpha ) == "table" then
+			for k, valor in pairs( Alpha ) do
 				if type( valor ) == "string" then
-					alpha_or_table[ k ] = valor:gsub( "[%#%&Hh]*(%x%x)[%&]*",
+					Alpha[ k ] = valor:gsub( "[%#%&Hh]*(%x%x)[%&]*",
 						function( ASS_alpha )
 							return format( "&H%s&", ASS_alpha )
 						end
@@ -12315,7 +11352,7 @@
 				end
 			end
 		end
-		return alpha_or_table
+		return Alpha
 	end
 	
 	function alpha.fromstyle( ColorAlpha )
@@ -13696,113 +12733,7 @@
 		return shape.origin( shape.rotate( shape_lineal_fx, angle_array ) )
 	end
 	
-	function shape.Lmove( x1, y1, x2, y2, t1, t2, Accel ) -- Shape Lineal Move
-		--mueve linealmente al objeto karaoke desde un punto p1 a un punto p2 sin unsar el tag \move
-		if type( x1 ) == "function" then
-			x1 = x1( )
-		end
-		if type( y1 ) == "function" then
-			y1 = y1( )
-		end
-		if type( x2 ) == "function" then
-			x2 = x2( )
-		end
-		if type( y2 ) == "function" then
-			y2 = y2( )
-		end
-		if type( t1 ) == "function" then
-			t1 = t1( )
-		end
-		if type( t2 ) == "function" then
-			t2 = t2( )
-		end
-		if type( Accel ) == "function" then
-			Accel = Accel( )
-		end
-		local Lcoor, time1, time2, accel = { }, 0, 1, 1
-		local posx1, posx2, posy1, posy2 = 0, 0, 0, 0
-		if type( x1 ) == "table" then
-			Lcoor = x1
-			time1 = math.round( y1 or fx.movet_i, 2 )
-			time2 = math.round( x2 or fx.movet_f, 2 )
-			accel = math.round( y2 or 1, 3 )
-		else
-			posx1 = x1 or fx.move_x1
-			posy1 = y1 or fx.move_y1
-			posx2 = x2 or fx.move_x2
-			posy2 = y2 or fx.move_y2
-			Lcoor = { posx1, posy1, posx2, posy2 }
-			time1 = math.round( t1 or fx.movet_i, 2 )
-			time2 = math.round( t2 or fx.movet_f, 2 )
-			accel = math.round( Accel or 1, 3 )
-		end
-		effector.print_error( time1, "number", "shape.Lmove", 5 )
-		effector.print_error( time2, "number", "shape.Lmove", 6 )
-		----------------------------------------------------------
-		if retime_mode then
-			time1, time2 = retimettag( retime_mode, time1, time2 )
-		end --september 09th 2017
-		----------------------------------------------------------
-		effector.print_error( posx1, "number", "shape.Lmove", 1 )
-		effector.print_error( posy1, "number", "shape.Lmove", 2 )
-		effector.print_error( posx2, "number", "shape.Lmove", 3 )
-		effector.print_error( posy2, "number", "shape.Lmove", 4 )
-		effector.print_error( accel, "number", "shape.Lmove", 7 )
-		local coorx, coory, segms, fscxy, sizex, sizey, times = { }, { }, { }, { }, { }, { }, { [ 0 ] = 0 }
-		for i = 1, #Lcoor / 2 do
-			coorx[ i ] = Lcoor[ 2 * i - 1 ] - val_width / 2
-			coory[ i ] = Lcoor[ 2 * i ] + val_height / 2 - l.descent
-		end
-		coorx, coory = math.round( coorx, 3 ), math.round( coory, 3 )
-		for i = 2, #coorx do
-			segms[ i - 1 ] = math.distance( coorx[ i ], coory[ i ], coorx[ i - 1 ], coory[ i - 1 ] )
-		end
-		local length = table.op( segms, "sum" )
-		table.insert( segms, 1, 0 )
-		if length == 0 then
-			length = 1
-		end
-		for i = 1, #segms do
-			times[ i ] = time1 + (time2 - time1) * segms[ i ] / length + times[ i - 1 ]
-		end
-		times = math.round( times, 2 )
-		local tags1 = format( "\\fscx%s\\fscy%s", coorx[ 1 ], coory[ 1 ] )
-		for i = 2, #coorx do
-			tags1 = tags1 .. format( "\\t(%s,%s,%s,\\fscx%s\\fscy%s)",
-				times[ i - 1 ], times[ i ], accel, coorx[ i ], coory[ i ]
-			)
-		end
-		local tags2 = format( "%s\\p1}m 0 0 m 100 100 {\\p0\\r%s", tags1, tags_style .. effector.keeptags( fx__.t_type, fx__.keeptagsfx ) )
-		for c in tags2:gmatch( "fscx?y?(%-?%d+[%.%d]*)" ) do
-			table.insert( fscxy, tonumber( c ) )
-		end
-		for i = 1, #fscxy / 2 do
-			table.insert( sizex, fscxy[ 2 * i - 1 ] )
-			table.insert( sizey, fscxy[ 2 * i - 0 ] )
-		end
-		local min_x, min_y = table.op( sizex, "min" ), table.op( sizey, "min" )
-		if min_x >= 0 then
-			min_x = 0
-		end
-		if min_y > 0
-			and min_y <= val_height then
-			min_y = -min_y
-		elseif min_y >= 0 then
-			min_y = 0
-		end
-		local posxy = format( "\\an7\\q2%s", effector.new_pos( min_x, min_y ) )
-		tags2 = posxy .. tags2:gsub( "(\\fscx%-?%d+[%.%d]*)(\\fscy%-?%d+[%.%d]*)", 
-			function( x, y )
-				fsc_x = x:match( "%-?%d+[%.%d]*" )
-				fsc_y = y:match( "%-?%d+[%.%d]*" )
-				return format( "\\fscx%s\\fscy%s", fsc_x - min_x, fsc_y - min_y )
-			end
-		)
-		tags2 = tags2:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
-		return tags2
-	end --shape.Lmove( 100, 200, 500, 600 )
-	
-	function shape.Lmove2( Coor, Times, Times2 ) -- Shape Lineal Move 2
+	function shape.lmove( Coor, Times, Times2, Accel ) -- Shape Lineal Move 2
 		if type( Coor ) == "function" then
 			Coor = Coor( )
 		end
@@ -13812,7 +12743,11 @@
 		if type( Times2 ) == "function" then
 			Times2 = Times2( )
 		end
-		effector.print_error( Coor, "table", "shape.Lmove2", 1 )
+		if type( Accel ) == "function" then
+			Accel = Accel( )
+		end
+		local Accel = Accel or 1
+		effector.print_error( Coor, "table", "shape.lmove", 1 )
 		------------------------------------
 		--hace que las coordenadas sean relativas a
 		--la posición por default del objeto karaoke
@@ -13856,7 +12791,7 @@
 				or math.round( time_ini + time_dur * parcial[ i / 2 ] / total_lenthg, 2 )
 			end
 		end
-		effector.print_error( Times, "table", "shape.Lmove2", 2 )
+		effector.print_error( Times, "table", "shape.lmove", 2 )
 		----------------------------------------
 		--los valores negativos valen desde el tiempo final del fx
 		--el 0, después de la primera posición, cuenta como fx.dur
@@ -13876,8 +12811,8 @@
 		end
 		local tags1 = format( "\\fscx%s\\fscy%s", coorx[ 1 ], coory[ 1 ] )
 		for i = 2, #coorx do
-			tags1 = tags1 .. format( "\\t(%s,%s,\\fscx%s\\fscy%s)",
-				Times[ 2 * (i - 1) - 1 ], Times[ 2 * (i - 1) ], coorx[ i ], coory[ i ]
+			tags1 = tags1 .. format( "\\t(%s,%s,%s,\\fscx%s\\fscy%s)",
+				Times[ 2 * (i - 1) - 1 ], Times[ 2 * (i - 1) ], Accel, coorx[ i ], coory[ i ]
 			)
 		end
 		local tags2 = format( "%s\\p1}m 0 0 m 100 100 {\\p0\\r%s", tags1, tags_style .. effector.keeptags( fx__.t_type, fx__.keeptagsfx ) )
@@ -13908,9 +12843,9 @@
 			end
 		)
 		return tags2
-	end --shape.Lmove2( { -l.width / 2, fx.pos_y, fx.pos_x, fx.pos_y, xres + l.width / 2, fx.pos_y }, { 0, 200, fx.dur - 200, fx.dur } )
+	end --shape.lmove( { -l.width / 2, fx.pos_y, fx.pos_x, fx.pos_y, xres + l.width / 2, fx.pos_y }, { 0, 200, fx.dur - 200, fx.dur } )
 	
-	function shape.Pmove( F_x, F_y, domainF, t1, t2, Accel, offset_t ) -- Shape Parametric Move
+	function shape.pmove( F_x, F_y, domainF, t1, t2, Accel, offset_t ) -- Shape Parametric Move
 		if type( F_x ) == "function" then
 			F_x = F_x( )
 		end
@@ -13929,16 +12864,16 @@
 		if type( offset_t ) == "function" then
 			offset_t = offset_t( )
 		end
-		effector.print_error( F_x, "string", "shape.Pmove", 1 )
-		effector.print_error( F_y, "string", "shape.Pmove", 2 )
-		effector.print_error( domainF, "numbertable", "shape.Pmove", 3 )
+		effector.print_error( F_x, "string", "shape.pmove", 1 )
+		effector.print_error( F_y, "string", "shape.pmove", 2 )
+		effector.print_error( domainF, "numbertable", "shape.pmove", 3 )
 		local offset_t = offset_t or 0
 		local accel = Accel or 1
 		local time2 = t2 or fx.movet_f
 		local time1 = t1 or fx.movet_i
 		local tgdur
-		effector.print_error( time1, "number", "shape.Pmove", 4 )
-		effector.print_error( time2, "number", "shape.Pmove", 5 )
+		effector.print_error( time1, "number", "shape.pmove", 4 )
+		effector.print_error( time2, "number", "shape.pmove", 5 )
 		----------------------------------------------------------
 		if retime_mode then
 			time1, time2 = retimettag( retime_mode, time1, time2 )
@@ -13946,9 +12881,9 @@
 		----------------------------------------------------------
 		local dur_t = time2 - time1
 		if Accel then
-			effector.print_error( Accel, "number", "shape.Pmove", 6 )
+			effector.print_error( Accel, "number", "shape.pmove", 6 )
 		end
-		effector.print_error( offset_t, "numbertable", "shape.Pmove", 7 )
+		effector.print_error( offset_t, "numbertable", "shape.pmove", 7 )
 		if type( offset_t ) == "table" then
 			tgdur = math.round( offset_t[ 1 ], 2)
 		else
@@ -14005,9 +12940,9 @@
 		)
 		tags2 = tags2:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 		return tags2
-	end --shape.Pmove( "100 * cos( %s )", "100 * sin( %s )", { 0, 2 * pi } )
+	end --shape.pmove( "100 * cos( %s )", "100 * sin( %s )", { 0, 2 * pi } )
 
-	function shape.Smove( Shape, t1, t2, Relative ) -- Shape Shape Move
+	function shape.smove( Shape, t1, t2, Relative ) -- Shape Shape Move
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -14019,8 +12954,8 @@
 		end
 		local time2 = t2 or fx.movet_f
 		local time1 = t1 or fx.movet_i
-		effector.print_error( time1, "number", "shape.Smove", 2 )
-		effector.print_error( time2, "number", "shape.Smove", 3 )
+		effector.print_error( time1, "number", "shape.smove", 2 )
+		effector.print_error( time2, "number", "shape.smove", 3 )
 		----------------------------------------------------------
 		if retime_mode then
 			time1, time2 = retimettag( retime_mode, time1, time2 )
@@ -14041,7 +12976,7 @@
 			end
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "stringtable", "shape.Smove", 1 )
+		effector.print_error( Shape, "stringtable", "shape.smove", 1 )
 		local tags2 = recall.shSmtag
 		if j == 1 then
 			--Shape = Yutils.shape.flatten( Shape, 3 )
@@ -14112,9 +13047,9 @@
 		)-- february 03rd 2018
 		:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 		return tags2
-	end --shape.Smove( shape.trebol )
+	end --shape.smove( shape.trebol )
 	
-	function shape.Rmove( Rx, Ry, t1, t2, Accel, offset_t, Counter2 ) -- Shape Random Move
+	function shape.rmove( Rx, Ry, t1, t2, Accel, offset_t, Counter2 ) -- Shape Random Move
 		if type( t1 ) == "function" then
 			t1 = t1( )
 		end
@@ -14131,18 +13066,18 @@
 		local Rx = Rx or 0.4 * val_height
 		local Ry = Ry or Rx
 		local tgdur
-		effector.print_error( Rx, "numbershapetable", "shape.Rmove", 1 )
-		effector.print_error( Ry, "numbershapetable", "shape.Rmove", 2 )
-		effector.print_error( time1, "number", "shape.Rmove", 3 )
-		effector.print_error( time2, "number", "shape.Rmove", 4 )
+		effector.print_error( Rx, "numbershapetable", "shape.rmove", 1 )
+		effector.print_error( Ry, "numbershapetable", "shape.rmove", 2 )
+		effector.print_error( time1, "number", "shape.rmove", 3 )
+		effector.print_error( time2, "number", "shape.rmove", 4 )
 		----------------------------------------------------------------
 		if retime_mode then
 			time1, time2 = retimettag( retime_mode, time1, time2 )
 		end --september 09th 2017
 		----------------------------------------------------------------
 		local dur_t = time2 - time1
-		effector.print_error( accel, "numberstring", "shape.Rmove", 5 )
-		effector.print_error( offset_t, "numbertable", "shape.Rmove", 6 )
+		effector.print_error( accel, "numberstring", "shape.rmove", 5 )
+		effector.print_error( offset_t, "numbertable", "shape.rmove", 6 )
 		local line = linefx[ ii ]
 		local func_accel = loadstring( format( "return function( meta, line, i ) return %s end", accel ) )( )
 		if type( offset_t ) == "table" then
@@ -14288,9 +13223,9 @@
 		)
 		tags2 = tags2:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 		return tags2
-	end --shape.Rmove( 10, 20 )
+	end --shape.rmove( 10, 20 )
 	
-	function shape.Rmove2( Rx, Ry, t, Accel ) -- Shape Random Move
+	function shape.rmove2( Rx, Ry, t, Accel ) -- Shape Random Move
 		if type( t ) == "function" then
 			t = t( )
 		end
@@ -14323,7 +13258,7 @@
 			tag_off = Rrd( 0.65 * time_off, 1.25 * time_off, 1, -2 * pi * i )
 			tag_tm1 = tag_dur + tag.only( i == 1 and Rrd( 1, 2, 1, 2 * i ) == 2, 0, tag_off )
 			tag_tm2 = tag_tm1 + tag_shk
-			tag_tbl[ i ] = shape.Rmove( Rx, Ry, tag_tm1, tag_tm2, Accel, { time_tag }, i )
+			tag_tbl[ i ] = shape.rmove( Rx, Ry, tag_tm1, tag_tm2, Accel, { time_tag }, i )
 			tag_dur = tag_tm2
 			i = i + 1
 		end
@@ -14338,16 +13273,16 @@
 		local tag_fx3 = table.op( tag_fx1, "concat" )
 		local tag_fx4 = tag_fx2:gsub( "\\p1", tag_fx3 .. "\\p1" )
 		return tag_fx4
-	end --shape.Rmove2( 12, 12 )
+	end --shape.rmove2( 12, 12 )
 	
-	function shape.Rmove3( Rx, Ry, t, Accel, offset_t )
+	function shape.rmove3( Rx, Ry, t, Accel, offset_t )
 		if type( t ) == "function" then
 			t = t( )
 		end
 		local times = t or { 0, fx.dur }
-		effector.print_error( times, "table", "shape.Rmove3", 3 )
+		effector.print_error( times, "table", "shape.rmove3", 3 )
 		local rmove3_tgfx = ""
-		local rmove3_tags = shape.Rmove( Rx, Ry, times[ 1 ], times[ 2 ], Accel, offset_t )
+		local rmove3_tags = shape.rmove( Rx, Ry, times[ 1 ], times[ 2 ], Accel, offset_t )
 		local rmove3_tag3 = { }
 		local rmove3_tbl3 = { }
 		local rmove3_accl = Accel
@@ -14360,7 +13295,7 @@
 				rmove3_offt = offset_t( )
 			end
 			rmove3_tbl3[ i - 1 ] = { }
-			rmove3_tag3[ i - 1 ] = shape.Rmove( Rx, Ry, times[ 2 * i - 1 ], times[ 2 * i ], rmove3_accl, rmove3_offt, i )
+			rmove3_tag3[ i - 1 ] = shape.rmove( Rx, Ry, times[ 2 * i - 1 ], times[ 2 * i ], rmove3_accl, rmove3_offt, i )
 			for tr in rmove3_tag3[ i - 1 ]:gmatch( "\\t%(%d+[%.%d]*%,%d+[%.%d]*%,[%d%.%,]*\\fscx%d+[%.%d]*\\fscy%d+[%.%d]*%)" ) do
 				table.insert( rmove3_tbl3[ i - 1 ], tr )
 			end
@@ -14369,9 +13304,9 @@
 		rmove3_tag3 = table.op( rmove3_tag3, "concat" )
 		rmove3_tgfx = rmove3_tags:gsub( "\\p1", format( "%s\\p1", rmove3_tag3 ) )
 		return rmove3_tgfx
-	end --shape.Rmove3( nil, nil, { 0, 500, fx.dur - 500, fx.dur }, 1, { 2f } )
+	end --shape.rmove3( nil, nil, { 0, 500, fx.dur - 500, fx.dur }, 1, { 2f } )
 	
-	function shape.Rmove4( Rx, Ry, t1, t2, Accel, offset_t, move4 )
+	function shape.rmove4( Rx, Ry, t1, t2, Accel, offset_t, move4 )
 		if type( move4 ) == "function" then
 			move4 = move4( )
 		end
@@ -14380,8 +13315,8 @@
 		local dur_t = time2 - time1
 		local move4 = move4 or { 1.5 * frame_dur, 25 * ratio }	--move4 = { t, dx, acc }
 		move4[ 3 ] = move4[ 3 ] or 1
-		effector.print_error( move4, "table", "shape.Rmove4", 7 )
-		local tag_r = shape.Rmove( Rx, Ry, time1, time2, Accel, offset_t )
+		effector.print_error( move4, "table", "shape.rmove4", 7 )
+		local tag_r = shape.rmove( Rx, Ry, time1, time2, Accel, offset_t )
 		----------------------------------------------------------------
 		if retime_mode then
 			time1, time2 = retimettag( retime_mode, time1, time2 )
@@ -14427,9 +13362,9 @@
 		tagfx = tag_r:gsub( "\\r", "\\r" .. tagfx )
 		tagfx = tagfx:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 		return tagfx
-	end --shape.Rmove4( 20, 20, 0, fx.dur, 1, { 460 }, { 3f, { 20, 40 } } )
+	end --shape.rmove4( 20, 20, 0, fx.dur, 1, { 460 }, { 3f, { 20, 40 } } )
 	
-	function shape.Omove( P, t1, t2, Dur, Accel ) -- Shape Oscill Move
+	function shape.omove( P, t1, t2, Dur, Accel ) -- Shape Oscill Move
 		if type( P ) == "function" then
 			P = P( )
 		end
@@ -14517,7 +13452,7 @@
 		)
 		tags2 = tags2:gsub( "(\\t%(%d+[%.%d]*%,%d+[%.%d]*%,)1%,", "%1" )
 		return tags2
-	end --shape.Omove( { 0, 30, 0, -30 } )
+	end --shape.omove( { 0, 30, 0, -30 } )
 	
 	function shape.lineclip( Mode, Dur, Ini )
 		--asemeja las posiciones del texto en distintos cuadros en el vídeo
@@ -18875,7 +17810,7 @@
 				Shape = linefx[ ii ].text:match( "\\i?clip%b()" )
 			end
 		end
-		local Mode = fx.offset.Mode or Mode or 2
+		local Mode = Mode or fx.offset.Mode or 2
 		Mode = ceil( abs( Mode ) )
 		if type( Shape ) == "string" then
 			if l_effect:match( "circle" )
@@ -19444,7 +18379,7 @@
 			while Horizontal[ i ] <= l.width do
 				shwidth = Rr( 18, 36 )
 				Horizontal[ i + 1 ] = (i == 0) and 0 or Horizontal[ i ] + R( 0.5 * shwidth, 1.5 * shwidth * Space )
-				Colors[ i + 1 ] = colortag and colorm1 or color.mask( "\\1c", colorm1, colorm2 )
+				Colors[ i + 1 ] = colortag and colorm1 or table.mask( colorm1, colorm2, "\\1c" )
 				Shapes[ i + 1 ] = shape.size( shape.origin( shape.rotate( Shape, R( 360 ) ) ), shwidth, Rr( 18, 36 ) )
 				i = i + 1
 			end
@@ -21171,7 +20106,7 @@
 			[ 11 ] = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 85, 115, 105, 110, 103, 32, 84, 97,
 					103, 115, 32, 70, 105, 108, 116, 101, 114, 58 },
 			[ 12 ] = { 75, 97, 114, 97, 32, 69, 102, 102, 101, 99, 116, 111, 114, 32, 51, 46, 54, 32, 108, 101, 103, 97, 99, 121 },
-			[ 13 ] = { 79, 99, 116, 111, 98, 101, 114, 32, 48, 55, 116, 104, 32, 50, 48, 49, 57 },
+			[ 13 ] = { 74, 117, 110, 101, 32, 49, 54, 116, 104, 32, 50, 48, 50, 48 },
 			[ 14 ] = { 40, 99, 41, 32, 86, 105, 99, 116, 56, 114, 32, 75, 97, 114, 97 },
 			[ 15 ] = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 102, 97, 99, 101, 98, 111, 111, 107, 46, 99, 111, 109, 47, 107, 97, 114,
 					97, 101, 102, 102, 101, 99, 116, 111, 114 },
@@ -21230,7 +20165,7 @@
 					108, 100, 101, 114, 32, 91, 102, 120, 93, 58 },
 			[ 46 ] = { 75, 101, 101, 112, 116, 97, 103, 115, 32, 91, 102, 120, 93, 58, 32, 32, 32 },
 			[ 47 ] = { 75, 97, 114, 97, 32, 69, 102, 102, 101, 99, 116, 111, 114, 32, 51, 46, 54, 32, 108, 101, 103, 97, 99, 121 },
-			[ 48 ] = { 79, 99, 116, 111, 98, 101, 114, 32, 48, 55, 116, 104, 32, 50, 48, 49, 57 },
+			[ 48 ] = { 74, 117, 110, 101, 32, 49, 54, 116, 104, 32, 50, 48, 50, 48 },
 			[ 49 ] = { 87, 104, 97, 116, 115, 65, 112, 112, 32, 75, 69, 58 },
 			[ 50 ] = { 43, 53, 55, 32, 51, 50, 48, 32, 56, 54, 51, 49, 52, 55, 50 },
 			[ 51 ] = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 100, 105, 115, 99, 111, 114, 100, 46, 103, 103, 47, 89, 70, 80, 50,
@@ -21541,7 +20476,7 @@
 		val_center, val_middle, val_left, val_right = l.center, l.middle, l.left, l.right
 		val_top, val_bottom, val_dur = l.top, l.bottom, line.duration
 		val_start, val_end, val_mid = line.start_time, line.end_time, line.mid_time
-		val_i, val_n = l_counter, maxil_counter
+		val_i, val_n = l_counter, maxil_count
 		if fx__.t_type == "Syl"
 			or fx__.t_type == "Syl Multi" then
 			val_width, val_height, val_text = syl.width, syl.height, syl.text
@@ -21652,7 +20587,7 @@
 			local l = subs[ i ]
 			maxi = maxi - 1
 			l_counter = #index - maxi
-			maxil_counter = #index
+			maxil_count = #index
 			karaskel.preproc_line( subs, meta, styles, l )
 			effector.do_fx( subs, meta, l, sett )
 			l.comment = lines_comment
