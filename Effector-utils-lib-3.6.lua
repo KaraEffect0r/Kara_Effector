@@ -43,7 +43,6 @@
 		-	r( r_i, r_f, r_step )
 		-	random.color( H, S, V )
 		-	random.alpha( alpha_i, alpha_f )
-		-	random.e( ... )
 		-	random.unique( Table, Index )
 		
 		librería table
@@ -69,11 +68,7 @@
 		-	table.inserttable( Table1, Table2, index_insert )
 		-	table.reverse( Table )
 		-	table.cyclic( Table )
-		+	table.set( color_masktable )
 		-	table.op( Table, Mode, add )
-		-	table.gradient( Size, ... )
-			table.bigradient( gradient1, gradient2, Size )
-			table.mask( Color_or_Alpha, Maskfx, Mode, First )
 			table.remember( table_ref, table_val )
 			table.random( Table_or_Number )
 		+	table.delete( Table, ... )
@@ -208,7 +203,6 @@
 			color.assF( Color )
 		-	color.to_RGB( Color )
 		-	color.to_HSV( Color )
-		-	color.vc( Color )
 		-	color.r( )
 		-	color.rc( Color, ... )
 		-	color.vc_to_c( Color )
@@ -538,11 +532,11 @@
 			return tonumber( time_HMS )
 		elseif type( time_HMS ) == "number" then
 			return time_HMS
-		elseif type( time_HMS ) == "table" then --resursión
+		elseif type( time_HMS ) == "table" then
 			time_to_ms = { }
-			for i = 1, #time_HMS do
-				time_to_ms[ i ] = HMS_to_ms( time_HMS[ i ] )
-			end
+			for k, v in pairs( time_HMS ) do
+				time_to_ms[ k ] = HMS_to_ms( v )
+			end --resursión
 		end --rewrite: june 14th 2020
 		return time_to_ms
 	end --HMS_to_ms( "0:00:02.325" )
@@ -555,34 +549,33 @@
 		local time_ms = time_ms or fx.offset.time_ms or 0 --add: may 31st 2020
 		local time_to_HMS
 		if type( time_ms ) == "table" then
-			local rec_table = { }
-			for i = 1, #time_ms do
-				rec_table[ i ] = ms_to_HMS( time_ms[ i ] )
+			time_to_HMS = { }
+			for k, v in pairs( time_ms ) do
+				time_to_HMS[ k ] = ms_to_HMS( v )
 			end
-			time_to_HMS = rec_table
-		else --recursividad: september 10th 2019
-			effector.print_error( time_ms, "numberstring", "ms_to_HMS", 1 )
-			local tms, time_H, time_M, time_S = math.round( time_ms ), 0, 0, 0
-			time_H = floor( tms / 3600000 )
-			tms = tms - time_H * 3600000
-			time_M = floor( tms / 60000 )
-			tms = tms - time_M * 60000
-			time_S = floor( tms / 1000 )
-			tms = tms - time_S * 1000
-			if time_M < 10 then
-				time_M = "0" .. time_M
-			end
-			if time_S < 10 then
-				time_S = "0" .. time_S
-			end
-			if tostring( tms ):len( ) == 1 then
-				tms = "00" .. tms
-			elseif tostring( tms ):len( ) == 2 then
-				tms =  "0" .. tms
-			end --ms_to_HMS( 234.945 )
-			time_to_HMS = format( "%s:%s:%s.%s", time_H, time_M, time_S, tms )
-		end --ms_to_HMS( { 540, 5645, 27432 } )
-		return time_to_HMS
+			return time_to_HMS
+		end --recursión
+		effector.print_error( time_ms, "numberstring", "ms_to_HMS", 1 )
+		local tms, time_H, time_M, time_S = math.round( time_ms ), 0, 0, 0
+		time_H = floor( tms / 3600000 )
+		tms = tms - time_H * 3600000
+		time_M = floor( tms / 60000 )
+		tms = tms - time_M * 60000
+		time_S = floor( tms / 1000 )
+		tms = tms - time_S * 1000
+		if time_M < 10 then
+			time_M = "0" .. time_M
+		end
+		if time_S < 10 then
+			time_S = "0" .. time_S
+		end
+		if tostring( tms ):len( ) == 1 then
+			tms = "00" .. tms
+		elseif tostring( tms ):len( ) == 2 then
+			tms =  "0" .. tms
+		end --ms_to_HMS( 234.945 )
+		time_to_HMS = format( "%s:%s:%s.%s", time_H, time_M, time_S, tms )
+		return time_to_HMS --ms_to_HMS( { 540, 5645, 27432 } )
 	end --ms_to_HMS( (j - 1) * 1f )
 	
 	function time_to_frame( Time )
@@ -593,24 +586,23 @@
 		local Time = Time or fx.offset.Time or 0 --add: may 31st 2020
 		local t_to_frame
 		if type( Time ) == "table" then
-			local rec_table = { }
-			for i = 1, #Time do
-				rec_table[ i ] = time_to_frame( Time[ i ] )
+			t_to_frame = { }
+			for k, v in pairs( Time ) do
+				t_to_frame[ k ] = time_to_frame( v )
 			end
-			t_to_frame = rec_table
-		else --recursividad: september 10th 2019
-			effector.print_error( Time, "numberstring", "time_to_frame", 1 )
-			local Time = tostring( Time )
-			if Time:match( "%d+%:%d+%:%d+%.%d+" ) then
-				if type( HMS_to_ms( Time ) ) == "table" then
-					Time = HMS_to_ms( Time )[ 1 ]
-				else
-					Time = HMS_to_ms( Time )
-				end
+			return t_to_frame
+		end --recursión
+		effector.print_error( Time, "numberstring", "time_to_frame", 1 )
+		local Time = tostring( Time )
+		if Time:match( "%d+%:%d+%:%d+%.%d+" ) then
+			if type( HMS_to_ms( Time ) ) == "table" then
+				Time = HMS_to_ms( Time )[ 1 ]
+			else
+				Time = HMS_to_ms( Time )
 			end
-			t_to_frame = ceil( Time / frame_dur )
-		end --time_to_frame( { 3000, "0:00:25.673" } )
-		return t_to_frame
+		end
+		t_to_frame = ceil( Time / frame_dur )
+		return t_to_frame --time_to_frame( { 3000, "0:00:25.673" } )
 	end --time_to_frame( 2000 )
 	
 	function frame_to_ms( frames )
@@ -621,17 +613,16 @@
 		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
 		local f_to_ms
 		if type( frames ) == "table" then
-			local rec_table = { }
-			for i = 1, #frames do
-				rec_table[ i ] = frame_to_ms( frames[ i ] )
+			f_to_ms = { }
+			for k, v in pairs( frames ) do
+				f_to_ms[ k ] = frame_to_ms( v )
 			end
-			f_to_ms = rec_table
-		else --recursividad: september 10th 2019
-			effector.print_error( frames, "number", "frame_to_ms", 1 )
-			f_to_ms =  math.round( frames * frame_dur, 2 )
-		end --frame_to_ms( { 2365, 128, 82351 } )
+			return f_to_ms
+		end --recursión
+		effector.print_error( frames, "number", "frame_to_ms", 1 )
+		f_to_ms = math.round( frames * frame_dur, 2 )
 		return f_to_ms
-	end
+	end --frame_to_ms( { 2365, 128, 82351 } )
 	
 	function frame_to_HMS( frames )
 		--convierte la cantidad de frames en un tiempo en formato HMS
@@ -641,17 +632,16 @@
 		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
 		local f_to_HMS
 		if type( frames ) == "table" then
-			local rec_table = { }
-			for i = 1, #frames do
-				rec_table[ i ] = frame_to_HMS( frames[ i ] )
+			f_to_HMS = { }
+			for k, v in pairs( frames ) do
+				f_to_HMS[ k ] = frame_to_HMS( v )
 			end
-			f_to_HMS = rec_table
-		else --recursividad: september 10th 2019
-			effector.print_error( frames, "number", "frame_to_HMS", 1 )
-			f_to_HMS = ms_to_HMS( frame_to_ms( frames ) )
-		end --frame_to_HMS( { 35, 240, { 4532, { 24, 276 }, 9574 } } )
+			return f_to_HMS
+		end --recursión
+		effector.print_error( frames, "number", "frame_to_HMS", 1 )
+		f_to_HMS = ms_to_HMS( frame_to_ms( frames ) )
 		return f_to_HMS
-	end
+	end --frame_to_HMS( { 35, 240, { 4532, { 24, 276 }, 9574 } } )
 
 	function time_mid1( Delay )
 		-- sumado en <Line Start Time>, hace que el texto aparezca desde los extremos hacia el centro de
@@ -852,20 +842,6 @@
 			ra_f = math.i( alpha_f + 1, 0, 255 )[ "A-->B-->A" ]
 		end
 		return alpha.val2ass( R( ra_f, ra_i ) )
-	end
-	
-	function random.e( ... )
-		-- retorma un elemento al azar de un listado de elementos o de una tabla
-		local Table_e = { ... }
-		if type( ... ) == "table" then
-			Table_e = ...
-		end
-		local rand_e = Table_e[ R( #Table_e ) ]
-		if rand_e == table_random then
-			rand_e = random.e( Table_e )
-		end
-		table_random = rand_e
-		return rand_e
 	end
 	
 	function random.unique( Table, Index ) --( Table[, Index] )
@@ -1392,32 +1368,30 @@
 		end
 		local Table_string, Chars_string = { }, { }
 		if type( String ) == "table" then
-			for i = 1, #String do
-				Table_string[ i ] = table.string( String[ i ], Number_str )
+			for k, v in pairs( String ) do
+				Table_string[ k ] = table.string( v, Number_str )
 			end
-		else --recursividad: march 07th 2020
-			local String = String or ""
-			local Number = Number_str or 1
-			effector.print_error( String, "string", "table.string", 1 )
-			effector.print_error( Number, "number", "table.string", 2 )
-			local Len_string = unicode.len( String )
-			local tbl_string = { }
-			for c in unicode.chars( String ) do
-				table.insert( Chars_string, c )
+			return Table_string
+		end --recursión
+		local String = String or ""
+		local Number = Number_str or 1
+		effector.print_error( String, "string", "table.string", 1 )
+		effector.print_error( Number, "number", "table.string", 2 )
+		local Len_string = unicode.len( String )
+		for c in unicode.chars( String ) do
+			table.insert( Chars_string, c )
+		end
+		if Number >= Len_string then
+			return { String }
+		end
+		for i = 1, Len_string - Number + 1 do
+			Table_string[ i ] = ""
+			for k = 1, Number do
+				Table_string[ i ] = Table_string[ i ] .. Chars_string[ i + k - 1 ]
 			end
-			if Number >= Len_string then
-				return { String }
-			end
-			for i = 1, Len_string - Number + 1 do
-				tbl_string[ i ] = ""
-				for k = 1, Number do
-					tbl_string[ i ] = tbl_string[ i ] .. Chars_string[ i + k - 1 ]
-				end
-			end
-			Table_string = table.duplicate( tbl_string )
-		end --table.string( { "String", "demo" }, 2 )
+		end
 		return Table_string
-	end
+	end --table.string( { "String", "demo" }, 2 )
 
 	function table.space( String )
 		--retorna una tabla con las posciones de los espacios (" ") que contenga un string
@@ -1426,20 +1400,20 @@
 		end
 		local Table_space = { }
 		if type( String ) == "table" then
-			for i = 1, #String do
-				Table_space[ i ] = table.space( String[ i ] )
+			for k, v in pairs( String ) do
+				Table_space[ k ] = table.space( v )
 			end
-		else --recursividad: march 07th 2020
-			effector.print_error( String, "string", "table.space", 1 )
-			local Table_string = table.string( String )
-			for i = 1, #Table_string do
-				if Table_string[ i ] == " " then
-					Table_space[ #Table_space + 1 ] = i
-				end
+			return Table_space
+		end --recursión
+		effector.print_error( String, "string", "table.space", 1 )
+		local Table_string = table.string( String )
+		for i = 1, #Table_string do
+			if Table_string[ i ] == " " then
+				Table_space[ #Table_space + 1 ] = i
 			end
-		end --table.space( { "line demo", "string word fx" } )
+		end
 		return Table_space
-	end
+	end --table.space( { "line demo", "string word fx" } )
 	
 	function table.word( String )
 		--retorna una tabla con las palabras de un string
@@ -1448,16 +1422,16 @@
 		end
 		local Table_word = { }
 		if type( String ) == "table" then
-			for i = 1, #String do
-				Table_word[ i ] = table.word( String[ i ] )
+			for k, v in pairs( String ) do
+				Table_word[ k ] = table.word( v )
 			end
-		else --recursividad: september 16th 2019
-			effector.print_error( String, "string", "table.word", 1 )
-			for word_s in String:gmatch( "%S+" ) do
-				table.insert( Table_word, word_s )
-			end
-		end --table.word( { "line demo", "string word fx" } )
-		return Table_word
+			return Table_word
+		end --recursión
+		effector.print_error( String, "string", "table.word", 1 )
+		for word_s in String:gmatch( "%S+" ) do
+			table.insert( Table_word, word_s )
+		end
+		return Table_word --table.word( { "line demo", "string word fx" } )
 	end --table.word( "line demo" )
 	
 	function table.retire( Table, ... )
@@ -1580,18 +1554,6 @@
 		return Table_cyc
 	end
 	
-	function table.set( color_masktable )
-		if type( color_masktable ) == "function" then
-			color_masktable = color_masktable( )
-		end
-		effector.print_error( color_masktable, "table", "table.set", 1 )
-		local table_mask_val_i = { }
-		for i = 1, #color_masktable do
-			table_mask_val_i[ i ] = color_masktable[ i ][ val_i ]
-		end
-		return table_mask_val_i
-	end
-	
 	function table.op( Table, Mode, add )
 		--realiza múltiples operaciones con los elementos de la tabla ingresada
 		if type( Table ) == "function" then
@@ -1676,7 +1638,6 @@
 		elseif Mode == "org" then
 			--retorna la tabla con los números organizados ascendentemente
 			local table_org = table.duplicate( Table )
-			--table.sort( table_org, function( a, b ) return a < b end )
 			table.sort( table_org, function( a, b )
 				if type( a ) == "table" then
 					a = a[ 1 ]
@@ -1690,7 +1651,6 @@
 		elseif Mode == "org2" then
 			--retorna la tabla con los números organizados descendentemente
 			local table_org2 = table.duplicate( Table )
-			--table.sort( table_org2, function( a, b ) return a > b end )
 			table.sort( table_org2, function( a, b )
 				if type( a ) == "table" then
 					a = a[ 1 ]
@@ -1748,179 +1708,6 @@
 			return table_idx
 		end
 	end
-	
-	function table.gradient( Size, ... )
-		-- example algorithm: "sin( pi * %s )"
-		if type( Size ) == "function" then
-			Size = Size( )
-		end
-		local toGradient = { ... }
-		if type( ... ) == "table" then
-			toGradient = ...
-		end
-		if #toGradient == 1 then
-			toGradient[ 2 ] = text.color1
-		end
-		toGradient = color.from_error( toGradient )
-		local Size = Size or val_n
-		effector.print_error( Size, "numbertable", "table.gradient", 1 )
-		local Grad, Gradient_H, Gradient_V = { }, { }, { }
-		local algorithm, Siz = "%s", math.round( Size )
-		if type( Size ) == "table"
-			and Size[ 2 ] then
-			Siz = math.round( Size[ 1 ] )
-			algorithm = Size[ 2 ]
-		end
-		if type( Size ) == "table"
-			and type( Size[ 1 ] ) == "table" then
-			Siz = math.round( Size[ 1 ][ 1 ] )
-			for i = 1, Siz do
-				Grad[ i ] = tag.ipol( math.format( algorithm, (i - 1) / (Siz - 1) ), toGradient )
-			end
-			return Grad
-		end
-		for i = 1, Siz + 1 do
-			Grad[ i ] = tag.ipol( math.format( algorithm, (i - 1) / Siz ), toGradient )
-		end
-		for i = 1, Siz do
-			Gradient_H[ i ] = format( "(%s,%s,%s,%s)", Grad[ i ], Grad[ i + 1 ], Grad[ i ], Grad[ i + 1 ] )
-			Gradient_V[ i ] = format( "(%s,%s,%s,%s)", Grad[ i ], Grad[ i ], Grad[ i + 1 ], Grad[ i + 1 ] )
-		end
-		if fx__.v_kanji == false then
-			return Gradient_H
-		end
-		return Gradient_V
-	end --"\\1c" .. table.gradient( val_n, "&H0000FF&", text.color1, "&H00FFFF&" )[val_i]
-	
-	function table.bigradient( gradient1, gradient2, Size )
-		if type( gradient1 ) == "function" then
-			gradient1 = gradient1( )
-		end
-		if type( gradient2 ) == "function" then
-			gradient2 = gradient2( )
-		end
-		if type( Size ) == "function" then
-			Size = Size( )
-		end
-		local gradient1 = color.from_error( gradient1 or text.color1 )
-		local gradient2 = color.from_error( gradient2 or text.color2 )
-		local Size = math.round( Size or val_n )
-		local N1, N2
-		local bigradient1, bigradient2 = gradient1, gradient2
-		if type( gradient1 ) == "string" then
-			bigradient1 = { gradient1, gradient1 }
-		end
-		if type( gradient2 ) == "string" then
-			bigradient2 = { gradient2, gradient2 }
-		end
-		if #bigradient1 == 1 then
-			bigradient1 = { bigradient1[ 1 ], bigradient1[ 1 ] }
-		end
-		if #bigradient2 == 1 then
-			bigradient2 = { bigradient2[ 1 ], bigradient2[ 1 ] }
-		end
-		local n1, n2, vector1, vector2 = #bigradient1 - 1, #bigradient2 - 1, { }, { }
-		local table_bigradientH, table_bigradientV = { }, { }
-		for k = 1, Size + 1 do
-			N1 = ceil( k / ((Size + 1) / n1) )
-			N2 = ceil( k / ((Size + 1) / n2) )
-			vector1[ k ] = tag.ipol( (k - (N1 - 1) * (Size + 1) / n1 - 1) / ((Size + 1) / n1), bigradient1[ N1 ], bigradient1[ N1 + 1 ] )
-			vector2[ k ] = tag.ipol( (k - (N2 - 1) * (Size + 1) / n2 - 1) / ((Size + 1) / n2), bigradient2[ N2 ], bigradient2[ N2 + 1 ] )
-		end
-		for i = 1, Size do
-			table_bigradientH[ i ] = format( "(%s,%s,%s,%s)", vector1[ i ], vector1[ i + 1 ], vector2[ i ], vector2[ i + 1 ] )
-			table_bigradientV[ i ] = format( "(%s,%s,%s,%s)", vector1[ i ], vector2[ i ], vector1[ i + 1 ], vector2[ i + 1 ] )
-		end
-		if fx__.v_kanji == false then
-			return table_bigradientH
-		end
-		return table_bigradientV
-	end --"\\1vc" .. table.bigradient( {"&H0000FF&", text.color1}, "&H00FFFF&", val_n )[val_i]
-	
-	function table.mask( Color_or_Alpha, Maskfx, Mode, First )
-		if type( Color_or_Alpha ) == "function" then
-			Color_or_Alpha = Color_or_Alpha( )
-		end
-		if type( Maskfx ) == "function" then
-			Maskfx = Maskfx( )
-		end
-		if type( Mode ) == "function" then
-			Mode = Mode( )
-		end
-		if type( First ) == "function" then
-			First = First( )
-		end
-		local vectorMask = color.from_error( Color_or_Alpha or text.color1 )
-		if type( vectorMask ) ~= "table" then
-			vectorMask = { vectorMask }
-		end
-		local Mask = Maskfx or { "&HFF&", "&H00&" }
-		local func_ipol, func_conv = alpha.ipolfx, alpha.va_to_a
-		if vectorMask[ 1 ]:match( "&H(%x+)&" ):len( ) == 6 then
-			Mask = color.from_error( Maskfx or { "&H5A5A5A&", "&H000000&" } )
-			func_ipol, func_conv = color.ipolfx, color.vc_to_c
-		end
-		if type( Mask ) ~= "table" then
-			Mask = { Mask }
-		end
-		if #Mask == 1 then
-			Mask[ 2 ] = Mask[ 1 ]
-		end
-		local Mode = Mode or ""
-		local ind, msk = recall.Ind, recall.Msk
-		local Mask1, Mask2, MaskT, Hue = { }, { }, { }, { }
-		if val_i == 1
-			and j == 1 then
-			ind = remember( "Ind", { } )
-			msk = remember( "Msk", { } )
-			for i = 1, 12 * (2 * (val_n + 1)) do
-				Mask = table.disorder( Mask )
-				ind[ i ] = Rc( 0.24, 1 )
-				msk[ i ] = func_ipol( R( 2 ) - 1, Mask[ 1 ], Mask[ 2 ] )
-			end
-		end
-		for k = 1, #vectorMask do
-			Hue[ k ], Mask2[ k ] = { }, { }
-			for i = 1, 12 * (2 * (val_n + 1)) do
-				Hue[ k ][ i ] = func_ipol( ind[ i ], msk[ i ], func_conv( vectorMask[ k ] ) )
-			end
-			for i = 1, 2 do
-				table.insert( Hue[ k ], Hue[ k ][ i ] )
-			end
-			for i = 1, 12 * val_n + 1 do
-				Mask1[ i ] = format( "%s(%s,%s,%s,%s)",
-					Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 2 ]
-				)
-				Mask2[ k ][ i ] = format( "%s(%s,%s,%s,%s)",
-					Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 2 ]
-				)
-				if fx__.v_kanji then
-					Mask1[ i ] = format( "%s(%s,%s,%s,%s)",
-						Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i + 2 ]
-					)
-					Mask2[ k ][ i ] = format( "%s(%s,%s,%s,%s)",
-						Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i + 2 ]
-					)
-				end
-			end
-			for i = 1, 12 * val_n + 1 do
-				Hue[ k ][ i ] = Mask1[ i ]
-			end
-		end
-		if First == 1 then
-			return Mask2
-		end
-		if First then
-			return Mask1
-		end
-		if #vectorMask == 1 then
-			return Hue[ 1 ][ val_i ]
-		end
-		for i = 1, #vectorMask do
-			MaskT[ i ] = Hue[ i ][ val_i ]
-		end
-		return MaskT
-	end --table.mask( "&H00FFFF&", "&H000000&", "\\1c" )
 	
 	table.recall = { }
 	function table.remember( table_ref, table_val )
@@ -2291,44 +2078,44 @@
 		end
 		local tbl_cap = { }
 		if type( String ) == "table" then
-			for i = 1, #String do
-				tbl_cap[ i ] = table.capture( String[ i ], Capture )
+			for k, v in pairs( String ) do
+				tbl_cap[ k ] = table.capture( v, Capture )
 			end
-		else --recursividad: march 07th 2020
-			local String = String or ""
-			local Capture = Capture or ""
-			effector.print_error( String, "string", "table.capture", 1 )
-			effector.print_error( Capture, "stringtable", "table.capture", 2 )
-			local special_cap = {
-				[ "color" ] = "[\\%dvc]*[&#]^*H?%x%x%x%x%x%x&?",
-				[ "alpha" ] = "[\\%dvc]*[&#]^*H?%x%x&?",
-				[ "number" ] = "%-?%d+[%.%d]*",
-				[ "shape" ] = "m%s+%-?%d+[%.%-%d blm]*",
-				[ "clip" ] = "\\i?clip%b()",
-				[ "word" ] = "%S+",
-			}--add: may 10th 2020
-			local captbl
-			if type( Capture ) == "table" then
-				for i = 1, #Capture do
-					captbl = Capture[ i ]
-					if special_cap[ captbl ] then
-						captbl = special_cap[ captbl ]
-					end --add may 09th 2020
-					for cap in String:gmatch( captbl ) do
-						table.insert( tbl_cap, cap )
-					end
-				end
-			else
-				captbl = Capture
+			return tbl_cap
+		end --recursión
+		local String = String or ""
+		local Capture = Capture or ""
+		effector.print_error( String, "string", "table.capture", 1 )
+		effector.print_error( Capture, "stringtable", "table.capture", 2 )
+		local special_cap = {
+			[ "color" ] = "[\\%dvc]*[&#]^*H?%x%x%x%x%x%x&?",
+			[ "alpha" ] = "[\\%dvc]*[&#]^*H?%x%x&?",
+			[ "number" ] = "%-?%d+[%.%d]*",
+			[ "shape" ] = "m%s+%-?%d+[%.%-%d blm]*",
+			[ "clip" ] = "\\i?clip%b()",
+			[ "word" ] = "%S+",
+		}--add: may 10th 2020
+		local captbl
+		if type( Capture ) == "table" then
+			for i = 1, #Capture do
+				captbl = Capture[ i ]
 				if special_cap[ captbl ] then
 					captbl = special_cap[ captbl ]
-				end
+				end --add may 09th 2020
 				for cap in String:gmatch( captbl ) do
 					table.insert( tbl_cap, cap )
 				end
 			end
-		end --table.capture( { "line demo", "string word fx" }, "o" )
-		return tbl_cap
+		else
+			captbl = Capture
+			if special_cap[ captbl ] then
+				captbl = special_cap[ captbl ]
+			end
+			for cap in String:gmatch( captbl ) do
+				table.insert( tbl_cap, cap )
+			end
+		end
+		return tbl_cap --table.capture( { "line demo", "string word fx" }, "o" )
 	end --may 12th 2018
 
 	function table.gsub( Table, Capture, Replace )
@@ -2718,6 +2505,13 @@
 		local String = String or ""
 		local Capture = Capture or "KE"
 		local str_count = 0
+		if type( String ) == "table" then
+			local count_tbl = { }
+			for k, v in pairs( String ) do
+				count_tbl[ k ] = string.count( v, Capture )
+			end
+			return count_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.count", 1 )
 		effector.print_error( Capture, "stringtable", "string.count", 2 )
 		if type( Capture ) == "string" then
@@ -2754,15 +2548,21 @@
 		return str_count
 	end --string.count( "&HF58628&", "%x" )
 
-	function string.toval( String, val )
+	function string.toval( String )
 		--convierte un string al valor real que representa
 		if type( String ) == "function" then
 			String = String( )
 		end
 		local String = String or ""
+		if type( String ) == "table" then
+			local toval_tbl = { }
+			for k, v in pairs( String ) do
+				toval_tbl[ k ] = string.toval( v )
+			end
+			return toval_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.toval", 1 )
 		local line, str_to_val = linefx[ ii ]
-		--val = val
 		if type( String ) == "string" then
 			-- march 15th 2018 ----------------------
 			String = String:gsub( "%.line", ".LINE" )
@@ -2801,6 +2601,13 @@
 		-- convierte al string "i" en un valor numérico consecutivo
 		local count_i = 0
 		local String = String or ""
+		if type( String ) == "table" then
+			local count_tbl = { }
+			for k, v in pairs( String ) do
+				count_tbl[ k ] = string.i( v )
+			end
+			return count_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.i", 1 )
 		String = String:gsub( "\\%w+%b()",
 			function( capture )
@@ -2828,6 +2635,13 @@
 		local String = String or ""
 		local Change = Change or ""
 		local nocapture_tbl = { }
+		if type( String ) == "table" then
+			local change_tbl = { }
+			for k, v in pairs( String ) do
+				change_tbl[ k ] = string.change( v, Capture, NoChange, NoCapture, Change )
+			end
+			return change_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.change", 1 )
 		effector.print_error( Capture, "stringtable", "string.change", 2 )
 		if NoCapture then
@@ -2903,6 +2717,13 @@
 		--string.cap( line.text_stripped, 4, 10 )
 		local String = String or ""
 		local Filter = Filter or ""
+		if type( String ) == "table" then
+			local cap_tbl = { }
+			for k, v in pairs( String ) do
+				cap_tbl[ k ] = string.cap( v, Capture, Extra_Capture, Filter )
+			end
+			return cap_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.cap", 1 )
 		effector.print_error( Capture, "numberstring", "string.cap", 2 )
 		effector.print_error( Extra_Capture, "numbertable", "string.cap", 3 )
@@ -3021,6 +2842,13 @@
 	function string.parts( String, Parts )
 		local String = String or linefx[ ii ].text_stripped
 		local Parts = Parts or 3
+		if type( String ) == "table" then
+			local recurion_tbl = { }
+			for k, v in pairs( String ) do
+				recurion_tbl[ k ] = string.parts( v, Parts )
+			end
+			return recurion_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.parts", 1 )
 		effector.print_error( Parts, "numbertable", "string.parts", 2 )
 		if type( Parts ) == "number" then
@@ -3051,7 +2879,7 @@
 			for k = 1, Part_i do
 				Parts_tbl[ i ] = Parts_tbl[ i ] .. (Chars_tbl[ 1 ] or "")
 				table.remove( Chars_tbl, 1 )
-			end
+			end --string.parts( { linefx[ 5 ].text_stripped, linefx[ 7 ].text_stripped },5 )
 			i = i + 1
 		end --string.parts( nil, { 1, 3 } )
 		return Parts_tbl
@@ -3069,6 +2897,13 @@
 		end
 		local String = String or ""
 		local Capture = Capture or "KE"
+		if type( String ) == "table" then
+			local recurion_tbl = { }
+			for k, v in pairs( String ) do
+				recurion_tbl[ k ] = string.match2( v, Capture, Table )
+			end
+			return recurion_tbl
+		end --recursión
 		effector.print_error( String, "string", "string.match2", 1 )
 		effector.print_error( Capture, "stringtable", "string.match2", 2 )
 		local match_multi, i = "", -1
@@ -3085,6 +2920,15 @@
 	
 	function string.newmatch( String, ... )
 		--realiza capturas múltiples hasta que ya no encuentre conicidencias
+		local String = String or ""
+		if type( String ) == "table" then
+			local recurion_tbl = { }
+			for k, v in pairs( String ) do
+				recurion_tbl[ k ] = string.newmatch( v, ... )
+			end
+			return recurion_tbl
+		end --recursión
+		effector.print_error( String, "string", "string.newmatch", 1 )
 		local Captures = { ... }
 		if type( ... ) == "table" then
 			Captures = ...
@@ -3105,6 +2949,15 @@
 	function string.replace( String, ... )
 		--genera remplazos por medio de capturas (modificación de string.gsub) las capturas son válidas de
 		--forma consecutiva, hasta que la concatenación de las mismas ya no exista como una captura válida
+		local String = String or ""
+		if type( String ) == "table" then
+			local recurion_tbl = { }
+			for k, v in pairs( String ) do
+				recurion_tbl[ k ] = string.replace( v, ... )
+			end
+			return recurion_tbl
+		end --recursión
+		effector.print_error( String, "string", "string.replace", 1 )
 		local Captures = { ... }
 		if type( ... ) == "table" then
 			Captures = ...
@@ -3170,6 +3023,15 @@
 			end --tag.clip( ):moveclip( )
 			return newclip --tag.clip( ):moveclip( 1.5 )
 		end --tag.clip( ):moveclip( { -200, 0, 0, 1400 }, { 0, 0, 1400, 2800 } )
+		local String = String or ""
+		if type( String ) == "table" then
+			local recurion_tbl = { }
+			for k, v in pairs( String ) do
+				recurion_tbl[ k ] = string.moveclip( v, ... )
+			end
+			return recurion_tbl
+		end --recursión
+		effector.print_error( String, "string", "string.moveclip", 1 )
 		return String .. new_clips( String, ... )
 	end --june 17th 2020
 
@@ -7976,7 +7838,7 @@
 			String = String( )
 		end
 		local String = String or ""
-		effector.print_error( String, "string", "tag.redefine2", 1 )
+		effector.print_error( String, "string", "tag.default2", 1 )
 		local tags_default_tags = {
 			[ 01 ] = "\\1v?c[tcfswmd]*%~",			[ 02 ] = "\\2v?c[tcfswmd]*%~",			[ 03 ] = "\\3v?c[tcfswmd]*%~",
 			[ 04 ] = "\\4v?c[tcfswmd]*%~",			[ 05 ] = "\\c[tcfswmd]*%~",				[ 06 ] = "\\1v?a[tcfswmd]*%~",
@@ -8125,16 +7987,6 @@
 			String = String( )
 		end
 		effector.print_error( String, "true", "tag.natsu", 1 )
-		local tags_color = {
-			[ 1 ] = "\\c",		[ 2 ] = "\\1c",		[ 3 ] = "\\2c",
-			[ 4 ] = "\\3c",		[ 5 ] = "\\4c",		[ 6 ] = "\\1vc",
-			[ 7 ] = "\\2vc",	[ 8 ] = "\\3vc",	[ 9 ] = "\\4vc",
-		}
-		local tags_alpha = {
-			[ 1 ] = "\\alpha",	[ 2 ] = "\\1a",		[ 3 ] = "\\2a",
-			[ 4 ] = "\\3a",		[ 5 ] = "\\4a",		[ 6 ] = "\\1va",
-			[ 7 ] = "\\2va",	[ 8 ] = "\\3va",	[ 9 ] = "\\4va",
-		}
 		-------------------------------------------------------------------------
 		String = String:gsub( "%.line", ".LINE" ) --> var.line.val
 		:gsub( "meta%.res_x", "xres" ):gsub( "meta%.res_y", "yres" )
@@ -8145,71 +7997,22 @@
 		-------------------------------------------------------------------------
 		String = String:gsub( "(\\%w+%-?%b{})",
 			function( capture )
-				if capture:match( "(\\%w+)%-?%b{}" ) ~= "\\N" then
-					local line = linefx[ ii ]
-					local tags_capture = tag.operation( capture:match( "(\\%w+)%-?%b{}" ) )
-					local vals_capture = capture:match( "\\%w+%-?(%b{})" ):sub( 2, -2 )
-					if pcall( loadstring( format( "return function( meta, line, x, y ) return { %s } end", vals_capture ) ) ) then
-						local fun_ipol = loadstring( format( "return function( meta, line, x, y ) return { %s } end", vals_capture ) )( )
-						if pcall( fun_ipol ) then
-							local tbl_ipol = fun_ipol( meta, line, x, y )
-							if tbl_ipol then
-								if capture:match( "(\\%w+%-)%b{}" ) then
-									if table.inside( tags_color, tags_capture ) then
-										return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
-									elseif table.inside( tags_alpha, tags_capture ) then
-										return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
-									end
-									if #tbl_ipol < 3 then
-										table.insert( tbl_ipol, 1, tags_capture )
-										local function tag_module( ... )
-											local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
-											for i = 1, #txt_tag do
-												if type( txt_tag[ i ] ) == "table" then
-													txt_val = math.round( tag.ipol( module, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
-													txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
-												else
-													txt_2tg[ i ] = txt_tag[ i ]
-												end
-											end
-											for i = 1, #txt_2tg do
-												txt_str = txt_str .. txt_2tg[ i ]
-											end
-											return txt_str
-										end
-										return tag_module( tbl_ipol )
-									end
-									return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
-								end
-								if table.inside( tags_color, tags_capture ) then
-									return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
-								elseif table.inside( tags_alpha, tags_capture ) then
-									return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
-								end
-								if #tbl_ipol < 3 then
-									table.insert( tbl_ipol, 1, tags_capture )
-									local function tag_module1( ... )
-										local txt_tag, txt_2tg, txt_str, txt_val = { ... }, { }, "", ""
-										for i = 1, #txt_tag do
-											if type( txt_tag[ i ] ) == "table" then
-												txt_val = math.round( tag.ipol( module1, txt_tag[ i ][ 2 ], txt_tag[ i ][ 3 ] ), 3 )
-												txt_2tg[ i ] = format( "%s%s", txt_tag[ i ][ 1 ], txt_val )
-											else
-												txt_2tg[ i ] = txt_tag[ i ]
-											end
-										end
-										for i = 1, #txt_2tg do
-											txt_str = txt_str .. txt_2tg[ i ]
-										end
-										return txt_str
-									end
-									return tag_module1( tbl_ipol )
-								end
-								return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
+				local line = linefx[ ii ]
+				local tags_capture = tag.operation( capture:match( "(\\%w+)%-?%b{}" ) )
+				local vals_capture = capture:match( "\\%w+%-?%{(.+)%}" )
+				if pcall( loadstring( format( "return function( meta, line, x, y ) return { %s } end", vals_capture ) ) ) then
+					local fun_ipol = loadstring( format( "return function( meta, line, x, y ) return { %s } end", vals_capture ) )( )
+					if pcall( fun_ipol ) then
+						local tbl_ipol = fun_ipol( meta, line, x, y )
+						if tbl_ipol then
+							if capture:match( "(\\%w+%-)%b{}" ) then
+								--\\tag-{ values } interpola respecto a j
+								return format( "%s%s", tags_capture, tag.ipol( module, tbl_ipol ) )
 							end
+							--\\tag{ values } interpola respecto a val_i
+							return format( "%s%s", tags_capture, tag.ipol( module1, tbl_ipol ) )
 						end
 					end
-					return capture
 				end
 				return capture
 			end
@@ -8221,7 +8024,7 @@
 		:gsub( "\"(&H%x+&)\"", "%1" ) --add: january 18th 2019
 		-------------------------------------------------------------------------
 		return String
-	end
+	end --mod:june 18th 2020
 	
 	function tag.do_alpha( String )
 		if type( String ) == "function" then
@@ -9916,6 +9719,10 @@
 		end
 		---------------------------------------------
 		local Ipol_i = Ipol_i or 0.5
+		if type( Ipol_i ) == "table" then
+			Ipol_i = math.format( Ipol_i[ 1 ], Ipol_i[ 2 ] )
+			--{ shape.circle, 1m }
+		end --add: june 19th 2020
 		if tostring( Ipol_i ) == "nan" then -- #/0 división por cero :D
 			return valors[ 1 ]
 		end --add: june 16th 2020
@@ -10570,30 +10377,6 @@
 		return HSV_table
 	end
 	
-	function color.vc( Color )
-		--convierte el color en formato vsfMOD
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		local Color = color.from_error( Color or text.color1 )
-		effector.print_error( Color, "color", "color.vc", 1 )
-		local vc, cvc_t = { Color }, { }
-		if type( Color ) == "table" then
-			vc = Color
-		end
-		for i = 1, #vc do
-			if vc[ i ]:len( ) < 15 then
-				cvc_t[ i ] = math.format( "(%s,%s,%s,%s)", color.assF( vc[ i ] ) )
-			else
-				cvc_t[ i ] = color.assF( vc[ i ] )
-			end
-		end
-		if #cvc_t == 1 then
-			return cvc_t[ 1 ]
-		end
-		return cvc_t
-	end
-	
 	function color.r( )
 		--genera un color random
 		return color.HSV_to_RGB( Rc( 360 ), Rc( 0, 1 ), Rc( 0, 1 ) )
@@ -10789,51 +10572,25 @@
 	end --mod: june 03rd 2020
 
 	function color.from_error( Color )
-		if type( Color ) == "string" then
-			if Color:match( "#%x%x%x%x%x%x" ) then
-				Color = Color:gsub( "#%x%x%x%x%x%x",
-					function( HTML_color )
-						return color.ass( HTML_color )
-					end
-				)
-			else
-				Color = Color:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
-					function( ASS_color )
-						return format( "&H%s&", ASS_color )
-					end
-				)
+		local Colorfx
+		if type( Color ) == "table" then
+			Colorfx = { }
+			for k, v in pairs( Color ) do
+				Colorfx[ k ] = color.from_error( v )
 			end
-		elseif type( Color ) == "table" then
-			for k, valor in pairs( Color ) do
-				if type( valor ) == "string" then
-					if valor:match( "#%x%x%x%x%x%x" ) then
-						Color[ k ] = valor:gsub( "#%x%x%x%x%x%x",
-							function( HTML_color )
-								return color.ass( HTML_color )
-							end
-						)
-					else
-						Color[ k ] = valor:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*",
-							function( ASS_color )
-								return format( "&H%s&", ASS_color )
-							end
-						)
-					end
+			return Colorfx
+		end --recursión
+		Colorfx = Color:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*", "&H%1&" )
+		if Color:match( "#%x%x%x%x%x%x" ) then
+			Colorfx = Color:gsub( "#%x%x%x%x%x%x",
+				function( HTML_color )
+					return color.ass( HTML_color )
 				end
-			end
+			)
 		end
-		return Color
-	end
+		return Colorfx
+	end	--rewrite: june 19th 2020
 	
-	function color.to_HTML( ASScolor )
-		if type( ASScolor ) == "function" then
-			ASScolor = ASScolor( )
-		end
-		local ASScolor = color.vc_to_c( ASScolor or "&HFFFFFF&" )
-		local Bhtml, Ghtml, Rhtml = ASScolor:match( "(%x%x)(%x%x)(%x%x)" )
-		return format( "#%s%s%s", Rhtml, Ghtml, Bhtml )
-	end
-
 	function color.matrix( Color, ... )
 		if type( Color ) == "function" then
 			Color = Color( )
@@ -18154,11 +17911,11 @@
 	function text.gradienth( ... )
 		local shp_w = (tonumber( fx.offset[ 1 ] or 0 ) > 0) and tonumber( fx.offset[ 1 ] or 0 ) or 2
 		local Shape, cn = "", ceil( val_width / shp_w )
-		local gradh = table.gradient( { { cn } }, ... )
+		local gradh = table.ipol( { ... }, cn )
 		for i = 1, cn do
 			Shape = Shape .. format( "{\\1c%s\\p1}%s", gradh[ i ], shape.size( shape.rectangle, shp_w, ceil( val_height ) ) )
 		end
-		return format( "{%s\\bord0\\shad0}%s", text.to_clip( ), Shape )
+		return format( "{%s\\bs0}%s", text.to_clip( ), Shape )
 	end --text.gradienth( "&H00FFFF&", "&H0000FF&" )
 	
 	function text.gradienth2( ... )
@@ -18168,22 +17925,22 @@
 		local count, gradh = recall.countline, recall.gradienth
 		if j == 1 then
 			count = remember( "countline", ceil( (l.width + 4 * shp_w) / shp_w ) )
-			gradh = remember( "gradienth", table.gradient( { { count } }, ... ) )
+			gradh = remember( "gradienth", table.ipol( { ... }, count ) )
 		end
 		for i = 1, cn2 do
 			Shape = Shape .. format( "{\\1c%s\\p1}%s", gradh[ floor( val_left - l.left ) + i ], Shmod )
 		end
-		return format( "{%s\\bord0\\shad0}%s", text.to_clip( ), Shape )
+		return format( "{%s\\bs0}%s", text.to_clip( ), Shape )
 	end --text.gradienth2( "&H00FFFF&", "&H0000FF&" )
 	
 	function text.gradientv( ... )
 		local shp_h = (tonumber( fx.offset[ 1 ] or 0 ) > 0) and tonumber( fx.offset[ 1 ] or 0 ) or 2
 		local Shape, cn = "", ceil( val_height / shp_h )
-		local gradv = table.gradient( { { cn } }, ... )
+		local gradv = table.ipol( { ... }, cn )
 		for i = 1, cn do
 			Shape = Shape .. format( "{\\1c%s\\p1}%s{\\p0}\\N", gradv[ i ], shape.size( shape.rectangle, ceil( val_width ), shp_h ) )
 		end
-		return format( "{%s\\bord0\\shad0}%s", text.to_clip( ), Shape )
+		return format( "{%s\\bs0}%s", text.to_clip( ), Shape )
 	end --text.gradientv( "&H00FFFF&", "&H0000FF&" )
 	
 	function text.gradientangle( Angle, ... )
@@ -18192,11 +17949,11 @@
 		local shp_w = math.round( abs( val_width * cos( rad( Angle ) ) + val_height * sin( rad( Angle ) ) + 1 ) )
 		local shp_h = math.round( abs( val_width * sin( rad( Angle ) ) + val_height * cos( rad( Angle ) ) + 1 ) )
 		local Shape, cn = format( "{\\fr%s}", Angle % 361 ), ceil( shp_w / shp_s )
-		local grada = table.gradient( { { cn } }, ... )
+		local grada = table.ipol( { ... }, cn )
 		for i = 1, cn do
 			Shape = Shape .. format( "{\\1c%s\\p1}%s", grada[ i ], shape.size( shape.rectangle, shp_s, shp_h ) )
 		end
-		return format( "{%s\\bord0\\shad0}%s", text.to_clip( ), Shape )
+		return format( "{%s\\bs0}%s", text.to_clip( ), Shape )
 	end --text.gradientangle( 45, "&H00FFFF&", "&H0000FF&" )
 	
 	function text.maskclip( Fondo, Color, fxBord, fxMask, Shape, Space )
@@ -18243,6 +18000,92 @@
 		if val_i == 1
 			and j == 1
 			and J == 1 then
+			-----------------------------------------------
+			local function table_mask( Color_or_Alpha, Maskfx, Mode, First )
+				if type( Color_or_Alpha ) == "function" then
+					Color_or_Alpha = Color_or_Alpha( )
+				end
+				if type( Maskfx ) == "function" then
+					Maskfx = Maskfx( )
+				end
+				if type( Mode ) == "function" then
+					Mode = Mode( )
+				end
+				if type( First ) == "function" then
+					First = First( )
+				end
+				local vectorMask = color.from_error( Color_or_Alpha or text.color1 )
+				if type( vectorMask ) ~= "table" then
+					vectorMask = { vectorMask }
+				end
+				local Mask = Maskfx or { "&HFF&", "&H00&" }
+				local func_ipol, func_conv = alpha.ipolfx, alpha.va_to_a
+				if vectorMask[ 1 ]:match( "&H(%x+)&" ):len( ) == 6 then
+					Mask = color.from_error( Maskfx or { "&H5A5A5A&", "&H000000&" } )
+					func_ipol, func_conv = color.ipolfx, color.vc_to_c
+				end
+				if type( Mask ) ~= "table" then
+					Mask = { Mask }
+				end
+				if #Mask == 1 then
+					Mask[ 2 ] = Mask[ 1 ]
+				end
+				local Mode = Mode or ""
+				local ind, msk = recall.Ind, recall.Msk
+				local Mask1, Mask2, MaskT, Hue = { }, { }, { }, { }
+				if val_i == 1
+					and j == 1 then
+					ind = remember( "Ind", { } )
+					msk = remember( "Msk", { } )
+					for i = 1, 12 * (2 * (val_n + 1)) do
+						Mask = table.disorder( Mask )
+						ind[ i ] = Rc( 0.24, 1 )
+						msk[ i ] = func_ipol( R( 2 ) - 1, Mask[ 1 ], Mask[ 2 ] )
+					end
+				end
+				for k = 1, #vectorMask do
+					Hue[ k ], Mask2[ k ] = { }, { }
+					for i = 1, 12 * (2 * (val_n + 1)) do
+						Hue[ k ][ i ] = func_ipol( ind[ i ], msk[ i ], func_conv( vectorMask[ k ] ) )
+					end
+					for i = 1, 2 do
+						table.insert( Hue[ k ], Hue[ k ][ i ] )
+					end
+					for i = 1, 12 * val_n + 1 do
+						Mask1[ i ] = format( "%s(%s,%s,%s,%s)",
+							Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 2 ]
+						)
+						Mask2[ k ][ i ] = format( "%s(%s,%s,%s,%s)",
+							Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 2 ]
+						)
+						if fx__.v_kanji then
+							Mask1[ i ] = format( "%s(%s,%s,%s,%s)",
+								Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i + 2 ]
+							)
+							Mask2[ k ][ i ] = format( "%s(%s,%s,%s,%s)",
+								Mode, Hue[ k ][ 2 * i - 1 ], Hue[ k ][ 2 * i ], Hue[ k ][ 2 * i + 1 ], Hue[ k ][ 2 * i + 2 ]
+							)
+						end
+					end
+					for i = 1, 12 * val_n + 1 do
+						Hue[ k ][ i ] = Mask1[ i ]
+					end
+				end
+				if First == 1 then
+					return Mask2
+				end
+				if First then
+					return Mask1
+				end
+				if #vectorMask == 1 then
+					return Hue[ 1 ][ val_i ]
+				end
+				for i = 1, #vectorMask do
+					MaskT[ i ] = Hue[ i ][ val_i ]
+				end
+				return MaskT
+			end --table_mask( "&H00FFFF&", "&H000000&", "\\1c" )
+			-----------------------------------------------
 			Horizontal = remember( "horiz", { [ 0 ] = 0 } )
 			Vertical = remember( "verti", { } )
 			Colors = remember( "color", { } )
@@ -18252,7 +18095,7 @@
 			while Horizontal[ i ] <= l.width do
 				shwidth = Rr( 18, 36 )
 				Horizontal[ i + 1 ] = (i == 0) and 0 or Horizontal[ i ] + R( 0.5 * shwidth, 1.5 * shwidth * Space )
-				Colors[ i + 1 ] = colortag and colorm1 or table.mask( colorm1, colorm2, "\\1c" )
+				Colors[ i + 1 ] = colortag and colorm1 or table_mask( colorm1, colorm2, "\\1c" )
 				Shapes[ i + 1 ] = shape.size( shape.origin( shape.rotate( Shape, R( 360 ) ) ), shwidth, Rr( 18, 36 ) )
 				i = i + 1
 			end
