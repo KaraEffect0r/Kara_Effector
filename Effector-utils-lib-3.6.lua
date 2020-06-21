@@ -10477,6 +10477,13 @@
 		if type( ColorAlpha ) == "function" then
 			ColorAlpha = ColorAlpha( )
 		end
+		if type( ColorAlpha ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( ColorAlpha ) do
+				recursion_tbl[ k ] = color.fromstyle( v )
+			end
+			return recursion_tbl
+		end --recursión
 		effector.print_error( ColorAlpha, "color", "color.fromstyle", 1 )
 		local toColor = ""
 		if ColorAlpha:match( "%x%x%x%x%x%x%x%x" ) then
@@ -10764,6 +10771,13 @@
 		if type( ColorAlpha ) == "function" then
 			ColorAlpha = ColorAlpha( )
 		end
+		if type( ColorAlpha ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( ColorAlpha ) do
+				recursion_tbl[ k ] = alpha.fromstyle( v )
+			end
+			return recursion_tbl
+		end --recursión
 		effector.print_error( ColorAlpha, "alpha", "alpha.fromstyle", 1 )
 		local toAlpha = ""
 		if ColorAlpha:match( "%x%x%x%x%x%x%x%x" ) then
@@ -10799,10 +10813,6 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		if type( Round ) == "function" then
-			Round = Round( )
-		end
-		local Round = Round or 2 -- cifras decimales a redondear los números en la shape
 		local Shape = Shape or nil
 		if not Shape
 			and linefx[ ii ].text:match( "\\i?clip%b()" ) then
@@ -10816,6 +10826,10 @@
 			end --shape.ASSDraw3( { shape.circle, x = "\\clip( m 0 0 l 0 1 l 1 1 l 1 0 )" } )
 			return recursion_tbl
 		end --recursión: september 08th 2019
+		local Round = Round or 2 -- cifras decimales a redondear los números en la shape
+		if type( Round ) == "function" then
+			Round = Round( )
+		end
 		effector.print_error( Shape, "shape", "shape.ASSDraw3", 1 )
 		effector.print_error( Round, "number", "shape.ASSDraw3", 2 )
 		local segments, coor2 = { }, { }
@@ -10882,11 +10896,7 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		if type( Round ) == "function" then
-			Round = Round( )
-		end
 		local Shape = shape.ASSDraw3( Shape )
-		local Round = Round or 0
 		if type( Shape ) == "table" then
 			local recursion_tbl = { }
 			for k, v in pairs( Shape ) do
@@ -10894,6 +10904,10 @@
 			end
 			return recursion_tbl
 		end --recursión: september 08th 2019
+		local Round = Round or 0
+		if type( Round ) == "function" then
+			Round = Round( )
+		end
 		effector.print_error( Shape, "shape",  "shape.round", 1 )
 		effector.print_error( Round, "number", "shape.round", 2 )
 		Shape = Shape:gsub( "%-?%d+[%.%d]*",
@@ -10938,10 +10952,6 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		if type( tract ) == "function" then
-			tract = tract( )
-		end
-		local tract = tract or 2
 		local Shape = shape.ASSDraw3( Shape ) or shape.circle
 		if type( Shape ) == "table" then
 			local recursion_tbl = { }
@@ -10950,6 +10960,10 @@
 			end
 			return recursion_tbl
 		end --recursión: september 08th 2019
+		local tract = tract or 2
+		if type( tract ) == "function" then
+			tract = tract( )
+		end
 		effector.print_error( Shape, "shape", "shape.redraw", 1 )
 		effector.print_error( tract, "number", "shape.redraw", 2 )
 		if Continued then
@@ -11047,9 +11061,6 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		if type( Split ) == "function" then
-			Split = Split( )
-		end
 		local Shape = shape.ASSDraw3( Shape )
 		if type( Shape ) == "table" then
 			local recursion_tbl = { }
@@ -11058,6 +11069,9 @@
 			end
 			return recursion_tbl
 		end --recursión: september 08th 2019
+		if type( Split ) == "function" then
+			Split = Split( )
+		end
 		effector.print_error( Shape, "shape", "shape.filter", 1 )
 		local filters = { ... }
 		if ...
@@ -11221,6 +11235,14 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.rotate( v, Angle, org_x, org_y )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		if type( Angle ) == "function" then
 			Angle = Angle( )
 		end
@@ -11230,14 +11252,6 @@
 		if type( org_y ) == "function" then
 			org_y = org_y( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
-		if type( Shape ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( Shape ) do
-				recursion_tbl[ k ] = shape.rotate( v, Angle, org_x, org_y )
-			end
-			return recursion_tbl
-		end --recursión: september 08th 2019
 		local Ang = Angle or 0
 		local cx = org_x or 0
 		local cy = org_y or 0
