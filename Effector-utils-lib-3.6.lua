@@ -118,7 +118,7 @@
 			math.Rfake2( Rand_i, Rand_f, Counter, Counter2, Mode )
 			math.Rredefine( Rand_i, Rand_f, Step, Counter, Counter2 )
 		+	math.format( String, ... )
-		-	math.round( number_or_table, decimal )
+		-	math.round( Number, Decimal )
 		-	math.distance( px1, py1, px2, py2 )
 		-	math.angle( px1, py1, px2, py2 )
 		-	math.polar( angle, radius, Return )
@@ -195,37 +195,24 @@
 		+	tag.filter( String, Tag, Filter )
 
 		librería color
-			color.ass( html_color )
+			color.ass( Color )
 			color.ass2( Rnum, Gnum, Bnum )
 			color.ass3( Hnum, Snum, Vnum )
-		<	color.rgb( Color, Matrix_1x3, Multi )
-		<	color.hsv( Color, Matrix_1x3, Multi )
-			color.assF( Color )
 		-	color.to_RGB( Color )
 		-	color.to_HSV( Color )
-		-	color.r( )
-		-	color.rc( Color, ... )
-		-	color.vc_to_c( Color )
-		-	color.interpolate( Color1, Color2, Index_Ipol )
+		-	color.interpolate( Ipol, Color1, Color2 )
 		-	color.set( Times, Colors, ... )
-			color.from_error( Color )
 		<	color.matrix( Color, ... )
 			color.fromstyle( ColorAlpha )
 			color.val2ass( val_R, val_G, val_B )
-			color.ipolfx( Ipol, Color1, Color2 )
 			color.HSV_to_RGB( Hue, Saturation, Value )
-
 		
 		librería alpha
-			alpha.assF( Alpha )
-		-	alpha.r( )
-		-	alpha.va_to_a( Alpha )
-		-	alpha.interpolate( Alpha1, Alpha2, Index_Ipol )
+			alpha.ass( Alpha )
+		-	alpha.interpolate( Ipol, Alpha1, Alpha2 )
 		-	alpha.set( Times, Alphas, ... )
-			alpha.from_error( Alpha )
 			alpha.fromstyle( ColorAlpha )
 			alpha.val2ass( val_A )
-			alpha.ipolfx( Ipol, Alpha1, Alpha2 )
 		
 		librería shape
 		+	shape.ASSDraw3( Shape )
@@ -518,27 +505,27 @@
 			time_HMS = time_HMS( )
 		end
 		local time_HMS = time_HMS or fx.offset.time_HMS or 0 --add: may 31st 2020
-		local time_to_ms = time_HMS
-		if type( time_HMS ) == "string" then
-			if time_HMS:match( "%d+%:%d+%:%d+%.%d+" ) then
-				local H, M, S, ms = time_HMS:match( "(%d+)%:(%d+)%:(%d+)%.(%d+)" )
-				if ms:len( ) == 2 then
-					ms = 10 * ms
-				elseif ms:len( ) == 1 then
-					ms = 100 * ms
-				end
-				return H * 3600000 + M * 60000 + S * 1000 + ms
-			end
-			return tonumber( time_HMS )
-		elseif type( time_HMS ) == "number" then
-			return time_HMS
-		elseif type( time_HMS ) == "table" then
-			time_to_ms = { }
+		if type( time_HMS ) == "table" then
+			local recursion_tbl = { }
 			for k, v in pairs( time_HMS ) do
-				time_to_ms[ k ] = HMS_to_ms( v )
+				recursion_tbl[ k ] = HMS_to_ms( v )
 			end --resursión
+			return recursion_tbl
+		end
+		if type( time_HMS ) == "string"
+			and time_HMS:match( "%d+%:%d+%:%d+%.%d+" ) then
+			local H, M, S, ms = time_HMS:match( "(%d+)%:(%d+)%:(%d+)%.(%d+)" )
+			if ms:len( ) == 2 then
+				ms = 10 * ms
+			elseif ms:len( ) == 1 then
+				ms = 100 * ms
+			end
+			return H * 3600000 + M * 60000 + S * 1000 + ms
+		end --HMS_to_ms( { "0:00:02.325", delay = "0:00:03.105" } )
+		if tonumber( time_HMS ) then
+			return tonumber( time_HMS )
 		end --rewrite: june 14th 2020
-		return time_to_ms
+		return time_HMS
 	end --HMS_to_ms( "0:00:02.325" )
 
 	function ms_to_HMS( time_ms )
@@ -547,13 +534,12 @@
 			time_ms = time_ms( )
 		end
 		local time_ms = time_ms or fx.offset.time_ms or 0 --add: may 31st 2020
-		local time_to_HMS
 		if type( time_ms ) == "table" then
-			time_to_HMS = { }
+			local recursion_tbl = { }
 			for k, v in pairs( time_ms ) do
-				time_to_HMS[ k ] = ms_to_HMS( v )
+				recursion_tbl[ k ] = ms_to_HMS( v )
 			end
-			return time_to_HMS
+			return recursion_tbl
 		end --recursión
 		effector.print_error( time_ms, "numberstring", "ms_to_HMS", 1 )
 		local tms, time_H, time_M, time_S = math.round( time_ms ), 0, 0, 0
@@ -573,9 +559,8 @@
 			tms = "00" .. tms
 		elseif tostring( tms ):len( ) == 2 then
 			tms =  "0" .. tms
-		end --ms_to_HMS( 234.945 )
-		time_to_HMS = format( "%s:%s:%s.%s", time_H, time_M, time_S, tms )
-		return time_to_HMS --ms_to_HMS( { 540, 5645, 27432 } )
+		end --ms_to_HMS( { 540.945, 5645, 27432 } )
+		return format( "%s:%s:%s.%s", time_H, time_M, time_S, tms )
 	end --ms_to_HMS( (j - 1) * 1f )
 	
 	function time_to_frame( Time )
@@ -584,13 +569,12 @@
 			Time = Time( )
 		end
 		local Time = Time or fx.offset.Time or 0 --add: may 31st 2020
-		local t_to_frame
 		if type( Time ) == "table" then
-			t_to_frame = { }
+			local recursion_tbl = { }
 			for k, v in pairs( Time ) do
-				t_to_frame[ k ] = time_to_frame( v )
+				recursion_tbl[ k ] = time_to_frame( v )
 			end
-			return t_to_frame
+			return recursion_tbl
 		end --recursión
 		effector.print_error( Time, "numberstring", "time_to_frame", 1 )
 		local Time = tostring( Time )
@@ -600,9 +584,8 @@
 			else
 				Time = HMS_to_ms( Time )
 			end
-		end
-		t_to_frame = ceil( Time / frame_dur )
-		return t_to_frame --time_to_frame( { 3000, "0:00:25.673" } )
+		end --time_to_frame( { 3000, "0:00:25.673" } )
+		return ceil( Time / frame_dur )
 	end --time_to_frame( 2000 )
 	
 	function frame_to_ms( frames )
@@ -611,17 +594,15 @@
 			frames = frames( )
 		end
 		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
-		local f_to_ms
 		if type( frames ) == "table" then
-			f_to_ms = { }
+			local recursion_tbl = { }
 			for k, v in pairs( frames ) do
-				f_to_ms[ k ] = frame_to_ms( v )
+				recursion_tbl[ k ] = frame_to_ms( v )
 			end
-			return f_to_ms
+			return recursion_tbl
 		end --recursión
 		effector.print_error( frames, "number", "frame_to_ms", 1 )
-		f_to_ms = math.round( frames * frame_dur, 2 )
-		return f_to_ms
+		return math.round( frames * frame_dur, 2 )
 	end --frame_to_ms( { 2365, 128, 82351 } )
 	
 	function frame_to_HMS( frames )
@@ -630,17 +611,15 @@
 			frames = frames( )
 		end
 		local frames = frames or fx.offset.frames or 0 --add: may 31st 2020
-		local f_to_HMS
 		if type( frames ) == "table" then
-			f_to_HMS = { }
+			local recursion_tbl = { }
 			for k, v in pairs( frames ) do
-				f_to_HMS[ k ] = frame_to_HMS( v )
+				recursion_tbl[ k ] = frame_to_HMS( v )
 			end
-			return f_to_HMS
+			return recursion_tbl
 		end --recursión
 		effector.print_error( frames, "number", "frame_to_HMS", 1 )
-		f_to_HMS = ms_to_HMS( frame_to_ms( frames ) )
-		return f_to_HMS
+		return ms_to_HMS( frame_to_ms( frames ) )
 	end --frame_to_HMS( { 35, 240, { 4532, { 24, 276 }, 9574 } } )
 
 	function time_mid1( Delay )
@@ -1363,18 +1342,19 @@
 		if type( String ) == "function" then
 			String = String( )
 		end
+		local Table_string, Chars_string = { }, { }
+		local String = String or ""
+		local Number = Number_str or 1
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = table.string( v, Number_str )
+			end
+			return recursion_tbl
+		end --recursión
 		if type( Number_str ) == "function" then
 			Number_str = Number_str( )
 		end
-		local Table_string, Chars_string = { }, { }
-		if type( String ) == "table" then
-			for k, v in pairs( String ) do
-				Table_string[ k ] = table.string( v, Number_str )
-			end
-			return Table_string
-		end --recursión
-		local String = String or ""
-		local Number = Number_str or 1
 		effector.print_error( String, "string", "table.string", 1 )
 		effector.print_error( Number, "number", "table.string", 2 )
 		local Len_string = unicode.len( String )
@@ -1400,10 +1380,11 @@
 		end
 		local Table_space = { }
 		if type( String ) == "table" then
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				Table_space[ k ] = table.space( v )
+				recursion_tbl[ k ] = table.space( v )
 			end
-			return Table_space
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "table.space", 1 )
 		local Table_string = table.string( String )
@@ -1422,10 +1403,11 @@
 		end
 		local Table_word = { }
 		if type( String ) == "table" then
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				Table_word[ k ] = table.word( v )
+				recursion_tbl[ k ] = table.word( v )
 			end
-			return Table_word
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "table.word", 1 )
 		for word_s in String:gmatch( "%S+" ) do
@@ -1696,7 +1678,7 @@
 			end
 			return table_inverse
 		elseif Mode == "idx" then --march 17th 2020
-		--organiza por index los elementos de la tabla
+			--organiza por index los elementos de la tabla
 			local table_idx = { }
 			for k, v in pairs( Table ) do
 				if type( k ) == "number" then
@@ -1937,12 +1919,12 @@
 			local ipol_i, ipol_f, pct_ip
 			---------------------------------------------
 			-- interpola el valor de dos números
-			local function ipol_number( val_1, val_2, pct_ipol )
+			local function ipol_number( pct_ipol, val_1, val_2 )
 				return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 			end
 			---------------------------------------------
 			-- interpola el valor de dos shapes o dos clips
-			local function ipol_shpclip( val_1, val_2, pct_ipol )
+			local function ipol_shpclip( pct_ipol, val_1, val_2 )
 				--table.ipol( { shape.circle .. shape.displace( shape.circle, 200, 0 ), shape.triangle }, 50 )[ j ]
 				local val_1, val_2 = shape.insert( val_1, val_2 )
 				local tbl_1, tbl_2, k = { }, { }, 0
@@ -1994,7 +1976,7 @@
 				ipol_i = Table_ipol[ floor( (i - 1) / (max_loop / (#Table_ipol - 1)) ) + 1 ]
 				ipol_f = Table_ipol[ floor( (i - 1) / (max_loop / (#Table_ipol - 1)) ) + 2 ]
 				pct_ip = floor( (i - 1) % (max_loop / (#Table_ipol - 1)) ) / (max_loop / (#Table_ipol - 1))
-				ipols[ i ] = ipol_function( ipol_i, ipol_f, math.format( algorithm_ipol, pct_ip ) )
+				ipols[ i ] = ipol_function( math.format( algorithm_ipol, pct_ip ), ipol_i, ipol_f )
 			end --table.ipol( { 12, 31 }, 11, "\\fscy", "sin( pi * %s )" )
 			--------------------------------------------
 			if algorithm_ipol:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then --si el algoritmo es una shape
@@ -2006,7 +1988,7 @@
 			end --fixed: january 28th 2020
 			ipol_i = Table_ipol[ floor( pct_ip ) ] or Table_ipol[ 1 ]
 			ipol_f = Table_ipol[ floor( pct_ip ) + 1 ] or Table_ipol[ floor( pct_ip ) ]
-			ipols[ #ipols + 1 ] = ipol_function( ipol_i, ipol_f, math.clamp( math.format( algorithm_ipol, 1 ) ) )
+			ipols[ #ipols + 1 ] = ipol_function( math.clamp( math.format( algorithm_ipol, 1 ) ), ipol_i, ipol_f )
 			--------------------------------------------
 			--concatena los valores con los Tags_ipol, si lo hay
 			if Tags_ipol then
@@ -2073,17 +2055,18 @@
 		if type( String ) == "function" then
 			String = String( )
 		end
+		local tbl_cap = { }
+		local String = String or ""
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = table.capture( v, Capture )
+			end
+			return recursion_tbl
+		end --recursión
 		if type( Capture ) == "function" then
 			Capture = Capture( )
 		end
-		local tbl_cap = { }
-		if type( String ) == "table" then
-			for k, v in pairs( String ) do
-				tbl_cap[ k ] = table.capture( v, Capture )
-			end
-			return tbl_cap
-		end --recursión
-		local String = String or ""
 		local Capture = Capture or ""
 		effector.print_error( String, "string", "table.capture", 1 )
 		effector.print_error( Capture, "stringtable", "table.capture", 2 )
@@ -2499,19 +2482,19 @@
 		if type( String ) == "function" then
 			String = String( )
 		end
-		if type( Capture ) == "function" then
-			Capture = Capture( )
-		end
 		local String = String or ""
 		local Capture = Capture or "KE"
 		local str_count = 0
 		if type( String ) == "table" then
-			local count_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				count_tbl[ k ] = string.count( v, Capture )
+				recursion_tbl[ k ] = string.count( v, Capture )
 			end
-			return count_tbl
+			return recursion_tbl
 		end --recursión
+		if type( Capture ) == "function" then
+			Capture = Capture( )
+		end
 		effector.print_error( String, "string", "string.count", 1 )
 		effector.print_error( Capture, "stringtable", "string.count", 2 )
 		if type( Capture ) == "string" then
@@ -2555,11 +2538,11 @@
 		end
 		local String = String or ""
 		if type( String ) == "table" then
-			local toval_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				toval_tbl[ k ] = string.toval( v )
+				recursion_tbl[ k ] = string.toval( v )
 			end
-			return toval_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.toval", 1 )
 		local line, str_to_val = linefx[ ii ]
@@ -2602,11 +2585,11 @@
 		local count_i = 0
 		local String = String or ""
 		if type( String ) == "table" then
-			local count_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				count_tbl[ k ] = string.i( v )
+				recursion_tbl[ k ] = string.i( v )
 			end
-			return count_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.i", 1 )
 		String = String:gsub( "\\%w+%b()",
@@ -2636,11 +2619,11 @@
 		local Change = Change or ""
 		local nocapture_tbl = { }
 		if type( String ) == "table" then
-			local change_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				change_tbl[ k ] = string.change( v, Capture, NoChange, NoCapture, Change )
+				recursion_tbl[ k ] = string.change( v, Capture, NoChange, NoCapture, Change )
 			end
-			return change_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.change", 1 )
 		effector.print_error( Capture, "stringtable", "string.change", 2 )
@@ -2718,11 +2701,11 @@
 		local String = String or ""
 		local Filter = Filter or ""
 		if type( String ) == "table" then
-			local cap_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				cap_tbl[ k ] = string.cap( v, Capture, Extra_Capture, Filter )
+				recursion_tbl[ k ] = string.cap( v, Capture, Extra_Capture, Filter )
 			end
-			return cap_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.cap", 1 )
 		effector.print_error( Capture, "numberstring", "string.cap", 2 )
@@ -2843,11 +2826,11 @@
 		local String = String or linefx[ ii ].text_stripped
 		local Parts = Parts or 3
 		if type( String ) == "table" then
-			local recurion_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				recurion_tbl[ k ] = string.parts( v, Parts )
+				recursion_tbl[ k ] = string.parts( v, Parts )
 			end
-			return recurion_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.parts", 1 )
 		effector.print_error( Parts, "numbertable", "string.parts", 2 )
@@ -2892,18 +2875,18 @@
 		if type( String ) == "function" then
 			String = String( )
 		end
+		local String = String or ""
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = string.match2( v, Capture, Table )
+			end
+			return recursion_tbl
+		end --recursión
+		local Capture = Capture or "KE"
 		if type( Capture ) == "function" then
 			Capture = Capture( )
 		end
-		local String = String or ""
-		local Capture = Capture or "KE"
-		if type( String ) == "table" then
-			local recurion_tbl = { }
-			for k, v in pairs( String ) do
-				recurion_tbl[ k ] = string.match2( v, Capture, Table )
-			end
-			return recurion_tbl
-		end --recursión
 		effector.print_error( String, "string", "string.match2", 1 )
 		effector.print_error( Capture, "stringtable", "string.match2", 2 )
 		local match_multi, i = "", -1
@@ -2922,11 +2905,11 @@
 		--realiza capturas múltiples hasta que ya no encuentre conicidencias
 		local String = String or ""
 		if type( String ) == "table" then
-			local recurion_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				recurion_tbl[ k ] = string.newmatch( v, ... )
+				recursion_tbl[ k ] = string.newmatch( v, ... )
 			end
-			return recurion_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.newmatch", 1 )
 		local Captures = { ... }
@@ -2942,7 +2925,7 @@
 				break
 			end
 			i = i + 1
-		end --string.newmatch( "\\1a&HFF&\\t(45,50,\\blur4)\\xshad-3.4", "\\[%d]*%a[%-%.%w&]*" )
+		end --string.newmatch( "\\1a&HFF&\\xshad-3.4\\t(45,50,\\blur4)", "\\[%d]*%a[%-%.%w&]*", "\\[%d]*%a[%-%.%w&]*" )
 		return unpack( newcaps )
 	end --june 15th 2020
 
@@ -2951,11 +2934,11 @@
 		--forma consecutiva, hasta que la concatenación de las mismas ya no exista como una captura válida
 		local String = String or ""
 		if type( String ) == "table" then
-			local recurion_tbl = { }
+			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				recurion_tbl[ k ] = string.replace( v, ... )
+				recursion_tbl[ k ] = string.replace( v, ... )
 			end
-			return recurion_tbl
+			return recursion_tbl
 		end --recursión
 		effector.print_error( String, "string", "string.replace", 1 )
 		local Captures = { ... }
@@ -2990,6 +2973,15 @@
 	
 	function string.moveclip( String, ... )
 		--hace que un \\i?clip se mueva acorde a las distancias y tiempo del \\move del KE o con configuraciones asignadas
+		local String = String or ""
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = string.moveclip( v, ... )
+			end
+			return recursion_tbl
+		end --recursión
+		effector.print_error( String, "string", "string.moveclip", 1 )
 		local function new_clips( String, ... )
 			if not String:match( "\\i?clip%([ ]*%-?%d[%.%d ]*,[ ]*%-?%d[%.%d ]*,[ ]*%-?%d[%.%d ]*,[ ]*%-?%d[%.%d ]*%)" ) then
 				return ""
@@ -3023,15 +3015,6 @@
 			end --tag.clip( ):moveclip( )
 			return newclip --tag.clip( ):moveclip( 1.5 )
 		end --tag.clip( ):moveclip( { -200, 0, 0, 1400 }, { 0, 0, 1400, 2800 } )
-		local String = String or ""
-		if type( String ) == "table" then
-			local recurion_tbl = { }
-			for k, v in pairs( String ) do
-				recurion_tbl[ k ] = string.moveclip( v, ... )
-			end
-			return recurion_tbl
-		end --recursión
-		effector.print_error( String, "string", "string.moveclip", 1 )
 		return String .. new_clips( String, ... )
 	end --june 17th 2020
 
@@ -3680,6 +3663,13 @@
 		if #Values == 0 then
 			Values = { 1 }
 		end --math.format( "frame_dur" )
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = math.format( v, ... )
+			end
+			return recursion_tbl
+		end --recursión
 		effector.print_error( String, "string", "math.format", 1 )
 		effector.print_error( Values, "table", "math.format", 2 )
 		------------------------------------------------------------------
@@ -3738,35 +3728,32 @@
 		return str_mathf
 	end
 
-	function math.round( number_or_table, decimal )
+	function math.round( Number, Decimal )
 		--redondea un número o una tabla de números a la
 		--cantidad de decimales indicados o al entero más cercano
-		local decimal = decimal or 0
-		local Num_round = number_or_table
-		local multiple, Table_round = 10 ^ decimal, { }
-		if type( number_or_table ) == "function" then
-			Num_round = number_or_table( )
+		local Number = Number or nil
+		if type( Number ) == "function" then
+			Number = Number( )
 		end
-		if type( decimal ) == "function" then
-			decimal = decimal( )
-		end
-		effector.print_error( Num_round, "true", "math.round", 1 )
-		effector.print_error( decimal, "number", "math.round", 2 )
-		if type( Num_round ) == "number"
-			or type( tonumber( Num_round ) ) == "number" then
-			return floor( tonumber( Num_round ) * multiple + 0.5 ) / multiple
-		elseif type( Num_round ) == "table" then
-			for i, v in pairs( Num_round ) do
-				Table_round[ i ] = v
-				if type( v ) == "number"
-					or type( tonumber( v ) ) == "number" then
-					Table_round[ i ] = floor( tonumber( v ) * multiple + 0.5 ) / multiple
-				end
+		if type( Number ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Number ) do
+				recursion_tbl[ k ] = math.round( v, Decimal )
 			end
-			return Table_round
+			return recursion_tbl
+		end --recursión
+		local Decimal = Decimal or 0
+		if type( Decimal ) == "function" then
+			Decimal = Decimal( )
 		end
-		return Num_round
-	end
+		effector.print_error( Number, "true", "math.round", 1 )
+		effector.print_error( Decimal, "number", "math.round", 2 )
+		if tonumber( Number ) then
+			Number = tonumber( Number )
+			return floor( Number * (10 ^ Decimal) + 0.5 ) / (10 ^ Decimal)
+		end --math.round( { 1.6, 1.2, x = "&HFF&", } )
+		return Number
+	end --rewrite june 21st 2020
 
 	function math.distance( px1, py1, px2, py2 )
 		--mide la distancia entre dos puntos o entre un punto y el origen ( 0, 0 )
@@ -4765,16 +4752,8 @@
 		end
 		if #MmBSh == 1 then
 			MmBfx = format( "\\pos(%s,%s)%s", MmBco[ 1 ], MmBco[ 2 ], MmBrz )
-		elseif #MmBSh == 2 then
+		else
 			MmBfx = format( "\\move(%s,%s,%s,%s,%s,%s)%s", MmBco[ 1 ], MmBco[ 2 ], MmBco[ 3 ], MmBco[ 4 ], t1, t2, MmBrz )
-		elseif #MmBSh == 3 then
-			MmBfx = format( "\\moves3(%s,%s,%s,%s,%s,%s,%s,%s)%s",
-				MmBco[ 1 ], MmBco[ 2 ], MmBco[ 3 ], MmBco[ 4 ], MmBco[ 5 ], MmBco[ 6 ], t1, t2, MmBrz
-			)
-		elseif #MmBSh == 4 then
-			MmBfx = format( "\\moves4(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)%s",
-				MmBco[ 1 ], MmBco[ 2 ], MmBco[ 3 ], MmBco[ 4 ], MmBco[ 5 ], MmBco[ 6 ], MmBco[ 7 ], MmBco[ 8 ], t1, t2, MmBrz
-			)
 		end
 		return MmBfx
 	end
@@ -4800,11 +4779,18 @@
 	end --math.bezier2move( nil, 1 )
 	
 	function math.circle( Shape )
-		--retorna las coordenadas del centro y el radio de un círculo a partir de tres puntos en un clip
+		--retorna las coordenadas del centro y el radio de un círculo a partir de tres puntos en un clip/shape
 		local coor, center = { }, { }
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = { math.circle( v ) }
+			end
+			return recursion_tbl
+		end --recursión
 		effector.print_error( Shape, "string", "math.circle", 1 )
 		for c in Shape:gmatch( "%-?%d+[%.%d]*" ) do
 			table.insert( coor, tonumber( c ) )
@@ -6338,14 +6324,14 @@
 				if Tag:match( "\\%d+v?a" )
 					or Tag:match( "\\alpha" ) then
 					return format( "%s%s\\t(%s%s)",
-						Tag, alpha.interpolate( Val_ini, Val_fin, (j - 1) / maxj ),
-						Tag, alpha.interpolate( Val_ini, Val_fin, (j - 0) / maxj )
+						Tag, alpha.interpolate( (j - 1) / maxj, Val_ini, Val_fin ),
+						Tag, alpha.interpolate( (j - 0) / maxj, Val_ini, Val_fin )
 					)
 				end --"\\1a0::255"
 				if Tag:match( "\\%d+v?c" ) then
 					return format( "%s%s\\t(%s%s)",
-						Tag, color.interpolate( Val_ini, Val_fin, (j - 1) / maxj ),
-						Tag, color.interpolate( Val_ini, Val_fin, (j - 0) / maxj )
+						Tag, color.interpolate( (j - 1) / maxj, Val_ini, Val_fin ),
+						Tag, color.interpolate( (j - 0) / maxj, Val_ini, Val_fin )
 					)
 				end
 				return format( "%s%s\\t(%s%s)",
@@ -7054,7 +7040,6 @@
 					function( capture, time_type )
 						table.insert(
 							time_capture_uni,
-						--	capture:match( "\\t[cdfisw%d]*(%b())" ):match( "\\%w+[ %S]*" ):sub( 1, -2 )
 							capture:match( "\\t[cdfisw%d]*(%b())" ):sub( 2, -2 ):match( "\\%S+[ %S]*" )
 						)
 						capture = capture .. "def"
@@ -9549,9 +9534,9 @@
 				[ 3 ] = "(\\alpha)(%b())",
 			}
 			local error_func_vsf = {
-				[ 1 ] = color.vc_to_c,
-				[ 2 ] = alpha.va_to_a,
-				[ 3 ] = alpha.va_to_a,
+				[ 1 ] = color.ass,
+				[ 2 ] = alpha.ass,
+				[ 3 ] = alpha.ass,
 			}
 			for i = 1, #error_tags_vsf do
 				String = String:gsub( error_tags_vsf[ i ],
@@ -9579,13 +9564,13 @@
 					local col_alp1, col_alp2, colalpvf
 					if coloralphas[ 1 ]:len( ) >= 6
 						and #coloralphas == 4 then
-						col_alp1 = color.ipolfx( 0.5, coloralphas[ 1 ], coloralphas[ 4 ] )
-						col_alp2 = color.ipolfx( 0.5, coloralphas[ 2 ], coloralphas[ 3 ] )
-						colalpvf = color.ipolfx( 0.5, col_alp1, col_alp2 )
+						col_alp1 = color.interpolate( 0.5, coloralphas[ 1 ], coloralphas[ 4 ] )
+						col_alp2 = color.interpolate( 0.5, coloralphas[ 2 ], coloralphas[ 3 ] )
+						colalpvf = color.interpolate( 0.5, col_alp1, col_alp2 )
 					elseif  #coloralphas == 4 then
-						col_alp1 = alpha.ipolfx( 0.5, coloralphas[ 1 ], coloralphas[ 4 ] )
-						col_alp2 = alpha.ipolfx( 0.5, coloralphas[ 2 ], coloralphas[ 3 ] )
-						colalpvf = alpha.ipolfx( 0.5, col_alp1, col_alp2 )
+						col_alp1 = alpha.interpolate( 0.5, coloralphas[ 1 ], coloralphas[ 4 ] )
+						col_alp2 = alpha.interpolate( 0.5, coloralphas[ 2 ], coloralphas[ 3 ] )
+						colalpvf = alpha.interpolate( 0.5, col_alp1, col_alp2 )
 					end
 					tag_mod = tag_mod:gsub( "v", "" )
 					coloralpha_mod = colalpvf
@@ -9643,14 +9628,14 @@
 		end
 		---------------------------------------------
 		-- interpola el valor de dos números
-		local function ipol_number( val_1, val_2, pct_ipol )
+		local function ipol_number( pct_ipol, val_1, val_2 )
 			local val_1 = val_1 or 0
 			local val_2 = val_2 or val_1
 			return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 		end
 		---------------------------------------------
 		-- interpola el valor de dos shapes o dos clips
-		local function ipol_shpclip( val_1, val_2, pct_ipol )
+		local function ipol_shpclip( pct_ipol, val_1, val_2 )
 			local val_1, val_2 = shape.insert( val_1, val_2 )
 			local tbl_1, tbl_2, k = { }, { }, 0
 			for c in val_1:gmatch( "%-?%d+[%.%d]*" ) do
@@ -9730,7 +9715,7 @@
 		Ipol_i = math.clamp( Ipol_i ) * (#valors - 1)
 		local valor_i = valors[ floor( Ipol_i ) + 1 ]
 		local valor_f = valors[ floor( Ipol_i ) + 2 ] or valors[ floor( Ipol_i ) + 1 ]
-		return ipol_function( valor_i, valor_f, Ipol_i - floor( Ipol_i ) )
+		return ipol_function( Ipol_i - floor( Ipol_i ), valor_i, valor_f )
 	end
 	
 	function tag.temp2( my_temp )
@@ -10096,6 +10081,14 @@
 	end --tag.setclip( { "\\clip(m 180 618 l 216 664 602 664 536 620)", "\\clip(812,660,1020,698)" }, { "\\1c&H0000FF&", "\\1c&FF0000&" } )
 	
 	function tag.filter( String, Tag, Filter )
+		local String = String or ""
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = tag.filter( v, Tag, Filter )
+			end
+			return recursion_tbl
+		end --recursión
 		effector.print_error( String, "string", "tag.filter", 1 )
 		effector.print_error( Tag, "string", "tag.filter", 2 )
 		effector.print_error( Filter, "function", "tag.filter", 3 )
@@ -10149,25 +10142,36 @@
 	
 	--------------------------------------------------------------------------------------------------
 	-- Librería de funciones "color" -----------------------------------------------------------------
-	function color.ass( html_color )
-		--convierte un color de formato HTML a formato .ass
-		if type( html_color ) == "function" then
-			html_color = html_color( )
+	function color.ass( Color )
+		--le da el formato xy-vsfilter a los colores, ya sea que estén en formato HTML o MOD
+		if type( Color ) == "function" then
+			Color = Color( )
 		end
-		local html_color = html_color or "#FFFFFF"
-		local colorfx
-		if type( html_color ) == "table" then
-			colorfx = { }
-			for i = 1, #html_color do
-				colorfx[ i ] = color.ass( html_color[ i ] )
-			end --recursividad: june 03rd 2020
-		else --color.ass( { "#FFFFFF", "#FF0000" } )
-			effector.print_error( html_color, "color", "color.ass", 1 )
-			local r_ass, g_ass, b_ass = html_color:match( "(%x%x)(%x%x)(%x%x)" )
-			colorfx = color.val2ass( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
+		local Colorfx
+		if type( Color ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Color ) do
+				recursion_tbl[ k ] = color.ass( v )
+			end
+			return recursion_tbl
+		end --recursión
+		effector.print_error( Color, "color", "ass", 1 )
+		if Color:match( "%#(%x%x)(%x%x)(%x%x)" ) then
+			Colorfx = Color:gsub( "%#(%x%x)(%x%x)(%x%x)",
+				function( r_ass, g_ass, b_ass )
+					return color.val2ass( tonumber( r_ass, 16 ), tonumber( g_ass, 16 ), tonumber( b_ass, 16 ) )
+				end
+			) --HTML to ass
+		else
+			Colorfx = Color:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*", "&H%1&" )
 		end
-		return colorfx
-	end
+		if Color:match( "%([ &H]*%x+[ &]*,[ &H]*%x+[ &]*,[ &H]*%x+[ &]*,[ &H]*%x+[ &]*%)" ) then
+			local c1, c2, c3, c4 = Color:match( "%([ &H]*(%x+)[ &]*,[ &H]*(%x+)[ &]*,[ &H]*(%x+)[ &]*,[ &H]*(%x+)[ &]*%)" )
+			c1, c2, c3, c4 = "&H" .. c1 .. "&", "&H" .. c2 .. "&", "&H" .. c3 .. "&", "&H" .. c4 .. "&"
+			Colorfx = color.interpolate( 0.5, color.interpolate( 0.5, c1, c4 ), color.interpolate( 0.5, c2, c3 ) )
+		end --VSFilterMod to ass
+		return Colorfx --color.ass( { "(FF0000,00FF00,0000FF,FF00FF)", "#AA00FF" } )
+	end	--rewrite: june 19th 2020
 	
 	function color.ass2( Rnum, Gnum, Bnum )
 		--convierte tres números en base decimal en un color en formato .ass
@@ -10225,273 +10229,121 @@
 		return color.HSV_to_RGB( Hnum, Snum / 100, Vnum / 100 )
 	end --"\\1c" .. color.ass3( 15 * val_i, 1, 1 )
 	
-	function color.rgb( Color, Matrix13, Multi )
-		--suma o multiplica una matriz 1x3 a los tres valores RGB de un color
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		if type( Matrix13 ) == "function" then
-			Matrix13 = Matrix13( )
-		end
-		local colorass = Color or text.color1
-		local matrixsm = Matrix13 or { 0, 0, 0 }
-		effector.print_error( colorass, "color", "color.rgb", 1 )
-		effector.print_error( matrixsm, "table", "color.rgb", 2 )
-		if type( colorass ) == "table" then
-			local rgb_tables, rgb_colors = { }, { }
-			local rgb_r, rgb_g, rgb_b
-			for i = 1, #colorass do
-				rgb_tables[ i ] = color.to_RGB( colorass[ i ] )
-				rgb_colors[ i ] = color.ass2( unpack( math.matrix_sum( rgb_tables[ i ], Matrix13 ) ) )
-				if Multi then
-					rgb_r = rgb_tables[ i ][ 1 ] * matrixsm[ 1 ]
-					rgb_g = rgb_tables[ i ][ 2 ] * matrixsm[ 2 ]
-					rgb_b = rgb_tables[ i ][ 3 ] * matrixsm[ 3 ]
-					rgb_colors[ i ] = color.ass2( rgb_r, rgb_g, rgb_b )
-				end
-			end
-			return rgb_colors
-		end
-		local rgb_table = color.to_RGB( colorass )
-		if Multi then
-			return color.ass2( rgb_table[ 1 ] * matrixsm[ 1 ], rgb_table[ 2 ] * matrixsm[ 2 ], rgb_table[ 3 ] * matrixsm[ 3 ] )
-		end
-		return color.ass2( unpack( math.matrix_sum( rgb_table, Matrix13 ) ) )
-	end --"\\1c" .. color.rgb( nil, { 0, 50 * syl.i, 23 * syl.i } )
-	
-	function color.hsv( Color, Matrix13, Multi )
-		--suma o multiplica una matriz 1x3 a los tres valores HSV de un color
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		if type( Matrix13 ) == "function" then
-			Matrix13 = Matrix13( )
-		end
-		local colorass = Color or text.color1
-		local matrixsm = Matrix13 or { 0, 0, 0 }
-		effector.print_error( colorass, "color", "color.hsv", 1 )
-		effector.print_error( matrixsm, "table", "color.hsv", 2 )
-		if type( colorass ) == "table" then
-			local hsv_tables, hsv_colors = { }, { }
-			local hsv_h, hsv_s, hsv_v
-			for i = 1, #colorass do
-				hsv_tables[ i ] = color.to_HSV( colorass[ i ] )
-				hsv_colors[ i ] = color.ass3( unpack( math.matrix_sum( hsv_tables[ i ], Matrix13 ) ) )
-				if Multi then
-					hsv_h = hsv_tables[ i ][ 1 ] * matrixsm[ 1 ]
-					hsv_s = hsv_tables[ i ][ 2 ] * matrixsm[ 2 ]
-					hsv_v = hsv_tables[ i ][ 3 ] * matrixsm[ 3 ]
-					hsv_colors[ i ] = color.ass3( hsv_h, hsv_s, hsv_v )
-				end
-			end
-			return hsv_colors
-		end
-		local hsv_table = color.to_HSV( colorass )
-		if Multi then
-			return color.ass3( hsv_table[ 1 ] * matrixsm[ 1 ], hsv_table[ 2 ] * matrixsm[ 2 ], hsv_table[ 3 ] * matrixsm[ 3 ] )
-		end
-		return color.ass3( unpack( math.matrix_sum( hsv_table, Matrix13 ) ) )
-	end --"\\1c" .. color.hsv( nil, { 17 * val_i, 1, 0 } )
-	
-	function color.assF( Color )
-		--le da formato .ass al color
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		local Color = Color or text.color1
-		effector.print_error( Color, "color", "color.assF", 1 )
-		local cF, tcF = { Color }, { }
-		if type( Color ) == "table" then
-			cF = Color
-		end
-		for i = 1, #cF do
-			if cF[ i ]:len( ) < 15 then
-				cF[ i ] = cF[ i ]:match( "%x+" )
-				cF[ i ] = "&H" .. cF[ i ]:upper( ) .. "&"
-			else
-				for c in cF[ i ]:gmatch( "[%&Hh]*%x%x%x%x%x%x[%&]*" ) do
-					c = c:match( "%x+" )
-					c = format( "&H%s&", c:upper( ) )
-					table.insert( tcF, c )
-				end
-				cF[ i ] = format( "(%s,%s,%s,%s)", tcF[ 1 ], tcF[ 2 ], tcF[ 3 ], tcF[ 4 ] )
-			end
-		end
-		if #cF == 1 then
-			return cF[ 1 ]
-		end
-		return cF
-	end
-	
 	function color.to_RGB( Color )
 		--retorna una tabla con los valores RGB del color ingresado
 		if type( Color ) == "function" then
 			Color = Color( )
 		end
-		local Color = color.from_error( Color or text.color1 )
-		effector.print_error( Color, "color", "color.to_RGB", 1 )
-		local C_ass, RGB_table, _c = { Color }, { }, color.vc_to_c
+		local Color = color.ass( Color or text.color1 )
 		if type( Color ) == "table" then
-			C_ass = Color
-		end
-		for i = 1, #C_ass do
-			local b_RGB, g_RGB, r_RGB = _c( C_ass[ i ] ):match( "(%x%x)(%x%x)(%x%x)" )
-			RGB_table[ i ] = { tonumber( r_RGB, 16 ), tonumber( g_RGB, 16 ), tonumber( b_RGB, 16 ) }
-		end
-		if #C_ass == 1 then
-			return RGB_table[ 1 ]
-		end
-		return RGB_table
-	end
+			local recursion_tbl = { }
+			for k, v in pairs( Color ) do
+				recursion_tbl[ k ] = color.to_RGB( v )
+			end
+			return recursion_tbl
+		end --recursión
+		effector.print_error( Color, "color", "color.to_RGB", 1 )
+		local b_RGB, g_RGB, r_RGB = Color:match( "(%x%x)(%x%x)(%x%x)" )
+		return { tonumber( r_RGB, 16 ), tonumber( g_RGB, 16 ), tonumber( b_RGB, 16 ) }
+	end --color.to_RGB( { shape.color1, x = "&HFF00CC&" } )
 	
 	function color.to_HSV( Color )
 		--retorna una tabla con los valores HSV del color ingresado
 		if type( Color ) == "function" then
 			Color = Color( )
 		end
-		local Color = color.from_error( Color or text.color1 )
-		effector.print_error( Color, "color", "color.to_HSV", 1 )
-		local c_ass, HSV_table, H, S, V, Cmin, Cmax, Dt = { Color }, { }, 0, 0, 0, 0, 1, 1
+		local Color = color.ass( Color or text.color1 )
 		if type( Color ) == "table" then
-			c_ass = Color
-		end
-		for i = 1, #c_ass do
-			local Red, Green, Blue = unpack( color.to_RGB( c_ass[ i ] ) )
-			local Rcol, Gcol, Bcol = Red / 255 + 0.000001, Green / 255, Blue / 255
-			Cmax = math.max( Rcol, Gcol, Bcol )
-			Cmin = math.min( Rcol, Gcol, Bcol )
-			Dt = Cmax - Cmin
-			H = math.round( 60 * (((Rcol - Gcol) / Dt) + 4), 3 )
-			if Cmax == Rcol then
-				H = math.round( 60 * (((Gcol - Bcol) / Dt) % 6), 3 )
-			elseif Cmax == Gcol then
-				H = math.round( 60 * (((Bcol - Rcol) / Dt) + 2), 3 )
+			local recursion_tbl = { }
+			for k, v in pairs( Color ) do
+				recursion_tbl[ k ] = color.to_HSV( v )
 			end
-			S = math.round( Dt / Cmax, 3 )
-			V = math.round( Cmax, 3 )
-			HSV_table[ i ] = { H, S, V }
+			return recursion_tbl
+		end --recursión
+		effector.print_error( Color, "color", "color.to_HSV", 1 )
+		local H, S, V = 0, 0, 0
+		local Red, Green, Blue = unpack( color.to_RGB( Color ) )
+		local Rcol, Gcol, Bcol = Red / 255 + 0.000001, Green / 255, Blue / 255
+		local Cmax = math.max( Rcol, Gcol, Bcol )
+		local Cmin = math.min( Rcol, Gcol, Bcol )
+		local Dval = Cmax - Cmin
+		H = math.round( 60 * (((Rcol - Gcol) / Dval) + 4), 3 )
+		if Cmax == Rcol then
+			H = math.round( 60 * (((Gcol - Bcol) / Dval) % 6), 3 )
+		elseif Cmax == Gcol then
+			H = math.round( 60 * (((Bcol - Rcol) / Dval) + 2), 3 )
 		end
-		if #c_ass == 1 then
-			return HSV_table[ 1 ]
-		end
-		return HSV_table
-	end
+		S = math.round( Dval / Cmax, 3 )
+		V = math.round( Cmax, 3 )
+		return { H, S, V }
+	end --color.to_HSV( { my_color = shape.color3, "&HAAf0B7&" } )
 	
-	function color.r( )
-		--genera un color random
-		return color.HSV_to_RGB( Rc( 360 ), Rc( 0, 1 ), Rc( 0, 1 ) )
-	end
-
-	function color.rc( Color, ... )
-		--genera un color random a partir de un color base y cualesquieras otros que se ingresen
-		if type( Color ) == "function" then
-			Color = Color( )
+	function color.interpolate( Ipol, Color1, Color2 )
+		--interpolate_color
+		if type( Ipol ) == "function" then
+			Ipol = Ipol( )
 		end
-		local Color = color.from_error( Color or text.color1 )
-		effector.print_error( Color, "color", "color.rc", 1 )
-		local RCtable, i_c, _c = { }, color.ipolfx, color.vc_to_c
-		local RCcolor = { Color }
-		local RCmask = color.from_error( ... or { "&H6E6E6E&", "&H000000&" } )
-		if type( Color ) == "table" then
-			RCcolor = Color
-		end
-		if type( RCmask ) ~= "table" then
-			RCmask = { RCmask }
-		end
-		if #RCmask == 1 then
-			RCmask[ 2 ] = RCmask[ 1 ]
-		end
-		for i = 1, #RCcolor do
-			RCmask = table.disorder( RCmask )
-			RCtable[ i ] = i_c( Rc( 0.25, 1 ), i_c( R( 2 ) - 1, RCmask[ 1 ], RCmask[ 2 ] ), _c( RCcolor[ i ] ) )
-		end
-		if #RCcolor == 1 then
-			return RCtable[ 1 ]
-		end
-		return RCtable
-	end
-	
-	function color.vc_to_c( Color )
-		if type( Color ) == "function" then
-			Color = Color( )
-		end
-		local Color = color.from_error( Color or text.color1 )
-		effector.print_error( Color, "color", "color.vc_to_c", 1 )
-		local colorvc, VC2Ccolors, i_c = { Color }, { }, color.ipolfx
-		if type( Color ) == "table" then
-			colorvc = Color
-		end
-		for k = 1, #colorvc do
-			VC2Ccolors = { }
-			if colorvc[ k ]:len( ) < 15 then
-				colorvc[ k ] = color.assF( colorvc[ k ] )
-			else
-				for c in colorvc[ k ]:gmatch( "[%&Hh]*%x%x%x%x%x%x[%&]*" ) do
-					table.insert( VC2Ccolors, color.assF( c ) )
-				end
-				colorvc[ k ] = i_c( 0.5, i_c( 0.5, VC2Ccolors[ 1 ], VC2Ccolors[ 4 ] ), i_c( 0.5, VC2Ccolors[ 2 ], VC2Ccolors[ 3 ] ) )
-			end 
-		end
-		if #colorvc == 1 then
-			return colorvc[ 1 ]
-		end
-		return colorvc
-	end
-	
-	function color.interpolate( Color1, Color2, Index_Ipol )
 		if type( Color1 ) == "function" then
 			Color1 = Color1( )
 		end
 		if type( Color2 ) == "function" then
 			Color2 = Color2( )
 		end
-		if type( Index_Ipol ) == "function" then
-			Index_Ipol = Index_Ipol( )
-		end
-		local II = Index_Ipol or 0.5
-		local Color1 = color.from_error( Color1 or text.color1 )
-		local Color2 = color.from_error( Color2 or text.color2 )
-		effector.print_error( Color1, "color", "color.interpolate", 1 )
-		effector.print_error( Color2, "color", "color.interpolate", 2 )
-		effector.print_error( II, "number", "color.interpolate", 3 )
-		local Ci_table, _c, i_c = { }, color.vc_to_c, color.ipolfx
-		local C1, C2 = { Color1 }, { Color2 }
+		local Ipol = Ipol or 0.5
+		local Color1 = Color1 or text.color1
+		local Color2 = Color2 or text.color2
+		---------------------------------
 		if type( Color1 ) == "table" then
-			C1 = Color1
-		end
-		if type( Color2 ) == "table" then
-			C2 = Color2
-		end
-		local color1_vc, color2_vc
-		for i = 1, #C1 do
-			for k = 1, #C2 do
-				color1_vc, color2_vc = { }, { }
-				for c in C1[ i ]:gmatch( "%x%x%x%x%x%x" ) do
-					table.insert( color1_vc, c )
-				end
-				for c in C2[ k ]:gmatch( "%x%x%x%x%x%x" ) do
-					table.insert( color2_vc, c )
-				end
-				if #color1_vc == 1
-					or #color2_vc == 1 then
-					table.insert( Ci_table, i_c( II, _c( C1[ i ] ), _c( C2[ k ] ) ) )
-				elseif #color1_vc == 4
-					and #color2_vc == 4 then
-					table.insert( Ci_table, format( "(%s,%s,%s,%s)",
-							i_c( II, color1_vc[ 1 ], color2_vc[ 1 ] ),
-							i_c( II, color1_vc[ 2 ], color2_vc[ 2 ] ),
-							i_c( II, color1_vc[ 3 ], color2_vc[ 3 ] ),
-							i_c( II, color1_vc[ 4 ], color2_vc[ 4 ] )
-						)
-					) --add: august 03rd 2019
+			local recursion_tbl = { }
+			for k, v in pairs( Color1 ) do
+				if type( Color2 ) == "table" then
+					recursion_tbl[ k ] = { }
+					for i, w in pairs( Color2 ) do
+						recursion_tbl[ k ][ i ] = color.interpolate( Ipol, v, w )
+					end
+				else
+					recursion_tbl[ k ] = color.interpolate( Ipol, v, Color2 )
 				end
 			end
+			return recursion_tbl
+		end --resursión 1
+		if type( Color2 ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Color2 ) do
+				if type( Color1 ) == "table" then
+					recursion_tbl[ k ] = { }
+					for i, w in pairs( Color1 ) do
+						recursion_tbl[ k ][ i ] = color.interpolate( Ipol, w, v )
+					end
+				else
+					recursion_tbl[ k ] = color.interpolate( Ipol, Color1, v )
+				end
+			end
+			return recursion_tbl
+		end --resursión 2
+		---------------------------------
+		effector.print_error( Ipol, "number", "color.interpolate", 1 )
+		effector.print_error( Color1, "color", "color.interpolate", 2 )
+		effector.print_error( Color2, "color", "color.interpolate", 3 )
+		if Color1:match( "%x%x%x%x%x%x%x%x" ) then
+			Color1 = Color1:match( "%x%x(%x%x%x%x%x%x)" )
 		end
-		if #Ci_table == 1 then
-			return Ci_table[ 1 ]
+		local col_R1 = tonumber( Color1:match( "%x%x%x%x(%x%x)" ), 16 )
+		local col_G1 = tonumber( Color1:match( "%x%x(%x%x)%x%x" ), 16 )
+		local col_B1 = tonumber( Color1:match( "(%x%x)%x%x%x%x" ), 16 )
+		if Color2:match( "%x%x%x%x%x%x%x%x" ) then
+			Color2 = Color2:match( "%x%x(%x%x%x%x%x%x)" )
 		end
-		return Ci_table
-	end
+		local col_R2 = tonumber( Color2:match( "%x%x%x%x(%x%x)" ), 16 )
+		local col_G2 = tonumber( Color2:match( "%x%x(%x%x)%x%x" ), 16 )
+		local col_B2 = tonumber( Color2:match( "(%x%x)%x%x%x%x" ), 16 )
+		Ipol = math.clamp( Ipol )
+		local ipol_R = math.round( col_R1 + (col_R2 - col_R1) * Ipol )
+		local ipol_G = math.round( col_G1 + (col_G2 - col_G1) * Ipol )
+		local ipol_B = math.round( col_B1 + (col_B2 - col_B1) * Ipol )
+		return color.val2ass( ipol_R, ipol_G, ipol_B ) --rewrite: june 20th 2020
+		--color.interpolate( 0.6, { shape.color1, "&H0000FF&" }, "&H000000&" )
+	end --color.interpolate( 0.5, "&HFFFFFF&", "&H0000FF&" )
 	
 	function color.set( Times, Colors, ... )
 		-- ... = \\1c, \\3c or \\4c
@@ -10502,7 +10354,7 @@
 			Colors = Colors( )
 		end
 		local Concats = { ... }
-		local Colors = color.from_error( Colors or { text.color2 } )
+		local Colors = color.ass( Colors or { text.color2 } )
 		local Times = Times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
 		effector.print_error( Times, "table", "color.set", 1 )
 		effector.print_error( Colors, "table", "color.set", 2 )
@@ -10571,33 +10423,25 @@
 		return Tags
 	end --mod: june 03rd 2020
 
-	function color.from_error( Color )
-		local Colorfx
-		if type( Color ) == "table" then
-			Colorfx = { }
-			for k, v in pairs( Color ) do
-				Colorfx[ k ] = color.from_error( v )
-			end
-			return Colorfx
-		end --recursión
-		Colorfx = Color:gsub( "[%&Hh]*(%x%x%x%x%x%x)[%&]*", "&H%1&" )
-		if Color:match( "#%x%x%x%x%x%x" ) then
-			Colorfx = Color:gsub( "#%x%x%x%x%x%x",
-				function( HTML_color )
-					return color.ass( HTML_color )
-				end
-			)
-		end
-		return Colorfx
-	end	--rewrite: june 19th 2020
-	
 	function color.matrix( Color, ... )
 		if type( Color ) == "function" then
 			Color = Color( )
 		end
 		local Colorx = Color or text.color1
+		if type( Color ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Color ) do
+				recursion_tbl[ k ] = color.matrix( v, ... )
+			end
+			return recursion_tbl
+		end --recursión
 		effector.print_error( Colorx, "color", "color.matrix", 1 )
-		local Matrixes = { ... }
+		local configs = ...
+		local Matrixes = { configs }
+		if type( configs ) == "table"
+			and table.type( configs ) == "table" then
+			Matrixes = configs
+		end
 		if #Matrixes == 0 then
 			Matrixes[ 1 ] = {
 				1,	0,	0,
@@ -10657,6 +10501,18 @@
 		local val_R = val_R or 255
 		local val_G = val_G or 255
 		local val_B = val_B or 255
+		if tonumber( val_R ) then
+			val_R = tonumber( val_R )
+		end
+		if tonumber( val_G ) then
+			val_G = tonumber( val_G )
+		end
+		if tonumber( val_B ) then
+			val_B = tonumber( val_B )
+		end
+		val_R = math.clamp( val_R, 0, 255 )
+		val_G = math.clamp( val_G, 0, 255 )
+		val_B = math.clamp( val_B, 0, 255 )
 		effector.print_error( val_R, "number", "color.val2ass", 1 )
 		effector.print_error( val_G, "number", "color.val2ass", 2 )
 		effector.print_error( val_B, "number", "color.val2ass", 3 )
@@ -10675,42 +10531,6 @@
 		return "&H" .. col_B .. col_G .. col_R .. "&" --august 04th 2019
 	end --color.val2ass( 255, 0, 0 )
 
-	function color.ipolfx( Ipol, Color1, Color2 )
-		--interpolate_color
-		if type( Ipol ) == "function" then
-			Ipol = Ipol( )
-		end
-		if type( Color1 ) == "function" then
-			Color1 = Color1( )
-		end
-		if type( Color2 ) == "function" then
-			Color2 = Color2( )
-		end
-		local Ipol = Ipol or 0.5
-		local Color1 = Color1 or text.color1
-		local Color2 = Color2 or text.color2
-		effector.print_error( Ipol, "number", "color.ipolfx", 1 )
-		effector.print_error( Color1, "color", "color.ipolfx", 2 )
-		effector.print_error( Color2, "color", "color.ipolfx", 3 )
-		if Color1:match( "%x%x%x%x%x%x%x%x" ) then
-			Color1 = Color1:match( "%x%x(%x%x%x%x%x%x)" )
-		end
-		local col_R1 = tonumber( Color1:match( "%x%x%x%x(%x%x)" ), 16 )
-		local col_G1 = tonumber( Color1:match( "%x%x(%x%x)%x%x" ), 16 )
-		local col_B1 = tonumber( Color1:match( "(%x%x)%x%x%x%x" ), 16 )
-		if Color2:match( "%x%x%x%x%x%x%x%x" ) then
-			Color2 = Color2:match( "%x%x(%x%x%x%x%x%x)" )
-		end
-		local col_R2 = tonumber( Color2:match( "%x%x%x%x(%x%x)" ), 16 )
-		local col_G2 = tonumber( Color2:match( "%x%x(%x%x)%x%x" ), 16 )
-		local col_B2 = tonumber( Color2:match( "(%x%x)%x%x%x%x" ), 16 )
-		Ipol = math.clamp( Ipol )
-		local ipol_R = math.round( col_R1 + (col_R2 - col_R1) * Ipol )
-		local ipol_G = math.round( col_G1 + (col_G2 - col_G1) * Ipol )
-		local ipol_B = math.round( col_B1 + (col_B2 - col_B1) * Ipol )
-		return color.val2ass( ipol_R, ipol_G, ipol_B ) --august 04th 2019
-	end --color.ipolfx( 0.5, "&HFFFFFF&", "&H0000FF&" )
-	
 	function color.HSV_to_RGB( Hue, Saturation, Value )
 		--HSV to ass color format :D HSV2ass
 		if type( Hue ) == "function" then
@@ -10759,132 +10579,107 @@
 
 	--------------------------------------------------------------------------------------------------
 	--Librería de las Funciones alpha ----------------------------------------------------------------
-	function alpha.assF( Alpha )
+	function alpha.ass( Alpha )
+		--le da el formato xy-vsfilter a los alphas
 		if type( Alpha ) == "function" then
 			Alpha = Alpha( )
 		end
-		local Alpha = Alpha or text.alpha1
-		local aF, taF = { Alpha }, { }
-		effector.print_error( Alpha, "alpha", "alpha.assF", 1 )
+		local Alphafx
 		if type( Alpha ) == "table" then
-			aF = Alpha
-		end
-		for i = 1, #aF do
-			taF = { }
-			if type( aF[ i ] ) == "number" then
-				aF[ i ] = alpha.val2ass( aF[ i ] % 256 )
-			else
-				if aF[ i ]:len( ) < 7 then
-					aF[ i ] = aF[ i ]:match( "%x+" )
-					aF[ i ] = format( "&H%s&", aF[ i ]:upper( ) )
-				else
-					for cF in aF[ i ]:gmatch( "[%&Hh]*%x%x[%&]*" ) do
-						cF = cF:match( "%x+" )
-						cF = format( "&H%s&", cF:upper( ) )
-						table.insert( taF, cF )
-					end
-					aF[ i ] = format( "(%s,%s,%s,%s)", taF[ 1 ], taF[ 2 ], taF[ 3 ], taF[ 4 ] )
-				end
+			local recursion_tbl = { }
+			for k, v in pairs( Alpha ) do
+				recursion_tbl[ k ] = alpha.ass( v )
 			end
+			return recursion_tbl
+		end --recursión
+		effector.print_error( Alpha, "alpha", "ass", 1 )
+		Alphafx = Alpha:gsub( "[%#%&Hh]*(%x%x)[%&]*", "&H%1&" )
+		if Alpha:match( "%([ &H]*%x+[ &]*,[ &H]*%x+[ &]*,[ &H]*%x+[ &]*,[ &H]*%x+[ &]*%)" ) then
+			local a1, a2, a3, a4 = Alpha:match( "%([ &H]*(%x+)[ &]*,[ &H]*(%x+)[ &]*,[ &H]*(%x+)[ &]*,[ &H]*(%x+)[ &]*%)" )
+			a1, a2, a3, a4 = "&H" .. a1 .. "&", "&H" .. a2 .. "&", "&H" .. a3 .. "&", "&H" .. a4 .. "&"
+			Alphafx = alpha.interpolate( 0.5, alpha.interpolate( 0.5, a1, a4 ), alpha.interpolate( 0.5, a2, a3 ) )
+		end --VSFilterMod to ass
+		return Alphafx --alpha.ass( { "(FF,00,AA,0F)", "#F0" } )
+	end	--june 20th 2020
+
+	function alpha.interpolate( Ipol, Alpha1, Alpha2 )
+		--interpolate_alpha
+		if type( Ipol ) == "function" then
+			Ipol = Ipol( )
 		end
-		if #aF == 1 then
-			return aF[ 1 ]
-		end
-		return aF
-	end
-	
-	function alpha.r( )
-		return alpha.val2ass( R( 0, 255 ) )
-	end
-	
-	function alpha.va_to_a( Alpha )
-		if type( Alpha ) == "function" then
-			Alpha = Alpha( )
-		end
-		local Alpha = alpha.from_error( Alpha or text.alpha1 )
-		effector.print_error( Alpha, "alpha", "alpha.va_to_a", 1 )
-		local alphava, alphas, i_a = Alpha, { }, alpha.ipolfx
-		if type( Alpha ) ~= "table" then
-			alphava = { Alpha }
-		end
-		for k = 1, #alphava do
-			if type( alphava[ k ] ) == "string"
-				and alphava[ k ]:len( ) >= 13 then
-				alphas = { }
-				for c_va in alphava[ k ]:gmatch( "[%&Hh]*%x%x[%&]*" ) do
-					table.insert( alphas, alpha.assF( c_va ) )
-				end
-				alphava[ k ] = i_a( 0.5, i_a( 0.5, alphas[ 1 ], alphas[ 4 ] ), i_a( 0.5, alphas[ 2 ], alphas[ 3 ] ) )
-			elseif type( alphava[ k ] ) == "number" then
-				alphava[ k ] = alpha.assF( alphava[ k ] )
-			end 
-		end
-		if #alphava == 1 then
-			return alphava[ 1 ]
-		end
-		return alphava
-	end
-	
-	function alpha.interpolate( Alpha1, Alpha2, Index_Ipol )
 		if type( Alpha1 ) == "function" then
 			Alpha1 = Alpha1( )
 		end
 		if type( Alpha2 ) == "function" then
 			Alpha2 = Alpha2( )
 		end
-		if type( Index_Ipol ) == "function" then
-			Index_Ipol = Index_Ipol( )
-		end
-		local II = Index_Ipol or 0.5
-		local Alpha1 = alpha.from_error( Alpha1 or "&HFF&" )
-		local Alpha2 = alpha.from_error( Alpha2 or text.alpha1 )
-		effector.print_error( Alpha1, "alpha", "alpha.interpolate", 1 )
-		effector.print_error( Alpha2, "alpha", "alpha.interpolate", 2 )
-		effector.print_error( II, "number", "alpha.interpolate", 3 )
-		local Ai_table, _a, i_a = { }, alpha.va_to_a, alpha.ipolfx
-		local A1, A2 = { Alpha1 }, { Alpha2 }
+		local Ipol = Ipol or 0.5
+		local Alpha1 = Alpha1 or text.alpha1
+		local Alpha2 = Alpha2 or text.alpha2
+		---------------------------------
 		if type( Alpha1 ) == "table" then
-			A1 = Alpha1
-		end
-		if type( Alpha2 ) == "table" then
-			A2 = Alpha2
-		end
-		local alpha1_va, alpha2_va
-		for i = 1, #A1 do
-			for k = 1, #A2 do
-				alpha1_va, alpha2_va = { }, { }
-				if type( A1[ i ] ) == "number" then
-					A1[ i ] = alpha.val2ass( A1[ i ] )
-				end
-				if type( A2[ k ] ) == "number" then
-					A2[ k ] = alpha.val2ass( A2[ k ] )
-				end
-				for c in A1[ i ]:gmatch( "%x%x" ) do
-					table.insert( alpha1_va, c )
-				end
-				for c in A2[ k ]:gmatch( "%x%x" ) do
-					table.insert( alpha2_va, c )
-				end
-				if #alpha1_va == 1
-					or #alpha2_va == 1 then
-					table.insert( Ai_table, i_a( II, _a( A1[ i ] ), _a( A2[ k ] ) ) )
-				elseif #alpha1_va == 4
-					and #alpha2_va == 4 then
-					table.insert( Ai_table, format( "(%s,%s,%s,%s)",
-							i_a( II, alpha1_va[ 1 ], alpha2_va[ 1 ] ),
-							i_a( II, alpha1_va[ 2 ], alpha2_va[ 2 ] ),
-							i_a( II, alpha1_va[ 3 ], alpha2_va[ 3 ] ),
-							i_a( II, alpha1_va[ 4 ], alpha2_va[ 4 ] )
-						)
-					)--add: august 03rd 2019
+			local recursion_tbl = { }
+			for k, v in pairs( Alpha1 ) do
+				if type( Alpha2 ) == "table" then
+					recursion_tbl[ k ] = { }
+					for i, w in pairs( Alpha2 ) do
+						recursion_tbl[ k ][ i ] = alpha.interpolate( Ipol, v, w )
+					end
+				else
+					recursion_tbl[ k ] = alpha.interpolate( Ipol, v, Alpha2 )
 				end
 			end
+			return recursion_tbl
+		end --resursión 1
+		if type( Alpha2 ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Alpha2 ) do
+				if type( Alpha1 ) == "table" then
+					recursion_tbl[ k ] = { }
+					for i, w in pairs( Alpha1 ) do
+						recursion_tbl[ k ][ i ] = alpha.interpolate( Ipol, w, v )
+					end
+				else
+					recursion_tbl[ k ] = alpha.interpolate( Ipol, Alpha1, v )
+				end
+			end
+			return recursion_tbl
+		end --resursión 2
+		---------------------------------
+		effector.print_error( Ipol, "number", "alpha.interpolate", 1 )
+		effector.print_error( Alpha1, "alpha", "alpha.interpolate", 2 )
+		effector.print_error( Alpha2, "alpha", "alpha.interpolate", 3 )
+		if tonumber( Alpha1 ) then
+			Alpha1 = tonumber( Alpha1 )
 		end
-		if #Ai_table == 1 then
-			return Ai_table[ 1 ]
+		if tonumber( Alpha2 ) then
+			Alpha2 = tonumber( Alpha2 )
 		end
-		return Ai_table
-	end
+		local alpha_i, alpha_f = 0, 255
+		if type( Alpha1 ) == "string"
+			and Alpha1:match( "%x%x%x%x%x%x%x%x" ) then
+			Alpha1 = Alpha1:match( "(%x%x)%x%x%x%x%x%x" )
+		end
+		if type( Alpha1 ) == "string" then
+			alpha_i = tonumber( Alpha1:match( "(%x%x)" ), 16 )
+		end
+		if type( Alpha1 ) == "number" then
+			alpha_i = math.clamp( Alpha1, 0, 255 )
+		end
+		if type( Alpha2 ) == "string"
+			and Alpha2:match( "%x%x%x%x%x%x%x%x" ) then
+			Alpha2 = Alpha2:match( "(%x%x)%x%x%x%x%x%x" )
+		end
+		if type( Alpha2 ) == "string" then
+			alpha_f = tonumber( Alpha2:match( "(%x%x)" ), 16 )
+		end
+		if type( Alpha2 ) == "number" then
+			alpha_f = math.clamp( Alpha2, 0, 255 )
+		end
+		Ipol = math.clamp( Ipol ) --rewrite: june 20th 2020
+		return alpha.val2ass( math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
+		--alpha.interpolate( 0.6, { shape.alpha1, shape.color3 }, { "&H0F&", "&HFF&" } )
+	end --alpha.interpolate( 0.5, "&HFF&", 55 )
 	
 	function alpha.set( Times, Alphas, ... )
 		-- ... = \\1a, \\3a or \\4a
@@ -10895,7 +10690,7 @@
 			Alphas = Alphas( )
 		end
 		local Concats = { ... }
-		local Alphas = alpha.from_error( Alphas or { text.alpha2 } )
+		local Alphas = alpha.ass( Alphas or { text.alpha2 } )
 		local Times = Times or { linefx[ ii ].start_time + linefx[ ii ].duration / 2 }
 		effector.print_error( Times, "table", "alpha.set", 1 )
 		effector.print_error( Alphas, "table", "alpha.set", 2 )
@@ -10964,27 +10759,6 @@
 		return Tags
 	end --mod: june 14th 2020
 
-	function alpha.from_error( Alpha )
-		if type( Alpha ) == "string" then
-			Alpha = Alpha:gsub( "[%#%&Hh]*(%x%x)[%&]*",
-				function( ASS_alpha )
-					return format( "&H%s&", ASS_alpha )
-				end
-			)
-		elseif type( Alpha ) == "table" then
-			for k, valor in pairs( Alpha ) do
-				if type( valor ) == "string" then
-					Alpha[ k ] = valor:gsub( "[%#%&Hh]*(%x%x)[%&]*",
-						function( ASS_alpha )
-							return format( "&H%s&", ASS_alpha )
-						end
-					)
-				end
-			end
-		end
-		return Alpha
-	end
-	
 	function alpha.fromstyle( ColorAlpha )
 		--alpha from style
 		if type( ColorAlpha ) == "function" then
@@ -11017,54 +10791,6 @@
 		end
 		return "&H" .. alpha_A .. "&" --august 04th 2019
 	end --alpha.val2ass( 86 )
-	
-	function alpha.ipolfx( Ipol, Alpha1, Alpha2 )
-		--interpolate_alpha
-		if type( Ipol ) == "function" then
-			Ipol = Ipol( )
-		end
-		if type( Alpha1 ) == "function" then
-			Alpha1 = Alpha1( )
-		end
-		if type( Alpha2 ) == "function" then
-			Alpha2 = Alpha2( )
-		end
-		local Ipol = Ipol or 0.5
-		local Alpha1 = Alpha1 or text.alpha1
-		local Alpha2 = Alpha2 or text.alpha2
-		effector.print_error( Ipol, "number", "alpha.ipolfx", 1 )
-		effector.print_error( Alpha1, "alpha", "alpha.ipolfx", 2 )
-		effector.print_error( Alpha2, "alpha", "alpha.ipolfx", 3 )
-		if tonumber( Alpha1 ) then
-			Alpha1 = tonumber( Alpha1 )
-		end
-		if tonumber( Alpha2 ) then
-			Alpha2 = tonumber( Alpha2 )
-		end
-		local alpha_i, alpha_f = 0, 255
-		if type( Alpha1 ) == "string"
-			and Alpha1:match( "%x%x%x%x%x%x%x%x" ) then
-			Alpha1 = Alpha1:match( "(%x%x)%x%x%x%x%x%x" )
-		end
-		if type( Alpha1 ) == "string" then
-			alpha_i = tonumber( Alpha1:match( "(%x%x)" ), 16 )
-		end
-		if type( Alpha1 ) == "number" then
-			alpha_i = math.clamp( Alpha1, 0, 255 )
-		end
-		if type( Alpha2 ) == "string"
-			and Alpha2:match( "%x%x%x%x%x%x%x%x" ) then
-			Alpha2 = Alpha2:match( "(%x%x)%x%x%x%x%x%x" )
-		end
-		if type( Alpha2 ) == "string" then
-			alpha_f = tonumber( Alpha2:match( "(%x%x)" ), 16 )
-		end
-		if type( Alpha2 ) == "number" then
-			alpha_f = math.clamp( Alpha2, 0, 255 )
-		end
-		Ipol = math.clamp( Ipol ) --august 04th 2019
-		return alpha.val2ass( math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
-	end --alpha.ipolfx( 0.5, "&HFF&", 55 )
 	-- [%#%&Hh]^* <-- son opcionales, pero mínimo debe haber una de ellas :)
 	
 	--------------------------------------------------------------------------------------------------
@@ -11083,70 +10809,71 @@
 			Shape = linefx[ ii ].text:match( "\\i?clip%b()" )
 		end --add: april 28th 2020
 		Shape = Shape or "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.ASSDraw3( v, Round )
+			end --shape.ASSDraw3( { shape.circle, x = "\\clip( m 0 0 l 0 1 l 1 1 l 1 0 )" } )
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		effector.print_error( Shape, "shape", "shape.ASSDraw3", 1 )
 		effector.print_error( Round, "number", "shape.ASSDraw3", 2 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.ASSDraw3( Shape[ i ], Round )
-			end --recursividad: september 08th 2019
-		else
-			local segments, coor2 = { }, { }
-			Shape = Shape:gsub( "  ", " " ) -- elimina los espacios múltiples
-			Shape = Shape:gsub( "%S+",
-				function( num )
-					return format( "%s", math.round( tonumber( num ) or num, Round ) )
-				end
-			) --redondea los valores numéricos de la shape
-			Shape = Shape:gsub( " c", "" ):gsub( "%b{}", "" )
-			if Shape:match( "%i?clip%b()" ) then
-				if Shape:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d]*" ) then
-					local cx1, cy1, cx2, cy2 = Shape:match( "(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d]*)" )
-					Shape = format( "m %s %s l %s %s l %s %s l %s %s ", cx1, cy1, cx1, cy2, cx2, cy2, cx2, cy1 )
-				elseif Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" ) then
-					Shape = Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" )
-				end
+		local segments, coor2 = { }, { }
+		Shape = Shape:gsub( "  ", " " ) -- elimina los espacios múltiples
+		Shape = Shape:gsub( "%S+",
+			function( num )
+				return format( "%s", math.round( tonumber( num ) or num, Round ) )
 			end
-			for c in Shape:gmatch( "[mlb]^* %-?%d+[%.%d]* [%-%.%d ]*" ) do
-				table.insert( segments, c )
+		) --redondea los valores numéricos de la shape
+		Shape = Shape:gsub( " c", "" ):gsub( "%b{}", "" )
+		if Shape:match( "%i?clip%b()" ) then
+			if Shape:match( "%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d]*" ) then
+				local cx1, cy1, cx2, cy2 = Shape:match( "(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d]*)" )
+				Shape = format( "m %s %s l %s %s l %s %s l %s %s ", cx1, cy1, cx1, cy2, cx2, cy2, cx2, cy1 )
+			elseif Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" ) then
+				Shape = Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dmlb ]*" )
 			end
-			for k = 1, #segments do
-				coor2[ k ] = { }
-				for c6 in segments[ k ]:gmatch( "%S+" ) do
-					--captura: signos, números, letras y puntos
-					table.insert( coor2[ k ], format( "%s ", c6 ) )
-				end
-			end
-			for k = 1, #coor2 do
-				if coor2[ k ][ 1 ] == "b "
-					and #coor2[ k ] > 7 then
-					coor3 = { }
-					table.remove( coor2[ k ], 1 )
-					for i = 1, #coor2[ k ] / 6 do
-						coor3[ i ] = { }
-						for h = 1, 6 do
-							table.insert( coor3[ i ], coor2[ k ][ 6 * (i - 1) + h ] )
-						end
-						coor3[ i ] = format( "b %s", table.op( coor3[ i ], "concat" ) )
-					end
-					coor2[ k ] = table.op( coor3, "concat" )
-				elseif coor2[ k ][ 1 ] == "l "
-					and #coor2[ k ] > 3 then
-					coor4 = { }
-					table.remove( coor2[ k ], 1 )
-					for i = 1, #coor2[ k ] / 2 do
-						coor4[ i ] = { }
-						for h = 1, 2 do
-							table.insert( coor4[ i ], coor2[ k ][ 2 * (i - 1) + h ] )
-						end
-						coor4[ i ] = format( "l %s", table.op( coor4[ i ], "concat" ) )
-					end
-					coor2[ k ] = table.op( coor4, "concat" )
-				else
-					coor2[ k ] = table.op( coor2[ k ], "concat" )
-				end
-			end
-			Shape = table.op( coor2, "concat" )
 		end
+		for c in Shape:gmatch( "[mlb]^* %-?%d+[%.%d]* [%-%.%d ]*" ) do
+			table.insert( segments, c )
+		end
+		for k = 1, #segments do
+			coor2[ k ] = { }
+			for c6 in segments[ k ]:gmatch( "%S+" ) do
+				--captura: signos, números, letras y puntos
+				table.insert( coor2[ k ], format( "%s ", c6 ) )
+			end
+		end
+		for k = 1, #coor2 do
+			if coor2[ k ][ 1 ] == "b "
+				and #coor2[ k ] > 7 then
+				coor3 = { }
+				table.remove( coor2[ k ], 1 )
+				for i = 1, #coor2[ k ] / 6 do
+					coor3[ i ] = { }
+					for h = 1, 6 do
+						table.insert( coor3[ i ], coor2[ k ][ 6 * (i - 1) + h ] )
+					end
+					coor3[ i ] = format( "b %s", table.op( coor3[ i ], "concat" ) )
+				end
+				coor2[ k ] = table.op( coor3, "concat" )
+			elseif coor2[ k ][ 1 ] == "l "
+				and #coor2[ k ] > 3 then
+				coor4 = { }
+				table.remove( coor2[ k ], 1 )
+				for i = 1, #coor2[ k ] / 2 do
+					coor4[ i ] = { }
+					for h = 1, 2 do
+						table.insert( coor4[ i ], coor2[ k ][ 2 * (i - 1) + h ] )
+					end
+					coor4[ i ] = format( "l %s", table.op( coor4[ i ], "concat" ) )
+				end
+				coor2[ k ] = table.op( coor4, "concat" )
+			else
+				coor2[ k ] = table.op( coor2[ k ], "concat" )
+			end
+		end
+		Shape = table.op( coor2, "concat" )
 		return Shape
 	end
 	
@@ -11160,21 +10887,22 @@
 		end
 		local Shape = shape.ASSDraw3( Shape )
 		local Round = Round or 0
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.round( v, Round )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		effector.print_error( Shape, "shape",  "shape.round", 1 )
 		effector.print_error( Round, "number", "shape.round", 2 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.round( Shape[ i ], Round )
+		Shape = Shape:gsub( "%-?%d+[%.%d]*",
+			function( num )
+				return math.round( tonumber( num ), Round )
 			end
-		else --recursividad: september 08th 2019
-			Shape = Shape:gsub( "%-?%d+[%.%d]*",
-				function( num )
-					return math.round( tonumber( num ), Round )
-				end
-			)
-		end
+		)
 		return Shape
-	end --shape.round( { "m 0.8 9 l 0 0 ", "m 5 6.2 l 8 8 " } )
+	end --shape.round( { "m 0.8 9 l 0 0 ", x = "m 5 6.2 l 8 8 " } )
 	
 	function shape.info( Shape )
 		--genera variables con la información notable de la Shape
@@ -11215,102 +10943,103 @@
 		end
 		local tract = tract or 2
 		local Shape = shape.ASSDraw3( Shape ) or shape.circle
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.redraw( v, tract, Section, Continued )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		effector.print_error( Shape, "shape", "shape.redraw", 1 )
 		effector.print_error( tract, "number", "shape.redraw", 2 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.redraw( Shape[ i ], tract, Section, Continued )
+		if Continued then
+			Shape = "m" .. Shape:gsub( "m", "l" ):sub( 2, -1 )
+		end --la convierte en una shape contínua
+		local segments, segm_tbl, c = { }
+		local Section = Section or "all"
+		local shape_new = recall.shprd
+		if j == 1 then
+			for c in Shape:gmatch( "[blm]^*%s+%-?%d+[%-%.%d ]*" ) do
+				segments[ #segments + 1 ] = c .. "x"
 			end
-		else --recursividad: september 08th 2019
-			if Continued then
-				Shape = "m" .. Shape:gsub( "m", "l" ):sub( 2, -1 )
-			end --la convierte en una shape contínua
-			local segments, segm_tbl, c = { }
-			local Section = Section or "all"
-			local shape_new = recall.shprd
-			if j == 1 then
-				for c in Shape:gmatch( "[blm]^*%s+%-?%d+[%-%.%d ]*" ) do
-					segments[ #segments + 1 ] = c .. "x"
+			segm_tbl = { [ 1 ] = segments[ 1 ]:gsub( "x", "" ) }
+			if Section == "line" then
+				for i = 2, #segments do
+					segm_tbl[ i ] = segments[ i ]:gsub( "l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x",
+						function( x2, y2 )
+							local x2, y2 = tonumber( x2 ), tonumber( y2 )
+							local x1, y1 = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x" )
+							x1, y1 = tonumber( x1 ), tonumber( y1 )
+							local angle = math.angle( x1, y1, x2, y2 )
+							local length = math.distance( x1, y1, x2, y2 )
+							local parts = length / math.round( length / tract )
+							local newline = ""
+							for k = 1, math.round( length / parts ) do
+								newline = newline .. format( "l %s %s ",
+									x1 + math.polar( angle, parts * k, "x" ),
+									y1 + math.polar( angle, parts * k, "y" )
+								)
+							end --shape.redraw( "m -5 -5 l -5 20 l 20 20 l 20 -5 l -5 -5 ", 10, "line" )
+							return newline
+						end
+					)
 				end
-				segm_tbl = { [ 1 ] = segments[ 1 ]:gsub( "x", "" ) }
-				if Section == "line" then
-					for i = 2, #segments do
-						segm_tbl[ i ] = segments[ i ]:gsub( "l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x",
-							function( x2, y2 )
-								local x2, y2 = tonumber( x2 ), tonumber( y2 )
-								local x1, y1 = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x" )
-								x1, y1 = tonumber( x1 ), tonumber( y1 )
-								local angle = math.angle( x1, y1, x2, y2 )
-								local length = math.distance( x1, y1, x2, y2 )
-								local parts = length / math.round( length / tract )
-								local newline = ""
-								for k = 1, math.round( length / parts ) do
-									newline = newline .. format( "l %s %s ",
-										x1 + math.polar( angle, parts * k, "x" ),
-										y1 + math.polar( angle, parts * k, "y" )
-									)
-								end --shape.redraw( "m -5 -5 l -5 20 l 20 20 l 20 -5 l -5 -5 ", 10, "line" )
-								return newline
+			elseif Section == "bezier" then
+				for i = 2, #segments do
+					segm_tbl[ i ] = segments[ i ]:gsub( "b%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+x",
+						function( Bezier )
+							local Bezier = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+)x" ) .. Bezier
+							local length = math.length_bezier( Bezier )
+							local parts = length / math.round( length / tract )
+							local newbezier, n = "", math.round( length / parts )
+							for k = 1, n do
+								newbezier = newbezier .. format( "l %s %s ",
+									math.confi_bezier( 4, Bezier, nil, k / n )
+								)
 							end
-						)
-					end
-				elseif Section == "bezier" then
-					for i = 2, #segments do
-						segm_tbl[ i ] = segments[ i ]:gsub( "b%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+x",
-							function( Bezier )
-								local Bezier = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+)x" ) .. Bezier
-								local length = math.length_bezier( Bezier )
-								local parts = length / math.round( length / tract )
-								local newbezier, n = "", math.round( length / parts )
-								for k = 1, n do
-									newbezier = newbezier .. format( "l %s %s ",
-										math.confi_bezier( 4, Bezier, nil, k / n )
-									)
-								end
-								return newbezier
-							end
-						)
-					end
-				else
-					for i = 2, #segments do
-						segm_tbl[ i ] = segments[ i ]:gsub( "l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x",
-							function( x2, y2 )
-								local x2, y2 = tonumber( x2 ), tonumber( y2 )
-								local x1, y1 = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x" )
-								x1, y1 = tonumber( x1 ), tonumber( y1 )
-								local angle = math.angle( x1, y1, x2, y2 )
-								local length = math.distance( x1, y1, x2, y2 )
-								local parts = length / math.round( length / tract )
-								local newline = ""
-								for k = 1, math.round( length / parts ) do
-									newline = newline .. format( "l %s %s ",
-										x1 + math.polar( angle, parts * k, "x" ),
-										y1 + math.polar( angle, parts * k, "y" )
-									) --shape.redraw( "m -5 -5 l -5 20 l 20 20 l 20 -5 l -5 -5 " )
-								end
-								return newline
-							end
-						)
-						:gsub( "b%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+x",
-							function( Bezier )
-								local Bezier = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+)x" ) .. Bezier
-								local length = math.length_bezier( Bezier )
-								local parts = length / math.round( length / tract )
-								local newbezier, n = "", math.round( length / parts )
-								for k = 1, n do
-									newbezier = newbezier .. format( "l %s %s ",
-										math.confi_bezier( 4, Bezier, nil, k / n )
-									)
-								end
-								return newbezier
-							end
-						)
-					end --shape.redraw( "m 15 0 b 0 0 0 20 15 20 l 45 20 b 60 20 60 0 45 0 l 15 0 " )
+							return newbezier
+						end
+					)
 				end
-				shape_new = table.concat( segm_tbl ):gsub( "x", "" )
-				Shape = remember( "shprd", shape_new )
+			else
+				for i = 2, #segments do
+					segm_tbl[ i ] = segments[ i ]:gsub( "l%s+(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x",
+						function( x2, y2 )
+							local x2, y2 = tonumber( x2 ), tonumber( y2 )
+							local x1, y1 = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*)%s+(%-?%d+[%.%d]*)%s+x" )
+							x1, y1 = tonumber( x1 ), tonumber( y1 )
+							local angle = math.angle( x1, y1, x2, y2 )
+							local length = math.distance( x1, y1, x2, y2 )
+							local parts = length / math.round( length / tract )
+							local newline = ""
+							for k = 1, math.round( length / parts ) do
+								newline = newline .. format( "l %s %s ",
+									x1 + math.polar( angle, parts * k, "x" ),
+									y1 + math.polar( angle, parts * k, "y" )
+								) --shape.redraw( "m -5 -5 l -5 20 l 20 20 l 20 -5 l -5 -5 " )
+							end
+							return newline
+						end
+					)
+					:gsub( "b%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+x",
+						function( Bezier )
+							local Bezier = segments[ i - 1 ]:match( "(%-?%d+[%.%d]*%s+%-?%d+[%.%d]*%s+)x" ) .. Bezier
+							local length = math.length_bezier( Bezier )
+							local parts = length / math.round( length / tract )
+							local newbezier, n = "", math.round( length / parts )
+							for k = 1, n do
+								newbezier = newbezier .. format( "l %s %s ",
+									math.confi_bezier( 4, Bezier, nil, k / n )
+								)
+							end
+							return newbezier
+						end
+					)
+				end --shape.redraw( "m 15 0 b 0 0 0 20 15 20 l 45 20 b 60 20 60 0 45 0 l 15 0 " )
 			end
-		end --shape.redraw( { shape.circle, shape.rectangle }, 3 )
+			shape_new = table.concat( segm_tbl ):gsub( "x", "" )
+			Shape = remember( "shprd", shape_new )
+		end --shape.redraw( { shape.circle, shp = shape.rectangle }, 3 )
 		return Shape --shape.redraw( shape.circle, 3 )
 	end --rewrite: march 30th 2020
 
@@ -11322,6 +11051,13 @@
 			Split = Split( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.filter( v, Split, ... )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		effector.print_error( Shape, "shape", "shape.filter", 1 )
 		local filters = { ... }
 		if ...
@@ -11333,56 +11069,50 @@
 				return x, y
 			end
 		end
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.filter( Shape[ i ], Split, ... )
-			end
-		else --recursividad: september 08th 2019
-			if Split
-				and Split ~= 0 then
-				local Split3 = abs( Split )
-				effector.print_error( Split3, "number", "shape.filter", 2 )
-				Shape = Yutils.shape.split( Shape, Split3 )
-				Shape = Yutils.shape.flatten( Shape, Split3 )
+		if Split
+			and Split ~= 0 then
+			local Split3 = abs( Split )
+			effector.print_error( Split3, "number", "shape.filter", 2 )
+			Shape = Yutils.shape.split( Shape, Split3 )
+			Shape = Yutils.shape.flatten( Shape, Split3 )
+		end
+		shape.info( Shape )
+		for i = 1, #filters do
+			if type( filters[ i ] ) == "table"
+				or type( filters[ i ] ) == "string" then
+				local do_shapefx, mode_fx = nil, nil
+				if type( filters[ i ] ) == "table" then
+					do_shapefx, mode_fx = filters[ i ][ 1 ], filters[ i ][ 2 ]
+				else
+					do_shapefx, mode_fx = filters[ i ], nil
+				end
+				Shape = shape.do_shape( Shape, do_shapefx, mode_fx )
+				--add: june 24th 2019
+			else
+				if type( filters[ i ] ) ~= "function" then
+					filters[ i ] = function( x, y )
+						return x, y
+					end
+				end
+				Pk = 0
+				Shape = Yutils.shape.filter( Shape,
+					function( x, y )
+						Cx = c_shape						-- coordenada "x" del centro de la shape
+						Cy = m_shape						-- coordenada "y" del centro de la shape
+						Do = math.distance( x, y )			-- distancia del punto al origen
+						Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
+						Ao = math.angle( x, y )				-- ángulo del origen al punto
+						Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
+						Pn = n_points						-- cantidad total de puntos en la shape
+						Pk = Pk + 1							-- contador de los puntos de la shape
+						Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
+						My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
+						Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
+						return filters[ i ]( x, y )
+					end
+				)
 			end
 			shape.info( Shape )
-			for i = 1, #filters do
-				if type( filters[ i ] ) == "table"
-					or type( filters[ i ] ) == "string" then
-					local do_shapefx, mode_fx = nil, nil
-					if type( filters[ i ] ) == "table" then
-						do_shapefx, mode_fx = filters[ i ][ 1 ], filters[ i ][ 2 ]
-					else
-						do_shapefx, mode_fx = filters[ i ], nil
-					end
-					Shape = shape.do_shape( Shape, do_shapefx, mode_fx )
-					--add: june 24th 2019
-				else
-					if type( filters[ i ] ) ~= "function" then
-						filters[ i ] = function( x, y )
-							return x, y
-						end
-					end
-					Pk = 0
-					Shape = Yutils.shape.filter( Shape,
-						function( x, y )
-							Cx = c_shape						-- coordenada "x" del centro de la shape
-							Cy = m_shape						-- coordenada "y" del centro de la shape
-							Do = math.distance( x, y )			-- distancia del punto al origen
-							Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
-							Ao = math.angle( x, y )				-- ángulo del origen al punto
-							Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
-							Pn = n_points						-- cantidad total de puntos en la shape
-							Pk = Pk + 1							-- contador de los puntos de la shape
-							Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
-							My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
-							Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
-							return filters[ i ]( x, y )
-						end
-					)
-				end
-				shape.info( Shape )
-			end
 		end
 		Shape = shape.ASSDraw3( Shape )
 		return Shape
@@ -11395,36 +11125,37 @@
 			Shape = Shape( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.length", 1 )
 		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.length( Shape[ i ], parts )
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.length( v, parts )
 			end
-		else --recursividad: september 08th 2019
-			local shape_parts, shape_segments, shape_length = { }, { }, 0
-			for c in Shape:gmatch( "%S+" ) do
-				table.insert( shape_parts, c )
-			end
-			for k = 1, #shape_parts do
-				local segments, n = { }, 0
-				if shape_parts[ k ] == "l"
-					or shape_parts[ k ] == "b" then
-					n = ( shape_parts[ k ] == "l" ) and 5 or 9
-					for i = 1, n do
-						segments[ i ] = tonumber( shape_parts[ k - 3 + i ] )
-					end
-					table.remove( segments, 3 )
-					table.insert( shape_segments, segments )
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		effector.print_error( Shape, "shape", "shape.length", 1 )
+		local shape_parts, shape_segments, shape_length = { }, { }, 0
+		for c in Shape:gmatch( "%S+" ) do
+			table.insert( shape_parts, c )
+		end
+		for k = 1, #shape_parts do
+			local segments, n = { }, 0
+			if shape_parts[ k ] == "l"
+				or shape_parts[ k ] == "b" then
+				n = ( shape_parts[ k ] == "l" ) and 5 or 9
+				for i = 1, n do
+					segments[ i ] = tonumber( shape_parts[ k - 3 + i ] )
 				end
+				table.remove( segments, 3 )
+				table.insert( shape_segments, segments )
 			end
-			if parts then
-				return shape_segments
-			end
-			for i = 1, #shape_segments do
-				shape_length = shape_length + math.length_bezier( shape_segments[ i ] )
-			end
-			Shape = shape_length
-		end --shape.length( { shape.circle, shape.rectangle } )
+		end
+		if parts then
+			return shape_segments
+		end
+		for i = 1, #shape_segments do
+			shape_length = shape_length + math.length_bezier( shape_segments[ i ] )
+		end
+		Shape = shape_length --shape.length( { shape.circle, shape.rectangle } )
 		return Shape
 		--return shape_length
 	end --shape.length( shape.circle )
@@ -11435,32 +11166,32 @@
 			Shape = Shape( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.width", 1 )
 		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.width( Shape[ i ], Height )
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.width( v, Height )
 			end
-		else --recursividad: september 08th 2019
-			local shape_parts, shape_px, shape_py = { }, { }, { }
-			for c in Shape:gmatch( "%-?%d+[%.%d]*" ) do
-				table.insert( shape_parts, tonumber( c ) )
-			end
-			for i = 1, #shape_parts / 2 do
-				shape_px[ i ] = shape_parts[ 2 * i - 1 ]
-				shape_py[ i ] = shape_parts[ 2 * i - 0 ]
-			end
-			local shape_width, shape_height = 0, 0
-			if #shape_parts > 0 then
-				shape_width  = table.op( shape_px, "rank" )
-				shape_height = table.op( shape_py, "rank" )
-			end
-			if Height == "height" then
-				return shape_height
-			end
-			Shape = shape_width
-		end --shape.width( { shape.circle, shape.rectangle } )
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		effector.print_error( Shape, "shape", "shape.width", 1 )
+		local shape_parts, shape_px, shape_py = { }, { }, { }
+		for c in Shape:gmatch( "%-?%d+[%.%d]*" ) do
+			table.insert( shape_parts, tonumber( c ) )
+		end
+		for i = 1, #shape_parts / 2 do
+			shape_px[ i ] = shape_parts[ 2 * i - 1 ]
+			shape_py[ i ] = shape_parts[ 2 * i - 0 ]
+		end
+		local shape_width, shape_height = 0, 0
+		if #shape_parts > 0 then
+			shape_width  = table.op( shape_px, "rank" )
+			shape_height = table.op( shape_py, "rank" )
+		end
+		if Height == "height" then
+			return shape_height
+		end
+		Shape = shape_width --shape.width( { shape.circle, shape.rectangle } )
 		return Shape
-		--return shape_width
 	end
 	
 	function shape.height( Shape )
@@ -11500,55 +11231,56 @@
 			org_y = org_y( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.rotate", 1 )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.rotate( v, Angle, org_x, org_y )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		local Ang = Angle or 0
 		local cx = org_x or 0
 		local cy = org_y or 0
+		effector.print_error( Shape, "shape", "shape.rotate", 1 )
 		effector.print_error( Ang, "numbertable", "shape.rotate", 2 )
 		effector.print_error( cx, "numberstring", "shape.rotate", 3 )
 		effector.print_error( cy, "numberstring", "shape.rotate", 4 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.rotate( Shape[ i ], Angle, org_x, org_y )
+		if type( Angle ) == "table" then --add: may 01st 2020
+			--Ang depende del ángulo entre dos puntos o un punto y el origen
+			if Angle[ 1 ]
+				and type( Angle[ 1 ] ) ~= "table" then
+				Angle[ 1 ] = { Angle[ 1 ] }
 			end
-		else --recursividad: september 08th 2019
-			if type( Angle ) == "table" then --add: may 01st 2020
-				--Ang depende del ángulo entre dos puntos o un punto y el origen
-				if Angle[ 1 ]
-					and type( Angle[ 1 ] ) ~= "table" then
-					Angle[ 1 ] = { Angle[ 1 ] }
-				end
-				if not Angle[ 1 ] then
-					Angle[ 1 ] = { }
-					Angle[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-					Angle[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
-					Angle[ 1 ][ 2 ] = Angle[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
-				end
-				Ang = Angle[ 2 ] - math.angle( Angle[ 1 ][ 1 ], Angle[ 1 ][ 2 ] )
+			if not Angle[ 1 ] then
+				Angle[ 1 ] = { }
+				Angle[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+				Angle[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
+				Angle[ 1 ][ 2 ] = Angle[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
 			end
-			if cx == "center" then
-				shape.info( Shape )
-				cx = c_shape
-				cy = m_shape
+			Ang = Angle[ 2 ] - math.angle( Angle[ 1 ][ 1 ], Angle[ 1 ][ 2 ] )
+		end
+		if cx == "center" then
+			shape.info( Shape )
+			cx = c_shape
+			cy = m_shape
+		end
+		if type( cx ) == "string"
+			and cx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+			cy = tonumber( cx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+			cx = tonumber( cx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+		end --add: may 18th 2020
+		Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
+			function( x, y )
+				local new_ang = math.angle( cx, cy, x, y )
+				local new_rad = math.distance( cx, cy, x, y )
+				x = cx + math.polar( new_ang + Ang, new_rad, "x" )
+				y = cy + math.polar( new_ang + Ang, new_rad, "y" )
+				return format( "%s %s", x, y )
 			end
-			if type( cx ) == "string"
-				and cx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-				cy = tonumber( cx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-				cx = tonumber( cx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-			end --add: may 18th 2020
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
-				function( x, y )
-					local new_ang = math.angle( cx, cy, x, y )
-					local new_rad = math.distance( cx, cy, x, y )
-					x = cx + math.polar( new_ang + Ang, new_rad, "x" )
-					y = cy + math.polar( new_ang + Ang, new_rad, "y" )
-					return format( "%s %s", x, y )
-				end
-			)
-			Shape = shape.ASSDraw3( Shape )
-		end --shape.rotate( { shape.rectangle, shape.trebol }, -45 )
+		)
+		Shape = shape.ASSDraw3( Shape )
 		return Shape
-	end
+	end --shape.rotate( { shape.rectangle, x = shape.trebol }, -45 )
 	
 	function shape.reflect( Shape, Axis, Relative )
 		--hace un reflejo de la Shape respecto a alguno de los 2 ejes, o a la recta y = x
@@ -11556,39 +11288,43 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.reflect( v, Axis, Relative )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		if type( Axis ) == "function" then
+			Axis = Axis( )
+		end
 		if type( Relative ) == "function" then
 			Relative = Relative( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape",  "shape.reflect", 1 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.reflect( Shape[ i ], Axis, Relative )
-			end
-		else --recursividad: september 08th 2019
-			local Reltv = Relative or 0
-			if type( Relative ) == "string" then
-				Relative = Relative:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				Relative = Relative:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				Reltv = string.toval( Relative )
-			end --add: may 03rd 2020
-			effector.print_error( Reltv, "number", "shape.reflect", 3 )
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
-				function( x, y )
-					if Axis == "x" then
-						y = Reltv - y
-					elseif Axis == "y"
-						or Axis == nil then
-						x = Reltv - x
-					else
-						x = -Reltv - x
-						y = -Reltv - y
-					end
-					return format( "%s %s", x, y )
+		local Reltv = Relative or 0
+		if type( Relative ) == "string" then
+			Relative = Relative:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			Relative = Relative:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			Reltv = string.toval( Relative )
+		end --add: may 03rd 2020
+		effector.print_error( Reltv, "number", "shape.reflect", 3 )
+		Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
+			function( x, y )
+				if Axis == "x" then
+					y = Reltv - y
+				elseif Axis == "y"
+					or Axis == nil then
+					x = Reltv - x
+				else
+					x = -Reltv - x
+					y = -Reltv - y
 				end
-			)
-			Shape = shape.ASSDraw3( Shape )
-		end
+				return format( "%s %s", x, y )
+			end
+		)
+		Shape = shape.ASSDraw3( Shape )
 		return Shape
 	end
 	
@@ -11597,116 +11333,120 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.oblique( v, Pixel, Axis )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		if type( Pixel ) == "function" then
 			Pixel = Pixel( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
+		if type( Axis ) == "function" then
+			Axis = Axis( )
+		end
 		effector.print_error( Shape, "shape", "shape.oblique", 1 )
 		effector.print_error( Pixel, "numbertable", "shape.oblique", 2 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.oblique( Shape[ i ], Pixel, Axis )
+		shape.info( Shape )
+		local pxl1, pxl2 = Pixel, 0
+		if type( Pixel ) == "table" then
+			pxl1 = Pixel[ 1 ]
+			pxl2 = Pixel[ 2 ] or 0
+			Axis = Axis or "xy" --fix: april 04th 2020
+			if type( pxl1 ) == "string" then
+				pxl1 = pxl1:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				pxl1 = pxl1:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				pxl1 = string.toval( pxl1 )
+			elseif type( pxl1 ) == "table"
+				and type( pxl1[ 1 ] ) == "string" then
+				pxl1[ 1 ] = pxl1[ 1 ]:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				pxl1[ 1 ] = pxl1[ 1 ]:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				pxl1[ 1 ] = string.toval( pxl1[ 1 ] )
 			end
-		else --recursividad: september 08th 2019
-			shape.info( Shape )
-			local pxl1, pxl2 = Pixel, 0
-			if type( Pixel ) == "table" then
-				pxl1 = Pixel[ 1 ]
-				pxl2 = Pixel[ 2 ] or 0
-				Axis = Axis or "xy" --fix: april 04th 2020
-				if type( pxl1 ) == "string" then
-					pxl1 = pxl1:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-					pxl1 = pxl1:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-					pxl1 = string.toval( pxl1 )
-				elseif type( pxl1 ) == "table"
-					and type( pxl1[ 1 ] ) == "string" then
-					pxl1[ 1 ] = pxl1[ 1 ]:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-					pxl1[ 1 ] = pxl1[ 1 ]:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-					pxl1[ 1 ] = string.toval( pxl1[ 1 ] )
-				end
-				if type( pxl2 ) == "string" then
-					pxl2 = pxl2:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-					pxl2 = pxl2:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-					pxl2 = string.toval( pxl2 )
-				elseif type( pxl2 ) == "table"
-					and type( pxl2[ 1 ] ) == "string" then
-					pxl2[ 1 ] = pxl2[ 1 ]:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-					pxl2[ 1 ] = pxl2[ 1 ]:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-					pxl2[ 1 ] = string.toval( pxl2[ 1 ] )
-				end --add: may 03rd 2020
+			if type( pxl2 ) == "string" then
+				pxl2 = pxl2:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				pxl2 = pxl2:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				pxl2 = string.toval( pxl2 )
+			elseif type( pxl2 ) == "table"
+				and type( pxl2[ 1 ] ) == "string" then
+				pxl2[ 1 ] = pxl2[ 1 ]:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+				pxl2[ 1 ] = pxl2[ 1 ]:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+				pxl2[ 1 ] = string.toval( pxl2[ 1 ] )
+			end --add: may 03rd 2020
+		end
+		local funct
+		if Axis == "x"
+			or Axis == nil then
+			if type( pxl1 ) == "table" then
+				--mod: april 04th 2020
+				funct = function( x, y )
+					local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
+					local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
+					local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
+					return format( "%s %s", x, y )
+				end --shape.oblique( shape.rectangle, { { 20 } }, "x" )		<--->
+			else
+				funct = function( x, y )
+					local x = x + pxl1 * (y - miny) / h_shape
+					return format( "%s %s", x, y )
+				end --shape.oblique( shape.rectangle, { 20 }, "x" )			--->
 			end
-			local funct
-			if Axis == "x"
-				or Axis == nil then
-				if type( pxl1 ) == "table" then
-					--mod: april 04th 2020
-					funct = function( x, y )
-						local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
-						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
-						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
-						return format( "%s %s", x, y )
-					end --shape.oblique( shape.rectangle, { { 20 } }, "x" )		<--->
-				else
-					funct = function( x, y )
-						local x = x + pxl1 * (y - miny) / h_shape
-						return format( "%s %s", x, y )
-					end --shape.oblique( shape.rectangle, { 20 }, "x" )			--->
-				end
-			elseif Axis == "y" then
-				if type( pxl1 ) == "table" then
-					funct = function( x, y )
-						local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
-						local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
-						local y = y + signy * propy * pxl1[ 1 ] * (x - minx) / w_shape
-						return format( "%s %s", x, y )
-					end
-				else
-					funct = function( x, y )
-						local y = y + pxl1 * (x - minx) / w_shape
-						return format( "%s %s", x, y )
-					end
+		elseif Axis == "y" then
+			if type( pxl1 ) == "table" then
+				funct = function( x, y )
+					local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
+					local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
+					local y = y + signy * propy * pxl1[ 1 ] * (x - minx) / w_shape
+					return format( "%s %s", x, y )
 				end
 			else
-				if type( pxl1 ) == "table"
-					and type( pxl2 ) == "table" then
-					funct = function( x, y )
-						local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
-						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
-						local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
-						local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
-						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
-						local y = y + signy * propy * pxl2[ 1 ] * (x - minx) / w_shape
-						return format( "%s %s", x, y )
-					end
-				elseif type( pxl1 ) == "table"
-					and type( pxl2 ) == "number" then
-					funct = function( x, y )
-						local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
-						local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
-						local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
-						local y = y + pxl2 * (x - minx) / w_shape
-						return format( "%s %s", x, y )
-					end
-				elseif type( pxl1 ) == "number"
-					and type( pxl2 ) == "table" then
-					funct = function( x, y )
-						local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
-						local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
-						local x = x + pxl1 * (y - miny) / h_shape
-						local y = y + signy * propy * pxl2[ 1 ] * (x - minx) / w_shape
-						return format( "%s %s", x, y )
-					end
-				else
-					funct = function( x, y )
-						local x = x + pxl1 * (y - miny) / h_shape
-						local y = y + pxl2 * (x - minx) / w_shape
-						return format( "%s %s", x, y )
-					end
+				funct = function( x, y )
+					local y = y + pxl1 * (x - minx) / w_shape
+					return format( "%s %s", x, y )
 				end
 			end
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", funct )
-			Shape = shape.ASSDraw3( Shape )
-		end	--shape.oblique( shape.rectangle, { { 20 } }, "y" )
+		else
+			if type( pxl1 ) == "table"
+				and type( pxl2 ) == "table" then
+				funct = function( x, y )
+					local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
+					local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
+					local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
+					local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
+					local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
+					local y = y + signy * propy * pxl2[ 1 ] * (x - minx) / w_shape
+					return format( "%s %s", x, y )
+				end
+			elseif type( pxl1 ) == "table"
+				and type( pxl2 ) == "number" then
+				funct = function( x, y )
+					local signx = abs( x - minx - w_shape / 2 ) / (x - minx - w_shape / 2)
+					local propx = abs( (x - minx - w_shape / 2) / (minx + w_shape / 2) )
+					local x = x + signx * propx * pxl1[ 1 ] * (y - miny) / h_shape
+					local y = y + pxl2 * (x - minx) / w_shape
+					return format( "%s %s", x, y )
+				end
+			elseif type( pxl1 ) == "number"
+				and type( pxl2 ) == "table" then
+				funct = function( x, y )
+					local signy = abs( y - miny - h_shape / 2 ) / (y - miny - h_shape / 2)
+					local propy = abs( (y - miny - h_shape / 2) / (miny + h_shape / 2) )
+					local x = x + pxl1 * (y - miny) / h_shape
+					local y = y + signy * propy * pxl2[ 1 ] * (x - minx) / w_shape
+					return format( "%s %s", x, y )
+				end
+			else
+				funct = function( x, y )
+					local x = x + pxl1 * (y - miny) / h_shape
+					local y = y + pxl2 * (x - minx) / w_shape
+					return format( "%s %s", x, y )
+				end
+			end
+		end
+		Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", funct )
+		Shape = shape.ASSDraw3( Shape ) --shape.oblique( shape.rectangle, { { 20 } }, "y" )
 		return Shape
 	end
 
@@ -11716,30 +11456,31 @@
 			Shape = Shape( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.to_bezier", 1 )
 		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.to_bezier( Shape[ i ] )
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.to_bezier( v )
 			end
-		else --recursividad: september 08th 2019
-			for i = 1, 2 do
-				Shape = Shape:gsub( "(%-?%d+[%.%d]* %-?%d+[%.%d]* l %-?%d+[%.%d]* %-?%d+[%.%d]*)",
-					function( seg_line )
-						local coor = { }
-						for c in seg_line:gmatch( "%-?%d+[%.%d]*" ) do
-							table.insert( coor, c )
-						end
-						local x1, y1, x4, y4 = coor[ 1 ], coor[ 2 ], coor[ 3 ], coor[ 4 ]
-						local Ang = math.angle( x1, y1, x4, y4 )
-						local Rad = math.distance( x1, y1, x4, y4 )
-						local x2, x3 = x1 + math.polar( Ang, (1 / 3) * Rad, "x" ), x1 + math.polar( Ang, (2 / 3) * Rad, "x" )
-						local y2, y3 = y1 + math.polar( Ang, (1 / 3) * Rad, "y" ), y1 + math.polar( Ang, (2 / 3) * Rad, "y" )
-						return format( "%s %s b %s %s %s %s %s %s", x1, y1, x2, y2, x3, y3, x4, y4 )
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		effector.print_error( Shape, "shape", "shape.to_bezier", 1 )
+		for i = 1, 2 do
+			Shape = Shape:gsub( "(%-?%d+[%.%d]* %-?%d+[%.%d]* l %-?%d+[%.%d]* %-?%d+[%.%d]*)",
+				function( seg_line )
+					local coor = { }
+					for c in seg_line:gmatch( "%-?%d+[%.%d]*" ) do
+						table.insert( coor, c )
 					end
-				)
-			end
-			Shape = shape.ASSDraw3( Shape )
+					local x1, y1, x4, y4 = coor[ 1 ], coor[ 2 ], coor[ 3 ], coor[ 4 ]
+					local Ang = math.angle( x1, y1, x4, y4 )
+					local Rad = math.distance( x1, y1, x4, y4 )
+					local x2, x3 = x1 + math.polar( Ang, (1 / 3) * Rad, "x" ), x1 + math.polar( Ang, (2 / 3) * Rad, "x" )
+					local y2, y3 = y1 + math.polar( Ang, (1 / 3) * Rad, "y" ), y1 + math.polar( Ang, (2 / 3) * Rad, "y" )
+					return format( "%s %s b %s %s %s %s %s %s", x1, y1, x2, y2, x3, y3, x4, y4 )
+				end
+			)
 		end
+		Shape = shape.ASSDraw3( Shape )
 		return Shape
 	end --shape.to_bezier( shape.rectangle )
 	
@@ -11749,76 +11490,78 @@
 			Shape = Shape( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.reverse", 1 )
 		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.reverse( Shape[ i ] )
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.reverse( v )
 			end
-		else --recursividad: september 08th 2019
-			local shape1, shape2, shape3 = { }, { }, { }
-			local index, shape_x, shape_y, shape_inv = { }, { }, { }, ""
-			for c in Shape:gmatch( "%S+" ) do
-				table.insert( shape1, c )
-				table.insert( shape2, c )
-			end
-			shape1, shape2 = table.reverse( shape1 ), table.reverse( shape2 )
-			for k = 1, #shape1 do
-				if shape1[ k ] == "m"
-					or shape1[ k ] == "l"
-					or shape1[ k ] == "b" then
-					table.insert( index, k )
-				end
-			end
-			for k = 1, #shape1 do
-				if shape1[ k ] == "m"
-					or shape1[ k ] == "l"
-					or shape1[ k ] == "b" then
-					table.remove( shape1, k )
-				end
-			end
-			for k = 1, #shape1 / 2 do
-				shape_x[ k ] = tonumber( shape1[ 2 * k - 0 ] )
-				shape_y[ k ] = tonumber( shape1[ 2 * k - 1 ] )
-			end
-			for k = 1, #shape1 do
-				if k % 2 == 1 then
-					shape3[ k ] = shape_x[ (k + 1) / 2 ]
-				else
-					shape3[ k ] = shape_y[ (k + 0) / 2 ]
-				end
-			end
-			for k = 1, #index do
-				if shape2[ index[ k ] ] ~= "b" then
-					table.insert( shape3, index[ k ], shape2[ index[ k ] ] )
-				else
-					table.insert( shape3, index[ k ] - 4, shape2[ index[ k ] ] )
-				end
-			end
-			for k = 1, #shape3 do
-				shape_inv = shape_inv .. shape3[ k ] .. " "
-			end
-			shape_inv = shape_inv:sub( 1, -3 )
-			shape_inv = "m " .. shape_inv
-			Shape = shape.ASSDraw3( shape_inv )
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		effector.print_error( Shape, "shape", "shape.reverse", 1 )
+		local shape1, shape2, shape3 = { }, { }, { }
+		local index, shape_x, shape_y, shape_inv = { }, { }, { }, ""
+		for c in Shape:gmatch( "%S+" ) do
+			table.insert( shape1, c )
+			table.insert( shape2, c )
 		end
+		shape1, shape2 = table.reverse( shape1 ), table.reverse( shape2 )
+		for k = 1, #shape1 do
+			if shape1[ k ] == "m"
+				or shape1[ k ] == "l"
+				or shape1[ k ] == "b" then
+				table.insert( index, k )
+			end
+		end
+		for k = 1, #shape1 do
+			if shape1[ k ] == "m"
+				or shape1[ k ] == "l"
+				or shape1[ k ] == "b" then
+				table.remove( shape1, k )
+			end
+		end
+		for k = 1, #shape1 / 2 do
+			shape_x[ k ] = tonumber( shape1[ 2 * k - 0 ] )
+			shape_y[ k ] = tonumber( shape1[ 2 * k - 1 ] )
+		end
+		for k = 1, #shape1 do
+			if k % 2 == 1 then
+				shape3[ k ] = shape_x[ (k + 1) / 2 ]
+			else
+				shape3[ k ] = shape_y[ (k + 0) / 2 ]
+			end
+		end
+		for k = 1, #index do
+			if shape2[ index[ k ] ] ~= "b" then
+				table.insert( shape3, index[ k ], shape2[ index[ k ] ] )
+			else
+				table.insert( shape3, index[ k ] - 4, shape2[ index[ k ] ] )
+			end
+		end
+		for k = 1, #shape3 do
+			shape_inv = shape_inv .. shape3[ k ] .. " "
+		end
+		shape_inv = shape_inv:sub( 1, -3 )
+		shape_inv = "m " .. shape_inv
+		Shape = shape.ASSDraw3( shape_inv )
 		return Shape
 	end
 
 	function shape.origin( Shape )
-		--posiciona a la Shape en su ubicación por default (cuadrante IV del AssDraw3)
+		--posiciona la Shape en su ubicación por default (cuadrante IV del AssDraw3)
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
 		local Shape = shape.ASSDraw3( Shape )
-		effector.print_error( Shape, "shape", "shape.origin", 1 )
 		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.origin( Shape[ i ] )
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.origin( v )
 			end
-		else --recursividad: september 08th 2019
-			shape.info( Shape )
-			Shape = shape.ASSDraw3( shape.displace( Shape, -minx, -miny ) )
-		end
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		effector.print_error( Shape, "shape", "shape.origin", 1 )
+		shape.info( Shape )
+		Shape = shape.ASSDraw3( shape.displace( Shape, -minx, -miny ) )
 		return Shape
 	end
 	
@@ -11827,51 +11570,52 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.displace( v, Dx, Dy )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		if type( Dx ) == "function" then
 			Dx = Dx( )
 		end
 		if type( Dy ) == "function" then
 			Dy = Dy( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.displace", 1 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.displace( Shape[ i ], Dx, Dy )
-			end
-		else --recursividad: september 08th 2019
-			local Dx = Dx or 0
-			local Dy = Dy or 0
-			if type( Dx ) == "string" --shape.displace( shape.rectangle, "m 20 20 " )
-				and Dx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-				Dy = tonumber( Dx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-				Dx = tonumber( Dx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-			end --add: may 18th 2020
-			if type( Dx ) == "table" then
-				--movimiento polar, indicando ángulo y radio
-				Dx, Dy = math.polar( Dx[ 1 ], Dx[ 2 ] )
-			end --add: april 12th 2020
-			---------------------------
-			if type( Dx ) == "string" then
-				Dx = Dx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				Dx = Dx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				Dx = string.toval( Dx )
-			end
-			if type( Dy ) == "string" then
-				Dy = Dy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				Dy = Dy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				Dy = string.toval( Dy )
-			end
-			-- add: may 02nd 2020 -----
-			effector.print_error( Dx, "number", "shape.displace", 2 )
-			effector.print_error( Dy, "number", "shape.displace", 3 )
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
-				function( x, y )
-					return format( "%s %s", x + Dx, y + Dy )
-				end
-			)
-			Shape = shape.ASSDraw3( Shape )
+		local Dx = Dx or 0
+		local Dy = Dy or 0
+		if type( Dx ) == "string" --shape.displace( shape.rectangle, "m 20 20 " )
+			and Dx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+			Dy = tonumber( Dx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+			Dx = tonumber( Dx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+		end --add: may 18th 2020
+		if type( Dx ) == "table" then
+			--movimiento polar, indicando ángulo y radio
+			Dx, Dy = math.polar( Dx[ 1 ], Dx[ 2 ] )
+		end --add: april 12th 2020
+		---------------------------
+		if type( Dx ) == "string" then
+			Dx = Dx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			Dx = Dx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			Dx = string.toval( Dx )
 		end
+		if type( Dy ) == "string" then
+			Dy = Dy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			Dy = Dy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			Dy = string.toval( Dy )
+		end
+		-- add: may 02nd 2020 -----
+		effector.print_error( Dx, "number", "shape.displace", 2 )
+		effector.print_error( Dy, "number", "shape.displace", 3 )
+		Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
+			function( x, y )
+				return format( "%s %s", x + Dx, y + Dy )
+			end
+		)
+		Shape = shape.ASSDraw3( Shape )
 		return Shape
 	end --shape.displace( shape.circle, 20, 10 )
 	
@@ -11891,40 +11635,41 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.centerpos( v, CenterX, CenterY )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		if type( CenterX ) == "function" then
 			CenterX = CenterX( )
 		end
 		if type( CenterY ) == "function" then
 			CenterY = CenterY( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.centerpos", 1 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.centerpos( Shape[ i ], CenterX, CenterY )
-			end
-		else --recursividad: september 08th 2019
-			local CenterX = CenterX or 0
-			local CenterY = CenterY or 0
-			if type( CenterX ) == "string" --shape.centerpos( shape.rectangle, "m 20 20 " )
-				and CenterX:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-				CenterY = tonumber( CenterX:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-				CenterX = tonumber( CenterX:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-			end --add: may 18th 2020
-			if type( CenterX ) == "string" then
-				CenterX = CenterX:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				CenterX = CenterX:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				CenterX = string.toval( CenterX )
-			end
-			if type( CenterY ) == "string" then
-				CenterY = CenterY:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				CenterY = CenterY:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				CenterY = string.toval( CenterY )
-			end --add: may 03rd 2020
-			effector.print_error( CenterX, "number", "shape.centerpos", 2 )
-			effector.print_error( CenterY, "number", "shape.centerpos", 3 )
-			Shape = shape.displace( shape.incenter( Shape ), CenterX, CenterY )
+		local CenterX = CenterX or 0
+		local CenterY = CenterY or 0
+		if type( CenterX ) == "string" --shape.centerpos( shape.rectangle, "m 20 20 " )
+			and CenterX:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+			CenterY = tonumber( CenterX:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+			CenterX = tonumber( CenterX:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+		end --add: may 18th 2020
+		if type( CenterX ) == "string" then
+			CenterX = CenterX:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			CenterX = CenterX:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			CenterX = string.toval( CenterX )
 		end
+		if type( CenterY ) == "string" then
+			CenterY = CenterY:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			CenterY = CenterY:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			CenterY = string.toval( CenterY )
+		end --add: may 03rd 2020
+		effector.print_error( CenterX, "number", "shape.centerpos", 2 )
+		effector.print_error( CenterY, "number", "shape.centerpos", 3 )
+		Shape = shape.displace( shape.incenter( Shape ), CenterX, CenterY )
 		return Shape
 	end --shape.centerpos( shape.circle, 300, 300 )
 	
@@ -11933,45 +11678,46 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.firstpos( v, pos_x, pos_y )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
 		if type( pos_x ) == "function" then
 			pos_x = pos_x( )
 		end
 		if type( pos_y ) == "function" then
 			pos_y = pos_y( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.firstpos", 1 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.firstpos( Shape[ i ], pos_x, pos_y )
-			end
-		else --recursividad: september 08th 2019
-			local first_x = pos_x or 0
-			local first_y = pos_y or 0
-			if type( first_x ) == "string" --shape.firstpos( shape.rectangle, "m 20 20 " )
-				and first_x:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-				first_y = tonumber( first_x:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-				first_x = tonumber( first_x:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-			end --add: may 18th 2020
-			if type( first_x ) == "string" then
-				first_x = first_x:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				first_x = first_x:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				first_x = string.toval( first_x )
-			end
-			if type( first_y ) == "string" then
-				first_y = first_y:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				first_y = first_y:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				first_y = string.toval( first_y )
-			end --add: may 03rd 2020
-			effector.print_error( first_x, "number", "shape.firstpos", 2 )
-			effector.print_error( first_y, "number", "shape.firstpos", 3 )
-			local first_p = { }
-			if Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%d]* " ) then
-				first_p.x = Shape:match( "m (%-?%d+[%.%d]*) %-?%d+[%.%d]* " )
-				first_p.y = Shape:match( "m %-?%d+[%.%d]* (%-?%d+[%.%d]*) " )
-			end
-			Shape = shape.displace( Shape, first_x - first_p.x, first_y - first_p.y )
+		local first_x = pos_x or 0
+		local first_y = pos_y or 0
+		if type( first_x ) == "string" --shape.firstpos( shape.rectangle, "m 20 20 " )
+			and first_x:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+			first_y = tonumber( first_x:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+			first_x = tonumber( first_x:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+		end --add: may 18th 2020
+		if type( first_x ) == "string" then
+			first_x = first_x:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			first_x = first_x:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			first_x = string.toval( first_x )
 		end
+		if type( first_y ) == "string" then
+			first_y = first_y:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			first_y = first_y:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			first_y = string.toval( first_y )
+		end --add: may 03rd 2020
+		effector.print_error( first_x, "number", "shape.firstpos", 2 )
+		effector.print_error( first_y, "number", "shape.firstpos", 3 )
+		local first_p = { }
+		if Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%d]* " ) then
+			first_p.x = Shape:match( "m (%-?%d+[%.%d]*) %-?%d+[%.%d]* " )
+			first_p.y = Shape:match( "m %-?%d+[%.%d]* (%-?%d+[%.%d]*) " )
+		end
+		Shape = shape.displace( Shape, first_x - first_p.x, first_y - first_p.y )
 		return Shape
 	end
 	
@@ -11980,6 +11726,15 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.ratio( v, Ratiox, Ratioy, Mode )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		local Mode = Mode or 0
 		if type( Ratiox ) == "function" then
 			Ratiox = Ratiox( )
 		end
@@ -11989,91 +11744,83 @@
 		if type( Mode ) == "function" then
 			Mode = Mode( )
 		end --add: january 05th 2019
-		local Mode = Mode or 0
-		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.ratio", 1 )
 		effector.print_error( Mode, "number", "shape.ratio", 4 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.ratio( Shape[ i ], Ratiox, Ratioy, Mode )
-			end
-		else --recursividad: september 08th 2019
-			shape.info( Shape )
-			-------------------------------------
-			--valores notables de la Shape
-			local shpx1, shpx2 = minx, maxx
-			local shpy1, shpy2 = miny, maxy
-			local shp_w, shp_h = w_shape, h_shape
-			-- january 05th 2019 ----------------
-			local Rx, Ry
-			if Ratiox then
-				Rx = Ratiox
-				if type( Ratiox ) == "table" then
-					if #Ratiox == 2 then --add: may 01st 2020
-						--Rx depende de la distancia entre dos puntos o un punto y el origen
-						if Ratiox[ 1 ]
-							and type( Ratiox[ 1 ] ) ~= "table" then
-							Ratiox[ 1 ] = { Ratiox[ 1 ] }
-						end
-						if not Ratiox[ 1 ] then
-							Ratiox[ 1 ] = { }
-							Ratiox[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-							Ratiox[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
-							Ratiox[ 1 ][ 2 ] = Ratiox[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
-						end
-						Rx = Ratiox[ 2 ] / math.distance( Ratiox[ 1 ][ 1 ], Ratiox[ 1 ][ 2 ] )
-						if math.distance( Ratiox[ 1 ][ 1 ], Ratiox[ 1 ][ 2 ] ) == 0 then
-							Rx = Ratiox[ 2 ] / shape.width( Shape )
-						end
-					else
-						Rx = Ratiox[ 1 ] / shape.width( Shape )
+		shape.info( Shape )
+		-------------------------------------
+		--valores notables de la Shape
+		local shpx1, shpx2 = minx, maxx
+		local shpy1, shpy2 = miny, maxy
+		local shp_w, shp_h = w_shape, h_shape
+		-- january 05th 2019 ----------------
+		local Rx, Ry
+		if Ratiox then
+			Rx = Ratiox
+			if type( Ratiox ) == "table" then
+				if #Ratiox == 2 then --add: may 01st 2020
+					--Rx depende de la distancia entre dos puntos o un punto y el origen
+					if Ratiox[ 1 ]
+						and type( Ratiox[ 1 ] ) ~= "table" then
+						Ratiox[ 1 ] = { Ratiox[ 1 ] }
 					end
-				end
-			else
-				Rx = 1
-			end
-			if Ratioy then
-				Ry = Ratioy
-				if type( Ratioy ) == "table" then
-					Ry = Ratioy[ 1 ] / shape.height( Shape )
-					if Ratiox == nil then
-						Rx = Ry
+					if not Ratiox[ 1 ] then
+						Ratiox[ 1 ] = { }
+						Ratiox[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+						Ratiox[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
+						Ratiox[ 1 ][ 2 ] = Ratiox[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
 					end
+					Rx = Ratiox[ 2 ] / math.distance( Ratiox[ 1 ][ 1 ], Ratiox[ 1 ][ 2 ] )
+					if math.distance( Ratiox[ 1 ][ 1 ], Ratiox[ 1 ][ 2 ] ) == 0 then
+						Rx = Ratiox[ 2 ] / shape.width( Shape )
+					end
+				else
+					Rx = Ratiox[ 1 ] / shape.width( Shape )
 				end
-			else
-				Ry = Rx
 			end
-			effector.print_error( Rx, "numbertable", "shape.ratio", 2 )
-			effector.print_error( Ry, "numbertable", "shape.ratio", 3 )
-			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
-				function( x, y )
-					--Mode = 0, respecto al punto (0, 0)
-					return format( "%s %s", x * Rx, y * Ry )
-				end
-			)
-			--------------------------------------------------------------------------------
-			--desplaza la shape_fx respecto a las 9 posiciones notables de la Shape original
-			if Mode == 1 then
-				Shape = shape.displace( shape.origin( Shape ), shpx1, shpy2 - shape.height( Shape ) )
-			elseif Mode == 2 then
-				Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy2 - shape.height( Shape ) )
-			elseif Mode == 3 then
-				Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy2 - shape.height( Shape ) )
-			elseif Mode == 4 then
-				Shape = shape.displace( shape.origin( Shape ), shpx1, shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
-			elseif Mode == 5 then
-				Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
-			elseif Mode == 6 then
-				Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
-			elseif Mode == 7 then
-				Shape = shape.displace( shape.origin( Shape ), shpx1, shpy1 )
-			elseif Mode == 8 then
-				Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 )
-			elseif Mode == 9 then
-				Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy1 )
-			end --add: january 05th 2019
-			--------------------------------------------------------------------------------
+		else
+			Rx = 1
 		end
+		if Ratioy then
+			Ry = Ratioy
+			if type( Ratioy ) == "table" then
+				Ry = Ratioy[ 1 ] / shape.height( Shape )
+				if Ratiox == nil then
+					Rx = Ry
+				end
+			end
+		else
+			Ry = Rx
+		end
+		effector.print_error( Rx, "numbertable", "shape.ratio", 2 )
+		effector.print_error( Ry, "numbertable", "shape.ratio", 3 )
+		Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)", 
+			function( x, y )
+				--Mode = 0, respecto al punto (0, 0)
+				return format( "%s %s", x * Rx, y * Ry )
+			end
+		)
+		--------------------------------------------------------------------------------
+		--desplaza la shape_fx respecto a las 9 posiciones notables de la Shape original
+		if Mode == 1 then
+			Shape = shape.displace( shape.origin( Shape ), shpx1, shpy2 - shape.height( Shape ) )
+		elseif Mode == 2 then
+			Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy2 - shape.height( Shape ) )
+		elseif Mode == 3 then
+			Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy2 - shape.height( Shape ) )
+		elseif Mode == 4 then
+			Shape = shape.displace( shape.origin( Shape ), shpx1, shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
+		elseif Mode == 5 then
+			Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
+		elseif Mode == 6 then
+			Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
+		elseif Mode == 7 then
+			Shape = shape.displace( shape.origin( Shape ), shpx1, shpy1 )
+		elseif Mode == 8 then
+			Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 )
+		elseif Mode == 9 then
+			Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy1 )
+		end --add: january 05th 2019
+		--------------------------------------------------------------------------------
 		return Shape --> Mode = 0
 	end
 	
@@ -12084,6 +11831,15 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.size( v, SizeX, SizeY, Mode )
+			end
+			return recursion_tbl
+		end --recursión: september 08th 2019
+		local Mode = Mode or 0
 		if type( SizeX ) == "function" then
 			SizeX = SizeX( )
 		end
@@ -12093,47 +11849,39 @@
 		if type( Mode ) == "function" then
 			Mode = Mode( )
 		end
-		local Mode = Mode or 0
-		local Shape = shape.ASSDraw3( Shape )
 		effector.print_error( Shape, "shape", "shape.size", 1 )
 		effector.print_error( Mode, "number", "shape.size", 4 )
-		if type( Shape ) == "table" then
-			for i = 1, #Shape do
-				Shape[ i ] = shape.size( Shape[ i ], SizeX, SizeY, Mode )
-			end
-		else --recursividad: september 08th 2019
-			local Szx = SizeX or shape.width( Shape )
-			local Szy = SizeY or Szx
-			if type( Szx ) == "table" then
-				Szx = shape.width( Shape ) + Szx[ 1 ]
-			end
-			if type( Szy ) == "table" then
-				Szy = shape.height( Shape ) + Szy[ 1 ]
-			end
-			if type( Szx ) == "string" then
-				Szx = Szx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				Szx = Szx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				Szx = string.toval( Szx )
-			end
-			if type( Szy ) == "string" then
-				Szy = Szy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-				Szy = Szy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-				Szy = string.toval( Szy )
-			end --add: may 03rd 2020
-			effector.print_error( Szx, "numbertable", "shape.size", 2 )
-			effector.print_error( Szy, "numbertable", "shape.size", 3 )
-			if Szx == 0 then
-				--la dimensión en "x" se modifica proporcionalmente según como se modifique en "y"
-				Shape = shape.ratio( Shape, nil, { Szy }, Mode )
-			elseif Szy == 0 then
-				--la dimensión en "y" se modifica proporcionalmente según como se modifique en "x"
-				Shape = shape.ratio( Shape, { Szx }, nil, Mode )
-			else
-				local ratio_x = shape.width( Shape ) > 0 and Szx / shape.width( Shape ) or 1
-				local ratio_y = shape.height( Shape ) > 0 and Szy / shape.height( Shape ) or 1 --add: april 12th 2020
-				Shape = shape.ratio( Shape, ratio_x, ratio_y, Mode )
-			end --mod: january 05th 2019
+		local Szx = SizeX or shape.width( Shape )
+		local Szy = SizeY or Szx
+		if type( Szx ) == "table" then
+			Szx = shape.width( Shape ) + Szx[ 1 ]
 		end
+		if type( Szy ) == "table" then
+			Szy = shape.height( Shape ) + Szy[ 1 ]
+		end
+		if type( Szx ) == "string" then
+			Szx = Szx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			Szx = Szx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			Szx = string.toval( Szx )
+		end
+		if type( Szy ) == "string" then
+			Szy = Szy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
+			Szy = Szy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
+			Szy = string.toval( Szy )
+		end --add: may 03rd 2020
+		effector.print_error( Szx, "numbertable", "shape.size", 2 )
+		effector.print_error( Szy, "numbertable", "shape.size", 3 )
+		if Szx == 0 then
+			--la dimensión en "x" se modifica proporcionalmente según como se modifique en "y"
+			Shape = shape.ratio( Shape, nil, { Szy }, Mode )
+		elseif Szy == 0 then
+			--la dimensión en "y" se modifica proporcionalmente según como se modifique en "x"
+			Shape = shape.ratio( Shape, { Szx }, nil, Mode )
+		else
+			local ratio_x = shape.width( Shape ) > 0 and Szx / shape.width( Shape ) or 1
+			local ratio_y = shape.height( Shape ) > 0 and Szy / shape.height( Shape ) or 1 --add: april 12th 2020
+			Shape = shape.ratio( Shape, ratio_x, ratio_y, Mode )
+		end --mod: january 05th 2019
 		return Shape
 	end --shape.size( shape.rectangle, 120, 45 )
 
@@ -16652,7 +16400,7 @@
 			if max_ipol == 0 then
 				return copy_tbl[ 1 ]
 			end
-			local function ipol_number( val_1, val_2, pct_ipol )
+			local function ipol_number( pct_ipol, val_1, val_2 )
 				return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 			end
 			local ipol_function = ipol_number
@@ -16668,7 +16416,7 @@
 				ipol_i = copy_tbl[ floor( (i - 1) / (max_ipol / (#copy_tbl - 1)) ) + 1 ]
 				ipol_f = copy_tbl[ floor( (i - 1) / (max_ipol / (#copy_tbl - 1)) ) + 2 ]
 				pct_ip = floor( (i - 1) % (max_ipol / (#copy_tbl - 1)) ) / (max_ipol / (#copy_tbl - 1))
-				tags_ipol[ i ] = ipol_function( ipol_i, ipol_f, pct_ip )
+				tags_ipol[ i ] = ipol_function( pct_ip, ipol_i, ipol_f )
 			end --text.tag( { "\\fscy", 100, 200, 50 } ) = text.tag( "\\fscy{ 100, 200, 50 }" )
 			tags_ipol[ #tags_ipol + 1 ] = copy_tbl[ #copy_tbl ]
 			---------------------------------------------------
@@ -18014,15 +17762,15 @@
 				if type( First ) == "function" then
 					First = First( )
 				end
-				local vectorMask = color.from_error( Color_or_Alpha or text.color1 )
+				local vectorMask = color.ass( Color_or_Alpha or text.color1 )
 				if type( vectorMask ) ~= "table" then
 					vectorMask = { vectorMask }
 				end
 				local Mask = Maskfx or { "&HFF&", "&H00&" }
-				local func_ipol, func_conv = alpha.ipolfx, alpha.va_to_a
+				local func_ipol = alpha.interpolate
 				if vectorMask[ 1 ]:match( "&H(%x+)&" ):len( ) == 6 then
-					Mask = color.from_error( Maskfx or { "&H5A5A5A&", "&H000000&" } )
-					func_ipol, func_conv = color.ipolfx, color.vc_to_c
+					Mask = color.ass( Maskfx or { "&H5A5A5A&", "&H000000&" } )
+					func_ipol = color.interpolate
 				end
 				if type( Mask ) ~= "table" then
 					Mask = { Mask }
@@ -18046,7 +17794,7 @@
 				for k = 1, #vectorMask do
 					Hue[ k ], Mask2[ k ] = { }, { }
 					for i = 1, 12 * (2 * (val_n + 1)) do
-						Hue[ k ][ i ] = func_ipol( ind[ i ], msk[ i ], func_conv( vectorMask[ k ] ) )
+						Hue[ k ][ i ] = func_ipol( ind[ i ], msk[ i ], vectorMask[ k ] )
 					end
 					for i = 1, 2 do
 						table.insert( Hue[ k ], Hue[ k ][ i ] )
