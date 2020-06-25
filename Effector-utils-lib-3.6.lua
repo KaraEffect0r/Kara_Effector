@@ -135,11 +135,9 @@
 			math.bezier2move( Shape, Mode, Accel )
 		+	math.circle( Shape )
 		+	math.rotate( p, axis, angle )
-		<	math.matrix_sum( A, B )
+		<	math.matrix_sum( ... )
 		<	math.matrix_trans( A )
-		<	math.matrix_esc( A, Escalar )
-		<	math.matrix_mul( A, B )
-		<	math.matrix_mul2( ... )
+		<	math.matrix_mul( ... )
 		<	math.matrix_cof( A, Return )
 		<	math.matrix_det( A )
 		<	math.matrix_adj( A )
@@ -229,11 +227,7 @@
 		-	shape.oblique( Shape, Pixel, Axis )
 		+	shape.to_bezier( Shape )
 		-	shape.reverse( Shape )
-		-	shape.origin( Shape )
-		-	shape.displace( Shape, Dx, Dy )
-		-	shape.incenter( Shape )
-		-	shape.centerpos( Shape, CenterX, CenterY )
-		-	shape.firstpos( Shape, pos_x, pos_y )
+		-	shape.displace( Shape, Dx, Dy, Mode )
 		-	shape.ratio( Shape, Ratiox, Ratioy, Mode )
 		-	shape.size( Shape, SizeX, SizeY, Mode )
 		-	shape.array( Shape, loops, Angle_or_mode, Dxy )
@@ -3676,7 +3670,7 @@
 		if String:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
 			local function shape_to_t( Shape, t )
 				--convierte las coordenadas "y" de una shape en el parámetro t
-				local Shape = shape.origin( shape.size( Shape, 100 ) )
+				local Shape = shape.displace( shape.size( Shape, 100 ), "origin" )
 				local Point = shape.point( Shape, 2 )
 				local n = #Point
 				local t = math.round( math.clamp( t ) * n )
@@ -4660,7 +4654,7 @@
 			end
 		end
 		if Align_Shape then
-			Shape = shape.incenter( Shape )
+			Shape = shape.displace( Shape, "incenter" )
 			local MB2_x = l_center + 0.5 * l_width * ((math.round( Align_Shape ) - 1) % 3 - 1)
 			local MB2_y = l_middle + 0.5 * l_height * (ceil( (10 - ((math.round( Align_Shape ) - 1) % 9 + 1)) / 3 ) - 2)
 			Shape = shape.displace( Shape, MB2_x, MB2_y )
@@ -4855,53 +4849,53 @@
 		return rot_p
 	end
 	
-	function math.matrix_sum( A, B )
-		--suma los elementos de dos array, o a los elementos de un array con un número dado
-		effector.print_error( A, "numbertable", "math.matrix_sum", 1 )
-		effector.print_error( B, "numbertable", "math.matrix_sum", 2 )
-		local sum
-		if type( A ) == "table"
-			and type( B ) == "table" then
-			for _, v in ipairs( A ) do
-				if type( v ) ~= "number" then
-					error( "<<Error: math.matrix_sum>> La primera matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+	function math.matrix_sum( ... )
+		--suma los elementos de las tablas entre sí, o con un número dado
+		local function sum_matrix( A, B )
+			effector.print_error( A, "numbertable", "math.matrix_sum", 1 )
+			effector.print_error( B, "numbertable", "math.matrix_sum", 2 )
+			local sum = { }
+			if type( A ) == "table" then
+				for _, v in ipairs( A ) do
+					if type( v ) ~= "number" then
+						error( "<<Error: math.matrix_sum>> La primera matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+					end
 				end
 			end
-			for _, v in ipairs( B ) do
-				if type( v ) ~= "number" then
-					error( "<<Error: math.matrix_sum>> La segunda matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+			if type( B ) == "table" then
+				for _, v in ipairs( B ) do
+					if type( v ) ~= "number" then
+						error( "<<Error: math.matrix_sum>> La segunda matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+					end
 				end
 			end
-			sum = { }
-			for i = 1, #A do
-				sum[ i ] = A[ i ] + B[ i ]
-			end
-		elseif  type( A ) == "number"
-			and type( B ) == "table" then
-			for _, v in ipairs( B ) do
-				if type( v ) ~= "number" then
-					error( "<<Error: math.matrix_sum>> La matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+			if type( A ) == "table" then
+				if type( B ) == "table" then
+					for i = 1, #A do
+						sum[ i ] = A[ i ] + B[ (i - 1) % #A + 1 ]
+					end
+				else
+					for i = 1, #A do
+						sum[ i ] = A[ i ] + B
+					end
+				end
+			else
+				if type( B ) == "table" then
+					for i = 1, #B do
+						sum[ i ] = A + B[ i ]
+					end
+				else
+					sum = A + B
 				end
 			end
-			sum = { }
-			for i = 1, #B do
-				sum[ i ] = A + B[ i ]
-			end
-		elseif  type( A ) == "table"
-			and type( B ) == "number" then
-			for _, v in ipairs( A ) do
-				if type( v ) ~= "number" then
-					error( "<<Error: math.matrix_sum>> La matriz solo debe contener números\nmatrix must contain only numbers", 2 )
-				end
-			end
-			sum = { }
-			for i = 1, #A do
-				sum[ i ] = A[ i ] + B
-			end
-		else
-			sum = A + B
+			return sum
 		end
-		return sum
+		local arrays = { ... }
+		local sumx = arrays[ 1 ]
+		for i = 2, #arrays do
+			sumx = sum_matrix( sumx, arrays[ i ] )
+		end
+		return sumx
 	end
 	
 	function math.matrix_trans( A )
@@ -4923,87 +4917,68 @@
 		return A
 	end
 
-	function math.matrix_esc( A, Escalar )
-		--multiplica los valores de un array por un número (escalar)
-		effector.print_error( A, "table", "math.matrix_esc", 1 )
-		effector.print_error( Escalar, "number", "math.matrix_esc", 2 )
-		for _, v in ipairs( A ) do
-			if type( v ) ~= "number" then
-				error( "<<Error: math.matrix_esc>> La matriz solo debe contener números\nmatrix must contain only numbers", 2 )
-			end
-		end
-		local esc = { }
-		for i = 1, #A do
-			esc[ i ] = Escalar * A[ i ]
-		end
-		return esc
-	end
-	
-	function math.matrix_mul( A, B )
-		--multiplica los valores de dos arrays
-		effector.print_error( A, "table", "math.matrix_mul", 1 )
-		effector.print_error( B, "table", "math.matrix_mul", 2 )
-		for _, v in ipairs( A ) do
-			if type( v ) ~= "number" then
-				error( "<<Error: math.matrix_mul>> La primera matriz solo debe contener números\nmatrix must contain only numbers", 2 )
-			end
-		end
-		for _, v in ipairs( B ) do
-			if type( v ) ~= "number" then
-				error( "<<Error: math.matrix_mul>> La segunda matriz solo debe contener números\nmatrix must contain only numbers", 2 )
-			end
-		end
-		local mul, trans = { }, { }
-		local An, Bn = #A, #B
-		if An < Bn then
-			trans = math.matrix_trans( B )
-			for i = 1, An do
-				mul[ i ] = 0
-				for k = 1, An do
-					mul[ i ] = mul[ i ] + A[ k ] * trans[ An * ((i - 1) % An) + k ]
+	function math.matrix_mul( ... )
+		--multiplica los valores de los arrays
+		local function mul_matrix( A, B ) --math.matrix_mul( { 1, -3, 0, 2 }, 2, { 2, 4, -2, 5 } )
+			effector.print_error( A, "numbertable", "math.matrix_mul", 1 )
+			effector.print_error( B, "numbertable", "math.matrix_mul", 2 )
+			if type( A ) == "table" then
+				for _, v in ipairs( A ) do
+					if type( v ) ~= "number" then
+						error( "<<Error: math.matrix_mul>> La primera matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+					end
 				end
 			end
-		elseif An > Bn then
-			for i = 1, Bn do
-				mul[ i ] = 0
-				for k = 1, Bn do
-					mul[ i ] = mul[ i ] + B[ i ] * A[ Bn * ((i - 1) % Bn) + k ]
+			if type( B ) == "table" then
+				for _, v in ipairs( B ) do
+					if type( v ) ~= "number" then
+						error( "<<Error: math.matrix_mul>> La segunda matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+					end
 				end
 			end
-		elseif An == Bn then
-			local n = An ^ 0.5
-			for i = 1, An do
-				mul[ i ] = 0
-				for k = 1, n do
-					mul[ i ] = mul[ i ] + A[ (i - 1) % n + (k - 1) * n + 1 ] * B[ floor( (i - 1) / n ) * n + k ]
+			local mul, trans = { }, { }
+			if type( A ) == "table"
+				and type( B ) == "table" then
+				local An, Bn = #A, #B
+				if An < Bn then
+					trans = math.matrix_trans( B )
+					for i = 1, An do
+						mul[ i ] = 0
+						for k = 1, An do
+							mul[ i ] = mul[ i ] + A[ k ] * trans[ An * ((i - 1) % An) + k ]
+						end
+					end
+				elseif An > Bn then
+					for i = 1, Bn do
+						mul[ i ] = 0
+						for k = 1, Bn do
+							mul[ i ] = mul[ i ] + B[ i ] * A[ Bn * ((i - 1) % Bn) + k ]
+						end
+					end
+				elseif An == Bn then
+					local n = An ^ 0.5
+					for i = 1, An do
+						mul[ i ] = 0
+						for k = 1, n do
+							mul[ i ] = mul[ i ] + A[ (i - 1) % n + (k - 1) * n + 1 ] * B[ floor( (i - 1) / n ) * n + k ]
+						end
+					end
 				end
-			end
-		end
-		return mul
-	end
-	
-	function math.matrix_mul2( ... )
-		--multipliaca los valores de todos los arrays ingresados
-		local Matrixes = { ... }
-		for i = 1, #Matrixes do
-			if #Matrixes[ i ] ~= 9 then
-				error( "<<Error: math.matrix_mul2>> Cada matriz debe ser de tamaño 3x3\n3x3 matrix expected", 2 )
-			end
-			for _, v in ipairs( Matrixes[ i ] ) do
-				if type( v ) ~= "number" then
-					error( "<<Error: math.matrix_mul2>> Cada matriz solo debe contener números\nmatrix must contain only numbers", 2 )
+			elseif type( A ) == "table" then
+				for i = 1, #A do
+					mul[ i ] = A[ i ] * B
 				end
+			else
+				mul = A * B
 			end
+			return mul
 		end
-		local Mul = {
-			1,	0,	0,
-			0,	1,	0,
-			0,	0,	1
-		}
-		for i = 1, #Matrixes do
-			Mul = math.matrix_mul( Mul, Matrixes[ i ] )
+		local arrays = { ... }
+		local mulx = arrays[ 1 ]
+		for i = 2, #arrays do
+			mulx = mul_matrix( mulx, arrays[ i ] )
 		end
-		return Mul
+		return mulx
 	end
 	
 	function math.matrix_cof( A, Return )
@@ -5038,7 +5013,7 @@
 		local adj = math.matrix_trans( cof )
 		local inv = table.duplicate( A )
 		if det ~= 0 then
-			inv = math.matrix_esc( adj, 1 / det )
+			inv = math.matrix_mul( adj, 1 / det )
 		end
 		if Return == "det" then
 			return det
@@ -5155,7 +5130,7 @@
 			Rot = Rot_x
 		elseif Axis == "y" then
 			Rot = Rot_y
-		end
+		end --shape.matrix( shape.rectangle, math.matrix_rot( 50, "y" ) )
 		local Rot1 = math.matrix_mul( math.matrix_dis( Orgx, Orgy ), Rot )
 		return math.matrix_mul( Rot1, math.matrix_dis( -Orgx, -Orgy ) )
 	end
@@ -5377,519 +5352,54 @@
 		return algorithms
 	end
 	
-	function math.pyf( )
-		local number_list, number_pyf = { }, ""
-		local numb1, numb2, numb3, numb4
-		for i = 123, 9876 do
-			number_pyf = tostring( i )
-			if number_pyf:len( ) == 3 then
-				number_pyf = "0" .. number_pyf
+	function math.picas( )
+		--jugar picas y fijas :D
+		local digits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }
+		digits = table.disorder( digits )
+		local function picasyfijas( Number )
+			local number_false = "Debes ingresar un número de 4 cifras y que todas ellas sean diferentes entre sí"
+			local Number = Number or fx.offset[ 1 ]
+			local number_str = tostring( Number )
+			if number_str:len( ) ~= 4 then
+				return number_false
 			end
-			numb1, numb2 = number_pyf:sub( 1, 1 ), number_pyf:sub( 2, 2 )
-			numb3, numb4 = number_pyf:sub( 3, 3 ), number_pyf:sub( 4, 4 )
-			if numb1 ~= numb2
-				and numb1 ~= numb3
-				and numb1 ~= numb4
-				and numb2 ~= numb3
-				and numb2 ~= numb4
-				and numb3 ~= numb4 then
-				table.insert( number_list, R( 100 ), number_pyf )
+			local table_pyf, table_numb = { }, { }
+			for i = 1, 4 do
+				table_pyf[ i ] = number4:sub( i, i )
+				table_numb[ i ] = number_str:sub( i, i )
 			end
-		end
-		number_list = table.disorder( number_list )
-		return Re( number_list )
-	end
-	
-	function picas( numb )
-		local number_false = "Debes ingresar un número de 4 cifras y que todas ellas sean diferentes entre sí"
-		if type( numb ) ~= "number" then
-			return number_false
-		end
-		local number_str = tostring( numb )
-		if number_str:len( ) == 3 then
-			number_str = "0" .. number_str
-		end
-		if number_str:len( ) ~= 4 then
-			return number_false
-		end
-		local table_pyf, table_numb = { }, { }
-		for i = 1, 4 do
-			table_pyf[ i ] = randpf:sub( i, i )
-			table_numb[ i ] = number_str:sub( i, i )
-		end
-		local num_picas, num_fijas = 0, 0
-		for i = 1, 4 do
-			if table.inside( table_pyf, table_numb[ i ] ) then
-				if table.index( table_pyf, table_numb[ i ] ) == i then
-					num_fijas = num_fijas + 1
-				else
-					num_picas = num_picas + 1
-				end
-			end
-		end
-		count_pf = count_pf + 1
-		local num_intentos = "intentos"
-		if count_pf == 1 then
-			num_intentos = "intento"
-		end
-		if num_fijas == 4 then
-			return format( "%s --> Ganaste en %s %s", number_str, count_pf, num_intentos )
-		end
-		if num_picas == 0
-			and num_fijas == 0 then
-			return format( "%s --> Nada!!", number_str )
-		end
-		local pica_str, fija_str = "picas", "fijas"
-		if num_picas == 1 then
-			pica_str = "pica"
-		end
-		if num_fijas == 1 then
-			fija_str = "fija"
-		end
-		return format( "%s --> %s %s y %s %s", number_str, num_picas, pica_str, num_fijas, fija_str )
-	end
-
-	function sudoku_gen( levels )
-		local function sudoku2( levels )
-			local fila = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
-			local filas = { [ 1 ] = table.disorder( fila ) }
-			for i = 2, 9 do
-				filas[ i ] = { }
-			end
-			local colums, matrix = { }, { }
-			for i = 1, 9 do
-				colums[ i ] = { }
-				matrix[ i ] = { }
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 primeros elementos de las 3 primeras matrices
-			-- agrega el primer elemento de las 9 columnas
-			local filx = table.duplicate( fila )
-			for i = 1, 3 do
-				for k = 1, 3 do
-					matrix[ i ][ k ] = filas[ 1 ][ 3 * (i - 1) + k ]
-					colums[ 3 * (i - 1) + k ][ 1 ] = filas[ 1 ][ 3 * (i - 1) + k ]
-				end
-				filx = table.retire( filx, matrix[ 1 ][ i ] )
-			end
-			--------------------------------------------------------------
-			-- primeros 3 elementos de la fila 2
-			for i = 1, 3 do
-				filas[ 2 ][ i ] = filx[ R( #filx ) ]
-				filx = table.retire( filx, filas[ 2 ][ i ] )
-			end
-			-- segundos 3 elementos de la fila 2
-			filx = table.duplicate( matrix[ 3 ] )
-			filx = table.delete( filx, filas[ 2 ] )
-			local mtx_1, i = random.unique( matrix[ 1 ] ), 1
-			while #filx < 3 do
-				table.insert( filx, mtx_1[ i ] )
-				i = i + 1
-			end
-			for i = 4, 6 do
-				filas[ 2 ][ i ] = filx[ R( #filx ) ]
-				filx = table.retire( filx, filas[ 2 ][ i ] )
-			end
-			-- terceros 3 elementos de la fila 2
-			filx = table.duplicate( fila )
-			filx = table.delete( filx, filas[ 2 ] )
-			for i = 7, 9 do
-				filas[ 2 ][ i ] = filx[ R( #filx ) ]
-				filx = table.retire( filx, filas[ 2 ][ i ] )
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 segundos elementos de las 3 primeras matrices
-			-- agrega el segundo elemento de las 9 columnas
-			for i = 1, 3 do
-				for k = 1, 3 do
-					matrix[ i ][ k + 3 ] = filas[ 2 ][ 3 * (i - 1) + k ]
-					colums[ 3 * (i - 1) + k ][ 2 ] = filas[ 2 ][ 3 * (i - 1) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- elementos de la fila 3
-			filx = table.duplicate( fila )
-			filx = table.delete( filx, matrix[ 1 ] )
-			for i = 1, 3 do
-				filas[ 3 ][ i ] = filx[ R( #filx ) ]
-				filx = table.retire( filx, filas[ 3 ][ i ] )
-			end
-			filx = table.duplicate( fila )
-			filx = table.delete( filx, matrix[ 2 ] )
-			for i = 4, 6 do
-				filas[ 3 ][ i ] = filx[ R( #filx ) ]
-				filx = table.retire( filx, filas[ 3 ][ i ] )
-			end
-			filx = table.duplicate( fila )
-			filx = table.delete( filx, matrix[ 3 ] )
-			for i = 7, 9 do
-				filas[ 3 ][ i ] = filx[ R( #filx ) ]
-				filx = table.retire( filx, filas[ 3 ][ i ] )
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 terceros elementos de las 3 primeras matrices
-			-- agrega el tercer elemento de las 9 columnas
-			for i = 1, 3 do
-				for k = 1, 3 do
-					matrix[ i ][ k + 6 ] = filas[ 3 ][ 3 * (i - 1) + k ]
-					colums[ 3 * (i - 1) + k ][ 3 ] = filas[ 3 ][ 3 * (i - 1) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- fila 4
-			for i = 1, 9 do
-				filx = table.duplicate( fila )
-				filx = table.delete( filx, filas[ 4 ] )
-				filx = table.delete( filx, colums[ i ] )
-				filas[ 4 ][ i ] = filx[ R( #filx ) ] or 0
-			end
-			while table.inside( filas[ 4 ], 0 ) do
-				filas[ 4 ] = { } -- limpia la fila 4
-				for i = 1, 9 do  -- inicia nuevamente el llenado de la fila 4
-					filx = table.duplicate( fila )
-					filx = table.delete( filx, filas[ 4 ] )
-					filx = table.delete( filx, colums[ i ] )
-					filas[ 4 ][ i ] = filx[ R( #filx ) ] or 0
-				end
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 primeros elementos de las matrices 4, 5 y 6
-			-- agrega el cuarto elemento de las 9 columnas
-			for i = 4, 6 do
-				for k = 1, 3 do
-					matrix[ i ][ k ] = filas[ 4 ][ 3 * (i - 4) + k ]
-					colums[ 3 * (i - 4) + k ][ 4 ] = filas[ 4 ][ 3 * (i - 4) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- fila 5
-			-- primeros 3 elementos de la fila 5
-			for i = 1, 3 do
-				filx = table.duplicate( fila )
-				filx = table.delete( filx, colums[ i ] )
-				filx = table.delete( filx, matrix[ 4 ] )
-				filx = table.delete( filx, filas[ 5 ] )
-				filas[ 5 ][ i ] = filx[ R( #filx ) ]
-			end
-			-- segundos 3 elementos de la fila 5
-			filx = table.duplicate( matrix[ 6 ] )
-			filx = table.delete( filx, filas[ 5 ] )
-			local mtx_1, i = random.unique( matrix[ 4 ] ), 1
-			while #filx < 3 do
-				table.insert( filx, mtx_1[ i ] )
-				i = i + 1
-			end
-			for i = 4, 6 do
-				filas[ 5 ][ i ] = filx[ R( #filx ) ]
-				local k = 0
-				while table.inside( colums[ i ], filas[ 5 ][ i ] ) do
-					filas[ 5 ][ i ] = filx[ R( #filx ) ]
-					k = k + 1
-					if k == 8 then
-						filas[ 5 ][ i ] = 0
-						break
-					end
-				end
-				filx = table.retire( filx, filas[ 5 ][ i ] )
-			end
-			while table.inside( filas[ 5 ], 0 ) do
-				filas[ 5 ][ 4 ], filas[ 5 ][ 5 ], filas[ 5 ][ 6 ] = nil, nil, nil
-				filx = table.duplicate( matrix[ 6 ] )
-				filx = table.delete( filx, filas[ 5 ] )
-				mtx_1, i = random.unique( matrix[ 4 ] ), 1
-				while #filx < 3 do
-					table.insert( filx, mtx_1[ i ] )
-					i = i + 1
-				end
-				for i = 4, 6 do
-					filas[ 5 ][ i ] = filx[ R( #filx ) ]
-					local k = 0
-					while table.inside( colums[ i ], filas[ 5 ][ i ] ) do
-						filas[ 5 ][ i ] = filx[ R( #filx ) ]
-						k = k + 1
-						if k == 8 then
-							break
-						end
-					end
-					filx = table.retire( filx, filas[ 5 ][ i ] )
-				end
-			end
-			-- terceros 3 elementos de la fila 5
-			filx = table.duplicate( fila )
-			filx = table.delete( filx, filas[ 5 ] )
-			filx = table.disorder( filx )
-			local filx2, i = table.permute( filx ), 1
-			while  table.inside( colums[ 7 ], filx[ 1 ] )
-				or table.inside( colums[ 8 ], filx[ 2 ] )
-				or table.inside( colums[ 9 ], filx[ 3 ] ) do
-				filx = filx2[ i ]
-				i = i + 1
-				if i == 7 then
-					break
-				end
-			end
-			filas[ 5 ] = table.inserttable( filas[ 5 ], filx )
-			--------------------------------------------------------------
-			-- agrega los 3 segundos elementos de las matrices 4, 5 y 6
-			-- agrega el quinto elemento de las 9 columnas
-			for i = 4, 6 do
-				for k = 1, 3 do
-					matrix[ i ][ k + 3 ] = filas[ 5 ][ 3 * (i - 4) + k ]
-					colums[ 3 * (i - 4) + k ][ 5 ] = filas[ 5 ][ 3 * (i - 4) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- fila 6
-			for k = 1, 3 do
-				filx = table.duplicate( fila )
-				filx = table.delete( filx, matrix[ 3 + k ] )
-				filx = table.disorder( filx )
-				local filx2, i = table.permute( filx ), 1
-				while (table.inside( colums[ 1 + 3 * (k - 1) ], filx[ 1 ] )
-					or table.inside( colums[ 2 + 3 * (k - 1) ], filx[ 2 ] ))
-					or table.inside( colums[ 3 + 3 * (k - 1) ], filx[ 3 ] ) do
-					filx = filx2[ i ]
-					i = i + 1
-					if i == 7 then
-						break
-					end
-				end
-				filas[ 6 ] = table.inserttable( filas[ 6 ], filx )
-			end
-			for i = 1, 9 do
-				if table.inside( colums[ i ], filas[ 6 ][ i ] ) then
-					return "error"
-				end
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 terceros elementos de las matrices 4, 5 y 6
-			-- agrega el sexto elemento de las 9 columnas
-			for i = 4, 6 do
-				for k = 1, 3 do
-					matrix[ i ][ k + 6 ] = filas[ 6 ][ 3 * (i - 4) + k ]
-					colums[ 3 * (i - 4) + k ][ 6 ] = filas[ 6 ][ 3 * (i - 4) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- fila 7
-			for i = 1, 9 do
-				filx = table.duplicate( fila )
-				filx = table.delete( filx, filas[ 7 ] )
-				filx = table.delete( filx, colums[ i ] )
-				filas[ 7 ][ i ] = filx[ R( #filx ) ] or 0
-			end
-			while table.inside( filas[ 7 ], 0 ) do
-				filas[ 7 ] = { } -- limpia la fila 7
-				for i = 1, 9 do  -- inicia nuevamente el llenado de la fila 7
-					filx = table.duplicate( fila )
-					filx = table.delete( filx, filas[ 7 ] )
-					filx = table.delete( filx, colums[ i ] )
-					filas[ 7 ][ i ] = filx[ R( #filx ) ] or 0
-				end
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 primeros elementos de las matrices 7, 8 y 9
-			-- agrega el séptimo elemento de las 9 columnas
-			for i = 7, 9 do
-				for k = 1, 3 do
-					matrix[ i ][ k ] = filas[ 7 ][ 3 * (i - 7) + k ]
-					colums[ 3 * (i - 7) + k ][ 7 ] = filas[ 7 ][ 3 * (i - 7) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- fila 8
-			-- primeros 3 elementos de la fila 8
-			for i = 1, 3 do
-				filx = table.duplicate( fila )
-				filx = table.delete( filx, colums[ i ] )
-				filx = table.delete( filx, matrix[ 7 ] )
-				filx = table.delete( filx, filas[ 8 ] )
-				filas[ 8 ][ i ] = filx[ R( #filx ) ]
-			end
-			-- segundos 3 elementos de la fila 8
-			filx = table.duplicate( matrix[ 9 ] )
-			filx = table.delete( filx, filas[ 8 ] )
-			local mtx_1, i = table.disorder( matrix[ 7 ] ), 1
-			while #filx < 3 do
-				table.insert( filx, mtx_1[ i ] )
-				i = i + 1
-			end
-			for i = 4, 6 do
-				filas[ 8 ][ i ] = filx[ R( #filx ) ]
-				local k = 0
-				while table.inside( colums[ i ], filas[ 8 ][ i ] ) do
-					filas[ 8 ][ i ] = filx[ R( #filx ) ]
-					k = k + 1
-					if k == 9 then
-						filas[ 8 ][ i ] = 0
-						break
-					end
-				end
-				filx = table.retire( filx, filas[ 8 ][ i ] )
-			end
-			if table.inside( filas[ 8 ], 0 ) then
-				return "error"
-			end
-			-- terceros 3 elementos de la fila 8
-			filx = table.duplicate( fila )
-			filx = table.delete( filx, filas[ 8 ] )
-			filx = table.disorder( filx )
-			local filx2, i = table.permute( filx ), 1
-			while  table.inside( colums[ 7 ], filx[ 1 ] )
-				or table.inside( colums[ 8 ], filx[ 2 ] )
-				or table.inside( colums[ 9 ], filx[ 3 ] ) do
-				filx = filx2[ i ]
-				i = i + 1
-				if i == 7 then
-					break
-				end
-			end
-			filas[ 8 ] = table.inserttable( filas[ 8 ], filx )
-			for i = 1, 3 do
-				if table.inside( colums[ i + 6 ], filas[ 8 ][ i + 6 ] ) then
-					return "error"
-				end
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 segundos elementos de las matrices 7, 8 y 9
-			-- agrega el octavo elemento de las 9 columnas
-			for i = 7, 9 do
-				for k = 1, 3 do
-					matrix[ i ][ k + 3 ] = filas[ 8 ][ 3 * (i - 7) + k ]
-					colums[ 3 * (i - 7) + k ][ 8 ] = filas[ 8 ][ 3 * (i - 7) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			-- fila 9
-			for i = 1, 9 do
-				filas[ 9 ][ i ] = unpack( table.delete( fila, colums[ i ] ) )
-			end
-			--------------------------------------------------------------
-			-- agrega los 3 terceros elementos de las matrices 7, 8 y 9
-			-- agrega el noveno elemento de las 9 columnas
-			for i = 7, 9 do
-				for k = 1, 3 do
-					matrix[ i ][ k + 6 ] = filas[ 9 ][ 3 * (i - 7) + k ]
-					colums[ 3 * (i - 7) + k ][ 9 ] = filas[ 9 ][ 3 * (i - 7) + k ]
-				end
-			end
-			--------------------------------------------------------------
-			for i = 4, 9 do
-				for k = 1, 9 do
-					if table.count( matrix[ i ], k ) > 1 then
-						return "error"
+			local num_picas, num_fijas = 0, 0
+			for i = 1, 4 do
+				if table.inside( table_pyf, table_numb[ i ] ) then
+					if table.index( table_pyf, table_numb[ i ] ) == i then
+						num_fijas = num_fijas + 1
+					else
+						num_picas = num_picas + 1
 					end
 				end
 			end
-			--------------------------------------------------------------
-			--levels
-			local levels = levels or 8
-			for i = 1, 9 do
-				for k = 1, 9 do
-					if R( R( 1, R( 2, R( 4, levels ) ) ) ) == 1 then
-						filas[ i ][ k ] = 0
-					end
-				end
+			count_pf = count_pf + 1
+			local num_intentos = "intentos"
+			if count_pf == 1 then
+				num_intentos = "intento"
 			end
-			--------------------------------------------------------------
-			return filas
+			if num_fijas == 4 then
+				return format( "%s --> Ganaste en %s %s", number_str, count_pf, num_intentos )
+			end
+			if num_picas == 0
+				and num_fijas == 0 then
+				return format( "%s --> Nada!!", number_str )
+			end
+			local pica_str, fija_str = "picas", "fijas"
+			if num_picas == 1 then
+				pica_str = "pica"
+			end
+			if num_fijas == 1 then
+				fija_str = "fija"
+			end
+			return format( "%s --> %s %s y %s %s", number_str, num_picas, pica_str, num_fijas, fija_str )
 		end
-		local sud_gen = sudoku2( levels )
-		while sud_gen == "error" do
-			sud_gen = sudoku2( levels )
-		end
-		return sud_gen
-	end
-
-	function sudoku( levels )
-		local levels = levels or 3
-		local sudoku_tbl = recall.sud_tbl
-		local Shap = recall.Shap
-		local Shap3 = recall.Shap3
-		local shap5 = recall.shap5
-		local siz = recall.siz
-		if j < 5 then
-			local Size = yres - 40 * ratio
-			local Bord = 5 * ratio
-			local Siz2 = (Size - 4 * Bord) / 3
-			Shap = remember( "Shap", shape.size( shape.rectangle, Size ) )
-			local ShaC = shape.reverse( shape.size( shape.rectangle, Siz2 ) )
-			for i = 1, 3 do
-				for k = 1, 3 do
-					Shap = Shap .. shape.displace( ShaC, Bord + (Siz2 + Bord) * (k - 1), Bord + (Siz2 + Bord) * (i - 1) )
-				end
-			end
-			Shap2, Shap3 = shape.size( Shap, Siz2 + Bord ), ""
-			for i = 1, 3 do
-				for k = 1, 3 do
-					Shap3 = Shap3 .. shape.displace( Shap2, 0.5 * Bord + (Siz2 + Bord) * (k - 1), 0.5 * Bord + (Siz2 + Bord) * (i - 1) )
-				end
-			end
-			Shap3 = remember( "Shap3", Shap3 )
-			local shap4 = shape.size( shape.rectangle, Size, Siz2 + Bord )
-			local shap5 = remember( "shap5", shape.displace( shap4, 0, Siz2 + 1.5 * Bord ) .. shape.displace( shape.origin( shape.rotate( shape.reverse( shap4 ), 90 ) ), Siz2 + 1.5 * Bord, 0 ) )
-			siz = remember( "siz", Size / 9 )
-			sudoku_tbl = remember( "sud_tbl", sudoku_gen( LVL ) )
-		end
-		local count_1, count_2
-		maxloop( 85 )
-		relayer( 4 )
-		if j == 1 then
-			return format( "{\\bs0\\an5\\pos(%s,%s)\\bs0\\1c&HFAFAFA&\\p1}%s", 0.5 * xres, 0.5 * yres, shape.size( shape.rectangle, xres, yres ) )
-		elseif j == 2 then
-			return format( "{\\bs0\\an5\\pos(%s,%s)\\bs0\\1c&HEEEEF0&\\p1}%s", 0.5 * xres, 0.5 * yres, shap5 )
-		elseif j == 3 then
-			levels = abs( ceil( levels ) )
-			if levels < 1 then
-				levels = 1
-			elseif levels > 6 then
-				levels = 6
-			end
-			local nivel, LVL = "", 8
-			if levels == 1 then
-				nivel = "Very Easy"
-				LVL = R( 11, 12 )
-			elseif levels == 2 then
-				nivel = "Easy"
-				LVL = R( 9, 10 )
-			elseif levels == 3 then
-				nivel = "Medium"
-				LVL = 8
-			elseif levels == 4 then
-				nivel = "Hard"
-				LVL = 7
-			elseif levels == 5 then
-				nivel = "Very Hard"
-				LVL = 6
-			elseif levels == 6 then
-				nivel = "Dement"
-				LVL = 5
-			end
-			local serie = ""
-			for i = 1, 11 do
-				if i < 6 then
-					serie = serie .. ( (R( 5 ) ~= 1 ) and 0 or R( 0, 9 ) )
-				else
-					serie = serie .. R( 0, 9 )
-				end
-			end
-			return format( "{\\an7\\pos(%s,%s)\\bs0\\fnArial\\fs%s\\1c&H545459&}Sudoku %s\\NLevel: {\\b1}%s\\N{\\b0}Generated by:\\N{\\b1}KE %s",
-				30 * ratio, 20 * ratio, 28 * ratio, serie, nivel, script_version .. script_update
-			)
-		elseif j == 4 then
-			return format( "{\\an5\\pos(%s,%s)\\bs0\\1c&H545459&}", 0.5 * xres, 0.5 * yres ) .. Shap .. Shap3
-		else
-			count_1, count_2 = math.i( j - 4, 9 )[ "1-->A" ], math.i( j - 4, 9, 1 )[ "A,mB" ]
-			if sudoku_tbl[ count_2 ][ count_1 ] ~= 0 then
-				return format( "{\\an5\\pos(%s,%s)\\bs0\\1c&H545459&\\fnArial\\fs%s\\blur0.45}%s",
-					0.5 * xres - 4 * siz + siz * (count_1 - 1),
-					0.5 * yres - 4 * siz + siz * (count_2 - 1),
-					45 * ratio,
-					sudoku_tbl[ count_2 ][ count_1 ]
-				)
-			end
-			return nil
-		end
+		return digits[ 2 ] .. digits[ 4 ] .. digits[ 6 ] .. digits[ 8 ], picasyfijas
 	end
 
 	function math.shape( Shape, Length, Mode, Max_n )
@@ -6130,10 +5640,8 @@
 			function( condition, true_exit, false_exit )
 				local condition = condition:sub( 2, -2 ):gsub( "\\", "\\\\" )
 				local true_exit = string.toval( true_exit:sub( 2, -2 ) ):gsub( "\\", "\\\\" ):gsub( "%&", "↓" )
-				--true_exit fix: may 11th 2018 --> add the string.toval function
 				if false_exit then
 					false_exit = string.toval( false_exit:sub( 2, -2 ) ):gsub( "\\", "\\\\" ):gsub( "%&", "↓" )
-					--false_exit fix: may 11th 2018 --> add the string.toval function
 				end
 				local tag_only = format( "tag.only( %s, %s )", condition, "\"" .. true_exit .. "\"" )
 				if false_exit then
@@ -7623,23 +7131,23 @@
 					local shape_modify = capture:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) --> captura shapes completas ^_^
 					if capture:match( "pos" ) then
 						--"\\clip(shape.circle, 'pos')"
-						shape_modify = shape.centerpos( shape_modify, fx.move_x1, fx.move_y1 )
+						shape_modify = shape.displace( shape_modify, fx.move_x1, fx.move_y1, "center" )
 					elseif capture:match( "%,[%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
 						--"\\clip(shape.circle, 1, 120, -86)" relativo a la posición x, y
 						local pos_clip_x, pos_clip_y = capture:match( "%,[%d ]*%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)" )
-						shape_modify = shape.centerpos(
+						shape_modify = shape.displace(
 							shape_modify,
 							fx.pos_x + tonumber( pos_clip_x ),
-							fx.pos_y + tonumber( pos_clip_y )
+							fx.pos_y + tonumber( pos_clip_y ), "center"
 						)
 					elseif capture:match( "%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
 						--"\\clip(shape.circle, 120, -86)" relativo al 0, 0
 						local pos_clip_x, pos_clip_y = capture:match( "%,[ ]*(%-?%d+[%.%d ]*)%,[ ]*(%-?%d+[%.%d ]*)" )
-						shape_modify = shape.centerpos( shape_modify, tonumber( pos_clip_x ), tonumber( pos_clip_y ) )
+						shape_modify = shape.displace( shape_modify, tonumber( pos_clip_x ), tonumber( pos_clip_y ), "center" )
 					else
 						--"\\clip(shape.circle, true)"
-						shape_modify = shape.centerpos( shape_modify, fx.pos_x, fx.pos_y )
-						--shape_modify = shape.centerpos( shape_modify, fx.move_x1, fx.move_y1 ) --fix: august 04th 2018
+						shape_modify = shape.displace( shape_modify, fx.pos_x, fx.pos_y, "center" )
+						--shape_modify = shape.displace( shape_modify, fx.move_x1, fx.move_y1, "center" ) --fix: august 04th 2018
 					end
 					return format( "%s(%s)", Tag, shape_modify )
 				elseif type( string.toval( "{" .. capture:sub( 2, -2 ) .. "}" ) ) == "table" then --add: march 08th 2017
@@ -9286,7 +8794,7 @@
 		effector.print_error( Center_y, "number", "tag.clip_shape", 3 )
 		local Shp_tbl = recall.shpx
 		if j == 1 then
-			Shp_tbl = remember( "shpx", shape.divide( shape.centerpos( Shapes, fx.pos_x + Center_x, fx.pos_y + Center_y ) ) )
+			Shp_tbl = remember( "shpx", shape.divide( shape.displace( Shapes, fx.pos_x + Center_x, fx.pos_y + Center_y, "center" ) ) )
 		end
 		return format( "\\clip(%s)", Shp_tbl[ (j - 1) % #Shp_tbl + 1 ] )
 	end --Add: august 04th 2018
@@ -10280,16 +9788,12 @@
 	
 	function color.interpolate( Ipol, Color1, Color2 )
 		--interpolate_color
-		if type( Ipol ) == "function" then
-			Ipol = Ipol( )
-		end
 		if type( Color1 ) == "function" then
 			Color1 = Color1( )
 		end
 		if type( Color2 ) == "function" then
 			Color2 = Color2( )
 		end
-		local Ipol = Ipol or 0.5
 		local Color1 = Color1 or text.color1
 		local Color2 = Color2 or text.color2
 		---------------------------------
@@ -10322,7 +9826,6 @@
 			return recursion_tbl
 		end --resursión 2
 		---------------------------------
-		effector.print_error( Ipol, "number", "color.interpolate", 1 )
 		effector.print_error( Color1, "color", "color.interpolate", 2 )
 		effector.print_error( Color2, "color", "color.interpolate", 3 )
 		if Color1:match( "%x%x%x%x%x%x%x%x" ) then
@@ -10337,6 +9840,18 @@
 		local col_R2 = tonumber( Color2:match( "%x%x%x%x(%x%x)" ), 16 )
 		local col_G2 = tonumber( Color2:match( "%x%x(%x%x)%x%x" ), 16 )
 		local col_B2 = tonumber( Color2:match( "(%x%x)%x%x%x%x" ), 16 )
+		local Ipol = Ipol or 0.5
+		if type( Ipol ) == "function" then
+			Ipol = Ipol( )
+		end
+		if type( Ipol ) == "table" then
+			Ipol = math.format( Ipol[ 1 ], Ipol[ 2 ] )
+			--{ shape.circle, 1m }
+		end
+		if tostring( Ipol ) == "nan" then -- #/0 división por cero :D
+			return valors[ 1 ]
+		end --add: june 22nd 2020
+		effector.print_error( Ipol, "number", "color.interpolate", 1 )
 		Ipol = math.clamp( Ipol )
 		local ipol_R = math.round( col_R1 + (col_R2 - col_R1) * Ipol )
 		local ipol_G = math.round( col_G1 + (col_G2 - col_G1) * Ipol )
@@ -10427,7 +9942,7 @@
 		if type( Color ) == "function" then
 			Color = Color( )
 		end
-		local Colorx = Color or text.color1
+		local Color = Color or text.color1
 		if type( Color ) == "table" then
 			local recursion_tbl = { }
 			for k, v in pairs( Color ) do
@@ -10435,7 +9950,7 @@
 			end
 			return recursion_tbl
 		end --recursión
-		effector.print_error( Colorx, "color", "color.matrix", 1 )
+		effector.print_error( Color, "color", "color.matrix", 1 )
 		local configs = ...
 		local Matrixes = { configs }
 		if type( configs ) == "table"
@@ -10459,17 +9974,7 @@
 				end
 			end
 		end
-		if type( Colorx ) == "table" then
-			local RGB_tables, Col_matrix = { }, { }
-			for i = 1, #Colorx do
-				RGB_tables[ i ] = color.to_RGB( Colorx[ i ] )
-				Col_matrix[ i ] = color.ass2( math.matrix_mul( RGB_tables[ i ], math.matrix_mul2( unpack( Matrixes ) ) ) )
-			end
-			return Col_matrix
-		end
-		local RGB_table = color.to_RGB( Colorx )
-		local Mtx_multi = math.matrix_mul2( unpack( Matrixes ) )
-		return color.ass2( math.matrix_mul( RGB_table, Mtx_multi ) )
+		return color.ass2( math.matrix_mul( color.to_RGB( Color ), unpack( Matrixes ) ) )
 	end
 	
 	function color.fromstyle( ColorAlpha )
@@ -10611,16 +10116,12 @@
 
 	function alpha.interpolate( Ipol, Alpha1, Alpha2 )
 		--interpolate_alpha
-		if type( Ipol ) == "function" then
-			Ipol = Ipol( )
-		end
 		if type( Alpha1 ) == "function" then
 			Alpha1 = Alpha1( )
 		end
 		if type( Alpha2 ) == "function" then
 			Alpha2 = Alpha2( )
 		end
-		local Ipol = Ipol or 0.5
 		local Alpha1 = Alpha1 or text.alpha1
 		local Alpha2 = Alpha2 or text.alpha2
 		---------------------------------
@@ -10653,7 +10154,6 @@
 			return recursion_tbl
 		end --resursión 2
 		---------------------------------
-		effector.print_error( Ipol, "number", "alpha.interpolate", 1 )
 		effector.print_error( Alpha1, "alpha", "alpha.interpolate", 2 )
 		effector.print_error( Alpha2, "alpha", "alpha.interpolate", 3 )
 		if tonumber( Alpha1 ) then
@@ -10683,6 +10183,18 @@
 		if type( Alpha2 ) == "number" then
 			alpha_f = math.clamp( Alpha2, 0, 255 )
 		end
+		local Ipol = Ipol or 0.5
+		if type( Ipol ) == "function" then
+			Ipol = Ipol( )
+		end
+		if type( Ipol ) == "table" then
+			Ipol = math.format( Ipol[ 1 ], Ipol[ 2 ] )
+			--{ shape.circle, 1m }
+		end
+		if tostring( Ipol ) == "nan" then -- #/0 división por cero :D
+			return valors[ 1 ]
+		end --add: june 22nd 2020
+		effector.print_error( Ipol, "number", "alpha.interpolate", 1 )
 		Ipol = math.clamp( Ipol ) --rewrite: june 20th 2020
 		return alpha.val2ass( math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
 		--alpha.interpolate( 0.6, { shape.alpha1, shape.color3 }, { "&H0F&", "&HFF&" } )
@@ -11560,27 +11072,13 @@
 		return Shape
 	end
 
-	function shape.origin( Shape )
-		--posiciona la Shape en su ubicación por default (cuadrante IV del AssDraw3)
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		local Shape = shape.ASSDraw3( Shape )
-		if type( Shape ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( Shape ) do
-				recursion_tbl[ k ] = shape.origin( v )
-			end
-			return recursion_tbl
-		end --recursión: september 08th 2019
-		effector.print_error( Shape, "shape", "shape.origin", 1 )
-		shape.info( Shape )
-		Shape = shape.ASSDraw3( shape.displace( Shape, -minx, -miny ) )
-		return Shape
-	end
-	
-	function shape.displace( Shape, Dx, Dy )
+	function shape.displace( Shape, Dx, Dy, Mode )
 		--desplaza la Shape a las coordenadas seleccionadas
+		-->shape.origin		= shape.displace( Shape, 0, 0, "origin" ) or shape.displace( Shape, "origin" )
+		-->shape.incenter	= shape.displace( Shape, 0, 0, "center" ) or shape.displace( Shape, "incenter" )
+		-->shape.centerpos	= shape.displace( Shape, Dx, Dy, "center" )	--> move respect to center shape
+		-->shape.firstpos	= shape.displace( Shape, Dx, Dy, "first" )	--> move respect to first point shape
+		-->new mode displace: shape.displace( Shape, Dx, Dy, "last" )	--> move respect to last point shape
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -11588,7 +11086,7 @@
 		if type( Shape ) == "table" then
 			local recursion_tbl = { }
 			for k, v in pairs( Shape ) do
-				recursion_tbl[ k ] = shape.displace( v, Dx, Dy )
+				recursion_tbl[ k ] = shape.displace( v, Dx, Dy, Mode )
 			end
 			return recursion_tbl
 		end --recursión: september 08th 2019
@@ -11611,15 +11109,43 @@
 			Dx, Dy = math.polar( Dx[ 1 ], Dx[ 2 ] )
 		end --add: april 12th 2020
 		---------------------------
-		if type( Dx ) == "string" then
-			Dx = Dx:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-			Dx = Dx:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-			Dx = string.toval( Dx )
-		end
-		if type( Dy ) == "string" then
-			Dy = Dy:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-			Dy = Dy:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-			Dy = string.toval( Dy )
+		if type( Dx ) == "string"
+			or type( Dy ) == "string"
+			or Mode then
+			shape.info( Shape )
+			if Dx == "origin" then
+				Dx, Dy, Mode = 0, 0, "origin"
+			elseif Dx == "incenter" then
+				Dx, Dy, Mode = 0, 0, "center"
+			end
+			if type( Dx ) == "string" then
+				Dx = Dx:gsub( "(%d)x", "%1 * x" ):gsub( "x", w_shape )
+				Dx = Dx:gsub( "(%d)y", "%1 * y" ):gsub( "y", h_shape )
+				Dx = string.toval( Dx )
+			end
+			if type( Dy ) == "string" then
+				Dy = Dy:gsub( "(%d)x", "%1 * x" ):gsub( "x", w_shape )
+				Dy = Dy:gsub( "(%d)y", "%1 * y" ):gsub( "y", h_shape )
+				Dy = string.toval( Dy )
+			end
+			--Mode: "origin", "center", "first", "last"
+			if Mode == "origin" then			-->shape.origin( Shape ) = shape.displace( Shape, 0, 0, "origin" )
+				Dx = Dx - minx
+				Dy = Dy - miny
+			elseif Mode == "center" then
+				Dx = Dx - minx - 0.5 * w_shape	-->shape.incenter( Shape ) = shape.displace( Shape, 0, 0, "center" )
+				Dy = Dy - miny - 0.5 * h_shape	-->shape.centerpos( Shape, Dx, Dy ) = shape.displace( Shape, Dx, Dy, "center" )
+			elseif Mode == "first" then			-->shape.firstpos( Shape, Dx, Dy ) = shape.displace( Shape, Dx, Dy, "first" )
+				local px, py = Shape:match( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)" )
+				px, py = tonumber( px ), tonumber( py )
+				Dx = Dx - px
+				Dy = Dy - py
+			elseif Mode == "last" then
+				local px, py = shape.reverse( Shape ):match( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)" )
+				px, py = tonumber( px ), tonumber( py )
+				Dx = Dx - px
+				Dy = Dy - py
+			end --add: june 24th 2020
 		end
 		-- add: may 02nd 2020 -----
 		effector.print_error( Dx, "number", "shape.displace", 2 )
@@ -11632,108 +11158,6 @@
 		Shape = shape.ASSDraw3( Shape )
 		return Shape
 	end --shape.displace( shape.circle, 20, 10 )
-	
-	function shape.incenter( Shape )
-		--Desplaza la Shape respecto a su centro, al punto P = (0, 0)
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		effector.print_error( Shape, "shape", "shape.incenter", 1 )
-		local Shape = shape.origin( Shape )
-		Shape = shape.displace( Shape, -shape.width( Shape ) / 2, -shape.height( Shape ) / 2)
-		return shape.ASSDraw3( Shape )
-	end
-	
-	function shape.centerpos( Shape, CenterX, CenterY )
-		--Desplaza la Shape respecto a su centro, al punto P = ( CenterX, CenterY )
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		local Shape = shape.ASSDraw3( Shape )
-		if type( Shape ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( Shape ) do
-				recursion_tbl[ k ] = shape.centerpos( v, CenterX, CenterY )
-			end
-			return recursion_tbl
-		end --recursión: september 08th 2019
-		if type( CenterX ) == "function" then
-			CenterX = CenterX( )
-		end
-		if type( CenterY ) == "function" then
-			CenterY = CenterY( )
-		end
-		effector.print_error( Shape, "shape", "shape.centerpos", 1 )
-		local CenterX = CenterX or 0
-		local CenterY = CenterY or 0
-		if type( CenterX ) == "string" --shape.centerpos( shape.rectangle, "m 20 20 " )
-			and CenterX:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-			CenterY = tonumber( CenterX:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-			CenterX = tonumber( CenterX:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-		end --add: may 18th 2020
-		if type( CenterX ) == "string" then
-			CenterX = CenterX:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-			CenterX = CenterX:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-			CenterX = string.toval( CenterX )
-		end
-		if type( CenterY ) == "string" then
-			CenterY = CenterY:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-			CenterY = CenterY:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-			CenterY = string.toval( CenterY )
-		end --add: may 03rd 2020
-		effector.print_error( CenterX, "number", "shape.centerpos", 2 )
-		effector.print_error( CenterY, "number", "shape.centerpos", 3 )
-		Shape = shape.displace( shape.incenter( Shape ), CenterX, CenterY )
-		return Shape
-	end --shape.centerpos( shape.circle, 300, 300 )
-	
-	function shape.firstpos( Shape, pos_x, pos_y )
-		--Desplaza la Shape respecto a su primer punto, al punto P = ( pos_x, pos_y )
-		if type( Shape ) == "function" then
-			Shape = Shape( )
-		end
-		local Shape = shape.ASSDraw3( Shape )
-		if type( Shape ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( Shape ) do
-				recursion_tbl[ k ] = shape.firstpos( v, pos_x, pos_y )
-			end
-			return recursion_tbl
-		end --recursión: september 08th 2019
-		if type( pos_x ) == "function" then
-			pos_x = pos_x( )
-		end
-		if type( pos_y ) == "function" then
-			pos_y = pos_y( )
-		end
-		effector.print_error( Shape, "shape", "shape.firstpos", 1 )
-		local first_x = pos_x or 0
-		local first_y = pos_y or 0
-		if type( first_x ) == "string" --shape.firstpos( shape.rectangle, "m 20 20 " )
-			and first_x:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-			first_y = tonumber( first_x:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-			first_x = tonumber( first_x:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-		end --add: may 18th 2020
-		if type( first_x ) == "string" then
-			first_x = first_x:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-			first_x = first_x:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-			first_x = string.toval( first_x )
-		end
-		if type( first_y ) == "string" then
-			first_y = first_y:gsub( "(%d)x", "%1 * x" ):gsub( "x", shape.width( Shape ) )
-			first_y = first_y:gsub( "(%d)y", "%1 * y" ):gsub( "y", shape.height( Shape ) )
-			first_y = string.toval( first_y )
-		end --add: may 03rd 2020
-		effector.print_error( first_x, "number", "shape.firstpos", 2 )
-		effector.print_error( first_y, "number", "shape.firstpos", 3 )
-		local first_p = { }
-		if Shape:match( "m %-?%d+[%.%d]* %-?%d+[%.%d]* " ) then
-			first_p.x = Shape:match( "m (%-?%d+[%.%d]*) %-?%d+[%.%d]* " )
-			first_p.y = Shape:match( "m %-?%d+[%.%d]* (%-?%d+[%.%d]*) " )
-		end
-		Shape = shape.displace( Shape, first_x - first_p.x, first_y - first_p.y )
-		return Shape
-	end
 	
 	function shape.ratio( Shape, Ratiox, Ratioy, Mode )
 		--modifica el tamaño de la Shape respecto a una proporción (Ratio)
@@ -11816,23 +11240,23 @@
 		--------------------------------------------------------------------------------
 		--desplaza la shape_fx respecto a las 9 posiciones notables de la Shape original
 		if Mode == 1 then
-			Shape = shape.displace( shape.origin( Shape ), shpx1, shpy2 - shape.height( Shape ) )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx1, shpy2 - shape.height( Shape ) )
 		elseif Mode == 2 then
-			Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy2 - shape.height( Shape ) )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy2 - shape.height( Shape ) )
 		elseif Mode == 3 then
-			Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy2 - shape.height( Shape ) )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx2 - shape.width( Shape ), shpy2 - shape.height( Shape ) )
 		elseif Mode == 4 then
-			Shape = shape.displace( shape.origin( Shape ), shpx1, shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx1, shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
 		elseif Mode == 5 then
-			Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
 		elseif Mode == 6 then
-			Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx2 - shape.width( Shape ), shpy1 + 0.5 * shp_h - 0.5 * shape.height( Shape ) )
 		elseif Mode == 7 then
-			Shape = shape.displace( shape.origin( Shape ), shpx1, shpy1 )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx1, shpy1 )
 		elseif Mode == 8 then
-			Shape = shape.displace( shape.origin( Shape ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx1 + 0.5 * shp_w - 0.5 * shape.width( Shape ), shpy1 )
 		elseif Mode == 9 then
-			Shape = shape.displace( shape.origin( Shape ), shpx2 - shape.width( Shape ), shpy1 )
+			Shape = shape.displace( shape.displace( Shape, "origin" ), shpx2 - shape.width( Shape ), shpy1 )
 		end --add: january 05th 2019
 		--------------------------------------------------------------------------------
 		return Shape --> Mode = 0
@@ -12009,12 +11433,12 @@
 			local shp_array = ""
 			for i = 1, #configs_pos do
 				shp_array = shp_array .. shape.displace(
-					shape.rotate( shape.incenter( Shapes[ (i - 1) % #Shapes + 1 ] ), configs_pos[ i ][ 3 ] ),
+					shape.rotate( shape.displace( Shapes[ (i - 1) % #Shapes + 1 ], "incenter" ), configs_pos[ i ][ 3 ] ),
 					configs_pos[ i ][ 1 ], configs_pos[ i ][ 2 ]
 				)
 				-- la opción de que la shape rote o no
 			end --shape.array( shape.size( shape.rectangle, 15, 45 ), 20, "shape", shape.circle )
-			return shape.origin( shp_array ) --add: december 08th 2018
+			return shape.displace( shp_array, "origin" ) --add: december 08th 2018
 		elseif An_mo == "shape2"
 			or An_mo == "shape3" then
 			local configs_pos = math.shape( disxy, nil, nil, loop1 * loop2 )
@@ -12024,11 +11448,11 @@
 					Shapes[ (i - 1) % #Shapes + 1 ] = shape.reverse( Shapes[ (i - 1) % #Shapes + 1 ] )
 				end
 				shp_array = shp_array .. shape.displace(
-					shape.rotate( shape.incenter( Shapes[ (i - 1) % #Shapes + 1 ] ), configs_pos[ i ][ 3 ] ),
+					shape.rotate( shape.displace( Shapes[ (i - 1) % #Shapes + 1 ], "incenter" ), configs_pos[ i ][ 3 ] ),
 					configs_pos[ i ][ 1 ], configs_pos[ i ][ 2 ]
 				)
 			end --shape.array( shape.size( shape.rectangle, 15, 45 ), 24, "shape2", shape.circle )
-			return shape.origin( shp_array ) --add: december 08th 2018
+			return shape.displace( shp_array, "origin" ) --add: december 08th 2018
 		elseif An_mo == "radial3" then
 			local radio_array, arcox
 			for i = 1, #Shapes do
@@ -12036,7 +11460,7 @@
 				widths[ i ] = shape.width( Shapes[ i ] ) + distance_r
 				shp_lefts[ i ] = shp_lefts[ i - 1 ] + widths[ i - 1 ]
 				for k = 1, loop2 do
-					shape_array[ i ] = shape_array[ i ] .. shape.displace( shape.origin( Shapes[ i ] ),
+					shape_array[ i ] = shape_array[ i ] .. shape.displace( shape.displace( Shapes[ i ], "origin" ),
 						(k - 1) * widths[ i ],
 						-0.5 * shape.height( Shapes[ i ] )
 					)
@@ -12057,14 +11481,14 @@
 					radio_array ), angle_ini + arcox
 				)
 			end
-			return shape.origin( shape_radial_fx )	--radial3
+			return shape.displace( shape_radial_fx, "origin" )	--radial3
 		elseif An_mo == "radial"
 			or An_mo == "radial1"
 			or An_mo == "radial2" then
 			local radio_array, arcox
 			for i = 1, loop2 do
 				idx = (i - 1) % #Shapes + 1
-				shape_array[ i ] = shape.displace( shape.origin( Shapes[ idx ] ), 0, -0.5 * shape.height( Shapes[ idx ] ) )
+				shape_array[ i ] = shape.displace( shape.displace( Shapes[ idx ], "origin" ), 0, -0.5 * shape.height( Shapes[ idx ] ) )
 				widths[ i ] = shape.width( Shapes[ idx ] ) + distance_r
 				shp_lefts[ i ] = shp_lefts[ i - 1 ] + widths[ i - 1 ]
 				shape_radial = shape_radial .. shape.displace( shape_array[ i ], shp_lefts[ i ] )
@@ -12089,11 +11513,11 @@
 					angle_ini + arcox
 				)
 			end
-			return shape.origin( shape_radial_fx )	--radial1, radial2
+			return shape.displace( shape_radial_fx, "origin" )	--radial1, radial2
 		elseif An_mo == "array" then
 			for i = 1, loop2 do
 				idx = (i - 1) % #Shapes + 1
-				Shapes[ idx ] = shape.origin( Shapes[ idx ] )
+				Shapes[ idx ] = shape.displace( Shapes[ idx ], "origin" )
 				heights[ i ] = shape.height( Shapes[ idx ] ) + distance_y
 				shp_tops[ i ] = shp_tops[ i - 1 ] + heights[ i - 1 ]
 				shape_rectangular[ i ] = ""
@@ -12116,13 +11540,13 @@
 		end
 		for i = 1, loop1 do
 			idx = (i - 1) % #Shapes + 1
-			shape_lineal[ i ] = shape.origin( shape.rotate( Shapes[ idx ], angle_shape - angle_array ) )
+			shape_lineal[ i ] = shape.displace( shape.rotate( Shapes[ idx ], angle_shape - angle_array ), "origin" )
 			shape_lineal[ i ] = shape.displace( shape_lineal[ i ], 0, -0.5 * shape.height( shape_lineal[ i ] ) )
 			widths[ i ] = shape.width( shape_lineal[ i ] ) + distance_x
 			shp_lefts[ i ] = shp_lefts[ i - 1 ] + widths[ i - 1 ]
 			shape_lineal_fx = shape_lineal_fx .. shape.displace( shape_lineal[ i ], shp_lefts[ i ] )
 		end
-		return shape.origin( shape.rotate( shape_lineal_fx, angle_array ) )
+		return shape.displace( shape.rotate( shape_lineal_fx, angle_array ), "origin" )
 	end
 	
 	function shape.lmove( Coor, Times, Times2, Accel ) -- Shape Lineal Move 2
@@ -12856,7 +12280,7 @@
 		end
 		if linefx[ ii ].text:match( "\\i?clip%b()" ) then
 			local Shape = shape.ASSDraw3( linefx[ ii ].text:match( "\\i?clip%b()" ) )
-			Shape = shape.firstpos( Shape, 0, 0 )
+			Shape = shape.displace( Shape, 0, 0, "first" )
 			local t_ini = Ini or fx.movet_i
 			local t_dur = Dur or frame_dur
 			effector.print_error( t_dur, "number", "shape.lineclip", 2 )
@@ -13365,7 +12789,7 @@
 				end --mod: january 02nd 2019
 				i = i + 1
 			end
-			Shape = remember( "shape_multi1", shape.origin( Shape ) )
+			Shape = remember( "shape_multi1", shape.displace( Shape, "origin" ) )
 		end
 		return shape.ASSDraw3( Shape ) --shape.multi1( 100, { 10, { 4 } } )
 	end --retorna shapes cuadradas concéntricas
@@ -13477,20 +12901,20 @@
 			effector.print_error( Size, "numbertable", "shape.multi3", 1 )
 			effector.print_error( Bord, "numbertable", "shape.multi3", 2 )
 			effector.print_error( Shape, "shape", "shape.multi3", 3 )
-			Shape3 = shape.incenter( shape.size( Shape, Bord[ 1 ] ) )
+			Shape3 = shape.displace( shape.size( Shape, Bord[ 1 ] ), "incenter" )
 			while Size_max <= Size do
 				if type( Bord ) == "table" then
 					Brd_i = Bord[ i % #Bord + 1 ]
 				end
 				Size_max = Size_max + 2 * ((type( Brd_i ) == "table") and Brd_i[ 1 ] or Brd_i)
 				if type( Brd_i ) == "number" then
-					Shpfx1 = shape.incenter( shape.size( Shape, Size_max ) )
-					Shpfx2 = shape.incenter( shape.reverse( shape.size( Shape, Size_max - 2 * Brd_i ) ):gsub( "m", "l", 1 ) )
+					Shpfx1 = shape.displace( shape.size( Shape, Size_max ), "incenter" )
+					Shpfx2 = shape.displace( shape.reverse( shape.size( Shape, Size_max - 2 * Brd_i ) ):gsub( "m", "l", 1 ), "incenter" )
 					Shape3 = Shape3 .. Shpfx1 .. Shpfx2
 				end
 				i = i + 1
 			end --mod: january 03rd 2019
-			Shape3 = remember( "shape_multi3", shape.origin( Shape3 ) )
+			Shape3 = remember( "shape_multi3", shape.displace( Shape3, "origin" ) )
 		end --shape.multi3( 100, { 8, { 5 } } )
 		return shape.ASSDraw3( Shape3 )
 	end --si no se pone "Shape", retorna círculos concéntricos, o shapes concéntricas de la que se haya ingresado
@@ -13561,8 +12985,8 @@
 				i = i + 1
 			end
 			Shapefx = remember( "Shpfx", ( Loop1 % 2 == 1 )
-				and shape.origin( shape.rotate( Shape, ((-1) ^ ((Loop1 - 1) / 2)) * 90 / Loop1 ) )
-				or  shape.origin( Shape )
+				and shape.displace( shape.rotate( Shape, ((-1) ^ ((Loop1 - 1) / 2)) * 90 / Loop1 ), "origin" )
+				or  shape.displace( Shape, "origin" )
 			)
 		end
 		return Shapefx --shape.multi4( 100, 6, 4, 3 )
@@ -13596,14 +13020,14 @@
 					ShapeT[ i ] = ""
 					for k = 1, #Shapes do
 						ShapeT[ i ] = ShapeT[ i ] .. shape.displace(
-							shape.incenter( Shapes[ (k - i) % #Shapes + 1 ] ), (k - 1) * max_W, (i - #Shapes) * max_H
+							shape.displace( Shapes[ (k - i) % #Shapes + 1 ], "incenter" ), (k - 1) * max_W, (i - #Shapes) * max_H
 						)
 					end
 				end
-				Shape = shape.origin( table.op( ShapeT, "concat" ) )
+				Shape = shape.displace( table.op( ShapeT, "concat" ), "origin" )
 			else
 				Shape = Shapes or shape.size( shape.rectangle, 8 * ratio )
-				Shape = shape.origin( Shape )
+				Shape = shape.displace( Shape, "origin" )
 			end
 			local Height = Height or val_height
 			local Width = Width or val_width
@@ -13716,7 +13140,7 @@
 					end
 				end
 			end
-			Shape = remember( "shape_multi7", shape.origin( Shape ) )
+			Shape = remember( "shape_multi7", shape.displace( Shape, "origin" ) )
 		end
 		return shape.ASSDraw3( Shape ) --shape.multi7( 12, { 20, 40, 60 } )
 	end --retorna un círculo o el perímetro de un círculo hecho con segmentos individuales
@@ -13735,7 +13159,7 @@
 			Loop = Loop( )
 		end
 		local Shape = Shape or shape.rectangle
-		Shape = shape.origin( Shape )
+		Shape = shape.displace( Shape, "origin" )
 		local Size_i = Size_ini or shape.width( Shape )
 		local Size_f = Size_fin or shape.width( Shape ) * 0.5
 		local Loop_s = Loop or 8
@@ -13754,7 +13178,7 @@
 			Shp_mul8 = ""
 			local Shp_cent, Shp_midd = 0.5 * shape.width( Shp_init ), 0.5 * shape.height( Shp_init )
 			for i = 1, Loop_s do
-				Shp_mul8 = Shp_mul8 .. shape.centerpos( shape.size( Shp_init, Size_max - (Size_max - Size_min) * (i - 1) / (Loop_s - 1), 0 ), Shp_cent, Shp_midd )
+				Shp_mul8 = Shp_mul8 .. shape.displace( shape.size( Shp_init, Size_max - (Size_max - Size_min) * (i - 1) / (Loop_s - 1), 0 ), Shp_cent, Shp_midd, "center" )
 			end
 			Shp_mul8 = remember( "shape8", Shp_mul8 )
 		end
@@ -13793,13 +13217,13 @@
 		end --add: december 05th 2018
 		local Shps_9 = "{\\p1}"
 		if type( Shape ) == "string" then
-			Shape = shape.origin( Shape )
+			Shape = shape.displace( Shape, "origin" )
 			for i = 1, Loop_s do
 				Shps_9 = Shps_9 .. tag_N .. Tags_s[ (i - 1) % #Tags_s + 1 ] .. "}" .. Shape
 			end
 		elseif type( Shape ) == "function" then
 			for i = 1, Loop_s do
-				Shps_9 = Shps_9 .. tag_N .. Tags_s[ (i - 1) % #Tags_s + 1 ] .. "}" .. shape.origin( Shape( i, Loop_s ) )
+				Shps_9 = Shps_9 .. tag_N .. Tags_s[ (i - 1) % #Tags_s + 1 ] .. "}" .. shape.displace( Shape( i, Loop_s ), "origin" )
 			end --january 24th 2018
 			--[[
 			my_filter = function( ... )
@@ -13887,11 +13311,11 @@
 			if  Bord > floor( math.min( Size_x, Size_y ) / 2 ) - 1 then
 				Bord = floor( math.min( Size_x, Size_y ) / 2 ) - 1
 			end
-			Shape_1 = shape.incenter( shape.size( Shape, Size_x, Size_y ) )
-			Shape_2 = shape.incenter( shape.size( shape.reverse( Shape ), Size_x - 2 * Bord, Size_y - 2 * Bord ) )
+			Shape_1 = shape.displace( shape.size( Shape, Size_x, Size_y ), "incenter" )
+			Shape_2 = shape.displace( shape.size( shape.reverse( Shape ), Size_x - 2 * Bord, Size_y - 2 * Bord ), "incenter" )
 			Shape_2 = "l" .. Shape_2:sub( 2, -1 )
 			Shape_B = Shape_1 .. Shape_2
-			Shape = shape.firstpos( Shape_B, P_first.x, P_first.y )
+			Shape = shape.displace( Shape_B, P_first.x, P_first.y, "first" )
 		end
 		return Shape
 	end --shape.bord( shape.circle, 8, 120 )
@@ -14127,10 +13551,10 @@
 		if type( Shape ) == "string"
 			and Shape ~= "" then
 			Cpx, Cpy, Radius = math.circle( Shape )
-			ShapeC = shape.displace( shape.incenter( shape.size( shape.circle, 2 * Radius ) ), Cpx, Cpy )
+			ShapeC = shape.displace( shape.size( shape.circle, 2 * Radius ), Cpx, Cpy, "center" )
 			ShapeC = format( "{\\an7\\pos(0,0)}%s", ShapeC )
 		elseif type( Shape ) == "table" then
-			ShapeC = shape.displace( shape.incenter( shape.size( shape.circle, 2 * Shape[ 3 ] ) ), Shape[ 1 ], Shape[ 2 ] )
+			ShapeC = shape.displace( shape.size( shape.circle, 2 * Shape[ 3 ] ), Shape[ 1 ], Shape[ 2 ], "center" )
 			ShapeC = format( "{\\an7\\pos(0,0)}%s", ShapeC )
 		end
 		return ShapeC
@@ -14376,7 +13800,7 @@
 				end
 			end
 		end
-		local Matrix = math.matrix_mul2( unpack( Matrixes ) )
+		local Matrix = math.matrix_mul( unpack( Matrixes ) )
 		if type( Shape ) == "table" then
 			for i = 1, #Shape do
 				Shape[ i ] = shape.matrix( Shape[ i ], ... )
@@ -14557,7 +13981,7 @@
 			end
 			return x, y
 		end
-		return format( "{\\p1}%s", shape.origin( shape.filter( Shape, 2, shape_filter ) ) )
+		return format( "{\\p1}%s", shape.displace( shape.filter( Shape, 2, shape_filter ), "origin" ) )
 	end --shape.deformed( shape.rectangle, 8, 5, "y" )
 	
 	function shape.fusion( Shapes, Tags )
@@ -14572,7 +13996,7 @@
 		if j == 1 then
 			Shapes_tbl = Shapes or { shape.rectangle, shape.circle }
 			if type( Shapes_tbl ) == "string" then
-				Shapes_tbl = shape.divide( shape.origin( Shapes_tbl ) )
+				Shapes_tbl = shape.divide( shape.displace( Shapes_tbl, "origin" ) )
 			end
 			for i = 1, #Shapes_tbl do
 				shape.info( Shapes_tbl[ i ] )
@@ -14588,7 +14012,7 @@
 				Shapes_tbl[ i ] = shp_mark .. Shapes_tbl[ i ]
 			end
 			for i = #Shapes_tbl, 1, -1 do
-				Shapes_tbl[ i ] = shape.centerpos( Shapes_tbl[ i ], 0.5 * shp_mark_x + (#Shapes_tbl - i) * shp_mark_x, 0.5 * shp_mark_y )
+				Shapes_tbl[ i ] = shape.displace( Shapes_tbl[ i ], 0.5 * shp_mark_x + (#Shapes_tbl - i) * shp_mark_x, 0.5 * shp_mark_y, "center" )
 				Shapes_tbl[ i ] = shape.displace( Shapes_tbl[ i ], -0.5 * #Shapes_tbl * shp_mark_x + 0.5 * shp_mark_x )
 			end
 			local shp_tags = Tags
@@ -14625,7 +14049,7 @@
 		effector.print_error( deforx, "number", "shape.deformed2", 2 )
 		effector.print_error( defory, "number", "shape.deformed2", 3 )
 		local maxx, maxy = shape.width( Shape ), shape.height( Shape )
-		Shape = shape.origin( Shape )
+		Shape = shape.displace( Shape, "origin" )
 		Shape = Shape:gsub( "(%d+[%.%d]* %d+[%.%d]*)",
 			function( Point )
 				if table.inside( coors, Point ) == false then
@@ -15196,7 +14620,7 @@
 		shape.info( Shapes[ j ] )
 		local nx, ny = c_shape, m_shape
 		local pixel_pos = effector.new_pos( fx.pos_x + nx - cx, fx.pos_y + ny - cy )
-		return format( "{%s}", pixel_pos ) .. shape.origin( Shapes[ j ] )
+		return format( "{%s}", pixel_pos ) .. shape.displace( Shapes[ j ], "origin" )
 	end --may 21st 2020
 	
 	function shape.grid( Shape, Filter, Align, Line, Lines )
@@ -15206,7 +14630,7 @@
 		if type( Align ) == "function" then
 			Align = Align( )
 		end
-		local Shape = shape.origin( Shape or shape.size( shape.circle, 32 ) )
+		local Shape = shape.displace( Shape or shape.size( shape.circle, 32 ), "origin" )
 		local Filter = Filter or function( ) return "" end
 		local Align = Align or 7					--alineación, en caso de ingresar imagen
 		local x_max, y_max = shape.width( Shape ), shape.height( Shape )
@@ -15792,7 +15216,7 @@
 							local x1, y1 = tonumber( x1 ), tonumber( y1 )
 							--graph.polygon( 7, 200, 270, 20, nil, nil, { nil, nil, "v" } )
 							local Shape = shape.rotate( shape.ratio( tip, { nil, x2 - x1 } ), { nil, 0 } )
-							return shape.firstpos( Shape, x1, y1 ):gsub( "m", "" )
+							return shape.displace( Shape, x1, y1, "first" ):gsub( "m", "" )
 							--graph.polygon( 6, 200, 270, 20, nil, nil, { 60, nil, "v" } )
 						end
 					)
@@ -15810,7 +15234,7 @@
 							if n % 2 == 1 then
 								Angle = math.angle( format( "%s %s l %s %s", x0, y0, x1, y1 ) ) + 90
 							end --graph.polygon( 5, 200, 270, 20, nil, nil, { 60, nil, "v", "v" } )
-							Shape = shape.firstpos( shape.rotate( Shape, Angle ), x1, y1 ):gsub( "m", "" )
+							Shape = shape.displace( shape.rotate( Shape, Angle ), x1, y1, "first" ):gsub( "m", "" )
 							return format( " %s %s l ", x0, y0 ) .. Shape
 						end
 					)
@@ -15824,7 +15248,7 @@
 			return shp_polygon
 		end --graph.polygon( 5, 200, 250, 20 )
 		if type( Angle ) == "number" then
-			return shape.origin( graph_polygon( n, Height, Angle, Bord, Extra, Width ) )
+			return shape.displace( graph_polygon( n, Height, Angle, Bord, Extra, Width ), "origin" )
 			--graph.polygon( 6, 300, 320, 10 )
 		end
 		if type( Angle ) == "table" then
@@ -15834,7 +15258,7 @@
 				Bord_i = Bord_i + 2 * (Bord + Space / sin( rad( Theta ) ))
 			end --graph.polygon( 6, 40, { 240, 180, 200, 100, 80 }, 20, 5 )
 		end
-		multi_polygon = shape.origin( multi_polygon )
+		multi_polygon = shape.displace( multi_polygon, "origin" )
 		if Tags then
 			multi_polygon = shape.fusion( multi_polygon, Tags )
 		end --graph.polygon( 10, 50, { 240, 180, 200, 100, 80, 300, 200, 100 }, 15, 4, table.ipol( { "\\1c&H00FF00&", "\\1c&H0000FF&" }, 8 ) )
@@ -15962,7 +15386,7 @@
 			if is_shape then
 				return shp_line
 			end --graph.line( { { 0, 20 }, { 30, 20 }, { 0, 50 }, { 330, 20 }, { 0, 20 } }, 8 )
-			return shape.origin( shp_line )
+			return shape.displace( shp_line, "origin" )
 		end --april 18th 2020
 		if type( Configs ) == "string" then
 			local Shapes = shape.divide( Configs )
@@ -16065,7 +15489,7 @@
 		local Radius = Radius or 100
 		local n = n or 8
 		local Dent = Dent or "m 0 0 l 100 0 "
-		Dent = shape.incenter( shape.rotate( Dent, { nil, 0 } ) )
+		Dent = shape.displace( shape.rotate( Dent, { nil, 0 } ), "incenter" )
 		effector.print_error( Radius, "number", "graph.gear", 1 )
 		effector.print_error( n, "number", "graph.gear", 2 )
 		effector.print_error( Dent, "shape", "graph.gear", 3 )
@@ -16105,7 +15529,7 @@
 			circle_add1 = shape.size( circle[ "+" ], 1.1 * Radius ) .. shape.size( circle[ "-" ], 0.9 * Radius )
 			circle_add2 = shape.size( circle[ "+" ], 0.5 * Radius )
 		end --graph.gear( 80, 8, "m -45 -16 l -20 0 l 20 0 l 45 -16 ", true )
-		return shape.origin( shp_gear .. circle_add1 .. circle_add2 )
+		return shape.displace( shp_gear .. circle_add1 .. circle_add2, "origin" )
 	end --april 12th 2020
 
 	function graph.cake( Radius, Angle, Bord, Space, Tags, Extra )
@@ -16214,7 +15638,7 @@
 						function( x, y )
 							local x, y = tonumber( x ), tonumber( y )
 							local Shape = shape.rotate( shape.ratio( tip, { nil, Bord } ), { nil, 0 } )
-							return shape.firstpos( Shape, x, y ):gsub( "m", "" )
+							return shape.displace( Shape, x, y, "first" ):gsub( "m", "" )
 						end
 					)
 				end
@@ -16227,7 +15651,7 @@
 						function( x, y )
 							local x, y = tonumber( x ), tonumber( y )
 							local Shape = shape.rotate( shape.ratio( tip, { nil, Bord } ), { nil, 0 } )
-							return shape.firstpos( shape.rotate( Shape, Angle - 180 ), x, y ):gsub( "m", "" )
+							return shape.displace( shape.rotate( Shape, Angle - 180 ), x, y, "first" ):gsub( "m", "" )
 						end
 					)
 				end
@@ -16237,7 +15661,7 @@
 		end
 		--------------------------
 		if type( Angle ) == "number" then
-			return shape.origin( graph_cake( Radius, Angle, Bord, Extra ) )
+			return shape.displace( graph_cake( Radius, Angle, Bord, Extra ), "origin" )
 			--graph.cake( 100, 300, 10, nil, nil, { 100 } )
 		end --retorna el cake sin borde :D
 		local Bord_i, Anglex, multi_cake = 0, 0, ""
@@ -16254,7 +15678,7 @@
 				Bord_i = Bord_i + Bord + Space
 			end --graph.cake( 40, { 240, 180, 200, 100, 80 }, 10 )
 		end
-		multi_cake = shape.origin( multi_cake )
+		multi_cake = shape.displace( multi_cake, "origin" )
 		if Tags then
 			multi_cake = shape.fusion( multi_cake, Tags )
 		end --graph.cake( 50, { 240, 180, 200, 100, 80, 300, 200, 100 }, 15, 4, table.ipol( { "\\1c&H00FF00&", "\\1c&H0000FF&" }, 8 ) )
@@ -17214,7 +16638,7 @@
 				end
 				local ang_x, ang_y = Coor[ 1 ], Coor[ 2 ]
 				local angle = math.angle( center_x, center_y, ang_x, ang_y )
-				local shape_crc = shape.centerpos( shape.size( shape.circle, 2 * (Radius + (fx.offset[ 1 ] or 0)) ) )
+				local shape_crc = shape.displace( shape.size( shape.circle, 2 * (Radius + (fx.offset[ 1 ] or 0)) ), "center" )
 				shape_crc = shape.displace( shape.rotate( shape_crc, angle - 90 + (fx.offset[ 2 ] or 0) ), center_x, center_y )
 				if l_effect:match( "icircle" ) then
 					shape_crc = shape.reverse( shape_crc )
@@ -17858,7 +17282,7 @@
 				shwidth = Rr( 18, 36 )
 				Horizontal[ i + 1 ] = (i == 0) and 0 or Horizontal[ i ] + R( 0.5 * shwidth, 1.5 * shwidth * Space )
 				Colors[ i + 1 ] = colortag and colorm1 or table_mask( colorm1, colorm2, "\\1c" )
-				Shapes[ i + 1 ] = shape.size( shape.origin( shape.rotate( Shape, R( 360 ) ) ), shwidth, Rr( 18, 36 ) )
+				Shapes[ i + 1 ] = shape.size( shape.displace( shape.rotate( Shape, R( 360 ) ), "origin" ), shwidth, Rr( 18, 36 ) )
 				i = i + 1
 			end
 			for i = 1, #Horizontal do
@@ -17889,13 +17313,13 @@
 			if #decide3 == 0 then
 				return format( "{\\an7\\pos(%s,%s)%s\\3c%s\\bord2\\blur4%s%s\\p1}%s",
 					l.left, l.top, Colors[ R( #Colors ) ], shape.color3, text.to_clip( ), fxMask,
-					shape.centerpos( Shapes[ R( #Shapes ) ], val_center - l.left, l.middle )
+					shape.displace( Shapes[ R( #Shapes ) ], val_center - l.left, l.middle, "center" )
 				)
 			end
 			maxloop( #decide3 )
 			return format( "{\\an7\\pos(%s,%s)%s\\3c%s\\bord2\\blur4%s%s\\p1}%s",
 				l.left, l.top, Colors[ decide3[ j ][ 1 ] ], shape.color3, text.to_clip( ), fxMask,
-				shape.centerpos( Shapes[ decide3[ j ][ 1 ] ], decide3[ j ][ 2 ], Vertical[ decide3[ j ][ 1 ] ] )
+				shape.displace( Shapes[ decide3[ j ][ 1 ] ], decide3[ j ][ 2 ], Vertical[ decide3[ j ][ 1 ] ], "center" )
 			)
 		end
 		return format( "{\\1a&HFF&%s}%s", fxBord, val_text )
