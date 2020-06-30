@@ -7,12 +7,13 @@
 	Effector_Lib_version  = "3.6"
 	Effector_Lib_modified = "June 16th 2020"
 	-- functions abbreviations -------------------------------------------------------------------------------
-	sin = math.sin			asin = math.asin		log   = math.log10			pi = math.pi
-	cos = math.cos			acos = math.acos		ceil  = math.ceil			ln = math.log
-	tan = math.tan			atan = math.atan		rand  = math.random			r  = math.random
-	abs = math.abs			sinh = math.sinh		floor = math.floor			F  = string.format
-	deg = math.deg			cosh = math.cosh	  	atan2 = math.atan2			format = string.format
-	rad = math.rad			tanh = math.tanh		script_version = "3.6"		script_update = " legacy"
+	sin = math.sin							asin = math.asin						pi = math.pi
+	cos = math.cos							acos = math.acos						ln = math.log
+	tan = math.tan							atan = math.atan						floor = math.floor
+	abs = math.abs							sinh = math.sinh						atan2 = math.atan2
+	deg = math.deg							cosh = math.cosh					  	format = string.format
+	rad = math.rad							tanh = math.tanh						script_version = "3.6"
+	log = math.log10						ceil = math.ceil						script_update = " legacy"
 	
 	-- include Yutils by Christoph Spanknebel "Youka" --------------------------------------------------------
 	Yutils = include( "Yutils.lua" ) 									 -- https://github.com/Youka/Yutils --
@@ -39,12 +40,6 @@
 			time_loop1( Mode, Delay )
 			time_loop2( Mode, Delay )
 		
-		librería random
-		-	r( r_i, r_f, r_step )
-		-	random.color( H, S, V )
-		-	random.alpha( alpha_i, alpha_f )
-		-	random.unique( Table, Index )
-		
 		librería table
 		-	table.view( Table, Name, indent )
 		-	table.inside( Table, e )
@@ -54,18 +49,16 @@
 		-	table.disorder( Table )
 			table.concat1( Table, ... )
 			table.concat2( Table, ... )
-		-	table.concat3( ... )
-		-	table.concat4( ... )
+			table.concat3( ... )
+			table.concat4( ... )
 		-	table.filter( Table, Filter )
 		-	table.replay( len_table, ... )
 		-	table.count( Table, e )
 		-	table.pos( Table, e )
-		-	table.string( String, Number_str )
-		-	table.space( String )
-		-	table.word( String )
+		-	table.string( String, n )
 		-	table.retire( Table, ... )
-		+	table.combine( Table, n_combinations )
-		-	table.inserttable( Table1, Table2, index_insert )
+		+	table.combine( Table, n )
+		-	table.inserttable( Table1, Table2, Index )
 		-	table.reverse( Table )
 		-	table.cyclic( Table )
 		-	table.op( Table, Mode, add )
@@ -151,8 +144,7 @@
 			math.shape( Shape, Length, Mode )
 			math.audio( Audio_wav, Loops, Scale, Offset_time, Values )
 			math.to16( Num )
-			math.clamp( Num, Min, Max )
-			math.clamp2( Num, Min, Max )
+			math.clamp( Num, Min, Max, Cycle )
 			math.cubic( c1, c2, c3, c4 )
 			math.count( )
 		
@@ -198,6 +190,7 @@
 			color.ass3( Hnum, Snum, Vnum )
 		-	color.to_RGB( Color )
 		-	color.to_HSV( Color )
+			color.random( H, S, V )
 		-	color.interpolate( Ipol, Color1, Color2 )
 		-	color.set( Times, Colors, ... )
 		<	color.matrix( Color, ... )
@@ -207,6 +200,7 @@
 		
 		librería alpha
 			alpha.ass( Alpha )
+			alpha.random( Alpha1, Alpha2 )
 		-	alpha.interpolate( Ipol, Alpha1, Alpha2 )
 		-	alpha.set( Times, Alphas, ... )
 			alpha.fromstyle( ColorAlpha )
@@ -390,10 +384,10 @@
 		+	effector.macro_fx( subtitles, selected_lines, active_line )
 	}
 	--]]
-	-----------------------------------------------------------------------------------------------------------------------------------------------
-	alpha = { } color = { } effector = { } image = { } random = { } recall = { } shape = { } tag = { } temp = { } text = { } file = { } graph = { }
-	-----------------------------------------------------------------------------------------------------------------------------------------------
-	-- Librería de shapes prediceñadas del Kara Effector ------------------------------------------------------------------------------------------
+	----------------------------------------------------------------------------------------------------------------------------------
+	alpha = { } color = { } effector = { } file = { } graph = { } image = { } recall = { } shape = { } tag = { } temp = { } text = { }
+	----------------------------------------------------------------------------------------------------------------------------------
+	-- Librería de shapes prediceñadas del Kara Effector -----------------------------------------------------------------------------
 	shape.circle	= "m 50 0 b 22 0 0 22 0 50 b 0 78 22 100 50 100 b 78 100 100 78 100 50 b 100 22 78 0 50 0 "
 	shape.triangle  = "m 50 0 l 0 86 l 100 86 l 50 0 "
 	shape.rectangle = "m 0 0 l 0 100 l 100 100 l 100 0 l 0 0 "
@@ -728,115 +722,6 @@
 			return Delay * (-J + 0.5) - 200
 		end
 		return Delay
-	end
-	
-	--------------------------------------------------------------------------------------------------
-	-- Librería de Funciones "random" ----------------------------------------------------------------
-	function r( r_i, r_f, r_step )
-		local rand_i, rand_f = r_i, r_f
-		local rand_s = r_step or 1
-		if type( rand_i ) == "function" then
-			rand_i = r_i( )
-		end
-		if type( rand_f ) == "function" then
-			rand_f = r_f( )
-		end
-		if type( r_step ) == "function" then
-			rand_s = r_step( )
-		end
-		if rand_i == nil then
-			return math.random( )
-		end
-		if rand_f == nil then
-			return math.random( rand_i )
-		end
-		effector.print_error( rand_i, "number", "r", 1 )
-		effector.print_error( rand_f, "number", "r", 2 )
-		effector.print_error( rand_s, "number", "r", 3 )
-		local r_ii = math.min( rand_i, rand_f )
-		local r_ff = math.max( rand_i, rand_f )
-		if rand_s == 0 then
-			rand_s = 1
-		end
-		return math.random( math.round( r_ii / rand_s ), math.round( r_ff / rand_s ) ) * rand_s
-	end
-	rand = r
-	
-	function random.color( H, S, V )
-		local Hrc, Src, Vrc = R( 360 ), 1, 1
-		if type( H ) == "function" then
-			H = H( )
-		end
-		if type( S ) == "function" then
-			S = S( )
-		end
-		if type( V ) == "function" then
-			V = V( )
-		end
-		local H = H or fx.offset.H or nil
-		local S = S or fx.offset.S or nil
-		local V = V or fx.offset.V or nil --june 01st 2020
-		if type( H ) == "table" then
-			Hrc = R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
-		elseif type( H ) == "number" then
-			Hrc = (H - 1) % 360 + 1
-		end
-		if type( S ) == "table" then
-			Src = R( S[ 2 ] % 101, S[ 1 ] % 101 ) / 100
-		elseif type( S ) == "number" then
-			Src = math.i( S + 1, 0, 100 )[ "A-->B-->A" ] / 100
-		end
-		if type( V ) == "table" then
-			Vrc = R( V[ 2 ] % 101, V[ 1 ] % 101 ) / 100
-		elseif type( V ) == "number" then
-			Vrc = math.i( V + 1, 0, 100 )[ "A-->B-->A" ] / 100
-		end
-		return color.HSV_to_RGB( Hrc, Src, Vrc )
-	end
-	
-	function random.alpha( alpha_i, alpha_f )
-		if type( alpha_i ) == "function" then
-			alpha_i = alpha_i( )
-		end
-		if type( alpha_f ) == "function" then
-			alpha_f = alpha_f( )
-		end
-		local ra_i, ra_f = 0, 255
-		local alpha_i = alpha_i or fx.offset.alpha_i or nil --june 01st 2020
-		local alpha_f = alpha_f or fx.offset.alpha_f or nil
-		if type( alpha_i ) == "string" then
-			ra_i = tonumber( alpha_i:match( "(%x%x)" ), 16 )
-		elseif type( alpha_i ) == "number" then
-			ra_i = math.i( alpha_i + 1, 0, 255 )[ "A-->B-->A" ]
-		end
-		if type( alpha_f ) == "string" then
-			ra_f = tonumber( alpha_f:match( "(%x%x)" ), 16 )
-		elseif type( alpha_f ) == "number" then
-			ra_f = math.i( alpha_f + 1, 0, 255 )[ "A-->B-->A" ]
-		end
-		return alpha.val2ass( R( ra_f, ra_i ) )
-	end
-	
-	function random.unique( Table, Index ) --( Table[, Index] )
-		if type( Table ) == "function" then
-			Table = Table( )
-		end
-		if type( Index ) == "function" then
-			Index = Index( )
-		end
-		local Table = Table or fx.offset.Table
-		local Index = Index or fx.offset.Index --june 01st 2020
-		effector.print_error( Table, "numbertable", "random.unique", 1 )
-		local Table_u, Ind = recall.tableu, 1
-		if Index == nil then
-			return table.disorder( Table )
-		end
-		if Index == 1 then
-			Table_u = remember( "tableu", table.disorder( Table ) )
-		end
-		effector.print_error( Index, "number", "random.unique", 2 )
-		Ind = #Table_u - #Table_u * ceil( Index / #Table_u ) + Index
-		return Table_u[ Ind ]
 	end
 	
 	--------------------------------------------------------------------------------------------------
@@ -1331,23 +1216,23 @@
 		return Table_pos
 	end
 	
-	function table.string( String, Number_str )-- ( "String", 2 ) -> { St, tr, ri, in, ng }
+	function table.string( String, n )-- ( "String", 2 ) -> { St, tr, ri, in, ng }
 		--retorna una tabla con las partes de n tamaño de un string
 		if type( String ) == "function" then
 			String = String( )
 		end
 		local Table_string, Chars_string = { }, { }
 		local String = String or ""
-		local Number = Number_str or 1
+		local Number = n or 1
 		if type( String ) == "table" then
 			local recursion_tbl = { }
 			for k, v in pairs( String ) do
-				recursion_tbl[ k ] = table.string( v, Number_str )
+				recursion_tbl[ k ] = table.string( v, n )
 			end
 			return recursion_tbl
 		end --recursión
-		if type( Number_str ) == "function" then
-			Number_str = Number_str( )
+		if type( n ) == "function" then
+			n = n( )
 		end
 		effector.print_error( String, "string", "table.string", 1 )
 		effector.print_error( Number, "number", "table.string", 2 )
@@ -1367,49 +1252,6 @@
 		return Table_string
 	end --table.string( { "String", "demo" }, 2 )
 
-	function table.space( String )
-		--retorna una tabla con las posciones de los espacios (" ") que contenga un string
-		if type( String ) == "function" then
-			String = String( )
-		end
-		local Table_space = { }
-		if type( String ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( String ) do
-				recursion_tbl[ k ] = table.space( v )
-			end
-			return recursion_tbl
-		end --recursión
-		effector.print_error( String, "string", "table.space", 1 )
-		local Table_string = table.string( String )
-		for i = 1, #Table_string do
-			if Table_string[ i ] == " " then
-				Table_space[ #Table_space + 1 ] = i
-			end
-		end
-		return Table_space
-	end --table.space( { "line demo", "string word fx" } )
-	
-	function table.word( String )
-		--retorna una tabla con las palabras de un string
-		if type( String ) == "function" then
-			String = String( )
-		end
-		local Table_word = { }
-		if type( String ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( String ) do
-				recursion_tbl[ k ] = table.word( v )
-			end
-			return recursion_tbl
-		end --recursión
-		effector.print_error( String, "string", "table.word", 1 )
-		for word_s in String:gmatch( "%S+" ) do
-			table.insert( Table_word, word_s )
-		end
-		return Table_word --table.word( { "line demo", "string word fx" } )
-	end --table.word( "line demo" )
-	
 	function table.retire( Table, ... )
 		--retira de una tabla los elementos indicados o los elementos
 		--que estén desde la posición { { a, b } } consecutivos todos
@@ -1439,17 +1281,17 @@
 		return Table_ret
 	end --table.retire( { 21, 22, 23, 24, 25, 26 }, { { 1, 4 } } )
 	
-	function table.combine( Table, n_combinations )
+	function table.combine( Table, n )
 		--obtiene las combinaciones de n tamaño de una tabla
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
-		if type( n_combinations ) == "function" then
-			n_combinations = n_combinations( )
+		if type( n ) == "function" then
+			n = n( )
 		end
 		effector.print_error( Table, "table", "table.combine", 1 )
-		effector.print_error( n_combinations, "number", "table.combine", 2 )
-		local Table_com, a, nN = { }, { }, math.round( abs( n_combinations ) )
+		effector.print_error( n, "number", "table.combine", 2 )
+		local Table_com, a, nN = { }, { }, math.round( abs( n ) )
 		local newrow
 		for i = 1, nN do
 			a[ #a + 1 ] = i
@@ -1475,7 +1317,7 @@
 		return Table_com --( {a,b,c,d}, 2 ) -> {{a,b}, {a,c}, {a,d}, {b,c}, {b,d}, {c,d}}
 	end
 	
-	function table.inserttable( Table1, Table2, index_insert ) --(Table1, Table2[, index_insert])
+	function table.inserttable( Table1, Table2, Index ) --(Table1, Table2[, Index])
 		--inserta los elementos de la tabla 2 dentro de la tabla 1
 		if type( Table1 ) == "function" then
 			Table1 = Table1( )
@@ -1483,19 +1325,19 @@
 		if type( Table2 ) == "function" then
 			Table2 = Table2( )
 		end
-		if type( index_insert ) == "function" then
-			index_insert = index_insert( )
+		if type( Index ) == "function" then
+			Index = Index( )
 		end
 		effector.print_error( Table1, "table", "table.inserttable", 1 )
 		effector.print_error( Table2, "table", "table.inserttable", 2 )
 		local Table_ins = Table1
-		if index_insert == nil then
+		if Index == nil then
 			for i = 1, #Table2 do
 				Table_ins[ #Table_ins + 1 ] = Table2[ i ]
 			end
 		else
 			for i = 1, #Table2 do
-				table.insert( Table_ins, index_insert, Table2[ #Table2 - i + 1 ] )
+				table.insert( Table_ins, Index, Table2[ #Table2 - i + 1 ] )
 			end
 		end
 		return Table_ins
@@ -3019,7 +2861,7 @@
 		local rand_i, rand_f = Rand_i, Rand_f
 		if Rand_f == nil
 			and Rand_i == nil then
-			return math.round( r( ), 4 )
+			return math.round( math.random( ), 4 )
 		end
 		if Rand_f == nil
 			and Rand_i then
@@ -3041,7 +2883,7 @@
 		local rand_f = math.round( rand_f )
 		local R_i = math.min( rand_i, rand_f )
 		local R_f = math.max( rand_i, rand_f )
-		return R_i + (r( R_i, R_f ) + Offset_r - 1) % (R_f - R_i + 1)
+		return R_i + (math.random( R_i, R_f ) + Offset_r - 1) % (R_f - R_i + 1)
 	end
 	
 	function R( Rand_i, Rand_f, Step )
@@ -5487,15 +5329,23 @@
 					dec_to_hex[ k ] = v
 				end
 			end
-		end
+		end --recursión
 		return dec_to_hex --august 03rd 2019
 	end --math.to16( 255 )
 
-	function math.clamp( Num, Min, Max )
+	function math.clamp( Num, Min, Max, Cycle )
 		--restringe un número entre un mínimo y un máximo
 		if type( Num ) == "function" then
 			Num = Num( )
 		end
+		local Num = Num or 0.5
+		if type( Num ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Num ) do
+				recursion_tbl[ k ] = math.clamp( v, Min, Max, Cycle )
+			end
+			return recursion_tbl
+		end --recursión
 		if type( Min ) == "function" then
 			Min = Min( )
 		end
@@ -5513,42 +5363,19 @@
 		effector.print_error( Max, "number", "math.clamp", 3 )
 		local c_min = math.min( Min, Max )
 		local c_max = math.max( Min, Max )
-		if type( Num ) == "number" then
-			if Num < c_min then
-				return c_min
-			elseif Num > c_max then
-				return c_max
-			end
+		if Cycle then --se restringe en forma cíclica
+			Num = math.round( Num * 10000 )
+			c_min = math.round( c_min * 10000 )
+			c_max = math.round( c_max * 10000 )
+			return math.round( math.i( Num - c_min, c_min, c_max )[ "A-->B-->A" ] / 10000, 3 )
 		end
-		return Num --august 03rd 2019
+		if Num < c_min then
+			return c_min
+		elseif Num > c_max then
+			return c_max
+		end
+		return Num --rewrite: june 30th 2020
 	end --math.clamp( 3, 5, 10 )
-	
-	function math.clamp2( Num, Min, Max )
-		--restringe un número entre un mínimo y un máximo
-		--en caso de exceder un límite, se regresará en forma de rebote
-		if type( Num ) == "function" then
-			Num = Num( )
-		end
-		if type( Min ) == "function" then
-			Min = Min( )
-		end
-		if type( Max ) == "function" then
-			Max = Max( )
-		end
-		if Min == nil then
-			Min = 0
-		end
-		if Max == nil then
-			Max = 1
-		end
-		effector.print_error( Num, "number", "math.clamp2", 1 )
-		effector.print_error( Min, "number", "math.clamp2", 2 )
-		effector.print_error( Max, "number", "math.clamp2", 3 )
-		local Num = math.round( Num * 10000 )
-		local Min = math.round( Min * 10000 )
-		local Max = math.round( Max * 10000 )
-		return math.round( math.i( Num - Min, Min, Max )[ "A-->B-->A" ] / 10000, 3 )
-	end --math.clamp2( 3m, 0, 1 )
 	
 	function math.cubic( c1, c2, c3, c4 )
 		--calcula la raíz o raíces de una ecuación cúbica
@@ -6055,9 +5882,9 @@
 		String = String:gsub( "(\\[%dv]*c)(%([ ]*R%b()[ ]*%))",
 			function( Tag, Random_funct )
 				local Random_funct = Random_funct:match( "R%b()" ):sub( 2, -1 )
-				return format( "%s( random.color%s )", Tag, Random_funct )
+				return format( "%s( color.random%s )", Tag, Random_funct )
 			end
-		) --"\\1cR( ** )" --> "\\1c .. random.color( ** )"
+		) --"\\1cR( ** )" --> "\\1c .. color.random( ** )"
 		--▼--------------------------------------------------------
 		String = String:gsub( "\\bs(%d[fr%.%d]*)", "\\bord%1\\shad%1" )
 		:gsub( "\\bss", format( "\\bord%s\\shad%s", l.outline, l.shadow ) )
@@ -9786,6 +9613,38 @@
 		return { H, S, V }
 	end --color.to_HSV( { my_color = shape.color3, "&HAAf0B7&" } )
 	
+	function color.random( H, S, V )
+		local Hrc, Src, Vrc = R( 360 ), 1, 1
+		if type( H ) == "function" then
+			H = H( )
+		end
+		if type( S ) == "function" then
+			S = S( )
+		end
+		if type( V ) == "function" then
+			V = V( )
+		end
+		local H = H or fx.offset.H or nil
+		local S = S or fx.offset.S or nil
+		local V = V or fx.offset.V or nil --june 01st 2020
+		if type( H ) == "table" then
+			Hrc = R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
+		elseif type( H ) == "number" then
+			Hrc = (H - 1) % 360 + 1
+		end
+		if type( S ) == "table" then
+			Src = R( S[ 2 ] % 101, S[ 1 ] % 101 ) / 100
+		elseif type( S ) == "number" then
+			Src = math.i( S + 1, 0, 100 )[ "A-->B-->A" ] / 100
+		end
+		if type( V ) == "table" then
+			Vrc = R( V[ 2 ] % 101, V[ 1 ] % 101 ) / 100
+		elseif type( V ) == "number" then
+			Vrc = math.i( V + 1, 0, 100 )[ "A-->B-->A" ] / 100
+		end
+		return color.HSV_to_RGB( Hrc, Src, Vrc )
+	end
+	
 	function color.interpolate( Ipol, Color1, Color2 )
 		--interpolate_color
 		if type( Color1 ) == "function" then
@@ -10113,7 +9972,30 @@
 		end --VSFilterMod to ass
 		return Alphafx --alpha.ass( { "(FF,00,AA,0F)", "#F0" } )
 	end	--june 20th 2020
-
+	
+	function alpha.random( Alpha1, Alpha2 )
+		if type( Alpha1 ) == "function" then
+			Alpha1 = Alpha1( )
+		end
+		if type( Alpha2 ) == "function" then
+			Alpha2 = Alpha2( )
+		end
+		local ra_i, ra_f = 0, 255
+		local Alpha1 = Alpha1 or fx.offset.Alpha1 or nil --june 01st 2020
+		local Alpha2 = Alpha2 or fx.offset.Alpha2 or nil
+		if type( Alpha1 ) == "string" then
+			ra_i = tonumber( Alpha1:match( "(%x%x)" ), 16 )
+		elseif type( Alpha1 ) == "number" then
+			ra_i = math.i( Alpha1 + 1, 0, 255 )[ "A-->B-->A" ]
+		end
+		if type( Alpha2 ) == "string" then
+			ra_f = tonumber( Alpha2:match( "(%x%x)" ), 16 )
+		elseif type( Alpha2 ) == "number" then
+			ra_f = math.i( Alpha2 + 1, 0, 255 )[ "A-->B-->A" ]
+		end
+		return alpha.val2ass( R( ra_f, ra_i ) )
+	end
+	
 	function alpha.interpolate( Ipol, Alpha1, Alpha2 )
 		--interpolate_alpha
 		if type( Alpha1 ) == "function" then
@@ -13204,7 +13086,7 @@
 		if Tags == nil then
 			Tags_s = { }
 			for i = 1, Loop_s do
-				Tags_s[ i ] = format( "{\\1c%s}", random.color( nil, 82 ) )
+				Tags_s[ i ] = format( "{\\1c%s}", color.random( nil, 82 ) )
 			end
 		end
 		effector.print_error( Tags_s, "table", "shape.multi9", 3 )
@@ -14019,7 +13901,7 @@
 			if Tags == nil then
 				shp_tags = { }
 				for i = 1, #Shapes_tbl do
-					shp_tags[ i ] = format( "{\\1c%s}", random.color( nil, 82 ) )
+					shp_tags[ i ] = format( "{\\1c%s}", color.random( nil, 82 ) )
 				end
 			end
 			for i = 1, #Shapes_tbl do
@@ -17051,7 +16933,7 @@
 		local bord_shape
 		local size_pixel = Pixel or 2
 		local seed_space = Seed or 1
-		local text_scale = Scale or 1 -->10-10-16
+		local text_scale = Scale or 1
 		local text_shape, points = recall.txtshp, recall.txtpnt
 		if j == 1 then
 			text_shape = remember( "txtshp",
@@ -17763,7 +17645,7 @@
 				)
 			end
 			local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
-			local shape_f = format( "{\\p1}m 0 0 l %s %s ", x, l.height - y_max - 1 )
+			local shape_f = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, l.height - y_max - 1 )
 			text_px = shape_i .. text_px .. shape_f
 			local textlines, l = { }
 			for l in text_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
@@ -18534,7 +18416,7 @@
 	effector.GUI_modify[ 53 ].hint = "fx.loop_v, fx.loop_h: Line Effect Loop\nmaxj = fx.loop_v * fx.loop_h"
 	effector.GUI_modify[ 54 ].hint = "fx.sizex, fx.sizey: Line Effect Size (\\fscx and \\fscy)"
 	effector.GUI_modify[ 55 ].hint = "Line Effect Return, example: syl.text, char.text, \"m 0 0 l 0 1 l 1 1 l 1 0 \""
-	effector.GUI_modify[ 56 ].hint = "Line Effect Add Tags, example: \"\\\\bord0\"; format( \"\\\\3c%s\", shape.color3 ) in lua Language, or: !maxloop( $width / $syln )!!retime( \"start2syl\", -1000 + $si * 50, 0 )!{\\1c!random.color( )!} in Automation Auto-4 Language"
+	effector.GUI_modify[ 56 ].hint = "Line Effect Add Tags, example: \"\\\\bord0\"; format( \"\\\\3c%s\", shape.color3 ) in lua Language, or: !maxloop( $width / $syln )!!retime( \"start2syl\", -1000 + $si * 50, 0 )!{\\1c!color.random( )!} in Automation Auto-4 Language"
 	effector.GUI_modify[ 57 ].hint = "Declare Variables and Functions"
 	effector.GUI_modify[ 58 ].hint = "Line Effect Save Configuration"
 	effector.GUI_modify[ 61 ].hint = "Print Configurations of the Line Effect"
@@ -19547,7 +19429,7 @@
 			end
 		elseif sett.line_style == "All Lines" then
 			for i = 1, #subtitles do
-			--todas las líneas (no comentadas)
+				--todas las líneas (no comentadas)
 				if subtitles[ i ].class == "dialogue"
 					and not subtitles[ i ].comment
 					and subtitles[ i ].effect ~= "Effector [fx]"
@@ -19557,7 +19439,7 @@
 			end
 		else
 			for i = 1, #subtitles do
-			--estilo seleccionado (líneas no comentadas)
+				--estilo seleccionado (líneas no comentadas)
 				if sett.line_style == subtitles[ i ].style
 					and subtitles[ i ].class == "dialogue"
 					and not subtitles[ i ].comment
