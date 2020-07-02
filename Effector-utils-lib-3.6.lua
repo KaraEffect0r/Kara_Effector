@@ -14506,6 +14506,7 @@
 	end --may 21st 2020
 	
 	function shape.grid( Shape, Filter, Align, Line, Lines )
+		--shape.grid( shape.size( shape.circle, 50 ), function( ) return "\\1c" .. tag.ipol( py / 50, "&HFF0000&", "&H0000FF&" ) end )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -14524,30 +14525,58 @@
 			-------------------------------
 			Reduc = remember( "reduce", function( String )
 					--reduce los colores y alphas repetidos
-					local coloralpha, c, a = { }
-					for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
-						coloralpha[ #coloralpha + 1 ] = { c, a }
+					local lines_in_shp, l = { }
+					--recolecta cada línea de la shape
+					for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+						l = l:match( "\\p1" ) and l or "{\\p1}" .. l --agrega el \\p1 en caso de que no haya
+						local k = 1
+						local parts_lines, p = { [ 0 ] = "" } --partes de una línea
+						for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
+							parts_lines[ #parts_lines + 1 ] = p
+						end
+						l = l:gsub( "%b{}m %d+[ %dl]*",
+							function( capture )
+								capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
+								k = k + 1
+								return capture
+							end
+						)
+						:gsub( "m %d+[ %dl]*(G[G]*)",
+							function( Mark )
+								local n = unicode.len( Mark ) + 1
+								return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
+							end
+						)--si una parte es igual a la anterior, la elimina
+						local alphas_lines, a = { [ 0 ] = "" }
+						for a in l:gmatch( "\\1a&H%x+&" ) do
+							alphas_lines[ #alphas_lines + 1 ] = a
+						end
+						k = 1
+						l = l:gsub( "\\1a&H%x+&",
+							function( alphax )
+								alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
+								k = k + 1
+								return alphax
+							end
+						)
+						local colors_lines, c = { [ 0 ] = "" }
+						for c in l:gmatch( "\\1c&H%x+&" ) do
+							colors_lines[ #colors_lines + 1 ] = c
+						end
+						k = 1
+						l = l:gsub( "\\1c&H%x+&",
+							function( colorx )
+								colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
+								k = k + 1
+								return colorx
+							end
+						)
+						:gsub( "\\x\\", "\\" )
+						:gsub( "&\\x", "&" )
+						lines_in_shp[ #lines_in_shp + 1 ] = l
 					end
-					String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
-						function( c, a )
-							return "cfx" .. "afx"
-						end
-					):gsub( "(cfx)(afx)",
-						function( c, a )
-							return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
-						end, 1
-					)
-					local i = math.count( )
-					String = String:gsub( "(cfx)(afx)",
-						function( c, a )
-							local k, c, a = i( ) + 1
-							c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
-							a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
-							return c .. a == "" and "\\x" or c .. a
-						end
-					)
-					return String
-				end --june 13th 2020
+					return table.concat( lines_in_shp )
+				end --july 02nd 2020
 			)
 			-------------------------------
 			local function image_info( Image )
@@ -14618,10 +14647,10 @@
 			if is_image and Line then
 				shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
 					function( isalpha, capture )
-						px = math.i( k, x_max )[ "1-->A" ]
-						py = math.i( k, x_max )[ "N,n" ]
+						px = tonumber( capture:match( "(%d+),%d+" ) )
+						py = tonumber( capture:match( "%d+,(%d+)" ) )
 						cx = x_max / 2
-						cy = l.fontsize / 2
+						cy = y_max / 2
 						rx = floor( px + val_left - l.left )
 						d = math.distance( cx, cy, px, py )
 						a = math.angle( cx, cy, px, py )
@@ -14642,10 +14671,10 @@
 			else
 				shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
 					function( isalpha, capture )
-						px = math.i( k, x_max )[ "1-->A" ]
-						py = math.i( k, x_max )[ "N,n" ]
+						px = tonumber( capture:match( "(%d+),%d+" ) )
+						py = tonumber( capture:match( "%d+,(%d+)" ) )
 						cx = x_max / 2
-						cy = l.fontsize / 2
+						cy = y_max / 2
 						rx = floor( px + val_left - l.left )
 						d = math.distance( cx, cy, px, py )
 						a = math.angle( cx, cy, px, py )
@@ -14658,20 +14687,20 @@
 				)
 			end
 			shape_px = shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" )
-			shape_px = remember( "shapefx", shape_px )
+			shape_px = remember( "shapefx", Reduc( shape_px ) )
 			if Lines then
-				local Lshp, l = { }
+				local lines_in_shape, l = { }
 				local parts = Lines
 				for l in shape_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-					Lshp[ #Lshp + 1 ] = "{\\p1}" .. Reduc( l ):gsub( "(1c)&H(%x+)&", "%1%2" )
+					lines_in_shape[ #lines_in_shape + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
 				end
 				if type( Lines ) == "table" then
-					parts = ceil( #Lshp / Lines[ 1 ] )
+					parts = ceil( #lines_in_shape / Lines[ 1 ] )
 				end
-				lines_shp = table.inpack( Lshp, parts )
+				lines_shp = table.inpack( lines_in_shape, parts )
 				for i = 1, #lines_shp do
 					lines_shp[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
-						(i - 1) * parts, table.concat( lines_shp[ i ] ), #Lshp - i * parts
+						(i - 1) * parts, table.concat( lines_shp[ i ] ), #lines_in_shape - i * parts
 					)
 				end
 				lines_shp = remember( "L_shapes", lines_shp )
@@ -14709,30 +14738,58 @@
 			-------------------------------
 			Reduc = remember( "reduce", function( String )
 					--reduce los colores y alphas repetidos
-					local coloralpha, c, a = { }
-					for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
-						coloralpha[ #coloralpha + 1 ] = { c, a }
+					local lines_in_shp, l = { }
+					--recolecta cada línea de la shape
+					for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+						l = l:match( "\\p1" ) and l or "{\\p1}" .. l --agrega el \\p1 en caso de que no haya
+						local k = 1
+						local parts_lines, p = { [ 0 ] = "" } --partes de una línea
+						for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
+							parts_lines[ #parts_lines + 1 ] = p
+						end
+						l = l:gsub( "%b{}m %d+[ %dl]*",
+							function( capture )
+								capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
+								k = k + 1
+								return capture
+							end
+						)
+						:gsub( "m %d+[ %dl]*(G[G]*)",
+							function( Mark )
+								local n = unicode.len( Mark ) + 1
+								return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
+							end
+						)--si una parte es igual a la anterior, la elimina
+						local alphas_lines, a = { [ 0 ] = "" }
+						for a in l:gmatch( "\\1a&H%x+&" ) do
+							alphas_lines[ #alphas_lines + 1 ] = a
+						end
+						k = 1
+						l = l:gsub( "\\1a&H%x+&",
+							function( alphax )
+								alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
+								k = k + 1
+								return alphax
+							end
+						)
+						local colors_lines, c = { [ 0 ] = "" }
+						for c in l:gmatch( "\\1c&H%x+&" ) do
+							colors_lines[ #colors_lines + 1 ] = c
+						end
+						k = 1
+						l = l:gsub( "\\1c&H%x+&",
+							function( colorx )
+								colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
+								k = k + 1
+								return colorx
+							end
+						)
+						:gsub( "\\x\\", "\\" )
+						:gsub( "&\\x", "&" )
+						lines_in_shp[ #lines_in_shp + 1 ] = l
 					end
-					String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
-						function( c, a )
-							return "cfx" .. "afx"
-						end
-					):gsub( "(cfx)(afx)",
-						function( c, a )
-							return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
-						end, 1
-					)
-					local i = math.count( )
-					String = String:gsub( "(cfx)(afx)",
-						function( c, a )
-							local k, c, a = i( ) + 1
-							c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
-							a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
-							return c .. a == "" and "\\x" or c .. a
-						end
-					)
-					return String
-				end --june 13th 2020
+					return table.concat( lines_in_shp )
+				end --july 02nd 2020
 			)
 			-------------------------------
 			local function image_info( Image )
@@ -14804,13 +14861,13 @@
 				str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
 				Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
 			end
-			Shape = remember( "shp_gridr", Shape )
+			Shape = remember( "shp_gridr", Reduc( Shape ) )
 			if Lines then
 				local Lshp, l = { }
 				local parts = Lines
 				if Shape:match( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) then
 					for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-						Lshp[ #Lshp + 1 ] = "{\\p1}" .. Reduc( l ):gsub( "(1c)&H(%x+)&", "%1%2" )
+						Lshp[ #Lshp + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
 					end
 					if type( Lines ) == "table" then
 						parts = ceil( #Lshp / Lines[ 1 ] )
@@ -14823,7 +14880,6 @@
 					end
 				else
 					for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H\\]*" ) do
-					--	Lshp[ #Lshp + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
 						Lshp[ #Lshp + 1 ] = l:gsub( "(1c)&H(%x+)&", "%1%2" )
 					end
 					if type( Lines ) == "table" then
@@ -17507,30 +17563,59 @@
 			-------------------------------
 			Reduc = remember( "reduce", function( String )
 					--reduce los colores y alphas repetidos
-					local coloralpha, c, a = { }
-					for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
-						coloralpha[ #coloralpha + 1 ] = { c, a }
+					local lines_in_shp, l = { }
+					--recolecta cada línea de la shape
+					for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+						l = "{\\p1}" .. l:gsub( "\\p1", "\\x" )
+						local k = 1
+						local parts_lines, p = { [ 0 ] = "" } --partes de una línea
+						for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
+							parts_lines[ #parts_lines + 1 ] = p
+						end
+						l = l:gsub( "%b{}m %d+[ %dl]*",
+							function( capture )
+								capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
+								k = k + 1
+								return capture
+							end
+						)
+						:gsub( "m %d+[ %dl]*(G[G]*)",
+							function( Mark )
+								local n = unicode.len( Mark ) + 1
+								return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
+							end
+						)--si una parte es igual a la anterior, la elimina
+						local alphas_lines, a = { [ 0 ] = "" }
+						for a in l:gmatch( "\\1a&H%x+&" ) do
+							alphas_lines[ #alphas_lines + 1 ] = a
+						end
+						k = 1
+						l = l:gsub( "\\1a&H%x+&",
+							function( alphax )
+								alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
+								k = k + 1
+								return alphax
+							end
+						)
+						local colors_lines, c = { [ 0 ] = "" }
+						for c in l:gmatch( "\\1c&H%x+&" ) do
+							colors_lines[ #colors_lines + 1 ] = c
+						end
+						k = 1
+						l = l:gsub( "\\1c&H%x+&",
+							function( colorx )
+								colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
+								k = k + 1
+								return colorx
+							end
+						)
+						:gsub( "\\x\\", "\\" )
+						:gsub( "&\\x", "&" )
+						:gsub( "{\\p1}{\\x", "{\\p1" )
+						lines_in_shp[ #lines_in_shp + 1 ] = l
 					end
-					String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
-						function( c, a )
-							return "cfx" .. "afx"
-						end
-					):gsub( "(cfx)(afx)",
-						function( c, a )
-							return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
-						end, 1
-					)
-					local i = math.count( )
-					String = String:gsub( "(cfx)(afx)",
-						function( c, a )
-							local k, c, a = i( ) + 1
-							c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
-							a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
-							return c .. a == "" and "\\x" or c .. a
-						end
-					)
-					return String
-				end --june 13th 2020
+					return table.concat( lines_in_shp )
+				end --july 02nd 2020
 			)
 			-------------------------------
 			local function image_info( Image )
@@ -17605,8 +17690,8 @@
 			if is_image and Line then
 				text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
 					function( isalpha, capture )
-						px = math.i( k, x_max )[ "1-->A" ]
-						py = math.i( k, x_max )[ "N,n" ]
+						px = tonumber( capture:match( "(%d+),%d+" ) )
+						py = tonumber( capture:match( "%d+,(%d+)" ) )
 						cx = x_max / 2
 						cy = l.fontsize / 2
 						rx = floor( px + val_left - l.left )
@@ -17629,11 +17714,11 @@
 			else
 				text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
 					function( isalpha, capture )
-						px = math.i( k, x_max )[ "1-->A" ]
-						py = math.i( k, x_max )[ "N,n" ]
+						px = tonumber( capture:match( "(%d+),%d+" ) )
+						py = tonumber( capture:match( "%d+,(%d+)" ) )
 						cx = x_max / 2
 						cy = l.fontsize / 2
-						rx = floor( px + val_left - l.left )
+						rx = floor( px + val_left - l.left ) --x relative
 						d = math.distance( cx, cy, px, py )
 						a = math.angle( cx, cy, px, py )
 						i = k
@@ -17642,17 +17727,13 @@
 						local replaces = min_alpha( isalpha .. Filter( capture ) )
 						return replaces
 					end
-				)
+				) --text.grid( syl.text, function( ) return "\\1c" .. tag.ipol( math.clamp( math.distance( Dx, Dy, px, py ), 0, Dr ) / Dr, shape.color1, shape.color3 ) end )
 			end
 			local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
 			local shape_f = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, l.height - y_max - 1 )
 			text_px = shape_i .. text_px .. shape_f
-			local textlines, l = { }
-			for l in text_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-				textlines[ #textlines + 1 ] = "{\\p1}" .. Reduc( l:gsub( "(\\1a&H%x+&)(\\1c&H%x+&)", "%2%1" ) ):gsub( "(1c)&H(%x+)&", "%1%2" )
-			end
-			text_px = remember( "textpixel", table.concat( textlines ):gsub( "{\\p1}{\\p1}", "{\\p1}" ):gsub( "\\p1\\", "\\" ) )
-		end
+			text_px = remember( "textpixel", Reduc( text_px ):gsub( "(1c)&H(%x+)&", "%1%2" ) )
+		end --text.grid( "demo" )
 		return text_px --text.grid( )
 	end --may 14th 2020
 
