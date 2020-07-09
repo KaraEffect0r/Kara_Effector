@@ -617,7 +617,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or fx.offset.Delay or 60 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 30 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid1", 1 )
 		if val_i <= (val_n + 1) / 2 then
 			return Delay * (val_i - 1) - 200
@@ -632,7 +632,7 @@
 		if type( Delay ) == "function" then
 			Delay = Delay( )
 		end
-		local Delay = Delay or fx.offset.Delay or 60 --add: may 31th 2020
+		local Delay = Delay or fx.offset.Delay or 30 --add: may 31th 2020
 		effector.print_error( Delay, "number", "time_mid2", 1 )
 		if val_i >= (val_n + 1) / 2 then
 			return Delay * (val_i - val_n - 1) - 200
@@ -1524,6 +1524,14 @@
 				end
 			end
 			return table_idx
+		elseif Mode == "move" then --july 08th 2020
+			--desplaza los índices de la tabla una cantidad entera de posiciones :D
+			local add = ceil( add or 0 )
+			local table_move = { }
+			for i = 1, #Table do
+				table_move[ i + add ] = Table[ i ]
+			end
+			return table_move
 		end
 	end
 	
@@ -4648,10 +4656,17 @@
 	end
 	
 	function math.rotate( p, axis, angle )
-		--rota un punto p(x,y,z) en el espacio, respecto al eje seleccionado
+		--rota un punto p( x, y, z ) en el espacio, respecto al eje seleccionado
 		if type( p ) == "function" then
 			p = p( )
 		end
+		if table.type( p ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( p ) do
+				recursion_tbl[ k ] = math.rotate( v, axis, angle )
+			end
+			return recursion_tbl
+		end --recursión
 		if type( angle ) == "function" then
 			angle = angle( )
 		end
@@ -9614,7 +9629,7 @@
 	end --color.to_HSV( { my_color = shape.color3, "&HAAf0B7&" } )
 	
 	function color.random( H, S, V )
-		local Hrc, Src, Vrc = R( 360 ), 1, 1
+		local Hrc, Src, Vrc = R( 360 ), 100, 100
 		if type( H ) == "function" then
 			H = H( )
 		end
@@ -9624,9 +9639,9 @@
 		if type( V ) == "function" then
 			V = V( )
 		end
-		local H = H or fx.offset.H or nil
-		local S = S or fx.offset.S or nil
-		local V = V or fx.offset.V or nil --june 01st 2020
+		local H = H or Hrc
+		local S = S or Src
+		local V = V or Vrc
 		if type( H ) == "table" then
 			Hrc = R( (H[ 1 ] - 1) % 360 + 1, (H[ 2 ] - 1) % 360 + 1 )
 		elseif type( H ) == "number" then
@@ -9981,8 +9996,8 @@
 			Alpha2 = Alpha2( )
 		end
 		local ra_i, ra_f = 0, 255
-		local Alpha1 = Alpha1 or fx.offset.Alpha1 or nil --june 01st 2020
-		local Alpha2 = Alpha2 or fx.offset.Alpha2 or nil
+		local Alpha1 = Alpha1 or ra_i
+		local Alpha2 = Alpha2 or ra_f
 		if type( Alpha1 ) == "string" then
 			ra_i = tonumber( Alpha1:match( "(%x%x)" ), 16 )
 		elseif type( Alpha1 ) == "number" then
@@ -10079,7 +10094,7 @@
 		effector.print_error( Ipol, "number", "alpha.interpolate", 1 )
 		Ipol = math.clamp( Ipol ) --rewrite: june 20th 2020
 		return alpha.val2ass( math.round( alpha_i + (alpha_f - alpha_i) * Ipol ) )
-		--alpha.interpolate( 0.6, { shape.alpha1, shape.color3 }, { "&H0F&", "&HFF&" } )
+		--alpha.interpolate( 0.6, { shape.alpha1, shape.alpha3 }, { "&H0F&", "&HFF&" } )
 	end --alpha.interpolate( 0.5, "&HFF&", 55 )
 	
 	function alpha.set( Times, Alphas, ... )
@@ -13690,7 +13705,7 @@
 		else --recursividad: september 08th 2019
 			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
 				function( x, y )
-					local Points = { tonumber( x ), tonumber( y ), 1 } --> coordenadas homogéneas
+					local Points = { tonumber( x ), tonumber( y ), 0 } --> coordenadas homogéneas
 					local Mtable = math.matrix_mul( Points, Matrix )
 					x = Mtable[ 1 ]
 					y = Mtable[ 2 ]
@@ -14518,195 +14533,185 @@
 		local Align = Align or 7					--alineación, en caso de ingresar imagen
 		local x_max, y_max = shape.width( Shape ), shape.height( Shape )
 		-----------------------------------
-		local shape_px = recall.shapefx
-		local lines_shp = recall.L_shapes
-		local Reduc = recall.reduce
-		if j == 1 then
-			-------------------------------
-			Reduc = remember( "reduce", function( String )
-					--reduce los colores y alphas repetidos
-					local lines_in_shp, l = { }
-					--recolecta cada línea de la shape
-					for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-						l = l:match( "\\p1" ) and l or "{\\p1}" .. l --agrega el \\p1 en caso de que no haya
-						local k = 1
-						local parts_lines, p = { [ 0 ] = "" } --partes de una línea
-						for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
-							parts_lines[ #parts_lines + 1 ] = p
-						end
-						l = l:gsub( "%b{}m %d+[ %dl]*",
-							function( capture )
-								capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
-								k = k + 1
-								return capture
-							end
-						)
-						:gsub( "m %d+[ %dl]*(G[G]*)",
-							function( Mark )
-								local n = unicode.len( Mark ) + 1
-								return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
-							end
-						)--si una parte es igual a la anterior, la elimina
-						local alphas_lines, a = { [ 0 ] = "" }
-						for a in l:gmatch( "\\1a&H%x+&" ) do
-							alphas_lines[ #alphas_lines + 1 ] = a
-						end
-						k = 1
-						l = l:gsub( "\\1a&H%x+&",
-							function( alphax )
-								alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
-								k = k + 1
-								return alphax
-							end
-						)
-						local colors_lines, c = { [ 0 ] = "" }
-						for c in l:gmatch( "\\1c&H%x+&" ) do
-							colors_lines[ #colors_lines + 1 ] = c
-						end
-						k = 1
-						l = l:gsub( "\\1c&H%x+&",
-							function( colorx )
-								colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
-								k = k + 1
-								return colorx
-							end
-						)
-						:gsub( "\\x\\", "\\" )
-						:gsub( "&\\x", "&" )
-						lines_in_shp[ #lines_in_shp + 1 ] = l
-					end
-					return table.concat( lines_in_shp )
-				end --july 02nd 2020
-			)
-			-------------------------------
-			local function image_info( Image )
-				local get_info = image.to_pixels( Image, nil, true )
-				local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
-				local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
-				local img_table, indx = { }, ""
-				for i = 1, get_info.width * get_info.height do
-					indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
-					img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+		local lines_shp
+		local Reduc = function( String )
+			--reduce los colores y alphas repetidos
+			local lines_in_shp, l = { }
+			--recolecta cada línea de la shape
+			for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+				l = l:match( "\\p1" ) and l or "{\\p1}" .. l --agrega el \\p1 en caso de que no haya
+				local k = 1
+				local parts_lines, p = { [ 0 ] = "" } --partes de una línea
+				for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
+					parts_lines[ #parts_lines + 1 ] = p
 				end
-				return img_table, an_x, an_y, get_info.width, get_info.height
-			end
-			local is_image, img_info
-			if type( Filter ) == "string" then			--si es una imagen .bmp
-				is_image = true
-				img_info, xi, yi, wi, hi = image_info( Filter )
-				Filter = function( i )
-					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-					x1, y1 = tonumber( x1 ), tonumber( y1 )
-					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-					local k = format( "%s,%s", xr, yr )
-					return img_info[ i ] or img_info[ k ] or "\\r"
-				end
-			end
-			-----------------------------------
-			local function min_alpha( String )
-				--elige al alpha más transparente y elimina al resto :D
-				local alphas, a = { }
-				for a in String:gmatch( "\\1a&H(%x%x)&" ) do
-					alphas[ #alphas + 1 ] = a
-				end
-				if #alphas > 1 then
-					for i = 1, #alphas do
-						alphas[ i ] = tonumber( alphas[ i ], 16 )
-					end
-					table.sort( alphas, function( a, b ) return a < b end )
-					String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
-				end
-				return String
-			end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
-			-----------------------------------
-			local tbl = shape.to_pixels( Shape, nil, nil, nil, { true } )
-			local tblx, str, c = { }
-			for i = 1, #tbl.x do
-				tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
-			end
-			local tbl_shp, id, is_shape = { }
-			for i = 1, y_max do
-				tbl_shp[ i ] = "{\\p1}"
-				for k = 1, x_max do
-					id = tostring( k ) .. "," .. tostring( i )
-					is_shape = format( "{\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
-					tbl_shp[ i ] = tbl_shp[ i ] .. ( tblx[ id ] and is_shape or "{\\x}m 0 0 l 1 1 " )
-				end
-				if not tbl_shp[ i ]:match( "1a" ) then
-					tbl_shp[ i ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
-				end
-				tbl_shp[ i ] = tbl_shp[ i ] .. "{\\p0}\\N"
-				while string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
-					str, c = string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 " )
-					tbl_shp[ i ] = tbl_shp[ i ]:gsub( str, format( "{\\x}m 0 0 l %s 1 ", c ) )
-				end		
-			end
-			shape_px = table.concat( tbl_shp )
-			local k = 1
-			if is_image and Line then
-				shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-					function( isalpha, capture )
-						px = tonumber( capture:match( "(%d+),%d+" ) )
-						py = tonumber( capture:match( "%d+,(%d+)" ) )
-						cx = x_max / 2
-						cy = y_max / 2
-						rx = floor( px + val_left - l.left )
-						d = math.distance( cx, cy, px, py )
-						a = math.angle( cx, cy, px, py )
-						i = k
-						n = #tbl.x
+				l = l:gsub( "%b{}m %d+[ %dl]*",
+					function( capture )
+						capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
 						k = k + 1
-						capture = capture:gsub( "(%d+)(,%d+)",
-							function( x, y )
-								local x = tonumber( x )
-								x = floor( x + val_left - l.left )
-								return tostring( x ) .. y
-							end
-						)
-						local replaces = min_alpha( isalpha .. Filter( capture ) )
-						return replaces
+						return capture
 					end
 				)
-			else
-				shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-					function( isalpha, capture )
-						px = tonumber( capture:match( "(%d+),%d+" ) )
-						py = tonumber( capture:match( "%d+,(%d+)" ) )
-						cx = x_max / 2
-						cy = y_max / 2
-						rx = floor( px + val_left - l.left )
-						d = math.distance( cx, cy, px, py )
-						a = math.angle( cx, cy, px, py )
-						i = k
-						n = #tbl.x
+				:gsub( "m %d+[ %dl]*(G[G]*)",
+					function( Mark )
+						local n = unicode.len( Mark ) + 1
+						return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
+					end
+				)--si una parte es igual a la anterior, la elimina
+				local alphas_lines, a = { [ 0 ] = "" }
+				for a in l:gmatch( "\\1a&H%x+&" ) do
+					alphas_lines[ #alphas_lines + 1 ] = a
+				end
+				k = 1
+				l = l:gsub( "\\1a&H%x+&",
+					function( alphax )
+						alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
 						k = k + 1
-						local replaces = min_alpha( isalpha .. Filter( capture ) )
-						return replaces
+						return alphax
 					end
 				)
+				local colors_lines, c = { [ 0 ] = "" }
+				for c in l:gmatch( "\\1c&H%x+&" ) do
+					colors_lines[ #colors_lines + 1 ] = c
+				end
+				k = 1
+				l = l:gsub( "\\1c&H%x+&",
+					function( colorx )
+						colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
+						k = k + 1
+						return colorx
+					end
+				)
+				:gsub( "\\x\\", "\\" )
+				:gsub( "&\\x", "&" )
+				lines_in_shp[ #lines_in_shp + 1 ] = l
 			end
-			shape_px = shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" )
-			shape_px = remember( "shapefx", Reduc( shape_px ) )
-			if Lines then
-				local lines_in_shape, l = { }
-				local parts = Lines
-				for l in shape_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-					lines_in_shape[ #lines_in_shape + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
-				end
-				if type( Lines ) == "table" then
-					parts = ceil( #lines_in_shape / Lines[ 1 ] )
-				end
-				lines_shp = table.inpack( lines_in_shape, parts )
-				for i = 1, #lines_shp do
-					lines_shp[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
-						(i - 1) * parts, table.concat( lines_shp[ i ] ), #lines_in_shape - i * parts
-					)
-				end
-				lines_shp = remember( "L_shapes", lines_shp )
+			return table.concat( lines_in_shp )
+		end --july 02nd 2020
+		-------------------------------
+		local function image_info( Image )
+			local get_info = image.to_pixels( Image, nil, true )
+			local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
+			local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
+			local img_table, indx = { }, ""
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+				img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+			end
+			return img_table, an_x, an_y, get_info.width, get_info.height
+		end
+		local is_image, img_info
+		if type( Filter ) == "string" then			--si es una imagen .bmp
+			is_image = true
+			img_info, xi, yi, wi, hi = image_info( Filter )
+			Filter = function( i )
+				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+				x1, y1 = tonumber( x1 ), tonumber( y1 )
+				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+				local k = format( "%s,%s", xr, yr )
+				return img_info[ i ] or img_info[ k ] or "\\r"
 			end
 		end
+		-----------------------------------
+		local function min_alpha( String )
+			--elige al alpha más transparente y elimina al resto :D
+			local alphas, a = { }
+			for a in String:gmatch( "\\1a&H(%x%x)&" ) do
+				alphas[ #alphas + 1 ] = a
+			end
+			if #alphas > 1 then
+				for i = 1, #alphas do
+					alphas[ i ] = tonumber( alphas[ i ], 16 )
+				end
+				table.sort( alphas, function( a, b ) return a < b end )
+				String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
+			end
+			return String
+		end	--min_alpha( "\\1a&H00&\\1c&H3B3540&\\1a&H60&" )
+		-----------------------------------
+		local tbl = shape.to_pixels( Shape, nil, nil, nil, { true } )
+		local tblx, str, c = { }
+		for i = 1, #tbl.x do
+			tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
+		end
+		local tbl_shp, id, is_shape = { }
+		for i = 1, y_max do
+			tbl_shp[ i ] = "{\\p1}"
+			for k = 1, x_max do
+				id = tostring( k ) .. "," .. tostring( i )
+				is_shape = format( "{\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
+				tbl_shp[ i ] = tbl_shp[ i ] .. ( tblx[ id ] and is_shape or "{\\x}m 0 0 l 1 1 " )
+			end
+			if not tbl_shp[ i ]:match( "1a" ) then
+				tbl_shp[ i ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
+			end
+			tbl_shp[ i ] = tbl_shp[ i ] .. "{\\p0}\\N"
+			while string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
+				str, c = string.match2( tbl_shp[ i ], "{\\x}m 0 0 l 1 1 " )
+				tbl_shp[ i ] = tbl_shp[ i ]:gsub( str, format( "{\\x}m 0 0 l %s 1 ", c ) )
+			end		
+		end
+		local shape_px = table.concat( tbl_shp )
+		local k = 1
+		if is_image and Line then
+			shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = tonumber( capture:match( "(%d+),%d+" ) )
+					py = tonumber( capture:match( "%d+,(%d+)" ) )
+					cx = x_max / 2
+					cy = y_max / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					capture = capture:gsub( "(%d+)(,%d+)",
+						function( x, y )
+							local x = tonumber( x )
+							x = floor( x + val_left - l.left )
+							return tostring( x ) .. y
+						end
+					)
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		else
+			shape_px = shape_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = tonumber( capture:match( "(%d+),%d+" ) )
+					py = tonumber( capture:match( "%d+,(%d+)" ) )
+					cx = x_max / 2
+					cy = y_max / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		end
+		shape_px = Reduc( shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" ) )
 		if Lines then
+			local lines_in_shape, l = { }
+			local parts = Lines
+			for l in shape_px:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+				lines_in_shape[ #lines_in_shape + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
+			end
+			if type( Lines ) == "table" then
+				parts = ceil( #lines_in_shape / Lines[ 1 ] )
+			end
+			lines_shp = table.inpack( lines_in_shape, parts )
+			for i = 1, #lines_shp do
+				lines_shp[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
+					(i - 1) * parts, table.concat( lines_shp[ i ] ), #lines_in_shape - i * parts
+				)
+			end
 			return lines_shp
 		end
 		shape_px = shape_px:gsub( "(1c)&H(%x+)&", "%1%2" )
@@ -14731,173 +14736,164 @@
 		local Align = Align or 7					--alineación, en caso de ingresar imagen
 		local Filter = Filter or function( i ) return "\\x" end
 		----------------------------------
-		local Shape = recall.shp_gridr
-		local Reduc = recall.reduce
-		local lines_img = recall.L_images
-		if j == 1 then
-			-------------------------------
-			Reduc = remember( "reduce", function( String )
-					--reduce los colores y alphas repetidos
-					local lines_in_shp, l = { }
-					--recolecta cada línea de la shape
-					for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-						l = l:match( "\\p1" ) and l or "{\\p1}" .. l --agrega el \\p1 en caso de que no haya
-						local k = 1
-						local parts_lines, p = { [ 0 ] = "" } --partes de una línea
-						for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
-							parts_lines[ #parts_lines + 1 ] = p
-						end
-						l = l:gsub( "%b{}m %d+[ %dl]*",
-							function( capture )
-								capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
-								k = k + 1
-								return capture
-							end
-						)
-						:gsub( "m %d+[ %dl]*(G[G]*)",
-							function( Mark )
-								local n = unicode.len( Mark ) + 1
-								return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
-							end
-						)--si una parte es igual a la anterior, la elimina
-						local alphas_lines, a = { [ 0 ] = "" }
-						for a in l:gmatch( "\\1a&H%x+&" ) do
-							alphas_lines[ #alphas_lines + 1 ] = a
-						end
-						k = 1
-						l = l:gsub( "\\1a&H%x+&",
-							function( alphax )
-								alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
-								k = k + 1
-								return alphax
-							end
-						)
-						local colors_lines, c = { [ 0 ] = "" }
-						for c in l:gmatch( "\\1c&H%x+&" ) do
-							colors_lines[ #colors_lines + 1 ] = c
-						end
-						k = 1
-						l = l:gsub( "\\1c&H%x+&",
-							function( colorx )
-								colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
-								k = k + 1
-								return colorx
-							end
-						)
-						:gsub( "\\x\\", "\\" )
-						:gsub( "&\\x", "&" )
-						lines_in_shp[ #lines_in_shp + 1 ] = l
-					end
-					return table.concat( lines_in_shp )
-				end --july 02nd 2020
-			)
-			-------------------------------
-			local function image_info( Image )
-				local get_info = image.to_pixels( Image, nil, true )
-				local img_table, indx = { }, ""
-				local an_x = floor( ((Align - 1) % 3) * (Width - get_info.width) / 2 )
-				local an_y = floor( (3 - ceil( Align / 3 ) ) * (Height - get_info.height) / 2 )
-				for i = 1, get_info.width * get_info.height do
-					indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
-					img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+		local Shape, lines_img
+		local Reduc = function( String )
+			--reduce los colores y alphas repetidos
+			local lines_in_shp, l = { }
+			--recolecta cada línea de la shape
+			for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+				l = l:match( "\\p1" ) and l or "{\\p1}" .. l --agrega el \\p1 en caso de que no haya
+				local k = 1
+				local parts_lines, p = { [ 0 ] = "" } --partes de una línea
+				for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
+					parts_lines[ #parts_lines + 1 ] = p
 				end
-				return img_table, an_x, an_y, get_info.width, get_info.height
+				l = l:gsub( "%b{}m %d+[ %dl]*",
+					function( capture )
+						capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
+						k = k + 1
+						return capture
+					end
+				)
+				:gsub( "m %d+[ %dl]*(G[G]*)",
+					function( Mark )
+						local n = unicode.len( Mark ) + 1
+						return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
+					end
+				)--si una parte es igual a la anterior, la elimina
+				local alphas_lines, a = { [ 0 ] = "" }
+				for a in l:gmatch( "\\1a&H%x+&" ) do
+					alphas_lines[ #alphas_lines + 1 ] = a
+				end
+				k = 1
+				l = l:gsub( "\\1a&H%x+&",
+					function( alphax )
+						alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
+						k = k + 1
+						return alphax
+					end
+				)
+				local colors_lines, c = { [ 0 ] = "" }
+				for c in l:gmatch( "\\1c&H%x+&" ) do
+					colors_lines[ #colors_lines + 1 ] = c
+				end
+				k = 1
+				l = l:gsub( "\\1c&H%x+&",
+					function( colorx )
+						colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
+						k = k + 1
+						return colorx
+					end
+				)
+				:gsub( "\\x\\", "\\" )
+				:gsub( "&\\x", "&" )
+				lines_in_shp[ #lines_in_shp + 1 ] = l
 			end
-			if type( Filter ) == "string" then			--si es una imagen .bmp
-				local img_info, xi, yi, wi, hi = image_info( Filter )
-				Filter = function( i )
-					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-					x1, y1 = tonumber( x1 ), tonumber( y1 )
-					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-					local k = format( "%s,%s", xr, yr )
-					return img_info[ i ] or img_info[ k ] or "\\r"
-				end
+			return table.concat( lines_in_shp )
+		end --july 02nd 2020
+		-------------------------------
+		local function image_info( Image )
+			local get_info = image.to_pixels( Image, nil, true )
+			local img_table, indx = { }, ""
+			local an_x = floor( ((Align - 1) % 3) * (Width - get_info.width) / 2 )
+			local an_y = floor( (3 - ceil( Align / 3 ) ) * (Height - get_info.height) / 2 )
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+				img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
 			end
-			----------------------------------
-			Shape = ""
-			local mx, maxn
-			if Mode == "h" then --barras horizontales
-				for i = 1, Height do
-					Shape = Shape .. format( "{\\p1\\pix}m 0 0 l 0 1 l %s 1 l %s 0 {\\p0}\\N", Width, Width )
-				end
-				mx, maxn = 1, Height
-			elseif Mode == "v" then --barras verticales
-				Shape = "{\\p1}"
-				for i = 1, Width do
-					Shape = Shape .. format( "{\\pix}m 0 0 l 0 %s l 1 %s l 1 0 ", Height, Height )
-				end
-				maxn = Width
-			else --cuadrícula
-				Shape = "{\\p1}"
-				for i = 1, Width do
-					Shape = Shape .. "{\\pix}m 0 0 l 0 1 l 1 1 l 1 0 "
-				end
-				Shape = Shape .. "{\\p0}\\N"
-				local shp = Shape
-				for i = 1, Height - 1 do
-					Shape = Shape .. shp
-				end
-				maxn = Width * Height
-			end
-			local k = 1
-			Shape = Shape:gsub( "\\pix",
-				function( capture )
-					px = mx or math.i( k, Width )[ "1-->A" ]
-					py = mx and k or math.i( k, Width )[ "N,n" ]
-					id = format( "%s,%s", px, py )
-					cx = Width / 2
-					cy = Height / 2
-					d = math.distance( cx, cy, px, py )
-					a = math.angle( cx, cy, px, py )
-					i = k
-					n = maxn
-					k = k + 1
-					return Filter( id )
-				end
-			)
-			local str, c
-			while string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 ", true )[ 2 ] > 1 do
-				str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
-				Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
-			end
-			Shape = remember( "shp_gridr", Reduc( Shape ) )
-			if Lines then
-				local Lshp, l = { }
-				local parts = Lines
-				if Shape:match( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) then
-					for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-						Lshp[ #Lshp + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
-					end
-					if type( Lines ) == "table" then
-						parts = ceil( #Lshp / Lines[ 1 ] )
-					end
-					lines_img = table.inpack( Lshp, parts )
-					for i = 1, #lines_img do
-						lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
-							(i - 1) * parts, table.concat( lines_img[ i ] ), #Lshp - i * parts
-						)
-					end
-				else
-					for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H\\]*" ) do
-						Lshp[ #Lshp + 1 ] = l:gsub( "(1c)&H(%x+)&", "%1%2" )
-					end
-					if type( Lines ) == "table" then
-						parts = ceil( #Lshp / Lines[ 1 ] )
-					end
-					lines_img = table.inpack( Lshp, parts )
-					for i = 1, #lines_img do
-						lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l %s 1 %s{\\x}m 0 0 l %s 1 ",
-							(i - 1) * parts, table.concat( lines_img[ i ] ), #Lshp - i * parts
-						)
-					end
-				end
-				lines_img = remember( "L_images", lines_img )
-			end
-		end --shape.gridr( 50, 50, nil, "test.bmp" )
-		if Lines then
-			return lines_img
+			return img_table, an_x, an_y, get_info.width, get_info.height
 		end
+		if type( Filter ) == "string" then			--si es una imagen .bmp
+			local img_info, xi, yi, wi, hi = image_info( Filter )
+			Filter = function( i )
+				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+				x1, y1 = tonumber( x1 ), tonumber( y1 )
+				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+				local k = format( "%s,%s", xr, yr )
+				return img_info[ i ] or img_info[ k ] or "\\r"
+			end
+		end
+		----------------------------------
+		Shape = ""
+		local mx, maxn
+		if Mode == "h" then --barras horizontales
+			for i = 1, Height do
+				Shape = Shape .. format( "{\\p1\\pix}m 0 0 l 0 1 l %s 1 l %s 0 {\\p0}\\N", Width, Width )
+			end
+			mx, maxn = 1, Height
+		elseif Mode == "v" then --barras verticales
+			Shape = "{\\p1}"
+			for i = 1, Width do
+				Shape = Shape .. format( "{\\pix}m 0 0 l 0 %s l 1 %s l 1 0 ", Height, Height )
+			end
+			maxn = Width
+		else --cuadrícula
+			Shape = "{\\p1}"
+			for i = 1, Width do
+				Shape = Shape .. "{\\pix}m 0 0 l 0 1 l 1 1 l 1 0 "
+			end
+			Shape = Shape .. "{\\p0}\\N"
+			local shp = Shape
+			for i = 1, Height - 1 do
+				Shape = Shape .. shp
+			end
+			maxn = Width * Height
+		end
+		local k = 1
+		Shape = Shape:gsub( "\\pix",
+			function( capture )
+				px = mx or math.i( k, Width )[ "1-->A" ]
+				py = mx and k or math.i( k, Width )[ "N,n" ]
+				id = format( "%s,%s", px, py )
+				cx = Width / 2
+				cy = Height / 2
+				d = math.distance( cx, cy, px, py )
+				a = math.angle( cx, cy, px, py )
+				i = k
+				n = maxn
+				k = k + 1
+				return Filter( id )
+			end
+		)
+		local str, c
+		while string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 ", true )[ 2 ] > 1 do
+			str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
+			Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
+		end
+		Shape = Reduc( Shape )
+		if Lines then
+			local Lshp, l = { }
+			local parts = Lines
+			if Shape:match( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) then
+				for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+					Lshp[ #Lshp + 1 ] = "{\\p1}" .. l:gsub( "(1c)&H(%x+)&", "%1%2" )
+				end
+				if type( Lines ) == "table" then
+					parts = ceil( #Lshp / Lines[ 1 ] )
+				end
+				lines_img = table.inpack( Lshp, parts )
+				for i = 1, #lines_img do
+					lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
+						(i - 1) * parts, table.concat( lines_img[ i ] ), #Lshp - i * parts
+					)
+				end
+			else
+				for l in Shape:gmatch( "%b{}m %d+[ %l%d%x&H\\]*" ) do
+					Lshp[ #Lshp + 1 ] = l:gsub( "(1c)&H(%x+)&", "%1%2" )
+				end
+				if type( Lines ) == "table" then
+					parts = ceil( #Lshp / Lines[ 1 ] )
+				end
+				lines_img = table.inpack( Lshp, parts )
+				for i = 1, #lines_img do
+					lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l %s 1 %s{\\x}m 0 0 l %s 1 ",
+						(i - 1) * parts, table.concat( lines_img[ i ] ), #Lshp - i * parts
+					)
+				end
+			end
+			return lines_img
+		end --shape.gridr( 50, 50, nil, "test.bmp" )
 		Shape = Shape:gsub( "(1c)&H(%x+)&", "%1%2" )
 		return Shape --shape.gridr( )
 	end --may 14th 2020
@@ -17557,183 +17553,179 @@
 		local Align = Align or 7 --alineación, en caso de ingresar imagen
 		local x_max, y_max = aegisub.width( Text ), aegisub.height( Text )
 		-----------------------------------
-		local text_px = recall.textpixel
-		local Reduc = recall.reduce
-		if j == 1 then
-			-------------------------------
-			Reduc = remember( "reduce", function( String )
-					--reduce los colores y alphas repetidos
-					local lines_in_shp, l = { }
-					--recolecta cada línea de la shape
-					for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
-						l = "{\\p1}" .. l:gsub( "\\p1", "\\x" )
-						local k = 1
-						local parts_lines, p = { [ 0 ] = "" } --partes de una línea
-						for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
-							parts_lines[ #parts_lines + 1 ] = p
-						end
-						l = l:gsub( "%b{}m %d+[ %dl]*",
-							function( capture )
-								capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
-								k = k + 1
-								return capture
-							end
-						)
-						:gsub( "m %d+[ %dl]*(G[G]*)",
-							function( Mark )
-								local n = unicode.len( Mark ) + 1
-								return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
-							end
-						)--si una parte es igual a la anterior, la elimina
-						local alphas_lines, a = { [ 0 ] = "" }
-						for a in l:gmatch( "\\1a&H%x+&" ) do
-							alphas_lines[ #alphas_lines + 1 ] = a
-						end
-						k = 1
-						l = l:gsub( "\\1a&H%x+&",
-							function( alphax )
-								alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
-								k = k + 1
-								return alphax
-							end
-						)
-						local colors_lines, c = { [ 0 ] = "" }
-						for c in l:gmatch( "\\1c&H%x+&" ) do
-							colors_lines[ #colors_lines + 1 ] = c
-						end
-						k = 1
-						l = l:gsub( "\\1c&H%x+&",
-							function( colorx )
-								colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
-								k = k + 1
-								return colorx
-							end
-						)
-						:gsub( "\\x\\", "\\" )
-						:gsub( "&\\x", "&" )
-						:gsub( "{\\p1}{\\x", "{\\p1" )
-						lines_in_shp[ #lines_in_shp + 1 ] = l
-					end
-					return table.concat( lines_in_shp )
-				end --july 02nd 2020
-			)
-			-------------------------------
-			local function image_info( Image )
-				local get_info = image.to_pixels( Image, nil, true )
-				local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
-				local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
-				local img_table, indx = { }, ""
-				for i = 1, get_info.width * get_info.height do
-					indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
-					img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+		local text_px
+		local Reduc = function( String )
+			--reduce los colores y alphas repetidos
+			local lines_in_shp, l = { }
+			--recolecta cada línea de la shape
+			for l in String:gmatch( "%b{}m %d+[ %l%d%x&H/{/}\\]*N" ) do
+				l = "{\\p1}" .. l:gsub( "\\p1", "\\x" )
+				local k = 1
+				local parts_lines, p = { [ 0 ] = "" } --partes de una línea
+				for p in l:gmatch( "%b{}m %d+[ %dl]*" ) do
+					parts_lines[ #parts_lines + 1 ] = p
 				end
-				return img_table, an_x, an_y, get_info.width, get_info.height
-			end
-			local is_image, img_info
-			if type( Filter ) == "string" then --si es una imagen .bmp
-				is_image = true
-				img_info, xi, yi, wi, hi = image_info( Filter )
-				Filter = function( i )
-					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-					x1, y1 = tonumber( x1 ), tonumber( y1 )
-					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-					local k = format( "%s,%s", xr, yr )
-					return img_info[ i ] or img_info[ k ] or "\\r"
-				end
-			end
-			-----------------------------------
-			local function min_alpha( String )
-				--elige al alpha más transparente y elimina al resto :D
-				local alphas, a = { }
-				for a in String:gmatch( "\\1a&H(%x%x)&" ) do
-					alphas[ #alphas + 1 ] = a
-				end
-				if #alphas > 1 then
-					for i = 1, #alphas do
-						alphas[ i ] = tonumber( alphas[ i ], 16 )
-					end
-					table.sort( alphas, function( a, b ) return a < b end )
-					String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
-				end
-				return String
-			end
-			-----------------------------------
-			local tbl = text.to_pixels( Text, nil, nil, nil, nil, { true } )
-			local x = table.op( tbl.x, "rank" )
-			local y = table.op( tbl.y, "rank" )
-			local tblx, str, c = { }
-			for i = 1, #tbl.x do
-				tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
-			end
-			local x_min, y_min = table.op( tbl.x, "min" ), table.op( tbl.y, "min" )
-			local x_max, y_max = x_min + x, y_min + y
-			local tbl_shp, id, is_shape = { }
-			for i = y_min, y_max do
-				tbl_shp[ i - y_min + 1 ] = ""
-				for k = x_min, x_max do
-					id = tostring( k ) .. "," .. tostring( i )
-					is_shape = format( "{\\p1\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
-					tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. ( tblx[ id ] and is_shape or "{\\p1}m 0 0 l 1 1 " )
-				end
-				if not tbl_shp[ i - y_min + 1 ]:match( "1a" ) then
-					tbl_shp[ i - y_min + 1 ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
-				end
-				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. "{\\p0}\\N"
-				while string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
-					str, c = string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 " )
-					tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ]:gsub( str, format( "{\\p1}m 0 0 l %s 1 ", c ) )
-				end		
-			end
-			text_px = table.concat( tbl_shp )
-			local k = 1
-			if is_image and Line then
-				text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-					function( isalpha, capture )
-						px = tonumber( capture:match( "(%d+),%d+" ) )
-						py = tonumber( capture:match( "%d+,(%d+)" ) )
-						cx = x_max / 2
-						cy = l.fontsize / 2
-						rx = floor( px + val_left - l.left )
-						d = math.distance( cx, cy, px, py )
-						a = math.angle( cx, cy, px, py )
-						i = k
-						n = #tbl.x
+				l = l:gsub( "%b{}m %d+[ %dl]*",
+					function( capture )
+						capture = (capture == parts_lines[ k - 1 ]) and "G" or capture
 						k = k + 1
-						capture = capture:gsub( "(%d+)(,%d+)",
-							function( x, y )
-								local x = tonumber( x )
-								x = floor( x + val_left - l.left )
-								return tostring( x ) .. y
-							end
-						)
-						local replaces = min_alpha( isalpha .. Filter( capture ) )
-						return replaces
+						return capture
 					end
 				)
-			else
-				text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
-					function( isalpha, capture )
-						px = tonumber( capture:match( "(%d+),%d+" ) )
-						py = tonumber( capture:match( "%d+,(%d+)" ) )
-						cx = x_max / 2
-						cy = l.fontsize / 2
-						rx = floor( px + val_left - l.left ) --x relative
-						d = math.distance( cx, cy, px, py )
-						a = math.angle( cx, cy, px, py )
-						i = k
-						n = #tbl.x
-						k = k + 1
-						local replaces = min_alpha( isalpha .. Filter( capture ) )
-						return replaces
+				:gsub( "m %d+[ %dl]*(G[G]*)",
+					function( Mark )
+						local n = unicode.len( Mark ) + 1
+						return format( "m 0 0 l 0 1 l %s 1 l %s 0 ", n, n )
 					end
-				) --text.grid( syl.text, function( ) return "\\1c" .. tag.ipol( math.clamp( math.distance( Dx, Dy, px, py ), 0, Dr ) / Dr, shape.color1, shape.color3 ) end )
+				)--si una parte es igual a la anterior, la elimina
+				local alphas_lines, a = { [ 0 ] = "" }
+				for a in l:gmatch( "\\1a&H%x+&" ) do
+					alphas_lines[ #alphas_lines + 1 ] = a
+				end
+				k = 1
+				l = l:gsub( "\\1a&H%x+&",
+					function( alphax )
+						alphax = (alphax == alphas_lines[ k - 1 ]) and "\\x" or alphax
+						k = k + 1
+						return alphax
+					end
+				)
+				local colors_lines, c = { [ 0 ] = "" }
+				for c in l:gmatch( "\\1c&H%x+&" ) do
+					colors_lines[ #colors_lines + 1 ] = c
+				end
+				k = 1
+				l = l:gsub( "\\1c&H%x+&",
+					function( colorx )
+						colorx = (colorx == colors_lines[ k - 1 ]) and "\\x" or colorx
+						k = k + 1
+						return colorx
+					end
+				)
+				:gsub( "\\x\\", "\\" )
+				:gsub( "&\\x", "&" )
+				:gsub( "{\\p1}{\\x", "{\\p1" )
+				lines_in_shp[ #lines_in_shp + 1 ] = l
 			end
-			local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
-			local shape_f = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, l.height - y_max - 1 )
-			text_px = shape_i .. text_px .. shape_f
-			text_px = remember( "textpixel", Reduc( text_px ):gsub( "(1c)&H(%x+)&", "%1%2" ) )
-		end --text.grid( "demo" )
+			return table.concat( lines_in_shp )
+		end --july 02nd 2020
+		-------------------------------
+		local function image_info( Image )
+			local get_info = image.to_pixels( Image, nil, true )
+			local an_x = floor( ((Align - 1) % 3) * (x_max - get_info.width) / 2 )
+			local an_y = floor( (3 - ceil( Align / 3 ) ) * (y_max - get_info.height) / 2 )
+			local img_table, indx = { }, ""
+			for i = 1, get_info.width * get_info.height do
+				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] + an_x ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] + an_y )
+				img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+			end
+			return img_table, an_x, an_y, get_info.width, get_info.height
+		end
+		local is_image, img_info
+		if type( Filter ) == "string" then --si es una imagen .bmp
+			is_image = true
+			img_info, xi, yi, wi, hi = image_info( Filter )
+			Filter = function( i )
+				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+				x1, y1 = tonumber( x1 ), tonumber( y1 )
+				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+				local k = format( "%s,%s", xr, yr )
+				return img_info[ i ] or img_info[ k ] or "\\r"
+			end
+		end
+		-----------------------------------
+		local function min_alpha( String )
+			--elige al alpha más transparente y elimina al resto :D
+			local alphas, a = { }
+			for a in String:gmatch( "\\1a&H(%x%x)&" ) do
+				alphas[ #alphas + 1 ] = a
+			end
+			if #alphas > 1 then
+				for i = 1, #alphas do
+					alphas[ i ] = tonumber( alphas[ i ], 16 )
+				end
+				table.sort( alphas, function( a, b ) return a < b end )
+				String = String:gsub( "\\1a&H%x%x&", "" ) .. format( "\\1a&H%s&", math.to16( alphas[ #alphas ] ) )
+			end
+			return String
+		end
+		-----------------------------------
+		local tbl = text.to_pixels( Text, nil, nil, nil, nil, { true } )
+		local x = table.op( tbl.x, "rank" )
+		local y = table.op( tbl.y, "rank" )
+		local tblx, str, c = { }
+		for i = 1, #tbl.x do
+			tblx[ tostring( tbl.x[ i ] ) .. "," .. tostring( tbl.y[ i ] ) ] = tbl.a[ i ]
+		end
+		local x_min, y_min = table.op( tbl.x, "min" ), table.op( tbl.y, "min" )
+		local x_max, y_max = x_min + x, y_min + y
+		local tbl_shp, id, is_shape = { }
+		for i = y_min, y_max do
+			tbl_shp[ i - y_min + 1 ] = ""
+			for k = x_min, x_max do
+				id = tostring( k ) .. "," .. tostring( i )
+				is_shape = format( "{\\p1\\1a%s\\%s}m 0 0 l 0 1 l 1 1 l 1 0 ", tblx[ id ] or 0, id )
+				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. ( tblx[ id ] and is_shape or "{\\p1}m 0 0 l 1 1 " )
+			end
+			if not tbl_shp[ i - y_min + 1 ]:match( "1a" ) then
+				tbl_shp[ i - y_min + 1 ] = format( "{\\p1}m 0 0 l %s 1 ", x_max )
+			end
+			tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ] .. "{\\p0}\\N"
+			while string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 ", true )[ 2 ] > 1 do
+				str, c = string.match2( tbl_shp[ i - y_min + 1 ], "{\\p1}m 0 0 l 1 1 " )
+				tbl_shp[ i - y_min + 1 ] = tbl_shp[ i - y_min + 1 ]:gsub( str, format( "{\\p1}m 0 0 l %s 1 ", c ) )
+			end		
+		end
+		text_px = table.concat( tbl_shp )
+		local k = 1
+		if is_image and Line then
+			text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = tonumber( capture:match( "(%d+),%d+" ) )
+					py = tonumber( capture:match( "%d+,(%d+)" ) )
+					cx = x_max / 2
+					cy = l.fontsize / 2
+					rx = floor( px + val_left - l.left )
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					capture = capture:gsub( "(%d+)(,%d+)",
+						function( x, y )
+							local x = tonumber( x )
+							x = floor( x + val_left - l.left )
+							return tostring( x ) .. y
+						end
+					)
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			)
+		else
+			text_px = text_px:gsub( "(\\1a&H%x%x&)\\(%d+,%d+)",
+				function( isalpha, capture )
+					px = tonumber( capture:match( "(%d+),%d+" ) )
+					py = tonumber( capture:match( "%d+,(%d+)" ) )
+					cx = x_max / 2
+					cy = l.fontsize / 2
+					rx = floor( px + val_left - l.left ) --x relative
+					d = math.distance( cx, cy, px, py )
+					a = math.angle( cx, cy, px, py )
+					i = k
+					n = #tbl.x
+					k = k + 1
+					local replaces = min_alpha( isalpha .. Filter( capture ) )
+					return replaces
+				end
+			) --text.grid( syl.text, function( ) return "\\1c" .. tag.ipol( math.clamp( math.distance( Dx, Dy, px, py ), 0, Dr ) / Dr, shape.color1, shape.color3 ) end )
+		end
+		local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
+		local shape_f = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, l.height - y_max - 1 )
+		text_px = shape_i .. text_px .. shape_f
+		text_px = Reduc( text_px ):gsub( "(1c)&H(%x+)&", "%1%2" )
+		--text.grid( "demo" )
 		return text_px --text.grid( )
 	end --may 14th 2020
 
@@ -17784,67 +17776,61 @@
 	function image.grid( Image, Lines )
 		local Image = Image or "test.bmp"
 		local get_info = image.to_pixels( Image, nil, true )
-		local img_table, indx = recall.image_tbl, ""
-		local image_px, id = recall.image_lin, ""
-		local lines_img = recall.Limages
-		if j == 1 then
-			-------------------------------
-			local function reduce( String )
-				--reduce los colores y alphas repetidos
-				local coloralpha, c, a = { }
-				for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
-					coloralpha[ #coloralpha + 1 ] = { c, a }
-				end
-				String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
-					function( c, a )
-						return "cfx" .. "afx"
-					end
-				):gsub( "(cfx)(afx)",
-					function( c, a )
-						return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
-					end, 1
-				)
-				local i = math.count( )
-				String = String:gsub( "(cfx)(afx)",
-					function( c, a )
-						local k, c, a = i( ) + 1
-						c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
-						a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
-						return c .. a == "" and "\\x" or c .. a
-					end
-				)
-				return String
-			end --june 13th 2020
-			-------------------------------
-			img_table = remember( "image_tbl", { } )
-			for i = 1, get_info.width * get_info.height do
-				indx = tostring( math.i( i, get_info.width )[ "1-->A" ] ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] )
-				img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+		local indx, id = "", ""
+		local img_table, image_px, lines_img
+		-------------------------------
+		local function reduce( String )
+			--reduce los colores y alphas repetidos
+			local coloralpha, c, a = { }
+			for c, a in String:gmatch( "\\1c(&H%x+&)\\1a(&H%x+&)" ) do
+				coloralpha[ #coloralpha + 1 ] = { c, a }
 			end
-			image_px = remember( "image_lin", { } )
-			for i = 1, get_info.height do
-				image_px[ i ] = "{\\p1}"
-				for k = 1, get_info.width do
-					id = tostring( k ) .. "," .. tostring( i )
-					image_px[ i ] = image_px[ i ] .. format( "{%s}m 0 0 l 0 1 l 1 1 l 1 0 ", img_table[ id ] )
+			String = String:gsub( "(\\1c&H%x+&)(\\1a&H%x+&)", 
+				function( c, a )
+					return "cfx" .. "afx"
 				end
-				image_px[ i ] = reduce( image_px[ i ] ):gsub( "(1c)&H(%x+)&", "%1%2" ) .. "{\\p0}\\N"
+			):gsub( "(cfx)(afx)",
+				function( c, a )
+					return format( "\\1c%s\\1a%s", coloralpha[ 1 ][ 1 ], coloralpha[ 1 ][ 2 ] )
+				end, 1
+			)
+			local i = math.count( )
+			String = String:gsub( "(cfx)(afx)",
+				function( c, a )
+					local k, c, a = i( ) + 1
+					c = coloralpha[ k ][ 1 ] == coloralpha[ k - 1 ][ 1 ] and "" or "\\1c" .. coloralpha[ k ][ 1 ]
+					a = coloralpha[ k ][ 2 ] == coloralpha[ k - 1 ][ 2 ] and "" or "\\1a" .. coloralpha[ k ][ 2 ]
+					return c .. a == "" and "\\x" or c .. a
+				end
+			)
+			return String
+		end --june 13th 2020
+		-------------------------------
+		img_table = { }
+		for i = 1, get_info.width * get_info.height do
+			indx = tostring( math.i( i, get_info.width )[ "1-->A" ] ) .. "," .. tostring( math.i( i, get_info.width )[ "N,n" ] )
+			img_table[ indx ] = format( "\\1c%s\\1a%s", get_info.color[ i ], get_info.alpha[ i ] )
+		end
+		image_px = { }
+		for i = 1, get_info.height do
+			image_px[ i ] = "{\\p1}"
+			for k = 1, get_info.width do
+				id = tostring( k ) .. "," .. tostring( i )
+				image_px[ i ] = image_px[ i ] .. format( "{%s}m 0 0 l 0 1 l 1 1 l 1 0 ", img_table[ id ] )
 			end
-			if Lines then
-				local parts = Lines
-				if type( Lines ) == "table" then
-					parts = ceil( #image_px / Lines[ 1 ] )
-				end
-				lines_img = table.inpack( image_px, parts )
-				for i = 1, #lines_img do
-					lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
-						(i - 1) * parts, table.concat( lines_img[ i ] ), #image_px - i * parts
-					)
-				end
-				lines_img = remember( "Limages", lines_img )
-			end
+			image_px[ i ] = reduce( image_px[ i ] ):gsub( "(1c)&H(%x+)&", "%1%2" ) .. "{\\p0}\\N"
 		end
 		if Lines then
+			local parts = Lines
+			if type( Lines ) == "table" then
+				parts = ceil( #image_px / Lines[ 1 ] )
+			end
+			lines_img = table.inpack( image_px, parts )
+			for i = 1, #lines_img do
+				lines_img[ i ] = format( "{\\bs0\\p1}m 0 0 l 1 %s {\\p0}\\N%s{\\p1}m 0 0 l 1 %s ",
+					(i - 1) * parts, table.concat( lines_img[ i ] ), #image_px - i * parts
+				)
+			end
 			return lines_img
 		end
 		local image_pix = table.concat( image_px )
