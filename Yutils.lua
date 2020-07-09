@@ -119,7 +119,8 @@ local SUPERSAMPLING = 8	-- Anti-aliasing precision for shape to pixels conversio
 local FONT_PRECISION = 64	-- Font scale for better precision output from native font system
 local LIBASS_FONTHACK = true	-- Scale font data to fontsize? (no effect on windows)
 local LIBPNG_PATH = "libpng"	-- libpng dynamic library location or shortcut (for system library loading function)
---local LIBPNG_PATH = "C:\\Users\\DM4\\Desktop\\Vídeos\\lpng1632\\libpng"
+--local LIBPNG_PATH = "C:\\Users\\victo\\Desktop\\Kara Effector 3.6\\lpng\\pngrutil.c"
+--local LIBPNG_PATH = include( "png" )
 
 -- Load FFI interface
 local ffi = require("ffi")
@@ -532,6 +533,9 @@ local Yutils
 Yutils = {
 	-- Table sublibrary
 	table = {
+		demo = function( s )
+			return utf8_to_utf16( s )
+		end,
 		-- Copies table deep
 		copy = function(t, depth)
 			-- Check argument
@@ -2547,7 +2551,7 @@ Yutils = {
 	-- Decoder sublibrary
 	decode = {
 		-- Creates BMP file reader
-		create_bmp_reader = function(filename)
+		create_bmp_reader = function(filename) --Yutils.decode.create_bmp_reader( "auto.png" )
 			-- Check argument
 			-- Yutils.decode.create_bmp_reader( img )
 			if type(filename) ~= "string" then
@@ -3195,7 +3199,8 @@ Yutils = {
 						local shape, shape_n = {}, 0
 						-- Get utf16 text
 						text = utf8_to_utf16(text)
-						local text_len = ffi.C.wcslen(text)
+						--local text_len = ffi.C.wcslen(text)
+						local text_len = tonumber( ffi.C.wcslen(text) ) --fixed: june 19th 2020
 						-- Add path to device context
 						if text_len > 8192 then
 							error("text too long", 2)
