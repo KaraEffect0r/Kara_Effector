@@ -63,7 +63,7 @@
 		-	table.cyclic( Table )
 		-	table.op( Table, Mode, add )
 			table.remember( table_ref, table_val )
-			table.random( Table_or_Number )
+			table.random( Table )
 		+	table.delete( Table, ... )
 		+	table.permute( Table )
 		+	table.ipol( Table, Size, Tags, algorithm )
@@ -888,7 +888,6 @@
 		if type( Table ) == "function" then
 			Table = Table( )
 		end
-		--effector.print_error( Table, "table", "table.duplicate", 1 )
 		local lookup_table = { }
 		local function table_copy( Table )
 			if type( Table ) ~= "table" then
@@ -1277,7 +1276,7 @@
 					table.remove( Table_ret, table.index( Table_ret, retire_e[ i ] ) )
 				end
 			end
-		end --2020 incluirla en table.delete
+		end
 		return Table_ret
 	end --table.retire( { 21, 22, 23, 24, 25, 26 }, { { 1, 4 } } )
 	
@@ -1532,6 +1531,31 @@
 				table_move[ i + add ] = Table[ i ]
 			end
 			return table_move
+		elseif Mode == "move2" then --august 24th 2020
+			--desplaza los índices de la tabla una cantidad entera de posiciones
+			--y los últimos se convertirán en los primeros elementos de la tabla :D
+			local add = ceil( add or 0 )
+			local table_move2 = { }
+			for i = 1, #Table do
+				table_move2[ math.i( i + add, #Table )[ "1-->A" ] ] = Table[ i ]
+			end
+			return table_move2
+		elseif Mode == "order" then --august 24th 2020
+			--organiza en orden alfabético los elementos de una tabla string
+			local table_order = table.duplicate( Table )
+			table.sort( table_order,
+				function( a, b )
+					local pattern = "^(.-)%s*(%d+)$"
+					local _, _, col1, num1 = tostring( a ):find( pattern )
+					local _, _, col2, num2 = tostring( b ):find( pattern )
+					if (col1 and col2)
+						and col1 == col2 then
+						return tonumber( num1 ) < tonumber( num2 )
+					end
+					return a < b
+				end
+			)
+			return table_order
 		end
 	end
 	
@@ -1545,27 +1569,27 @@
 		return unpack( table_val )
 	end
 	
-	function table.random( Table_or_Number )
+	function table.random( Table )
 		--retorna un elemento aleatoriamente de la tabla ingresada
 		--o un número entero al azar entre 1 y el número ingresado
-		if type( Table_or_Number ) == "function" then
-			Table_or_Number = Table_or_Number( )
+		if type( Table ) == "function" then
+			Table = Table( )
 		end
-		local T_o_N = Table_or_Number or { 1 }
-		effector.print_error( T_o_N, "numbertable", "table.random", 1 )
-		if type( T_o_N ) == "number" then
-			local Num = T_o_N
-			T_o_N = { }
+		local tbl_or_num = Table or { 1 }
+		effector.print_error( tbl_or_num, "numbertable", "table.random", 1 )
+		if type( tbl_or_num ) == "number" then
+			local Num = tbl_or_num
+			tbl_or_num = { }
 			for i = 1, Num do
-				T_o_N[ i ] = i
+				tbl_or_num[ i ] = i
 			end
 		end
-		if #T_o_N == 1 then
-			return T_o_N[ 1 ]
+		if #tbl_or_num == 1 then
+			return tbl_or_num[ 1 ]
 		end --add: june 18th 2020
-		local rand_e = T_o_N[ R( #T_o_N ) ]
+		local rand_e = tbl_or_num[ R( #tbl_or_num ) ]
 		if rand_e == table_random then
-			rand_e = T_o_N[ R( #T_o_N ) ]
+			rand_e = tbl_or_num[ R( #tbl_or_num ) ]
 		end
 		table_random = rand_e
 		return rand_e
@@ -2772,7 +2796,7 @@
 		end --string.newmatch( "\\1a&HFF&\\xshad-3.4\\t(45,50,\\blur4)", "\\[%d]*%a[%-%.%w&]*", "\\[%d]*%a[%-%.%w&]*" )
 		return unpack( newcaps )
 	end --june 15th 2020
-
+	
 	function string.replace( String, ... )
 		--genera remplazos por medio de capturas (modificación de string.gsub) las capturas son válidas de
 		--forma consecutiva, hasta que la concatenación de las mismas ya no exista como una captura válida
@@ -2800,6 +2824,7 @@
 			newcap = newcap .. Captures[ i + 1 ]
 			i = i + 1
 			if String == String:gsub( newcap, Filter ) then
+				i = i - 1
 				break
 			end
 		end
@@ -2808,7 +2833,7 @@
 			return String
 		end
 		local new_capture = ""
-		for k = 1, i - 1 do
+		for k = 1, i do
 			new_capture = new_capture .. Captures[ k ]
 		end
 		String = String:gsub( new_capture, Filter )
@@ -4624,7 +4649,6 @@
 	
 	function math.circle( Shape )
 		--retorna las coordenadas del centro y el radio de un círculo a partir de tres puntos en un clip/shape
-		local coor, center = { }, { }
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -4635,6 +4659,7 @@
 			end
 			return recursion_tbl
 		end --recursión
+		local coor, center = { }, { }
 		effector.print_error( Shape, "string", "math.circle", 1 )
 		for c in Shape:gmatch( "%-?%d+[%.%d]*" ) do
 			table.insert( coor, tonumber( c ) )
@@ -9261,14 +9286,14 @@
 			if fx.add_tags:match( delete_tags[ i ] ) then
 				--return_kefx = return_kefx:gsub( delete_tags[ i ], "" )
 				return_kefx = string.change( return_kefx, delete_tags[ i ], nil,
-					{ "%b{}.", "%b{}[ ]*m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*[%-?%d%.mlb ]*", "\\t[cdefirswx%~%-%d]*%b()" }
-				)
-				--mod: january 25th 2020
+					{ "%b{}%.", "%b{}[ ]*m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%d]*[%-?%d%.mlb ]*", "\\t[cdefirswx%~%-%d]*%b()" }
+				) 
+				--mod: july 27th 2020
 				--esta modificación protege los tags en los siguientes casos:
 				--tags de la función text.move
 				--tags agregados de las shapes
 				--tags que estén dentro de las transfos \\t[cdefirswx%~%-%d]*
-			end
+			end --■ ·
 		end
 		return return_kefx
 	end
@@ -9811,7 +9836,7 @@
 		end
 		return Tags
 	end --mod: june 03rd 2020
-
+	
 	function color.matrix( Color, ... )
 		if type( Color ) == "function" then
 			Color = Color( )
@@ -9916,7 +9941,7 @@
 		end
 		return "&H" .. col_B .. col_G .. col_R .. "&" --august 04th 2019
 	end --color.val2ass( 255, 0, 0 )
-
+	
 	function color.HSV_to_RGB( Hue, Saturation, Value )
 		--HSV to ass color format :D HSV2ass
 		if type( Hue ) == "function" then
@@ -10174,7 +10199,7 @@
 		end
 		return Tags
 	end --mod: june 14th 2020
-
+	
 	function alpha.fromstyle( ColorAlpha )
 		--alpha from style
 		if type( ColorAlpha ) == "function" then
@@ -10235,14 +10260,14 @@
 			end --shape.ASSDraw3( { shape.circle, x = "\\clip( m 0 0 l 0 1 l 1 1 l 1 0 )" } )
 			return recursion_tbl
 		end --recursión: september 08th 2019
-		local Round = Round or 2 -- cifras decimales a redondear los números en la shape
+		local Round = Round or 2 --cifras decimales a redondear los números en la shape
 		if type( Round ) == "function" then
 			Round = Round( )
 		end
 		effector.print_error( Shape, "shape", "shape.ASSDraw3", 1 )
 		effector.print_error( Round, "number", "shape.ASSDraw3", 2 )
 		local segments, coor2 = { }, { }
-		Shape = Shape:gsub( "  ", " " ) -- elimina los espacios múltiples
+		Shape = Shape:gsub( "  ", " " ) --elimina los espacios múltiples
 		Shape = Shape:gsub( "%S+",
 			function( num )
 				return format( "%s", math.round( tonumber( num ) or num, Round ) )
@@ -10356,7 +10381,7 @@
 		n_points = #shape_x						--> (points) cantidad de puntos de la shape
 		---------------------------------
 	end
-
+	
 	function shape.redraw( Shape, tract, Section, Continued )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
@@ -10465,7 +10490,7 @@
 		end --shape.redraw( { shape.circle, shp = shape.rectangle }, 3 )
 		return Shape --shape.redraw( shape.circle, 3 )
 	end --rewrite: march 30th 2020
-
+	
 	function shape.filter( Shape, Split, ... )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
@@ -10872,7 +10897,7 @@
 		Shape = shape.ASSDraw3( Shape ) --shape.oblique( shape.rectangle, { { 20 } }, "y" )
 		return Shape
 	end
-
+	
 	function shape.to_bezier( Shape )
 		--convierte las secciones "line" de la Shape, en "bezier"
 		if type( Shape ) == "function" then
@@ -10968,7 +10993,7 @@
 		Shape = shape.ASSDraw3( shape_inv )
 		return Shape
 	end
-
+	
 	function shape.displace( Shape, Dx, Dy, Mode )
 		--desplaza la Shape a las coordenadas seleccionadas
 		-->shape.origin		= shape.displace( Shape, 0, 0, "origin" ) or shape.displace( Shape, "origin" )
@@ -11219,7 +11244,7 @@
 		end --mod: january 05th 2019
 		return Shape
 	end --shape.size( shape.rectangle, 120, 45 )
-
+	
 	function shape.array( Shape, Loops, Angles_or_mode, Dxy )
 		--genera múltiples arreglos "array" de una o más shapes ingresadas
 		if type( Shape ) == "function" then
@@ -14696,7 +14721,10 @@
 				end
 			)
 		end
-		shape_px = Reduc( shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" ) )
+		shape_px = shape_px:gsub( "{\\p1}{\\x}", "{\\p1}" )
+		if reduce_lines then
+			shape_px = Reduc( shape_px )
+		end
 		if Lines then
 			local lines_in_shape, l = { }
 			local parts = Lines
@@ -14804,14 +14832,19 @@
 			return img_table, an_x, an_y, get_info.width, get_info.height
 		end
 		if type( Filter ) == "string" then			--si es una imagen .bmp
-			local img_info, xi, yi, wi, hi = image_info( Filter )
-			Filter = function( i )
-				local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
-				x1, y1 = tonumber( x1 ), tonumber( y1 )
-				local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
-				local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
-				local k = format( "%s,%s", xr, yr )
-				return img_info[ i ] or img_info[ k ] or "\\r"
+			if Filter:match( "%.bmp" ) then
+				local img_info, xi, yi, wi, hi = image_info( Filter )
+				Filter = function( i )
+					local x1, y1 = i:match( "(%-?%d+),(%-?%d+)" )
+					x1, y1 = tonumber( x1 ), tonumber( y1 )
+					local xr = math.i( x1 - xi, xi + 1, xi + wi )[ "A-->B" ]
+					local yr = math.i( y1 - yi, yi + 1, yi + hi )[ "A-->B" ]
+					local k = format( "%s,%s", xr, yr )
+					return img_info[ i ] or img_info[ k ] or "\\r"
+				end
+			else
+				local rtn = Filter
+				Filter = function( i ) return rtn end
 			end
 		end
 		----------------------------------
@@ -14861,7 +14894,10 @@
 			str, c = string.match2( Shape, "{\\x}m 0 0 l 0 1 l 1 1 l 1 0 " )
 			Shape = Shape:gsub( str, format( "{\\x}m 0 0 l 0 1 l %s 1 l %s 0 ", c, c ) )
 		end
-		Shape = Reduc( Shape )
+		--Shape = Reduc( Shape )
+		if reduce_lines then
+			Shape = Reduc( Shape )
+		end
 		if Lines then
 			local Lshp, l = { }
 			local parts = Lines
@@ -17724,7 +17760,10 @@
 		local shape_i = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, y_min - 1 )
 		local shape_f = format( "{\\p1}m 0 0 l %s %s {\\p0}\\N", x, l.height - y_max - 1 )
 		text_px = shape_i .. text_px .. shape_f
-		text_px = Reduc( text_px ):gsub( "(1c)&H(%x+)&", "%1%2" )
+		text_px = text_px:gsub( "(1c)&H(%x+)&", "%1%2" )
+		if reduce_lines then
+			text_px = Reduc( text_px )
+		end
 		--text.grid( "demo" )
 		return text_px --text.grid( )
 	end --may 14th 2020
