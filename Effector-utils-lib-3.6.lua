@@ -219,6 +219,7 @@
 		-	shape.rotate( Shape, Angle, org_x, org_y )
 		-	shape.reflect( Shape, Axis )
 		-	shape.oblique( Shape, Pixel, Axis )
+			shape.to_line( Shape, Tract )
 		+	shape.to_bezier( Shape )
 		-	shape.reverse( Shape )
 		-	shape.displace( Shape, Dx, Dy, Mode )
@@ -1533,7 +1534,7 @@
 			return table_move
 		elseif Mode == "move2" then --august 24th 2020
 			--desplaza los índices de la tabla una cantidad entera de posiciones
-			--y los últimos se convertirán en los primeros elementos de la tabla :D
+			--y los últimos se convertirán en los primeros elementos de la tabla (ciclo):D
 			local add = ceil( add or 0 )
 			local table_move2 = { }
 			for i = 1, #Table do
@@ -10326,7 +10327,7 @@
 	end
 	
 	function shape.round( Shape, Round )
-		--redondea los valores de la Shape a las cifras decimales indicadas o al entero más cercano
+		--redondea los valores numéricos de la Shape a las cifras decimales indicadas o al entero más cercano
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -10383,6 +10384,7 @@
 	end
 	
 	function shape.redraw( Shape, tract, Section, Continued )
+		--redibuja la shape en secciones rectas de longitudes indicadas
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -10492,6 +10494,7 @@
 	end --rewrite: march 30th 2020
 	
 	function shape.filter( Shape, Split, ... )
+		--aplica uno o más filtros a la shape, previamente seccionada en trozos rectos
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -10609,7 +10612,7 @@
 	end --shape.length( shape.circle )
 	
 	function shape.width( Shape, Height )
-		--retorna el ancho de la Shape ingresada
+		--retorna el ancho en pixeles de la Shape ingresada
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -10643,7 +10646,7 @@
 	end
 	
 	function shape.height( Shape )
-		--retorna el alto de la Shape ingresada
+		--retorna la altura en pixeles de la Shape ingresada
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -10669,66 +10672,82 @@
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
-		local Shape = shape.ASSDraw3( Shape )
-		if type( Shape ) == "table" then
-			local recursion_tbl = { }
-			for k, v in pairs( Shape ) do
-				recursion_tbl[ k ] = shape.rotate( v, Angle, org_x, org_y )
-			end
-			return recursion_tbl
-		end --recursión: september 08th 2019
-		if type( Angle ) == "function" then
-			Angle = Angle( )
-		end
 		if type( org_x ) == "function" then
 			org_x = org_x( )
 		end
 		if type( org_y ) == "function" then
 			org_y = org_y( )
 		end
+		local Shape = shape.ASSDraw3( Shape )
+		effector.print_error( Shape, "shape", "shape.rotate", 1 )
 		local Ang = Angle or 0
 		local cx = org_x or 0
 		local cy = org_y or 0
-		effector.print_error( Shape, "shape", "shape.rotate", 1 )
 		effector.print_error( Ang, "numbertable", "shape.rotate", 2 )
 		effector.print_error( cx, "numberstring", "shape.rotate", 3 )
 		effector.print_error( cy, "numberstring", "shape.rotate", 4 )
-		if type( Angle ) == "table" then --add: may 01st 2020
-			--Ang depende del ángulo entre dos puntos o un punto y el origen
-			if Angle[ 1 ]
-				and type( Angle[ 1 ] ) ~= "table" then
-				Angle[ 1 ] = { Angle[ 1 ] }
+		if type( Shape ) == "table" then
+			for i = 1, #Shape do
+				Shape[ i ] = shape.rotate( Shape[ i ], Angle, org_x, org_y )
 			end
-			if not Angle[ 1 ] then
-				Angle[ 1 ] = { }
-				Angle[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
-				Angle[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
-				Angle[ 1 ][ 2 ] = Angle[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
+		else --recursividad: september 08th 2019
+			if type( Angle ) == "table" then --add: may 01st 2020
+				--Ang depende del ángulo entre dos puntos o un punto y el origen
+				if Angle[ 1 ]
+					and type( Angle[ 1 ] ) ~= "table" then
+					Angle[ 1 ] = { Angle[ 1 ] }
+				end
+				if not Angle[ 1 ] then
+					Angle[ 1 ] = { }
+					Angle[ 1 ][ 1 ] = Shape:match( "%-?%d+[%.%d]*%s+%-?%d+[%.%d]*" )
+					Angle[ 1 ][ 2 ] = Shape:sub( -20, -1 ):reverse( )
+					Angle[ 1 ][ 2 ] = Angle[ 1 ][ 2 ]:match( "%d+[%.%d%-]*%s+%d+[%.%d%-]*" ):reverse( )
+				end
+				Ang = Angle[ 2 ] - math.angle( Angle[ 1 ][ 1 ], Angle[ 1 ][ 2 ] )
 			end
-			Ang = Angle[ 2 ] - math.angle( Angle[ 1 ][ 1 ], Angle[ 1 ][ 2 ] )
-		end
-		if cx == "center" then
+			if cx == "center" then
+				shape.info( Shape )
+				cx = c_shape
+				cy = m_shape
+			end
+			if type( cx ) == "string"
+				and cx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
+				cy = tonumber( cx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
+				cx = tonumber( cx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
+			end --add: may 18th 2020
+			------------
+			local Rotate
 			shape.info( Shape )
-			cx = c_shape
-			cy = m_shape
-		end
-		if type( cx ) == "string"
-			and cx:match( "%-?%d+[%.%d]* %-?%d+[%.%d]*" ) then
-			cy = tonumber( cx:match( "%-?%d+[%.%d]* (%-?%d+[%.%d]*)" ) )
-			cx = tonumber( cx:match( "(%-?%d+[%.%d]*) %-?%d+[%.%d]*" ) )
-		end --add: may 18th 2020
-		Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
-			function( x, y )
-				local new_ang = math.angle( cx, cy, x, y )
-				local new_rad = math.distance( cx, cy, x, y )
-				x = cx + math.polar( new_ang + Ang, new_rad, "x" )
-				y = cy + math.polar( new_ang + Ang, new_rad, "y" )
-				return format( "%s %s", x, y )
-			end
-		)
-		Shape = shape.ASSDraw3( Shape )
+			local i = math.count( )
+			------------
+			Shape = Shape:gsub( "(%-?%d+[%.%d]*) (%-?%d+[%.%d]*)",
+				function( x, y )
+					local new_ang = math.angle( cx, cy, x, y )
+					local new_rad = math.distance( cx, cy, x, y )
+					-- adaptación para rotar con un Filter( )
+					-- august 27th 2020 -------------------------
+					Cx = c_shape						-- coordenada "x" del centro de la shape
+					Cy = m_shape						-- coordenada "y" del centro de la shape
+					Do = math.distance( x, y )			-- distancia del punto al origen
+					Dc = math.distance( Cx, Cy, x, y )	-- distancia del punto al centro de la shape
+					Ao = math.angle( x, y )				-- ángulo del origen al punto
+					Ac = math.angle( Cx, Cy, x, y )		-- ángulo del centro al punto
+					Pn = n_points						-- cantidad total de puntos en la shape
+					Pk = i( )							-- contador de los puntos de la shape
+					Mx = (y - miny ) / h_shape			-- módulo de varianza respecto a "x", Mx = [0, 1]
+					My = (x - minx ) / w_shape			-- módulo de varianza respecto a "y", My = [0, 1]
+					Mp = (Pk - 1) / (Pn - 1)			-- módulo de varianza respecto a los puntos, Mp = [0, 1]
+					---------------------------------------------
+					Rotate = type( Ang ) == "function" and Ang( ) or Ang
+					x = cx + math.polar( new_ang + Rotate, new_rad, "x" )
+					y = cy + math.polar( new_ang + Rotate, new_rad, "y" )
+					return format( "%s %s", x, y )
+				end --shape.rotate( shape.redraw( shape.rectangle, 5 ), function( ) return tag.ipol( Mp, 0, 60 ) end )
+			)
+			Shape = shape.ASSDraw3( Shape )
+		end --shape.rotate( { shape.rectangle, shape.trebol }, -45 )
 		return Shape
-	end --shape.rotate( { shape.rectangle, x = shape.trebol }, -45 )
+	end
 	
 	function shape.reflect( Shape, Axis, Relative )
 		--hace un reflejo de la Shape respecto a alguno de los 2 ejes, o a la recta y = x
@@ -10897,6 +10916,28 @@
 		Shape = shape.ASSDraw3( Shape ) --shape.oblique( shape.rectangle, { { 20 } }, "y" )
 		return Shape
 	end
+	
+	function shape.to_line( Shape, Tract )
+		--convierte las secciones "bezier" de la Shape, en "line"
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.to_line( v, Tract )
+			end
+			return recursion_tbl
+		end --recursión
+		if type( Tract ) == "function" then
+			Tract = Tract( )
+		end
+		local Tract = Tract or 5 * ratio
+		effector.print_error( Shape, "shape", "shape.to_line", 1 )
+		effector.print_error( Tract, "number", "shape.to_line", 2 )
+		return shape.redraw( Shape, Tract, "bezier" )
+	end --august 30th 2020
 	
 	function shape.to_bezier( Shape )
 		--convierte las secciones "line" de la Shape, en "bezier"
@@ -11471,7 +11512,8 @@
 		return shape.displace( shape.rotate( shape_lineal_fx, angle_array ), "origin" )
 	end
 	
-	function shape.lmove( Coor, Times, Times2, Accel ) -- Shape Lineal Move 2
+	function shape.lmove( Coor, Times, Times2, Accel ) -- Shape Lineal Move
+		--genera un movimiento en secciones rectas según las coordenadas indicadas
 		if type( Coor ) == "function" then
 			Coor = Coor( )
 		end
@@ -11584,6 +11626,7 @@
 	end --shape.lmove( { -l.width / 2, fx.pos_y, fx.pos_x, fx.pos_y, xres + l.width / 2, fx.pos_y }, { 0, 200, fx.dur - 200, fx.dur } )
 	
 	function shape.pmove( F_x, F_y, domainF, t1, t2, Accel, offset_t ) -- Shape Parametric Move
+		--genera un movimiento de acuerdo con las funciones paraméticas ingresadas
 		if type( F_x ) == "function" then
 			F_x = F_x( )
 		end
@@ -11681,6 +11724,7 @@
 	end --shape.pmove( "100 * cos( %s )", "100 * sin( %s )", { 0, 2 * pi } )
 
 	function shape.smove( Shape, t1, t2, Relative ) -- Shape Shape Move
+		--genera un movimiento siguiendo el contorno de la shape ingresada
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -11788,6 +11832,7 @@
 	end --shape.smove( shape.trebol )
 	
 	function shape.rmove( Rx, Ry, t1, t2, Accel, offset_t, Counter2 ) -- Shape Random Move
+		--genera un movimiento aleatorio
 		if type( t1 ) == "function" then
 			t1 = t1( )
 		end
@@ -11964,6 +12009,7 @@
 	end --shape.rmove( 10, 20 )
 	
 	function shape.rmove2( Rx, Ry, t, Accel ) -- Shape Random Move
+		--genera un movimiento aleatorio, con tiempos off aleatorios
 		if type( t ) == "function" then
 			t = t( )
 		end
@@ -12014,6 +12060,7 @@
 	end --shape.rmove2( 12, 12 )
 	
 	function shape.rmove3( Rx, Ry, t, Accel, offset_t )
+		--genera un movimiento aleatorio en segmentos de tiempos determinados
 		if type( t ) == "function" then
 			t = t( )
 		end
@@ -12045,6 +12092,7 @@
 	end --shape.rmove3( nil, nil, { 0, 500, fx.dur - 500, fx.dur }, 1, { 2f } )
 	
 	function shape.rmove4( Rx, Ry, t1, t2, Accel, offset_t, move4 )
+		--genera un movimiento aleatorio con doble shake
 		if type( move4 ) == "function" then
 			move4 = move4( )
 		end
@@ -12103,6 +12151,7 @@
 	end --shape.rmove4( 20, 20, 0, fx.dur, 1, { 460 }, { 3f, { 20, 40 } } )
 	
 	function shape.omove( P, t1, t2, Dur, Accel ) -- Shape Oscill Move
+		--genera un movimiento oscilante entre los puntos ingresados
 		if type( P ) == "function" then
 			P = P( )
 		end
@@ -12261,6 +12310,7 @@
 	end --shape.lineclip( )
 
 	function shape.setclip( Clips, Tags, Index )
+		--alpica los fx solo a los objetos karaokes que estén dentro del clip o clips
 		local Index = Index or { ii }
 		local function setclip2( Clips2, Tags2, Index2 )
 			local function inclip( Clips3 )
@@ -12312,6 +12362,7 @@
 	end --shape.setclip( {"\\clip(m 180 618 l 216 664 602 664 536 620)", "\\clip(812,660,1020,698)"}, {"\\1c&H0000FF&", "\\1c&FF0000&"} )
 	
 	function shape.animated( dur, frame_duration, Shapes, Pscale, Random )
+		--genera una animación con las shapes ingresadas
 		if type( dur ) == "function" then
 			dur = dur( )
 		end
@@ -12467,6 +12518,7 @@
 	end
 	
 	function shape.trajectory( Loop_t, distance_nim, distance_max )
+		--genera una shape aleatoria con un trazo en beziers de forma fluida
 		if type( Loop_t ) == "function" then
 			Loop_t = Loop_t( )
 		end
@@ -12513,6 +12565,7 @@
 	end --shape.trajectory( )
 	
 	function shape.Ltrajectory( length_total, length_curve, height_curve ) -- Curve in Line Trajectory
+		--genera una shape aleatoria con un trazo en beziers de forma fluida, en trayectoria recta
 		if type( length_total ) == "function" then
 			length_total = length_total( )
 		end
@@ -12556,6 +12609,7 @@
 	end --shape.Ltrajectory( )
 	
 	function shape.Ctrajectory( Loop_Ct, radius_min, radius_max ) -- Circle Trajectory
+		--genera una shape aleatoria con un trazo en beziers de forma fluida, sinexceder un radio determinado
 		if type( Loop_Ct ) == "function" then
 			Loop_Ct = Loop_Ct( )
 		end
@@ -12602,6 +12656,7 @@
 	end --shape.Ctrajectory( )
 	
 	function shape.Rtrajectory( Loop_Rt, radius_min, radius_max ) -- Random Trajectory
+		--genera una shape aleatoria con un trazo en beziers
 		if type( radius_max ) == "function" then
 			radius_max = radius_max( )
 		end
@@ -12648,6 +12703,7 @@
 	end --shape.Rtrajectory( )
 	
 	function shape.Strajectory( Loops_St, Radius ) -- Segment Line Trajectory
+		--genera una shape aleatoria con trazos rectos
 		if type( Loops_St ) == "function" then
 			Loops_St = Loops_St( )
 		end
@@ -12671,6 +12727,7 @@
 	end --shape.Strajectory( )
 	
 	function shape.multi1( Size_shape, Px )
+		--retorna shapes cuadradas concéntricas
 		if type( Size_shape ) == "function" then
 			Size_shape = Size_shape( )
 		end
@@ -12714,9 +12771,10 @@
 			Shape = remember( "shape_multi1", shape.displace( Shape, "origin" ) )
 		end
 		return shape.ASSDraw3( Shape ) --shape.multi1( 100, { 10, { 4 } } )
-	end --retorna shapes cuadradas concéntricas
+	end
 	
 	function shape.multi2( Width, Height, Pixel )
+		--crea shapes diagonales dentro de un rectángulo con medidas dadas
 		if type( Width ) == "function" then
 			Width = Width( )
 		end
@@ -12795,9 +12853,10 @@
 			Shape = remember( "shape_multi2", Shp2 )
 		end --mod: january 04th 2019
 		return shape.ASSDraw3( Shape ) --shape.multi2( 36, 94, { 10, { 2 }, 5, { 3 } } )
-	end	--crea shapes diagonales dentro de un rectángulo con medidas dadas
+	end
 	
 	function shape.multi3( Size, Bord, Shape )
+		--si no se pone "Shape", retorna círculos concéntricos, o shapes concéntricas de la que se haya ingresado
 		if type( Size ) == "function" then
 			Size = Size( )
 		end
@@ -12839,9 +12898,10 @@
 			Shape3 = remember( "shape_multi3", shape.displace( Shape3, "origin" ) )
 		end --shape.multi3( 100, { 8, { 5 } } )
 		return shape.ASSDraw3( Shape3 )
-	end --si no se pone "Shape", retorna círculos concéntricos, o shapes concéntricas de la que se haya ingresado
+	end
 	
 	function shape.multi4( Size, Loop1, Loop2, n )
+		--retorna un polígono regular de Loop1 lados, con un arreglo de Loop2. n es la cantidad de arreglos tomados en cuenta
 		if type( Size ) == "function" then
 			Size = Size( )
 		end
@@ -12908,13 +12968,14 @@
 			end
 			Shapefx = remember( "Shpfx", ( Loop1 % 2 == 1 )
 				and shape.displace( shape.rotate( Shape, ((-1) ^ ((Loop1 - 1) / 2)) * 90 / Loop1 ), "origin" )
-				or  shape.displace( Shape, "origin" )
+				or shape.displace( Shape, "origin" )
 			)
 		end
 		return Shapefx --shape.multi4( 100, 6, 4, 3 )
-	end --retorna un polígono regular de Loop1 lados, con un arreglo de Loop2. n es la cantidad de arreglos tomados en cuenta
+	end
 	
 	function shape.multi5( Shapes, Width, Height, Dxy )
+		--retorna un arreglo matricial rectangular de las shapes ingresadas
 		if type( Shapes ) == "function" then
 			Shapes = Shapes( )
 		end
@@ -12967,12 +13028,10 @@
 			Shape = remember( "shape_multi5", shape.array( Shape, { length_H, length_V }, "array", dis_xy ) )
 		end
 		return shape.ASSDraw3( Shape ) --shape.multi5( )
-	end --retorna un arreglo matricial rectangular de las shapes ingresadas
+	end
 	
 	function shape.multi6( Size, Bord, Part ) -- december 30th 2016
-		local Size = Size or 104
-		local Bord = Bord or 4
-		local Part = Part or 20
+		--retorna el perímetro de un cuadrado formado de rectángulos individuales
 		if type( Size ) == "function" then
 			Size = Size( )
 		end
@@ -12982,6 +13041,9 @@
 		if type( Part ) == "function" then
 			Part = Part( )
 		end
+		local Size = Size or 104
+		local Bord = Bord or 4
+		local Part = Part or 20
 		local Shape = recall.shape_multi6
 		if j == 1 then
 			effector.print_error( Size, "number", "shape.multi6", 1 )
@@ -13013,9 +13075,16 @@
 			Shape = remember( "shape_multi6", sh_top .. sh_right .. sh_bottom .. sh_left )
 		end
 		return shape.ASSDraw3( Shape ) --shape.multi6( )
-	end --retorna el perímetro de un cuadrado formado de rectángulos individuales
+	end
 	
 	function shape.multi7( Part, Radius )
+		--retorna un círculo o el perímetro de un círculo hecho con segmentos individuales
+		if type( Part ) == "function" then
+			Part = Part( )
+		end
+		if type( Radius ) == "function" then
+			Radius = Radius( )
+		end
 		local Part = Part or 12
 		local Radius = Radius or 50
 		local Shape, Angle, Ang_B, Ratio = recall.shape_multi7
@@ -13065,9 +13134,10 @@
 			Shape = remember( "shape_multi7", shape.displace( Shape, "origin" ) )
 		end
 		return shape.ASSDraw3( Shape ) --shape.multi7( 12, { 20, 40, 60 } )
-	end --retorna un círculo o el perímetro de un círculo hecho con segmentos individuales
+	end
 	
 	function shape.multi8( Shape, Size_ini, Size_fin, Loop )
+		--retorna shapes concéntricas desde una tamaño inicial hasta un tamaño final
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13107,9 +13177,10 @@
 		-------------------------------------------------------------------------------------------
 		return Shp_mul8 --shape.multi8( shape.rectangle, 100, 10, 10 )
 		--january 11th 2018
-	end --retorna shapes concéntricas desde una tamaño inicial hasta un tamaño final
+	end
 	
 	function shape.multi9( Shape, Loop, Tags, Vertical )
+		--crea una shape formada por una secuencia de shapes en una única línea de fx
 		if type( Loop ) == "function" then
 			Loop = Loop( )
 		end
@@ -13167,10 +13238,10 @@
 		Shps_9 = Shps_9:gsub( "{\\p0}\\N{\\p1", "{", 1 )
 		--------------------------------------------------
 		return Shps_9
-		--crea una shape formada por una secuencia de shapes en una única línea de fx
 	end --january 13th 2018
 	
 	function shape.morphism( Size, Shape1, Shape2, Accel )
+		--retorna una tabla con la interpolación entre las dos shapes ingresadas
 		if type( Size ) == "function" then
 			Size = Size( )
 		end
@@ -13197,9 +13268,10 @@
 			Shapes = remember( "shape_morphism", table.ipol( { Shape1, Shape2 }, Size, nil, Accel ) )
 		end --rewrite: may 20th 2020
 		return Shapes --shape.morphism( 6, shape.to_bezier( shape.rectangle ), shape.circle )
-	end --retorna una tabla con la interpolación entre las dos shapes ingresadas
+	end
 	
 	function shape.bord( Shape, Bord, Size )
+		--genera el borde la shape con un espesor definido
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13243,6 +13315,7 @@
 	end --shape.bord( shape.circle, 8, 120 )
 	
 	function shape.from_audio( Audio_wav, Width_wav, Height_scale_wav, Thickness_wav, Offset_time )
+		--genera el gráfico del aundio en formato .wav ingresado
 		local Wav_fil = Audio_wav or "test.wav"
 		local Wav_frm = 2 * frame_dur
 		local Wav_wth = Width_wav or l.width + 20 * ratio
@@ -13285,6 +13358,7 @@
 	end --shape.from_audio( )
 	
 	function shape.to_pixels( Shape, Shape2, Seed, Filter, Table )
+		--convierte en pixeles la shape ingresada
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13379,6 +13453,7 @@
 	end --shape.to_pixels( shape.bord( shape.circle, 1 ), nil, 10 )
 	
 	function shape.bord_to_pixels( Shape, Shape2, Pixel, Seed, Filter )
+		--convierte el borde de la shape ingresada en pixeles
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13430,6 +13505,7 @@
 	end --shape.bord_to_pixels( shape.circle )
 	
 	function shape.fxline( P1, P2, Radius )
+		--genera una recta-shape dados dos puntos, o un punto, un ángulo y un radio
 		if type( P1 ) == "function" then
 			P1 = P1( )
 		end
@@ -13458,6 +13534,7 @@
 	end --shape.fxline( )
 	
 	function shape.fxcircle( Shape )
+		--genera un círculo-shape con los tres primeros puntos de la shape o clip ingresado
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13483,6 +13560,7 @@
 	end --shape.fxcircle( )
 	
 	function shape.trim( Shape, Lines, Mark, Ratio )
+		--divide en partes una shape según las rectas ingresadas
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13655,6 +13733,7 @@
 	end --tbl = shape.trim( shape.rectangle, { "m 0 100 l 100 0 ", "m 0 0 l 100 100 ", { 0, 20, 100, 20 } } )
 
 	function shape.reduce( Shape )
+		--elimina los puntos que le sobren a una shape
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13686,6 +13765,7 @@
 	end --shape.reduce( "m 0 0 l 0 2 l 0 3 l 0 5 l 0 6 l 0 8 l 0 9 l 0 11 l 0 12 l 0 14 " )
 
 	function shape.inclip( Tags )
+		--convierte el clip ingresado en una shape
 		local Shape = shape.displace( format( "m 0 0 l %s 0", l_width ), l_left, l_middle )
 		local Shpos = ""
 		if Tags then
@@ -13743,6 +13823,7 @@
 	end
 	
 	function shape.do_shape( Shape1, Shape2, Mode, Split )
+		--hace que la shape1 adopte  la forma de la shape2 sin perder sus características
 		if type( Shape1 ) == "function" then
 			Shape1 = Shape1( )
 		end
@@ -13811,6 +13892,7 @@
 	end	--shape.do_shape( shape.size( shape.rectangle, 80, 20 ), shape.circle, 1, 4 )
 	
 	function shape.to_outline( Shape, Bord )
+		--convierte una shape en el borde de ella misma
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13870,6 +13952,7 @@
 	end --shape.point( shape.circle )
 	
 	function shape.deformed( Shape, Deformed, Pixel, Axis )
+		--deforma la shape adoptando la forma de la función seno
 		if type( Shape ) == "function" then
 			Shape = Shape( )
 		end
@@ -13907,6 +13990,7 @@
 	end --shape.deformed( shape.rectangle, 8, 5, "y" )
 	
 	function shape.fusion( Shapes, Tags )
+		--fusiona las shapes ingresadas para que ocupen una única línea fx
 		if type( Shapes ) == "function" then
 			Shapes = Shapes( )
 		end
@@ -14473,6 +14557,7 @@
 	end --may 10th 2020
 	
 	function shape.pointpos( Shape, P1, P2 )
+		--desplaza la shape respecto a uno de sus puntos, al punto indicado
 		--shape.pointpos( shape.circle, 2, { 0, 0 } )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
@@ -14546,6 +14631,7 @@
 	end --may 21st 2020
 	
 	function shape.grid( Shape, Filter, Align, Line, Lines )
+		--convierte la shape ingresada en pixeles que ocupan una única línea fx
 		--shape.grid( shape.size( shape.circle, 50 ), function( ) return "\\1c" .. tag.ipol( py / 50, "&HFF0000&", "&H0000FF&" ) end )
 		if type( Shape ) == "function" then
 			Shape = Shape( )
@@ -14747,6 +14833,7 @@
 	end --may 14th 2020
 	
 	function shape.gridr( Width, Height, Mode, Filter, Align, Lines )
+		--genera un rectángulo en pixeles que ocupan una única línea fx
 		if type( Width ) == "function" then
 			Width = Width( )
 		end
