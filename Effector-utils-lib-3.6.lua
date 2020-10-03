@@ -18835,7 +18835,7 @@
 		[ 03 ] = { name = "ipol_type";	class = "dropdown";		x = 1;	y = 1;	height = 1;	 width = 2;		items = { "Lines Interpolation", "Chars Interpolation", "Chars Lines Ipol", "Shapes Interpolation", "Loop Interpolation" };	value = "Lines Interpolation" },
 		[ 04 ] = { 						class = "label";		x = 4;	y = 1;	height = 1;  width = 2;		label = "                     Frame Dur:" },
 		[ 05 ] = { name = "frame_durx";	class = "floatedit";	x = 6;  y = 1;	height = 1;	 width = 2;		step = 0.01;	min = 1;	value = frame_dur2 },
-		[ 06 ] = { 						class = "label";		x = 8;	y = 1;	height = 1;  width = 2;		label = "           Ipol Loop:" },
+		[ 06 ] = { 						class = "label";		x = 8;	y = 1;	height = 1;  width = 2;		label = "             Ipol Loop:" },
 		[ 07 ] = { name = "ipol_loop";	class = "intedit";		x = 10; y = 1;	height = 1;	 width = 2;		min = 0;	value = 0 },
 		[ 08 ] = { 						class = "label";		x = 0;	y = 2;	height = 1;  width = 2;		label = " Add Tags[fx]:" },
 		[ 09 ] = { 						class = "label";		x = 6;	y = 2;	height = 1;  width = 3;		label = " Ipol Pos with Shape[fx]:" },
@@ -19954,7 +19954,7 @@
 					l.start_time = times_lines[ i ]
 					l.end_time   = times_lines[ i + 1 ]
 				end
-				l.text = format( "{ipol[fx]: %s%s}%s", pos_for_shape[ i ], xtags_lines[ i ] or "", shapes_lines[ i ] or l.text_stripped )
+				l.text = format( "{ipol[fx]: %s%s%s}%s", pos_for_shape[ i ], xtags_lines[ i ] or "", settipol.add_tags, shapes_lines[ i ] or l.text_stripped )
 				subs.insert( #subs + 1, l )
 				aegisub.progress.task( format( "Lines Generated: %d", i ) )
 				aegisub.progress.set( 100 * (i / (loop_for_times - 1)) )
@@ -19976,7 +19976,7 @@
 				char.right = left + char.width
 				char.center = left + 0.5 * char.width
 				for i = 1, loop_for_times - 1 do
-					l.text = format( "{ipol[fx]: \\an5\\pos(%s,%s)}%s", char.center, char.middle, char.text )
+					l.text = format( "{ipol[fx]: \\an5\\pos(%s,%s)%s}%s", char.center, char.middle, settipol.add_tags, char.text )
 					subs.insert( #subs + 1, l )
 					aegisub.progress.task( format( "Lines Generated: %d", ci( ) ) )
 					aegisub.progress.set( 100 * (ci( ) / (loop_for_times * char.n - 1)) )
@@ -20023,7 +20023,7 @@
 						line_chars_ipol = line_chars_ipol .. " "
 					end
 				end
-				l.text = format( "{ipol[fx]: %s}%s", table.concat( tags_lines_unique ), line_chars_ipol )
+				l.text = format( "{ipol[fx]: %s%s}%s", table.concat( tags_lines_unique ), settipol.add_tags, line_chars_ipol )
 				subs.insert( #subs + 1, l )
 			end
 		end
