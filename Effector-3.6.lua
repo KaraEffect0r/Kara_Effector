@@ -1,5 +1,5 @@
 ﻿	-------------------------------------------------------------------------------------------------------------------------------
-	--[[ ( c ) Copyright 2012 - 2020, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki					   July 01st 2020 Colombia ]]--
+	--[[ ( c ) Copyright 2012 - 2020, Vict8r, Karalaura, NatsuoKE & Itachi Akatsuki					October 04th 2020 Colombia ]]--
 	-------------------------------------------------------------------------------------------------------------------------------
 	--> Kara Effector 3.6 legacy
 	--> Contáctanos:
@@ -1209,6 +1209,7 @@
 										time_fff = tonumber( os.time( ) )
 										aegisub.progress.task( format( "Lines: [%d/%d]  time: [%s]  Lines Generated: %d", count_ln, #idx_line, effector.time( time_iii, time_fff ), count_fx ) )
 										aegisub.progress.set( 100 * (line.i + (syl.i + j / maxj) / (syl.n + j / maxj)) / (line.n + (syl.i + j / maxj) / (syl.n + j / maxj)) )
+										--aegisub.progress.set( 100 * count_fx / (line.n * syl.n * maxj * maxJ) )
 									end
 									J = J + 1
 								end

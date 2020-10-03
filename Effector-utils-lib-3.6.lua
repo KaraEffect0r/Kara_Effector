@@ -5,7 +5,7 @@
 	Effector_Lib_authors  = "Itachi Akatsuki & Vict8r"
 	Effector_Lib_testers  = "NatsuoKE & Vict8r"
 	Effector_Lib_version  = "3.6"
-	Effector_Lib_modified = "June 16th 2020"
+	Effector_Lib_modified = "October 04th 2020"
 	-- functions abbreviations -------------------------------------------------------------------------------
 	sin = math.sin							asin = math.asin						pi = math.pi
 	cos = math.cos							acos = math.acos						ln = math.log
@@ -75,6 +75,7 @@
 			table.type( Table )
 			table.ipairs( Table )
 			table.inpack( Table, Group )
+			table.create( Size, Config )
 			
 		librería string
 		+	string.count( String, Capture )
@@ -85,8 +86,9 @@
 		+	string.parts( String, Parts )
 			string.match2( String, Capture, Table )
 			string.newmatch( String, ... )
-			string.moveclip( String, ... )
+			string.gmatch2( String, ... )
 			string.replace( String, ... )
+			string.moveclip( String, ... )
 		
 		librería math
 		-	math.R( Rand_i, Rand_f )
@@ -141,7 +143,7 @@
 		<	math.matrix_ref( Mode )
 		<	math.matrix_fil( Filxy, Axis )
 		<	math.i( counter, A, B, C )
-			math.shape( Shape, Length, Mode )
+			math.shape( Shape, Length, Mode, Max_n, Accel )
 			math.audio( Audio_wav, Loops, Scale, Offset_time, Values )
 			math.to16( Num )
 			math.clamp( Num, Min, Max, Cycle )
@@ -280,6 +282,7 @@
 			shape.pos( Shape )
 			shape.grid( Shape, Filter, Align, Line, Lines )
 			shape.gridr( Width, Height, Mode, Filter, Align, Lines )
+			shape.delete( Shape, Deletes )
 		
 		librería graph
 			graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
@@ -959,8 +962,8 @@
 				table.remove( newt, idx )
 			end
 			return newtable
-		elseif type( Table_dis ) == "number" then
-			for i = 1, Table_dis do
+		elseif type( tonumber( Table_dis ) ) == "number" then
+			for i = 1, tonumber( Table_dis ) do
 				table_n[ i ] = i
 			end
 			newt1 = table.duplicate( table_n )
@@ -1485,9 +1488,9 @@
 			return math.round( table_round, add )
 		elseif Mode == "add" then
 			--retorna la tabla, y a cada uno de los elementos le suma un número
-			if type( add ) == "number" then
+			if type( tonumber( add ) ) == "number" then
 				for i = 1, #Table do
-					table_add[ i ] = Table[ i ] + add
+					table_add[ i ] = Table[ i ] + tonumber( add )
 				end
 			elseif type( add ) == "table" then
 				for i = 1, #Table do 
@@ -1700,7 +1703,75 @@
 		if #Table == 1 then
 			Table[ 2 ] = Table[ 1 ]
 		end
-		---------------------
+		---------------------------------
+		for i = 1, #Table do --add: september 12th 2020
+			if type( Table[ i ] ) == "string" then
+				Table[ i ] = Table[ i ]:gsub( "%d+:%d+:%d+%.%d+", "" ) == "" and HMS_to_ms( Table[ i ] ) or Table[ i ]:gsub( "%d+:%d+:%d+%.%d+",
+					function( time_HMS )
+						return HMS_to_ms( time_HMS )
+					end
+				) or Table[ i ]
+			end --0:01:00.018 --> "%d+:%d+:%d+%.%d+"
+		end --table.ipol( { "0:01:00.018", 200 }, 5 )
+		---------------------------------
+		local function ipol_tags_multi( Table )
+			--interpola(previo) el valor de tags múltiples concatenados
+			--table.ipol( { "\\bord5\\fr45\\shad4", "\\frx34\\1a45\\pos(200,300)\\shad1" }, 10 )
+			local function tbl_type( Table )
+				for i = 1, #Table do
+					if type( Table[ i ] ) ~= "string" then
+						return "mixed"
+					end
+				end
+				return "string"
+			end
+			if tbl_type( Table ) == "string" then
+				local is_tags
+				for i = 1, #Table do
+					if Table[ i ]:match( "\\[%d]*%a+%(?%-?[%d&#]^*[%.%dH&,%)%x]*\\" ) then
+						is_tags = true
+					end
+				end
+				if is_tags then
+					local tags_lines_tag = { 
+						[ 01 ] = "\\an",		[ 02 ] = "\\pos",		[ 03 ] = "\\move",		[ 04 ] = "\\org",		[ 05 ] = "\\k",
+						[ 06 ] = "\\K",			[ 07 ] = "\\ko",		[ 08 ] = "\\kf",		[ 09 ] = "\\bord",		[ 10 ] = "\\shad",
+						[ 11 ] = "\\xbord",		[ 12 ] = "\\ybord",		[ 13 ] = "\\xshad",		[ 14 ] = "\\yshad",		[ 15 ] = "\\blur",
+						[ 16 ] = "\\c",			[ 17 ] = "\\1c",		[ 18 ] = "\\2c",		[ 19 ] = "\\3c",		[ 20 ] = "\\4c",
+						[ 21 ] = "\\alpha",		[ 22 ] = "\\1a",		[ 23 ] = "\\2a",		[ 24 ] = "\\3a",		[ 25 ] = "\\4a",
+						[ 26 ] = "\\frx",		[ 27 ] = "\\fry",		[ 28 ] = "\\frz",		[ 29 ] = "\\fax",		[ 30 ] = "\\fay",
+						[ 31 ] = "\\fscx",		[ 32 ] = "\\fscy",		[ 33 ] = "\\be",		[ 34 ] = "\\fsp",		[ 35 ] = "\\fr",
+						[ 36 ] = "\\b",			[ 37 ] = "\\i",			[ 38 ] = "\\u",			[ 39 ] = "\\s",			[ 40 ] = "\\fad",
+						[ 41 ] = "\\clip",		[ 42 ] = "\\iclip",		[ 43 ] = "\\p",
+					} --table.ipol( { "\\blur4\\1c&HFFFFFF&\\pos(240,464)", "\\blur1\\1c&H0102F7&\\pos(1026,616)" }, 10 )
+					local tags_lines_tbl = table.create( #tags_lines_tag, { } )
+					local v, idx, tgx
+					for i = 1, #Table do
+						for v in Table[ i ]:gmatch( "\\[%d]*%a+%(?%-?[%d&#]^*[%.%dH&,%)%x]*" ) do
+							tgx = tag.coupling( v:match( "(\\[%d]*%a+)%(?%-?[%d&#]^*[%.%dH&,%)%x]*" ) )
+							idx = table.inside( tags_lines_tag, tgx ) and table.index( tags_lines_tag, tgx ) or nil
+							if idx then
+								tags_lines_tbl[ idx ][ #tags_lines_tbl[ idx ] + 1 ] = v
+							end
+						end
+					end
+					local Table_tags = { }
+					for i = 1, #tags_lines_tbl do
+						if #tags_lines_tbl[ i ] > 0 then
+							if #tags_lines_tbl[ i ] == 1 then
+								tags_lines_tbl[ i ][ 2 ] = tags_lines_tbl[ i ][ 1 ]
+							end
+							Table_tags[ #Table_tags + 1 ] = tags_lines_tbl[ i ]
+						end
+					end
+					return Table_tags
+				end
+				return Table
+			end
+			return Table
+		end --september 24th 2020
+		Table = ipol_tags_multi( Table )
+		---------------------------------
 		for i = 1, #Table do
 			if type( Table[ i ] ) == "string" then
 				if Table[ i ]:match( "\\[%d]*%a+%-?[%d&#]^*[%.%dH&%x]*" ) then
@@ -1729,7 +1800,11 @@
 							table.insert( Tags, Table[ i ]:match( "(\\[%d]*%a+)%b()" ) )
 						end
 					end
-					Table[ i ] = string.toval( Table[ i ]:match( "\\[%d]*%a+(%b())" ) )
+					if Table[ i ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then --tag function
+						Table[ i ] = Table[ i ]:match( "\\[%d]*%a+(%b())" )
+					else --table.ipol( { "\\clip(0,0,200,200)", "\\clip(50,50,300,300)" }, 10 )
+						Table[ i ] = string.toval( Table[ i ]:match( "\\[%d]*%a+(%b())" ) )
+					end
 				end
 				if tonumber( Table[ i ] ) then
 					Table[ i ] = tonumber( Table[ i ] )
@@ -1763,7 +1838,11 @@
 									table.insert( Tags, Table[ i ][ k ]:match( "(\\[%d]*%a+)%b()" ) )
 								end
 							end
-							Table[ i ][ k ] = string.toval( Table[ i ][ k ]:match( "\\[%d]*%a+(%b())" ) )
+							if Table[ i ][ k ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then --tag function
+								Table[ i ][ k ] = Table[ i ][ k ]:match( "\\[%d]*%a+(%b())" )
+							else
+								Table[ i ][ k ] = string.toval( Table[ i ][ k ]:match( "\\[%d]*%a+(%b())" ) )
+							end
 						end
 						if tonumber( Table[ i ][ k ] ) then
 							Table[ i ][ k ] = tonumber( Table[ i ][ k ] )
@@ -1777,7 +1856,7 @@
 			Size = #Table
 		end
 		local algorithm = algorithm or "%s"
-		if type( algorithm ) == "number" then
+		if type( tonumber( algorithm ) ) == "number" then
 			algorithm = "%s ^ " .. tostring( algorithm )
 		end --may 20th 2020
 		-- algorithm example: "%s ^ 0.5"
@@ -1791,6 +1870,26 @@
 			local function ipol_number( pct_ipol, val_1, val_2 )
 				return math.round( val_1 + (val_2 - val_1) * pct_ipol, 3 )
 			end
+			---------------------------------------------
+			-- interpola los valores numéricos de los tags funciones
+			local function ipol_tagfunc( pct_ipol, val_1, val_2 )
+				local vals1, v1 = { }
+				local vals2, v2 = { }
+				for v1 in val_1:gmatch( "%-?%d+[%.%d]*" ) do
+					vals1[ #vals1 + 1 ] = tonumber( v1 )
+				end
+				for v2 in val_2:gmatch( "%-?%d+[%.%d]*" ) do
+					vals2[ #vals2 + 1 ] = tonumber( v2 )
+				end
+				local valsipol, valsconcat = { }, ""
+				for i = 1, #vals1 do
+					valsipol[ i ] = vals2[ i ] and math.round( vals1[ i ] + (vals2[ i ] - vals1[ i ]) * pct_ipol, 3 ) or vals1[ i ]
+				end
+				for i = 1, #valsipol do
+					valsconcat = valsconcat .. valsipol[ i ] .. ","
+				end
+				return "(" .. valsconcat:sub( 1, -2 ) .. ")"
+			end --september 23rd 2020
 			---------------------------------------------
 			-- interpola el valor de dos shapes o dos clips
 			local function ipol_shpclip( pct_ipol, val_1, val_2 )
@@ -1825,8 +1924,11 @@
 			---------------------------------------------
 			-- decide cuál de las 4 interpolaciones se usará
 			local ipol_function = ipol_number
-			if Shp_or_Clip then
+			if Shp_or_Clip == "shape" then
 				ipol_function = ipol_shpclip
+			end
+			if Shp_or_Clip == "tagsf" then
+				ipol_function = ipol_tagfunc
 			end
 			local ipol_coloralpha = ""
 			if string_in_tbl( Table_ipol ) then
@@ -1855,16 +1957,19 @@
 			else -- si el algoritmo es un módulo de varianza enre 0 y 1
 				pct_ip = math.clamp( math.format( algorithm_ipol, 1 ) ) * (#Table_ipol - 1)
 			end --fixed: january 28th 2020
-			ipol_i = Table_ipol[ floor( pct_ip ) ] or Table_ipol[ 1 ]
+			ipol_i = Table_ipol[ floor( pct_ip ) + 0 ] or Table_ipol[ 1 ]
 			ipol_f = Table_ipol[ floor( pct_ip ) + 1 ] or Table_ipol[ floor( pct_ip ) ]
 			ipols[ #ipols + 1 ] = ipol_function( math.clamp( math.format( algorithm_ipol, 1 ) ), ipol_i, ipol_f )
 			--------------------------------------------
-			--concatena los valores con los Tags_ipol, si lo hay
+			--concatena los valores con los Tags_ipol, si los hay
 			if Tags_ipol then
-				return table.concat2( ipols, Tags_ipol )
-			end --add: december 05th 2018
+				ipols = table.concat2( ipols, Tags_ipol )
+				for i = 1, #ipols do --agrega los paréntesis a los i?clips vectoriales :D
+					ipols[ i ] = ipols[ i ]:match( "clipm" ) and ipols[ i ]:gsub( "clipm", "clip(m" ) .. ")" or ipols[ i ]
+				end --table.ipol( { "\\clip(m 0 0 l 0 100 l 100 100 l 100 0 )", "\\clip(m 500 500 l 500 600 l 600 600 l 600 500 )" }, 20 )
+			end --mod: september 23rd 2020
 			--------------------------------------------
-			return ipols --rewrite: october 11th 2018
+			return ipols
 			--table.ipol( { 12, 31, 20, 13, 47 }, 16, "\\fscy" )
 		end
 		------------------------------------------------
@@ -1878,13 +1983,13 @@
 				end
 				return "table"
 			elseif type( Table[ 1 ] ) == "string" then --fix: december 09th 2018
-				if Table[ 1 ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%)" ) then
+				if Table[ 1 ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
 					for i = 1, #Table do
-						if not Table[ i ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*%)" ) then
+						if not Table[ i ]:match( "%([ ]*%-?%d+[%.%d ]*%,[ ]*%-?%d+[%.%d ]*" ) then
 							return "mixed"
 						end
 					end
-					return "clip"
+					return "tagsf"
 				elseif Table[ 1 ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
 					for i = 1, #Table do
 						if not Table[ i ]:match( "m %-?%d+[%.%d]* %-?%d+[%.%-%dblm ]*" ) then
@@ -1893,7 +1998,7 @@
 					end
 					return "shape"
 				end
-			end --type_table( { {1,2}, {3,4}, {5,6} } )
+			end
 			return "others"
 		end --add: december 08th 2018
 		-------------------------------------------------------------
@@ -1903,17 +2008,19 @@
 				if type( Tags ) == "table" then
 					Tags_tbl = Tags[ i ] or ""
 				end
-				if type_table( Table[ i ] ) == "shape"
-					or type_table( Table[ i ] ) == "clip" then
-					tbls_ipol[ i ] = tbl_ipol_funct( Table[ i ], Size, Tags_tbl, algorithm, true )
+				if type_table( Table[ i ] ) == "shape" then
+					tbls_ipol[ i ] = tbl_ipol_funct( Table[ i ], Size, Tags_tbl, algorithm, "shape" )
+				elseif type_table( Table[ i ] ) == "tagsf" then
+					tbls_ipol[ i ] = tbl_ipol_funct( Table[ i ], Size, Tags_tbl, algorithm, "tagsf" )--tags funciones
 				else
 					tbls_ipol[ i ] = tbl_ipol_funct( Table[ i ], Size, Tags_tbl, algorithm )
 				end
-			end --mod: january 17th 2019
+			end --mod: september 23rd 2020
 			return table.concat4( tbls_ipol )
-		elseif type_table( Table ) == "shape"
-			or type_table( Table ) == "clip" then
-			return tbl_ipol_funct( Table, Size, Tags, algorithm, true )
+		elseif type_table( Table ) == "shape" then
+			return tbl_ipol_funct( Table, Size, Tags, algorithm, "shape" )
+		elseif type_table( Table ) == "tagsf" then
+			return tbl_ipol_funct( Table, Size, Tags, algorithm, "tagsf" )--tags funciones
 		end
 		return tbl_ipol_funct( Table, Size, Tags, algorithm )
 	end --january 11th 2018
@@ -2343,6 +2450,20 @@
 		end
 		return inpacks
 	end --june 10th 2020
+	
+	function table.create( Size, Config )
+		if type( Size ) == "function" then
+			Size = Size( )
+		end
+		local Size = Size or 1
+		effector.print_error( Size, "number", "table.create", 1 )
+		Size = ceil( abs( Size ) )
+		local tbl_create = { }
+		for i = 1, Size do
+			tbl_create[ i ] = type( Config ) == "function" and Config( ) or (type( Config ) == "table" and table.duplicate( Config ) or Config)
+		end
+		return tbl_create --table.create( 10, {} )
+	end --september 26th 2020
 	
 	--------------------------------------------------------------------------------------------------
 	-- Ampliación de la Librería "string" ------------------------------------------------------------
@@ -2797,6 +2918,51 @@
 		end --string.newmatch( "\\1a&HFF&\\xshad-3.4\\t(45,50,\\blur4)", "\\[%d]*%a[%-%.%w&]*", "\\[%d]*%a[%-%.%w&]*" )
 		return unpack( newcaps )
 	end --june 15th 2020
+	
+	function string.gmatch2( String, ... )
+		--realiza capturas múltiples
+		local String = String or ""
+		if type( String ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( String ) do
+				recursion_tbl[ k ] = string.gmatch2( v, ... )
+			end
+			return recursion_tbl
+		end --recursión
+		effector.print_error( String, "string", "string.gmatch2", 1 )
+		local Captures = { ... }
+		if type( ... ) == "table" then
+			Captures = ...
+		end
+		local gmatch2_tbl, cap = { }
+		for i = 1, #Captures do
+			for cap in String:gmatch( Captures[ i ] ) do
+				gmatch2_tbl[ #gmatch2_tbl + 1 ] = cap
+			end
+		end
+		if #gmatch2_tbl == 0 then
+			return { }
+		end
+		local k = 0
+		for i = 1, #Captures do
+			String = String:gsub( Captures[ i ],
+				function( capture )
+					k = k + 1
+					return "capfx" .. k
+				end
+			)
+		end
+		local order, v = { }
+		for v in String:gmatch( "capfx(%d+)" ) do
+			order[ #order + 1 ] = tonumber( v )
+		end
+		local gmatch_tbl = { }
+		for i = 1, #gmatch2_tbl do
+			gmatch_tbl[ i ] = gmatch2_tbl[ order[ i ] ]
+		end
+		return gmatch_tbl
+		--string.gmatch2( "\\an5\\pos(600,320)\\blur4\\1c&HFFFFFF&", "\\[%d]*%a+%-?[%d&#]^*[%.%dH&%x]*", "\\[%d]*%a+%b()" )
+	end --september 23rd 2020
 	
 	function string.replace( String, ... )
 		--genera remplazos por medio de capturas (modificación de string.gsub) las capturas son válidas de
@@ -4438,6 +4604,12 @@
 			local bezier_pos, bezier_vec, bezier_points, bezier_PtNo = { }, { }, { }, { }
 			local Bn, bezier_length, bezier_offset = 8, 0, 0
 			local return_length = length[ 1 ]
+			----------------------------------------
+			local Accel = length[ 3 ] or "%s"
+			if type( tonumber( Accel ) ) == "number" then
+				Accel = "%s ^ " .. tostring( Accel )
+			end --september 27th 2020
+			----------------------------------------
 			bezier_points = pyointa.shape2coord( shape.ASSDraw3( Shape ) )
 			for i = 1, #bezier_points do
 				for k = 1, #bezier_points[ i ] do
@@ -4472,20 +4644,26 @@
 			elseif Mode == 3 then -- desde la derecha de la shape
 				bezier_offset = bezier_length - return_length - B_actor_offset
 			end
-			-------------
+			------------- math.bezier2( Shape, Mode, Align_Shape, OffsetB, length )
 			if max_n then
 				local bezier_target_length, bezier_angle = 0, 0
 				local bezier_t, bezier_tags
 				local shp_points = shape.point( Shape )
 				if table.compare( shp_points[ 1 ], shp_points[ #shp_points ] )
 					and return_length == bezier_length then
-					return_length = math.round( bezier_length * ( 1 - 1 / max_n ), 2 )
+					return_length = math.round( bezier_length * ( 1 - 1 / max_n ), 3 )
+				else --math.format( Accel, (i - 1) / (max_n - 1) )
+					return_length = math.round( return_length, 3 )
 				end --pregunta si el primer y último punto de la shape son iguales
 				for i = 1, max_n do
 					if Mode == 4 then -- justifica en toda la longitud de la shape
-						bezier_offset = (bezier_length - return_length) * (i - 1) / (max_n - 1)
+						bezier_offset = (bezier_length - return_length) * math.format( Accel, (i - 1) / (max_n - 1) )
 					end --math.shape( shape.circle, nil, nil, 20 )
-					bezier_PtNo, bezier_target_length = pyointa.length2PtNo( bezier_points, bezier_offset + (return_length - 0.0001) * (i - 1) / (max_n - 1), Bn )
+					bezier_PtNo, bezier_target_length = pyointa.length2PtNo(
+						bezier_points,
+						bezier_offset + (return_length - 0.01) * math.format( Accel, (i - 1) / (max_n - 1) ),
+						Bn
+					)
 					bezier_t = pyointa.length2t( bezier_PtNo, bezier_target_length, Bn )
 					bezier_pos = pyointa.getBezierPos( bezier_PtNo, bezier_t )
 					bezier_vec = pyointa.normal2P( bezier_PtNo, bezier_t )
@@ -4504,14 +4682,16 @@
 			end
 			if table.compare( shp_points[ 1 ], shp_points[ #shp_points ] )
 				and return_length == bezier_length then
-				return_length = math.round( bezier_length * ( 1 - 1 / maxj ), 2 )
+				return_length = math.round( bezier_length * ( 1 - 1 / maxj ), 3 )
+			else
+				return_length = math.round( return_length, 3 )
 			end --pregunta si el primer y último punto de la shape son iguales
 			-------------
 			if Mode == 4 then -- justifica en toda la longitud de la shape
 				bezier_offset = (bezier_length - return_length) * module
 			end
 			local bezier_target_length, bezier_angle = 0, 0
-			bezier_PtNo, bezier_target_length = pyointa.length2PtNo( bezier_points, bezier_offset + (return_length - 0.0001) * module, Bn )
+			bezier_PtNo, bezier_target_length = pyointa.length2PtNo( bezier_points, bezier_offset + (return_length - 0.01) * module, Bn )
 			local bezier_t = pyointa.length2t( bezier_PtNo, bezier_target_length, Bn ) or 1
 			bezier_pos = pyointa.getBezierPos( bezier_PtNo, bezier_t )
 			bezier_vec = pyointa.normal2P( bezier_PtNo, bezier_t )
@@ -4566,7 +4746,7 @@
 		end
 		targetLength, rot_Bezier = 0, 0
 		PtNo, targetLength = pyointa.length2PtNo( cont_point, lineoffset + val_center - l_left, nN )
-		if Mode == 5 then -- para trazar una curva por medio de shapes
+		if Mode == 5 then -- para trazar una curva por medio de shapes o chars
 			maxloop( (0.68 + offset_maxspace) * Blength )
 			PtNo, targetLength = pyointa.length2PtNo( cont_point, Blength * module , nN )
 		end
@@ -5285,14 +5465,14 @@
 		return digits[ 2 ] .. digits[ 4 ] .. digits[ 6 ] .. digits[ 8 ], picasyfijas
 	end
 
-	function math.shape( Shape, Length, Mode, Max_n )
-		--retorna la posición y el ángulo de los objetos karaoke en la trayectoria de una shape
+	function math.shape( Shape, Length, Mode, Max_n, Accel )
+		--retorna la posición y el ángulo de los objetos karaoke en una trayectoria de una shape
 		local Align_Shape = nil
 		local OffsetB = nil
-		if type( Max_n ) == "number" then
-			return math.bezier2( Shape, Mode, Align_Shape, OffsetB, { Length, Max_n } )
+		if type( tonumber( Max_n ) ) == "number" then
+			return math.bezier2( Shape, Mode, Align_Shape, OffsetB, { Length, tonumber( Max_n ), Accel } )
 		end --retorna el conjunto de posiciones y rotaciones en un tabla
-		return math.bezier2( Shape, Mode, Align_Shape, OffsetB, { Length } )
+		return math.bezier2( Shape, Mode, Align_Shape, OffsetB, { Length, nil, Accel } )
 		--retorna los tags \pos y \fr respecto al loop ( j ) :D
 	end --november 27th 2018
 	
@@ -9001,6 +9181,16 @@
 		local valors = { ... }
 		if type( ... ) == "table" then
 			valors = ...
+		end
+		---------------------------------------------
+		for i = 1, #valors do --add: september 12th 2020
+			if type( valors[ i ] ) == "string" then
+				valors[ i ] = valors[ i ]:gsub( "%d+:%d+:%d+%.%d+", "" ) == "" and HMS_to_ms( valors[ i ] ) or valors[ i ]:gsub( "%d+:%d+:%d+%.%d+",
+					function( time_HMS )
+						return HMS_to_ms( time_HMS )
+					end
+				) or valors[ i ]
+			end
 		end
 		---------------------------------------------
 		-- interpola el valor de dos números
@@ -15020,7 +15210,57 @@
 		Shape = Shape:gsub( "(1c)&H(%x+)&", "%1%2" )
 		return Shape --shape.gridr( )
 	end --may 14th 2020
-
+	
+	function shape.delete( Shape, Deletes )
+		if type( Shape ) == "function" then
+			Shape = Shape( )
+		end
+		local Shape = shape.ASSDraw3( Shape )
+		if type( Shape ) == "table" then
+			local recursion_tbl = { }
+			for k, v in pairs( Shape ) do
+				recursion_tbl[ k ] = shape.delete( v, Deletes )
+			end
+			return recursion_tbl
+		end --recursión
+		local Shapes = shape.divide( Shape )
+		if type( Deletes ) == "function" then
+			Deletes = Deletes( )
+		end
+		local Deletes = Deletes or "Rand"
+		local Shapex, Rand, Index = { }, 2
+		if type( Deletes ) == "number" then
+			Rand = Deletes 
+		elseif type( Deletes ) == "table" then
+			if table.type( Deletes ) == "number" then
+				Index = table.duplicate( Deletes )
+			else
+				Index = { }
+				for i = 1, #Deletes do
+					if type( Deletes[ i ] ) == "number" then
+						Index[ #Index + 1 ] = Deletes[ i ]
+					elseif type( Deletes[ i ] ) == "table" then
+						for k = Deletes[ i ][ 1 ], Deletes[ i ][ 2 ] do
+							Index[ #Index + 1 ] = k
+						end
+					end
+				end
+			end
+		end
+		if Index then
+			for i = 1, #Shapes do
+				if not table.inside( Index, i ) then
+					Shapex[ #Shapex + 1 ] = table.inside( Index, i ) and nil or Shapes[ i ]
+				end
+			end
+		else
+			for i = 1, #Shapes do
+				Shapex[ #Shapex + 1 ] = R( Rand ) == 1 and Shapes[ i ] or nil
+			end
+		end
+		return table.concat( Shapex )
+	end --august 24th 2020
+	
 	-------------------------------------------------------------------------------------------------
 	-- Librería de Funciones "graph" -- add: may 18th 2020 ------------------------------------------
 	function graph.polygon( n, Height, Angle, Bord, Space, Tags, Extra  )
@@ -18474,7 +18714,7 @@
 		[ 02 ] = {								class = "label";	x = 0; y = 1;	height = 1; width = 1;	label = "                          Apply to Style:" },
 		[ 03 ] = { name = "line_style";			class = "dropdown";	x = 1; y = 1;	height = 1; width = 4;	hint  = "Selected Lines or Lines Styles to which you Apply the Effect.";	items = { };	value = "" },
 		[ 04 ] = {								class = "label";	x = 0; y = 2;	height = 1; width = 1;	label = "                       Selection Effect:" },
-		[ 05 ] = { name = "effect_mode";		class = "dropdown";	x = 1; y = 2;	height = 1; width = 4;	hint  = "Select the Effect Mode, lead-in[fx], hi-light[fx], lead-out[fx], shape[fx], translation[fx] and function[fx].";	items = { "lead-in[fx]", "hi-light[fx]", "lead-out[fx]", "shape[fx]", "translation[fx]", "function[fx]" , "Add new config[fx]" };	value = "lead-in[fx]" },
+		[ 05 ] = { name = "effect_mode";		class = "dropdown";	x = 1; y = 2;	height = 1; width = 4;	hint  = "Select the Effect Mode, lead-in[fx], hi-light[fx], lead-out[fx], shape[fx], translation[fx] and function[fx].";	items = { "lead-in[fx]", "hi-light[fx]", "lead-out[fx]", "shape[fx]", "translation[fx]", "function[fx]" , "Add new config[fx]", "Lines Interpolation[fx]" };	value = "lead-in[fx]" },
 		[ 06 ] = {								class = "label";	x = 1; y = 5;	height = 1; width = 2;	label = " [:: Text Setting ::]" },
 		[ 07 ] = {								class = "label";	x = 1; y = 6;	height = 1; width = 2;	label = " Primary Color                                   " },
 		[ 08 ] = {								class = "label";	x = 3; y = 6;	height = 1; width = 2;	label = " Secondary Color                              " },
@@ -18582,6 +18822,30 @@
 		[ 05 ] = { name = "lua_file";	class = "dropdown";	x = 1;	y = 1;	height = 1;	 width = 2;		items = { "Effector-newfx-3.6.lua", "Effector-newlib-3.6.lua" };	value = "Effector-newfx-3.6.lua" },
 		--modify: august 18th 2018
 	}--▲ container_file = "Effector-newlib-3.6.lua"
+	
+	-----------------------
+	local frame_dur2, msa2, msb2 = 41.70, aegisub.ms_from_frame( 1 ), aegisub.ms_from_frame( 101 )
+	if msb2 then
+		frame_dur2 = math.round( ( msb2 - msa2 ) / 100, 2 )
+	end
+	-----------------------
+	effector.ipol_lines = { --september 15th 2020
+		[ 01 ] = { 						class = "label";		x = 0;	y = 0;	height = 1;  width = 2;		label = " Lines Interpolation[fx]:" },
+		[ 02 ] = { 						class = "label";		x = 0;	y = 1;	height = 1;  width = 1;		label = " Ipol Options:" },
+		[ 03 ] = { name = "ipol_type";	class = "dropdown";		x = 1;	y = 1;	height = 1;	 width = 2;		items = { "Lines Interpolation", "Chars Interpolation", "Chars Lines Ipol", "Shapes Interpolation", "Loop Interpolation" };	value = "Lines Interpolation" },
+		[ 04 ] = { 						class = "label";		x = 4;	y = 1;	height = 1;  width = 2;		label = "                     Frame Dur:" },
+		[ 05 ] = { name = "frame_durx";	class = "floatedit";	x = 6;  y = 1;	height = 1;	 width = 2;		step = 0.01;	min = 1;	value = frame_dur2 },
+		[ 06 ] = { 						class = "label";		x = 8;	y = 1;	height = 1;  width = 2;		label = "           Ipol Loop:" },
+		[ 07 ] = { name = "ipol_loop";	class = "intedit";		x = 10; y = 1;	height = 1;	 width = 2;		min = 0;	value = 0 },
+		[ 08 ] = { 						class = "label";		x = 0;	y = 2;	height = 1;  width = 2;		label = " Add Tags[fx]:" },
+		[ 09 ] = { 						class = "label";		x = 6;	y = 2;	height = 1;  width = 3;		label = " Ipol Pos with Shape[fx]:" },
+		[ 10 ] = { name = "add_tags";	class = "textbox";		x = 0;	y = 3;	height = 8;  width = 6;		text = "" },
+		[ 11 ] = { name = "pos_shape";	class = "textbox";		x = 6;	y = 3;	height = 8;  width = 6;		text = "" },
+		[ 12 ] = { name = "time_ipol";	class = "checkbox";		x = 0;	y = 11;	height = 1;	 width = 2;		label = "Ipol Times";	value = true },
+		[ 13 ] = { 						class = "label";		x = 4;	y = 11;	height = 1;  width = 2;		label = "                        Accel[fx]:" },
+		[ 14 ] = { name = "accel_ipol";	class = "textbox";		x = 6;	y = 11;	height = 1;  width = 6;		text = "1" },
+		[ 15 ] = { 						class = "label";		x = 0;	y = 12;	height = 1;  width = 12;	label = " Irterpolation Lines Macro Demo                                                                                 " },
+	}--▲
 	
 	-- Hints ----------------------------
 	effector.GUI_modify[ 29 ].hint = "Effect Type to Apply at Line Effect"
@@ -19083,7 +19347,7 @@
 			[ 11 ] = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 85, 115, 105, 110, 103, 32, 84, 97,
 					103, 115, 32, 70, 105, 108, 116, 101, 114, 58 },
 			[ 12 ] = { 75, 97, 114, 97, 32, 69, 102, 102, 101, 99, 116, 111, 114, 32, 51, 46, 54, 32, 108, 101, 103, 97, 99, 121 },
-			[ 13 ] = { 74, 117, 110, 101, 32, 49, 54, 116, 104, 32, 50, 48, 50, 48 },
+			[ 13 ] = { 79, 99, 116, 111, 98, 101, 114, 32, 48, 52, 116, 104, 32, 50, 48, 50, 48 },
 			[ 14 ] = { 40, 99, 41, 32, 86, 105, 99, 116, 56, 114, 32, 75, 97, 114, 97 },
 			[ 15 ] = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 102, 97, 99, 101, 98, 111, 111, 107, 46, 99, 111, 109, 47, 107, 97, 114,
 					97, 101, 102, 102, 101, 99, 116, 111, 114 },
@@ -19142,7 +19406,7 @@
 					108, 100, 101, 114, 32, 91, 102, 120, 93, 58 },
 			[ 46 ] = { 75, 101, 101, 112, 116, 97, 103, 115, 32, 91, 102, 120, 93, 58, 32, 32, 32 },
 			[ 47 ] = { 75, 97, 114, 97, 32, 69, 102, 102, 101, 99, 116, 111, 114, 32, 51, 46, 54, 32, 108, 101, 103, 97, 99, 121 },
-			[ 48 ] = { 74, 117, 110, 101, 32, 49, 54, 116, 104, 32, 50, 48, 50, 48 },
+			[ 48 ] = { 79, 99, 116, 111, 98, 101, 114, 32, 48, 52, 116, 104, 32, 50, 48, 50, 48 },
 			[ 49 ] = { 87, 104, 97, 116, 115, 65, 112, 112, 32, 75, 69, 58 },
 			[ 50 ] = { 43, 53, 55, 32, 51, 50, 48, 32, 56, 54, 51, 49, 52, 55, 50 },
 			[ 51 ] = { 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 100, 105, 115, 99, 111, 114, 100, 46, 103, 103, 47, 89, 70, 80, 50,
@@ -19284,7 +19548,7 @@
 				and type( name_argument ) ~= "table"
 				and type( name_argument ) ~= "function" then
 				error( format( [[Kara Effector [:error:] %s( ) :: El %s argumento de la función debe ser un string.
-		Este argumento debe ser un string. Recurda que todo string debe estar entre comillas
+		Este argumento debe ser un string. Recuerda que todo string debe estar entre comillas
 		simples o dobles, de otro modo el error persistirá.
 		
 		[error:] The %s argument of the function must be a string.]], name_function, arg_pos_nm1, arg_pos_nm2 ), 2 )
@@ -19306,7 +19570,7 @@
 			if type( name_argument ) ~= "table"
 				and type( name_argument ) ~= "function" then
 				error( format( [[Kara Effector [:error:] %s( ) :: El %s argumento de la función debe ser un tabla.
-		Este argumento debe ser una tabla.  Recurda que toda tabla debe estar definida entre
+		Este argumento debe ser una tabla. Recuerda que toda tabla debe estar definida entre
 		corchetes "{ }". Todos los elementos de una tabla deben estar separados por coma (,)
 		o por punto y coma (;). Posiblemente has cometido uno o más errores de los anterior-
 		mente mencionados. Si el argumento solicita únicamente una tabla, entonces no hay
@@ -19539,10 +19803,14 @@
 		local maxi = #index
 		local subtitles = subs
 		----------------
-		lines_ass = subs
+		--tabla de líneas(info) a las que se le aplicará el fx
+		lines_ass = { }
+		for i = 1, maxi do
+			lines_ass[ i ] = subs[ index[ i ] ]
+		end
 		----------------
+		--tabla de índices reales de líneas seleccionadas a fx
 		ini_line, count_line_dialogue = 0, 0
-		time_iii = tonumber( os.time( ) )
 		for i = 1, #subtitles do
 			if subtitles[ i ].class == "dialogue"
 				and subtitles[ i ].effect ~= "Effector [fx]"
@@ -19554,34 +19822,214 @@
 				ini_line = ini_line + 1
 			end
 		end
-		count_ln = 1
 		idx_line = index
-		count_fx = 0
-		line_delete = false
-		indx_delete = { }
 		line_subindex = table.op( idx_line, "add", count_line_dialogue - ini_line )
-		for _, i in ipairs( index ) do
-			local l = subs[ i ]
-			maxi = maxi - 1
-			l_counter = #index - maxi
-			maxil_count = #index
+		----------------
+		--contadores
+		count_fx = 0
+		count_ln = 1
+		line_delete = false
+		maxil_count = #index
+		----------------
+		--tiempo de apply
+		time_iii = tonumber( os.time( ) )
+		----------------
+		--apply
+		local v
+		if sett.effect_mode ~= "Lines Interpolation[fx]" then
+			for i = 1, #index do
+				v = index[ i ]
+				local l = subs[ v ]
+				maxi = maxi - 1
+				l_counter = #index - maxi
+				karaskel.preproc_line( subs, meta, styles, l )
+				effector.do_fx( subs, meta, l, sett )
+				l.comment = lines_comment
+				subs[ v ] = l
+				count_ln = count_ln + 1
+			end
+		else
+			v = index[ 1 ]
+			local l = subs[ v ]
 			karaskel.preproc_line( subs, meta, styles, l )
-			effector.do_fx( subs, meta, l, sett )
-			l.comment = lines_comment
-			subs[ i ] = l
-			count_ln = count_ln + 1
-			if line_delete == true then
-				--subs.delete( i )
-				table.insert( indx_delete, i )
-			end 
-		end
-		if line_delete == true
-			and #indx_delete > 0 then
-			for i = 1, #indx_delete do
-				subs.delete( indx_delete[ 1 ] )
+			effector.do_ipol( subs, meta, l, sett )
+			subs[ v ] = l
+			for i = 1, #index do
+				--comenta todas las líneas seleccionadas
+				v = index[ i ]
+				l = subs[ v ]
+				l.comment = true
+				subs[ v ] = l
 			end
 		end
+		----------------
+		--borra las líneas a las que se le aplica el fx
+		if line_delete == true then
+			for _, v in ipairs( table.reverse( index ) ) do
+				subs.delete( v )
+			end
+		end
+		----------------
 	end
+	
+	----------------------------------------------------------------------------
+	function effector.do_ipol( subs, meta, line, sett )
+		local l = table.copy( line )
+		l_actor = l.actor
+		j = 1
+		----------------------------
+		--datos de las líneas seleccionadas
+		local lines_ipol = { text_stripped = { }, start_time = { }, end_time = { }, tags_line = { }, template_shape = { }, time_ipol = { } }
+		for i = 1, #lines_ass do
+			lines_ipol.text_stripped[ i ]	= lines_ass[ i ].text:gsub( "%b{}", "" )
+			lines_ipol.start_time[ i ]		= lines_ass[ i ].start_time
+			lines_ipol.end_time[ i ]		= lines_ass[ i ].end_time
+			lines_ipol.tags_line[ i ]		= lines_ass[ i ].text:match( "%b{}" ) and lines_ass[ i ].text:match( "%b{}" ):sub( 2, -2 ) or ""
+			lines_ipol.template_shape[ i ]	= lines_ass[ i ].text:gsub( "%b{}", "", 1 )
+		end
+		lines_ipol.time_ipol[ 1 ] = lines_ass[ 1 ].start_time
+		lines_ipol.time_ipol[ 2 ] = lines_ass[ #lines_ass ].end_time
+		---------------------------- settipol.ipol_loop
+		--loop dependiendo de los tiempos de las líneas y el frame_dur2
+		local loop_for_times = settipol.ipol_type == "Loop Interpolation" and settipol.ipol_loop + 1 or ceil( (lines_ipol.time_ipol[ 2 ] - lines_ipol.time_ipol[ 1 ]) / settipol.frame_durx ) + 1
+		----------------------------
+		--pos en caso de movimiento en trayectoria shape
+		local lines_pos, pos_for_shape = "", table.create( loop_for_times - 1, "" )
+		if settipol.pos_shape:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) then
+			local Shape = shape.displace( settipol.pos_shape, 0, 0, "first" )
+			lines_pos = format( "\\pos(%s,%s)",
+				settipol.pos_shape:match( "m%s+(%-?%d+[%.%d]*)%s+%-?%d+[%.%d]*" ),
+				settipol.pos_shape:match( "m%s+%-?%d+[%.%d]*%s+(%-?%d+[%.%d]*)" )
+			)
+			for i = 1, #lines_ass do
+				if lines_ass[ i ].text:match( "\\pos%b()" ) then
+					lines_pos = lines_ass[ i ].text:match( "\\pos%b()" )
+					break
+				end
+			end
+			for i = 1, #lines_ass do
+				lines_ipol.tags_line[ i ] = lines_ipol.tags_line[ i ]:gsub( "\\pos%b()", "" )
+			end
+			pos_for_shape = { }
+			local Px, Py = lines_pos:match( "\\pos%([%s]*(%-?%d+[%.%d ]*)%,[%s]*(%-?%d+[%.%d ]*)%)" )
+			Px, Py = tonumber( Px ), tonumber( Py )
+			local tbl_pos_shape = math.shape( Shape, nil, nil, loop_for_times - 1, settipol.accel_ipol )
+			for i = 1, loop_for_times - 1 do
+				pos_for_shape[ i ] = format( "\\pos(%s,%s)", math.round( Px + tbl_pos_shape[ i ][ 1 ], 3 ), math.round( Py + tbl_pos_shape[ i ][ 2 ], 3 ) )
+			end
+		end
+		----------------------------
+		--tabla de tags de las líneas que sí tienen
+		local tags_lines_ipol = { }
+		for i = 1, #lines_ipol.tags_line do
+			if lines_ipol.tags_line[ i ] ~= "" then
+				tags_lines_ipol[ #tags_lines_ipol + 1 ] = lines_ipol.tags_line[ i ]
+			end
+		end
+		
+		--l.text = format( "{ipol[fx]: }%s", table.view( lines_ipol ) )
+		--subs.insert( #subs + 1, l )
+		
+		---[[
+		if settipol.ipol_type == "Lines Interpolation"
+			or settipol.ipol_type == "Loop Interpolation"
+			or settipol.ipol_type == "Shapes Interpolation" then
+			for i = 1, #tags_lines_ipol do
+				tags_lines_ipol[ i ] = tags_lines_ipol[ i ]:gsub( "\\[%d]*%a+%b[]", "" )
+			end
+			local times_lines = table.ipol( lines_ipol.time_ipol, loop_for_times, nil, settipol.accel_ipol )
+			local xtags_lines = #tags_lines_ipol > 0 and table.ipol( tags_lines_ipol, loop_for_times - 1, nil, settipol.accel_ipol ) or { "" }
+			local all_shapes, shapes_lines = true, { l.text_stripped }
+			for i = 1, #lines_ipol.template_shape do
+				if lines_ipol.template_shape[ i ]:match( "m%s+%-?%d+[%.%d]*%s+%-?%d+[%.%-%dmlb ]*" ) == nil then
+					all_shapes = false
+					break
+				end
+			end
+			if all_shapes then
+				shapes_lines = table.ipol( lines_ipol.template_shape, loop_for_times - 1, nil, settipol.accel_ipol )
+			end
+			for i = 1, loop_for_times - 1 do
+				if settipol.time_ipol then
+					l.start_time = times_lines[ i ]
+					l.end_time   = times_lines[ i + 1 ]
+				end
+				l.text = format( "{ipol[fx]: %s%s}%s", pos_for_shape[ i ], xtags_lines[ i ] or "", shapes_lines[ i ] or l.text_stripped )
+				subs.insert( #subs + 1, l )
+				aegisub.progress.task( format( "Lines Generated: %d", i ) )
+				aegisub.progress.set( 100 * (i / (loop_for_times - 1)) )
+			end
+		elseif settipol.ipol_type == "Chars Interpolation" then
+			local left = l.left
+			local ci = math.count( )
+			local line_text_stripped = l.text_stripped:gsub( "\\N", " " ):gsub( "  ", " " )
+			local char, c = { i = 1, n = unicode.len( line_text_stripped ) }
+			for c in unicode.chars( line_text_stripped ) do
+				char.text = c
+				width, height, descent, extlead = aegisub.text_extents( l.styleref, char.text )
+				char.width = width
+				char.height = height
+				char.top = l.top
+				char.middle = l.middle
+				char.bottom = l.bottom
+				char.left = left
+				char.right = left + char.width
+				char.center = left + 0.5 * char.width
+				for i = 1, loop_for_times - 1 do
+					l.text = format( "{ipol[fx]: \\an5\\pos(%s,%s)}%s", char.center, char.middle, char.text )
+					subs.insert( #subs + 1, l )
+					aegisub.progress.task( format( "Lines Generated: %d", ci( ) ) )
+					aegisub.progress.set( 100 * (ci( ) / (loop_for_times * char.n - 1)) )
+				end
+				left = left + width
+			end
+		elseif settipol.ipol_type == "Chars Lines Ipol" then
+			local tags_lines_unique = { }
+			local tags_lines_ipol, tg = { }
+			if #lines_ipol.tags_line > 0 then
+				for tg in lines_ipol.tags_line[ 1 ]:gmatch( "\\[%d]*%a+[%(%- ]*[%d&#]^*[%w%.%dH&,%x %)]*" ) do
+					tags_lines_unique[ #tags_lines_unique + 1 ] = tg
+				end
+				for tg in lines_ipol.tags_line[ 1 ]:gmatch( "\\[%d]*%a+%b[]" ) do
+					tags_lines_ipol[ #tags_lines_ipol + 1 ] = tg:gsub( "(&H%x+&)", "\"%1\"" )
+				end
+				local tags_names_ipol, vals_in_tag = { }
+				for i = 1, #tags_lines_ipol do
+					vals_in_tag = loadstring( format( "return function( ) return { %s } end", tags_lines_ipol[ i ]:match( "\\[%d]*%a+(%b[])" ):sub( 2, -2 ) ) )( )
+					tags_names_ipol[ i ] = tags_lines_ipol[ i ]:match( "(\\[%d]*%a+)%b[]" )
+					tags_lines_ipol[ i ] = vals_in_tag( )
+				end
+				local line_text_stripped_1 = l.text_stripped:gsub( "\\N", " " ):gsub( "  ", " " )
+				local line_text_stripped_2 = l.text_stripped:gsub( "\\N", "" ):gsub( " ", "" )
+				local char, c = { i = 1, n = unicode.len( line_text_stripped_2 ) }
+				local tbl_tags_ipol, tbl_tags_chars = { }, { }
+				for i = 1, #tags_lines_ipol do
+					tbl_tags_ipol[ i ] = table.ipol( tags_lines_ipol[ i ], char.n, tags_names_ipol[ i ], settipol.accel_ipol )
+				end
+				for i = 1, char.n do
+					tbl_tags_chars[ i ] = ""
+					for k = 1, #tbl_tags_ipol do
+						tbl_tags_chars[ i ] = tbl_tags_chars[ i ] .. tbl_tags_ipol[ k ][ i ]
+					end
+					tbl_tags_chars[ i ] = "{" .. tbl_tags_chars[ i ] .. "}"
+				end
+				local line_chars_ipol = ""
+				local ci = math.count( )
+				for c in unicode.chars( line_text_stripped_1 ) do
+					if c ~= " " then
+						char.i = ci( )
+						line_chars_ipol = line_chars_ipol .. tbl_tags_chars[ char.i ] .. c
+					else
+						line_chars_ipol = line_chars_ipol .. " "
+					end
+				end
+				l.text = format( "{ipol[fx]: %s}%s", table.concat( tags_lines_unique ), line_chars_ipol )
+				subs.insert( #subs + 1, l )
+			end
+		end
+		--]]
+	end --september 14th 2020
+	----------------------------------------------------------------------------
 
 	function effector.preprosses_styles( styles, subtitles, has_selected_lines )
 		effector.GUI_config[ 3 ].items = { }
@@ -19680,9 +20128,12 @@
 			margin_v = 20;
 			margin_b = 20;
 			margin_t = 20;
-			encoding = 1
+			encoding = 1;
+			relative_to = 2
 		}
 		table.insert( styles, 1, DefaultKE )
+		styles[ "DefaultKE" ] = styles[ 1 ]--self reference
+		styles[ "n" ] = styles[ "n" ] + 1
 		for i = 1, #subtitles do
 			if subtitles[ i ].class == "dialogue"
 				and subtitles[ i ].effect ~= "Effector [fx]"
@@ -19695,13 +20146,11 @@
 		for i = 1, #linefx do
 			mmwth[ i ] = { wo = { }, sm = { }, sy = { }, ro = { }, hi = { }, ka = { }, ch = { }, pa = { } }
 			mmdur[ i ] = { wo = { }, sm = { }, sy = { }, ro = { }, hi = { }, ka = { }, ch = { }, pa = { } }
-			linefx[ i ].text = linefx[ i ].text:gsub( "(%b{})([	 ]^*)([\32-\47\58-\64]*%S+[\32-\47\58-\64]*)", " %1%3%2" )
-			-- en teoría, la anterior línea corrige el error del timeo en los scripts de dejar separado el texto
-			-- de la etiqueta de tags: {\k10} demo, el famoso error de "Hira nil"... ya veremos si se solucionó
+			linefx[ i ].text = linefx[ i ].text:gsub( "(%b{})([	 ]^*)([\32-\47\58-\64]*%S+[\32-\47\58-\64]*)", " %1%3%2" ) --fix "Hira nil"
 			linefx[ i ].text = linefx[ i ].text:gsub( "(}#)( [ ]*{)", "%1{\\k0}%2" )
 			linefx[ i ].text = linefx[ i ].text:gsub( "(}＃)( [ ]*{)", "%1{\\k0}%2" )
 			l_style = styles[ tostring( linefx[ i ].style ) ] or styles[ 1 ] --> DefaultKE style
-			width, height, descent, extlead	= aegisub.text_extents( l_style,
+			width, height, descent, extlead = aegisub.text_extents( l_style,
 				text.remove_extra_space( text.remove_tags( linefx[ i ].text:gsub( "\\N", " " ):gsub( "  ", " " ) ) )
 			)
 			options_lft_line = {
@@ -20439,21 +20888,28 @@
 		::back_select_1::
 		-------------------
 		---------------------------------------------------------------
-		if #effector.GUI_config[ 05 ].items == 6 then
+		if not effector.GUI_config[ 05 ].items[ "Add new config[fx]" ] then
 			effector.GUI_config[ 05 ].items[ 7 ] = "Add new config[fx]"
 		end --november 17th 2018
+		if not effector.GUI_config[ 05 ].items[ "Lines Interpolation[fx]" ] then
+			effector.GUI_config[ 05 ].items[ 8 ] = "Lines Interpolation[fx]"
+		end --september 14th 2020
 		---------------------------------------------------------------
 		repeat
+			--ventana 1
 			box_res, sett = aegisub.dialog.display( effector.GUI_config,
-				{ "Apply Selection", "Cancel", "Style Manager" },
+				{ "Apply Selection", "Cancel", "Style Manager" }, --3 botones iniciales
 				{ ok = "Apply Selection", cancel = "Cancel" }
 			)
 			---------------------------------------------------------------
 			::back_select_2::
 			---------------------------------------------------------------
-			if #effector.GUI_config[ 05 ].items == 6 then
+			if not effector.GUI_config[ 05 ].items[ "Add new config[fx]" ] then
 				effector.GUI_config[ 05 ].items[ 7 ] = "Add new config[fx]"
 			end --november 17th 2018
+			if not effector.GUI_config[ 05 ].items[ "Lines Interpolation[fx]" ] then
+				effector.GUI_config[ 05 ].items[ 8 ] = "Lines Interpolation[fx]"
+			end --september 14th 2020
 			---------------------------------------------------------------
 			-- ventana para añadir nuevas configuraciones o nuevos efectos
 			if box_res == "Apply Selection"
@@ -20526,6 +20982,30 @@
 			end
 			---------------------------------------------------
 			if box_res == "Apply Selection"
+				and sett.effect_mode == "Lines Interpolation[fx]" then
+				box_ipol, settipol = aegisub.dialog.display( effector.ipol_lines,
+					{ "Apply Interpolation", "Cancel" },
+					{ ok = "Apply Interpolation", cancel = "Cancel" }
+				)
+				-- save the configs ---------------------------------
+				effector.ipol_lines[ 03 ].value = settipol.ipol_type
+				effector.ipol_lines[ 05 ].value = settipol.frame_durx
+				effector.ipol_lines[ 07 ].value = settipol.ipol_loop
+				effector.ipol_lines[ 10 ].text  = settipol.add_tags
+				effector.ipol_lines[ 11 ].text  = settipol.pos_shape
+				effector.ipol_lines[ 12 ].value = settipol.time_ipol
+				effector.ipol_lines[ 14 ].text  = settipol.accel_ipol
+				-----------------------------------------------------
+				if box_ipol == "Apply Interpolation" then
+					aegisub.progress.title( "Kara Effector - Lines Interpolation" )
+					effector.preprosses_macro( subtitles, sett, fx__, selected_lines )
+					aegisub.progress.set( 100 )
+				end
+				--sett.effect_mode = "lead-in[fx]"
+				goto config_ini_mode --revisar
+			end --add: september 14th 2020
+			---------------------------------------------------
+			if box_res == "Apply Selection"
 				and sett.line_style ~= "" then
 				effector.GUI_config[ 30 ] = { class = "label";	x = 1; y = 15;	height = 1; width = 2; label = " [:: Effect Setting ::]" }
 				if  sett.effect_mode == "lead-in[fx]" then
@@ -20561,7 +21041,9 @@
 				end
 				---------------------------------------------------------------------------------
 				table.remove( effector.GUI_config[ 05 ].items, #effector.GUI_config[ 05 ].items )
+				table.remove( effector.GUI_config[ 05 ].items, #effector.GUI_config[ 05 ].items )
 				-- elimina el "Add new config[fx]" del listado de fx de la primera ventana del KE
+				-- elimina el "Lines Interpol[fx]" del listado de fx de la primera ventana del KE
 				---------------------------------------------------------------------------------
 				
 				repeat
