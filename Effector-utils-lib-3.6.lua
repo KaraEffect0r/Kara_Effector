@@ -16,7 +16,7 @@
 	log = math.log10						ceil = math.ceil						script_update = " legacy"
 	
 	-- include Yutils by Christoph Spanknebel "Youka" --------------------------------------------------------
-	Yutils = include( "Yutils.lua" ) 									 -- https://github.com/Youka/Yutils --
+	Yutils = require "Yutils" 									 -- https://github.com/Youka/Yutils --
 	----------------------------------------------------------------------------------------------------------
 	
 	-- Effector-utils-lib-3.6 functions ----------------------------------------------------------------------
